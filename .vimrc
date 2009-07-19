@@ -55,6 +55,9 @@ set number            " 行番号表示
 set wrap              " 画面幅で折り返す
 "set list              " 不可視文字表示
 "set listchars=tab:>\  " 不可視文字の表示方法
+set list
+set listchars=tab:>.,trail:_,extends:>,precedes:< " 不可視文字の表示形式
+
 set notitle           " タイトル書き換えない
 
 " Moving
@@ -65,19 +68,16 @@ nn <C-j> :call search ("^". matchstr (getline (line (".")), '\(\s*\)') ."\\S")<C
 
 " Encoding
 set encoding=utf-8
-":set fenc=utf-8
-":set fencs=iso-2022-jp,euc-jp,cp932
-
-"set termencoding=utf-8
-"set encoding=utf-8
-"set fileencodings=iso-2022-jp,utf-8,cp932,euc-jp
+set fileencoding=utf-8
+set fileencodings=utf-8,iso-2022-jp,euc-jp,cp932
+set termencoding=utf-8
 
 " 厳密な文字コード判別
 " http://www.kawaz.jp/pukiwiki/?vim#content_1_7
 " http://d.hatena.ne.jp/hazy-moon/20061229/1167407073
 
 " free cursor
-set whichwrap=b,s,<,>,[,]
+set whichwrap=b,s,h,l,<,>,[,]
 
 " status line
 " ref: http://www.e2esound.com/20080816/entry-id=303#
@@ -153,6 +153,7 @@ endif
 autocmd FileType perl set makeprg=perl\ -c\ %\ $*
 autocmd FileType perl set errorformat=%f:%l:%m
 autocmd FileType perl set autowrite
+autocmd FileType t    set filetype=perl
 
 "" for objective-c programming
 "  *.m is not MATLAB file, but objectvie-c
