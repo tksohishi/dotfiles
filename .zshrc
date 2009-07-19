@@ -130,7 +130,7 @@ alias df="df -h"
 
 alias su="su -l"
 
-alias mysql="mysql5"
+#alias mysql="mysql5"
 
 case "${OSTYPE}" in
 darwin*)
