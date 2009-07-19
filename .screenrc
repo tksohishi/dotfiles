@@ -1,0 +1,46 @@
+defscrollback 10000
+
+escape ^Tt
+vbell off
+startup_message off
+autodetach on
+shelltitle zsh
+shell -$SHELL
+
+# TODO:what's is defhstatus
+#defhstatus screen@$HOSTNAME
+defhstatus I^En:^EtI
+
+# for detail status on statusline
+# ref: http://www.hsbt.org/diary/20060901.html#p02
+hardstatus on
+hardstatus alwayslastline
+hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %{..Y} %m/%d %C%a"
+
+# encoding
+defutf8 on
+defkanji utf-8
+encoding utf-8 utf-8
+defencoding utf-8
+
+# for Terminal.app screen scroll back enable
+# ref: http://blog.s21g.com/articles/1047
+# TODO:on vim, can't scroll back 
+termcapinfo xterm* ti@:te@
+
+# key bind
+bind s
+bind c screen zsh
+
+# use - in order to over 10 windows
+bind - command -c minus
+bind -c minus 0 select 10
+bind -c minus 1 select 11
+bind -c minus 2 select 12
+bind -c minus 3 select 13
+bind -c minus 4 select 14
+bind -c minus 5 select 15
+bind -c minus 6 select 16
+bind -c minus 7 select 17
+bind -c minus 8 select 18
+bind -c minus 9 select 19
