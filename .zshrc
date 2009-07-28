@@ -131,6 +131,7 @@ alias df="df -h"
 alias su="su -l"
 
 #alias mysql="mysql5"
+alias grep="grep --color=auto"
 
 case "${OSTYPE}" in
 darwin*)
