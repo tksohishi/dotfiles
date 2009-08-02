@@ -205,3 +205,6 @@ export PERL_AUTOINSTALL="--defaultdeps"
 ## load .profile file
 #
 [ -f ~/.profile ] && source ~/.profile
+
+# tab-completion in python interpreter enabled
+[ -f ~/.pythonrc.py ] && export PYTHONSTARTUP=$HOME/.pythonrc.py
