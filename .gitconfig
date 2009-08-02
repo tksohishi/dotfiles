@@ -1,5 +1,5 @@
 [user]
-	name = Takeshi Ohishi
+    name = Takeshi Ohishi
     email = skyfive.508@gmail.com
 
 # ref: http://d.hatena.ne.jp/tokuhirom/20081212/1229080990
@@ -10,15 +10,15 @@
 [color "branch"]
     current = yellow reverse
     local = yellow
-    remote = green
+    remote = blue
 [color "diff"]
     meta = yellow bold
     frag = magenta bold
     old = red bold
-    new = green bold
+    new = blue bold
 [color "status"]
     added = yellow
-    changed = green
+    changed = blue
     untracked = cyan
 [color]
     ui = true
@@ -33,3 +33,4 @@
     co = checkout
     df = diff
     lg = log -p
+    add = add -v
