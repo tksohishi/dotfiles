@@ -44,6 +44,7 @@ filetype on         "
 filetype indent on  " 
 filetype plugin on  " .vim/ftplugin/を有効に
 set nobackup        " バックアップ取らない
+set nowritebackup   " バックアップ取らない(for crontab)
 set autoread        " 他で書き換えられたら自動で読み直す
 set noswapfile      " スワップファイル作らない
 set hidden          " 編集中でも他のファイルを開けるようにする
