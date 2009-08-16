@@ -14,7 +14,7 @@ syntax enable
 " softtabstopはTabキー押し下げ時の挿入される空白の量，0の場合はtabstopと同じ，BSにも影響する
 set tabstop=4
 set shiftwidth=4
-set softtabstop=4
+set softtabstop=0
 " tab => space
 set expandtab
 " ????
@@ -142,6 +142,9 @@ map T :TaskList<CR>
 " ========== programming lang setting ==========
 "" for python programming
 if has("autocmd")
+    " indent 2 space
+    autocmd FileType python set tabstop=2
+    autocmd FileType python set shiftwidth=2
     " Ctrl-nで入力補完,再度Ctrl-nで決定
     autocmd FileType python set complete+=k/Users/takeshi/.vim/plugin/pydiction/pydiction isk+=.,(
     " omni-completion Ctr-x Ctr-o
