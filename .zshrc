@@ -209,3 +209,7 @@ export PERL_AUTOINSTALL="--defaultdeps"
 
 # tab-completion in python interpreter enabled
 [ -f ~/.pythonrc.py ] && export PYTHONSTARTUP=$HOME/.pythonrc.py
+
+# virtualenvwrapper script
+#export WORKON_HOME=$HOME/.virtualenvs
+#source /usr/local/bin/virtualenvwrapper_bashrc

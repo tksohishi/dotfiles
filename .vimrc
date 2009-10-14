@@ -30,7 +30,7 @@ set formatoptions+=m           " 整形オプション，マルチバイト系�
 set imdisable                  " 日本語入力OFF(TODO:下の2つ要らないかも)
 set iminsert=0                 " Insert mode時にIME OFF
 set imsearch=0                 " Search時にIME OFF
-set textwidth=99               " 1行99文字まで(80文字が理想)
+"set textwidth=99               " 1行99文字まで(80文字が理想)
 
 " Search
 set wrapscan   " 最後まで検索したら先頭へ戻る
@@ -48,6 +48,10 @@ set nowritebackup   " バックアップ取らない(for crontab)
 set autoread        " 他で書き換えられたら自動で読み直す
 set noswapfile      " スワップファイル作らない
 set hidden          " 編集中でも他のファイルを開けるようにする
+
+" Backup
+" ref: http://d.hatena.ne.jp/viver/20090723/p1
+" CAUTION: You should create the directory for backup and fit your user/group name
 
 " Displaying
 set showmatch         " 括弧の対応をハイライト

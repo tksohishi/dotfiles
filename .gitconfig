@@ -34,3 +34,6 @@
     df = diff
     lg = log -p
     add = add -v
+[github]
+	user = skyfive
+	token = 90a550c5f1a663f5b50a7acb4847cb89

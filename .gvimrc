@@ -7,5 +7,5 @@ if has('gui_macvim')
     set columns=180        " Window size(width)
     set lines=50           " Window size(height)
     colorscheme pablo
-    set guifont=Monaco:h15
+    set guifont=Monaco:h13
 endif
