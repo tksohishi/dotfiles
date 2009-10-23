@@ -145,24 +145,30 @@ map T :TaskList<CR>
 
 " ========== programming lang setting ==========
 "" for python programming
-if has("autocmd")
-    " indent 2 space
-    autocmd FileType python set tabstop=2
-    autocmd FileType python set shiftwidth=2
-    " Ctrl-nで入力補完,再度Ctrl-nで決定
-    autocmd FileType python set complete+=k/Users/takeshi/.vim/plugin/pydiction/pydiction isk+=.,(
-    " omni-completion Ctr-x Ctr-o
-    " ref: http://blog.dispatched.ch/2009/05/24/vim-as-python-ide/
-    autocmd FileType python set omnifunc=pythoncomplete#Complete
-endif
+" indent 2 space
+autocmd FileType python setlocal tabstop=2
+autocmd FileType python setlocal shiftwidth=2
+" Ctrl-nで入力補完,再度Ctrl-nで決定
+autocmd FileType python setlocal complete+=k/Users/takeshi/.vim/plugin/pydiction/pydiction isk+=.,(
+" omni-completion Ctr-x Ctr-o
+" ref: http://blog.dispatched.ch/2009/05/24/vim-as-python-ide/
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 
 "" for perl programming
 " check perl code with :make
-autocmd FileType perl set makeprg=perl\ -c\ %\ $*
-autocmd FileType perl set errorformat=%f:%l:%m
-autocmd FileType perl set autowrite
-autocmd FileType t    set filetype=perl
+autocmd FileType perl setlocal makeprg=perl\ -c\ %\ $*
+autocmd FileType perl setlocal errorformat=%f:%l:%m
+autocmd FileType perl setlocal autowrite
+autocmd FileType t    setlocal filetype=perl
+autocmd BufNewFile,BufRead *.psgi setlocal filetype=perl
 
 "" for objective-c programming
 "  *.m is not MATLAB file, but objectvie-c
 let g:filetype_m = 'objc'
+
+
+"" for ruby programming
+autocmd FileType ruby setlocal tabstop=2
+autocmd FileType ruby setlocal shiftwidth=2
+autocmd FileType ruby setlocal makeprg=ruby\ -c\ %
+autocmd FileType ruby setlocal errorformat=%m\ in\ %f\ on\ line\ %l
