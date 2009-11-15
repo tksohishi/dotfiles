@@ -172,3 +172,11 @@ autocmd FileType ruby setlocal tabstop=2
 autocmd FileType ruby setlocal shiftwidth=2
 autocmd FileType ruby setlocal makeprg=ruby\ -c\ %
 autocmd FileType ruby setlocal errorformat=%m\ in\ %f\ on\ line\ %l
+
+"" for (X)HTML, XML, CSS coding
+autocmd FileType html setlocal tabstop=2
+autocmd FileType html setlocal shiftwidth=2
+autocmd FileType xml  setlocal tabstop=2
+autocmd FileType xml  setlocal shiftwidth=2
+autocmd FileType css  setlocal tabstop=2
+autocmd FileType css  setlocal shiftwidth=2
