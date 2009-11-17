@@ -126,6 +126,9 @@ if has('mac')
     set ttymouse=xterm2
 endif
 
+" omni-completion by <C-]>
+imap <C-]> <C-x><C-o>
+
 " ========== vim plugin setting ==========
 
 " minibufexpl.vim
@@ -150,7 +153,7 @@ autocmd FileType python setlocal tabstop=2
 autocmd FileType python setlocal shiftwidth=2
 " Ctrl-nで入力補完,再度Ctrl-nで決定
 autocmd FileType python setlocal complete+=k/Users/takeshi/.vim/plugin/pydiction/pydiction isk+=.,(
-" omni-completion Ctr-x Ctr-o
+" omni-completion Ctr-x Ctr-o (Ctr-Space) for python
 " ref: http://blog.dispatched.ch/2009/05/24/vim-as-python-ide/
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 
@@ -163,15 +166,19 @@ autocmd FileType t    setlocal filetype=perl
 autocmd BufNewFile,BufRead *.psgi setlocal filetype=perl
 
 "" for objective-c programming
-"  *.m is not MATLAB file, but objectvie-c
+"  *.m is not MATLAB file, but Objective-C
 let g:filetype_m = 'objc'
-
 
 "" for ruby programming
 autocmd FileType ruby setlocal tabstop=2
 autocmd FileType ruby setlocal shiftwidth=2
 autocmd FileType ruby setlocal makeprg=ruby\ -c\ %
 autocmd FileType ruby setlocal errorformat=%m\ in\ %f\ on\ line\ %l
+
+" Rubyのオムニ補完を設定(ft-ruby-omni)
+let g:rubycomplete_buffer_loading = 1
+let g:rubycomplete_classes_in_global = 1
+let g:rubycomplete_rails = 1
 
 "" for (X)HTML, XML, CSS coding
 autocmd FileType html setlocal tabstop=2
