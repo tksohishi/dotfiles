@@ -213,3 +213,5 @@ export PERL_AUTOINSTALL="--defaultdeps"
 # virtualenvwrapper script
 #export WORKON_HOME=$HOME/.virtualenvs
 #source /usr/local/bin/virtualenvwrapper_bashrc
+
+export SHELL=/bin/zsh
