@@ -183,7 +183,14 @@ let g:rubycomplete_rails = 1
 "" for (X)HTML, XML, CSS coding
 autocmd FileType html setlocal tabstop=2
 autocmd FileType html setlocal shiftwidth=2
+autocmd FileType html :compiler tidy
+autocmd FileType html :setlocal makeprg=tidy\ -raw\ -quiet\ -errors\ --gnu-emacs\ yes\ \"%\"
 autocmd FileType xml  setlocal tabstop=2
 autocmd FileType xml  setlocal shiftwidth=2
 autocmd FileType css  setlocal tabstop=2
 autocmd FileType css  setlocal shiftwidth=2
+autocmd FileType css :compiler css
+
+"" for JavaScript
+" javascript lint required to install from http://www.javascriptlint.com/download.htm
+autocmd FileType javascript :compiler javascriptlint
