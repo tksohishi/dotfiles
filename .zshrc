@@ -214,4 +214,8 @@ export PERL_AUTOINSTALL="--defaultdeps"
 #export WORKON_HOME=$HOME/.virtualenvs
 #source /usr/local/bin/virtualenvwrapper_bashrc
 
-export SHELL=/bin/zsh
+export SHELL=/opt/local/bin/zsh
+
+# showing branch name for version controller system
+# http://d.hatena.ne.jp/mollifier/20090814/p1
+
