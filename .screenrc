@@ -4,8 +4,8 @@ escape ^Tt
 vbell off
 startup_message off
 autodetach on
-shelltitle zsh
-shell -$SHELL
+shelltitle tmp
+shell -${SHELL}
 
 # TODO:what's is defhstatus
 #defhstatus screen@$HOSTNAME
