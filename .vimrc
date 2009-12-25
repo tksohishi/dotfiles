@@ -194,3 +194,6 @@ autocmd FileType css :compiler css
 "" for JavaScript
 " javascript lint required to install from http://www.javascriptlint.com/download.htm
 autocmd FileType javascript :compiler javascriptlint
+
+"" for golang
+autocmd BufRead,BufNewFile *.go setf go
