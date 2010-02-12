@@ -203,6 +203,9 @@ export PERL_AUTOINSTALL="--defaultdeps"
 #
 [ -f ~/.zshrc.mine ] && source ~/.zshrc.mine
 
+## load user .alias configuration file
+[ -f ~/.alias] && source ~/.alias
+
 ## load .profile file
 #
 [ -f ~/.profile ] && source ~/.profile
@@ -228,3 +231,22 @@ precmd () {
 }
 RPROMPT="%1(v|%F{green}%1v%f|)"
 
+
+# Golang
+export GOROOT=$HOME/local/go
+
+case "${OSTYPE}" in
+freebsd*)
+    export GOOS=freebsd
+    ;;
+darwin*)
+    export GOOS=darwin
+    ;;
+linux*)
+    export GOOS=linux
+    ;;
+esac
+export GOARCH=386
+
+# screen
+export SCREENDIR=$HOME/tmp/screen
