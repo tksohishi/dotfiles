@@ -204,7 +204,7 @@ export PERL_AUTOINSTALL="--defaultdeps"
 [ -f ~/.zshrc.mine ] && source ~/.zshrc.mine
 
 ## load user .alias configuration file
-[ -f ~/.alias] && source ~/.alias
+[ -f ~/.alias ] && source ~/.alias
 
 ## load .profile file
 #
@@ -234,6 +234,7 @@ RPROMPT="%1(v|%F{green}%1v%f|)"
 
 # Golang
 export GOROOT=$HOME/local/go
+export GOBIN=$HOME/local/go/bin
 
 case "${OSTYPE}" in
 freebsd*)
