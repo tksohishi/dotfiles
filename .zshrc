@@ -234,7 +234,7 @@ RPROMPT="%1(v|%F{green}%1v%f|)"
 
 # Golang
 export GOROOT=$HOME/local/go
-export GOBIN=$HOME/local/go/bin
+export GOBIN=$HOME/local/bin
 
 case "${OSTYPE}" in
 freebsd*)
