@@ -30,7 +30,8 @@ termcapinfo xterm* ti@:te@
 
 # key bind
 bind s
-bind c screen /opt/local/bin/zsh
+bind c screen -${SHELL}
+#bind c screen /opt/local/bin/zsh
 
 # use - in order to over 10 windows
 bind - command -c minus
