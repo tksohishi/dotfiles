@@ -159,11 +159,15 @@ autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 
 "" for perl programming
 " check perl code with :make
-autocmd FileType perl setlocal makeprg=perl\ -c\ %\ $*
+"autocmd FileType perl setlocal makeprg=perl\ -c\ %\ $*
 autocmd FileType perl setlocal errorformat=%f:%l:%m
 autocmd FileType perl setlocal autowrite
 autocmd FileType t    setlocal filetype=perl
 autocmd BufNewFile,BufRead *.psgi setlocal filetype=perl
+
+" MobaSiF
+autocmd BufNewFile,BufRead *.conf setlocal filetype=perl
+autocmd FileType perl setlocal makeprg=perl\ -c\ -Ipm\ %\ $*
 
 "" for objective-c programming
 "  *.m is not MATLAB file, but Objective-C
