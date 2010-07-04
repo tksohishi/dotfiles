@@ -190,6 +190,7 @@ autocmd FileType xml  setlocal shiftwidth=2
 autocmd FileType css  setlocal tabstop=2
 autocmd FileType css  setlocal shiftwidth=2
 autocmd FileType css :compiler css
+autocmd BufNewFile,BufRead *.css setlocal syntax=css3
 
 "" for JavaScript
 " javascript lint required to install from http://www.javascriptlint.com/download.htm
