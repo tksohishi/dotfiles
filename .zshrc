@@ -213,6 +213,9 @@ export PERL_AUTOINSTALL="--defaultdeps"
 # tab-completion in python interpreter enabled
 [ -f ~/.pythonrc.py ] && export PYTHONSTARTUP=$HOME/.pythonrc.py
 
+# perlbrew
+[ -f $HOME/perl5/perlbrew/etc/bashrc ] && source $HOME/perl5/perlbrew/etc/bashrc
+
 # virtualenvwrapper script
 #export WORKON_HOME=$HOME/.virtualenvs
 #source /usr/local/bin/virtualenvwrapper_bashrc
@@ -258,3 +261,6 @@ export GOARCH=386
 
 # screen
 export SCREENDIR=$HOME/tmp/screen
+
+# perlomni.vim
+export PATH=$PATH:$HOME/.vim/bin
