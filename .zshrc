@@ -222,7 +222,7 @@ export PERL_AUTOINSTALL="--defaultdeps"
 
 case "${OSTYPE}" in
 darwin*)
-    export SHELL=/opt/local/bin/zsh
+    SHELL=/usr/local/bin/zsh
     ;;
 linux*)
     export SHELL=/bin/zsh
@@ -258,9 +258,6 @@ linux*)
     ;;
 esac
 export GOARCH=386
-
-# screen
-export SCREENDIR=$HOME/tmp/screen
 
 # perlomni.vim
 export PATH=$PATH:$HOME/.vim/bin
