@@ -138,10 +138,10 @@ let g:qb_hotkey = ";;"
 " taglist.vim requires ctags
 " http://nanasi.jp/articles/vim/taglist_vim.html
 " http://bit.ly/5maYv5
-let Tlist_Show_One_File = 1               "現在編集中のソースのタグしか表示しない
-let Tlist_Exit_OnlyWindow = 1             "taglistのウィンドーが最後のウィンドーならばVimを閉じる
-let Tlist_Use_Right_Window = 1            "右側でtaglistのウィンドーを表示
-map T :TlistToggle<CR>  "taglistを開くショットカットキー
+let Tlist_Show_One_File = 1     " 現在編集中のソースのタグしか表示しない
+let Tlist_Exit_OnlyWindow = 1   " taglistのウィンドーが最後のウィンドーならばVimを閉じる
+let Tlist_Use_Right_Window = 1  " 右側でtaglistのウィンドーを表示
+map T :TlistToggle<CR>
 
 " tasklist.vim
 " http://www.vim.org/scripts/script.php?script_id=2607
