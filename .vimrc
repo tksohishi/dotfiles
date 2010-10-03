@@ -1,28 +1,24 @@
 " .vimrc edited by Takeshi Ohishi
 " ChangeLog
+" 2010/10/2 organize some settings
 " 2009/4/23 add the comments and setting
 "  ref: http://relaxedcolumn.blog8.fc2.com/blog-entry-101.html
 " ========== general setting ========== "
 " Basic
-set nocompatible
+set nocompatible    " vi互換外す
 colorscheme evening
-syntax enable
+syntax enable       " syntaxを有効に
 
 " Tab
-" tabstopはTab文字を画面上で何文字分に展開するか
-" shiftwidthはcindentやautoindent時に挿入されるインデントの幅
-" softtabstopはTabキー押し下げ時の挿入される空白の量，0の場合はtabstopと同じ，BSにも影響する
-set tabstop=4
-set shiftwidth=4
-set softtabstop=0
-" tab => space
-"set expandtab
-" ????
-" set smarttab
+set tabstop=4      " Tab文字を画面上で何文字分に展開するか
+set shiftwidth=4   " cindentやautoindent時に挿入されるインデントの幅
+set softtabstop=0  " Tabキー押し下げ時の挿入される空白の量，0の場合はtabstopと同じ，BSにも影響する
+set expandtab      " Tab文字の代わりにスペースを入力する
+set smarttab       " 行頭の余白内で Tab を打ち込むと、'shiftwidth' の数だけインデント
 
 " Indent
-set autoindent
-set smartindent
+set autoindent     " 新しい行のインデントを現在行と同じにする
+set smartindent    " 新しい行を作った時高度な自動インデントを行う
 
 " Input
 set backspace=indent,eol,start " バックスペースでなんでも消せるように
@@ -30,7 +26,7 @@ set formatoptions+=m           " 整形オプション，マルチバイト系�
 set imdisable                  " 日本語入力OFF(TODO:下の2つ要らないかも)
 set iminsert=0                 " Insert mode時にIME OFF
 set imsearch=0                 " Search時にIME OFF
-"set textwidth=99               " 1行99文字まで(80文字が理想)
+"set textwidth=99              " 1行99文字まで(80文字が理想)
 
 " Search
 set wrapscan   " 最後まで検索したら先頭へ戻る
@@ -40,8 +36,8 @@ set incsearch  " インクリメンタルサーチ
 set hlsearch   " 検索文字をハイライト
 
 " File
-filetype on         " 
-filetype indent on  " 
+filetype on         " ファイルタイプを有効に
+filetype indent on  " ファイルタイプによるインデントを行う
 filetype plugin on  " .vim/ftplugin/を有効に
 set nobackup        " バックアップ取らない
 set nowritebackup   " バックアップ取らない(for crontab)
@@ -58,11 +54,8 @@ set showmatch         " 括弧の対応をハイライト
 set showcmd           " 入力中のコマンドを表示
 set number            " 行番号表示
 set wrap              " 画面幅で折り返す
-"set list              " 不可視文字表示
-"set listchars=tab:>\  " 不可視文字の表示方法
-set list
+set list              " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:< " 不可視文字の表示形式
-
 set notitle           " タイトル書き換えない
 
 " Moving
@@ -76,6 +69,7 @@ set encoding=utf-8
 set fileencoding=utf-8
 set fileencodings=utf-8,iso-2022-jp,euc-jp,cp932
 set termencoding=utf-8
+set fileformats=unix,dos,mac
 
 " 厳密な文字コード判別
 " http://www.kawaz.jp/pukiwiki/?vim#content_1_7
@@ -90,10 +84,10 @@ set laststatus=2
 set statusline=%F%m%r%h%w\%=[TYPE=%Y]\[FORMAT=%{&ff}]\[ENC=%{&fileencoding}]\[LOW=%l/%L]\[COL=%v]
 
 " Migemo
-if has('migemo')
-    set migemo
-    set migemodict=/opt/local/share/migemo/utf-8/migemo-dict
-endif
+"if has('migemo')
+"    set migemo
+"    set migemodict=/opt/local/share/migemo/utf-8/migemo-dict
+"endif
 
 " short cut for Copy, Cut, Paste
 " Copy  (Ctrl + c)
@@ -132,21 +126,29 @@ imap <C-]> <C-x><C-o>
 " ========== vim plugin setting ==========
 
 " minibufexpl.vim
-let g:miniBufExplMapWindowNavVim = 1
-let g:miniBufExplMapWindowNavArrows = 1
-let g:miniBufExplMapCTabSwitchBufs = 1
-let g:miniBufExplModSelTarget = 1
+" qbuf.vimでバッファ管理していて快適なのでこちらは使わない 10/2/2010
+"let g:miniBufExplMapWindowNavVim = 1
+"let g:miniBufExplMapWindowNavArrows = 1
+"let g:miniBufExplMapCTabSwitchBufs = 1
+"let g:miniBufExplModSelTarget = 1
 
 " qbuf.vim
 let g:qb_hotkey = ";;"
 
 " taglist.vim requires ctags
-map P :TlistToggle<CR>
+" http://nanasi.jp/articles/vim/taglist_vim.html
+" http://bit.ly/5maYv5
+let Tlist_Show_One_File = 1     " 現在編集中のソースのタグしか表示しない
+let Tlist_Exit_OnlyWindow = 1   " taglistのウィンドーが最後のウィンドーならばVimを閉じる
+let Tlist_Use_Right_Window = 1  " 右側でtaglistのウィンドーを表示
+map T :TlistToggle<CR>
 
 " tasklist.vim
-map T :TaskList<CR>
+" http://www.vim.org/scripts/script.php?script_id=2607
+map F :TaskList<CR>
 
 " ========== programming lang setting ==========
+
 "" for python programming
 " indent 2 space
 autocmd FileType python setlocal tabstop=2
