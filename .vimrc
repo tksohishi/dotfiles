@@ -166,7 +166,8 @@ autocmd FileType t    setlocal filetype=perl
 autocmd BufNewFile,BufRead *.psgi setlocal filetype=perl
 
 " MobaSiF
-autocmd BufNewFile,BufRead *.conf setlocal filetype=perl
+autocmd BufNewFile,BufRead *.conf   setlocal filetype=perl
+autocmd BufNewFile,BufRead *.conf.* setlocal filetype=perl
 autocmd FileType perl setlocal makeprg=perl\ -c\ -Ipm\ %\ $*
 
 "" for objective-c programming
