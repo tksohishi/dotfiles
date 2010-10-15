@@ -202,6 +202,8 @@ autocmd BufNewFile,BufRead *.css setlocal syntax=css3
 "" for JavaScript
 " javascript lint required to install from http://www.javascriptlint.com/download.htm
 autocmd FileType javascript :compiler javascriptlint
+autocmd FileType javascript setlocal tabstop=2
+autocmd FileType javascript setlocal shiftwidth=2
 
 "" for golang
 autocmd BufRead,BufNewFile *.go setf go
