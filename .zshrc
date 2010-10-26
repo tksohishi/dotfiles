@@ -261,3 +261,7 @@ export GOARCH=386
 
 # perlomni.vim
 export PATH=$PATH:$HOME/.vim/bin
+
+# Node and npm
+export PATH=$PATH:/usr/local/share/npm/bin
+export NODE_PATH=/usr/local/lib/node
