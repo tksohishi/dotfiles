@@ -7,5 +7,7 @@ if has('gui_macvim')
     set columns=180        " Window size(width)
     set lines=50           " Window size(height)
     colorscheme koehler    " other candidates: murphy,slate,torte
-    set guifont=Monaco:h13
+    set guifont=Monaco:h13 " Font Monaco 13pt
+    " For MobaSiF
+    " set noexpandtab      " Not using MobaSiF anymore, I hope...
 endif
