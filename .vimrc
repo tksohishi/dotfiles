@@ -195,6 +195,7 @@ autocmd FileType perl setlocal makeprg=perl\ -c\ -Ipm\ %\ $*
 let g:filetype_m = 'objc'
 
 "" for ruby programming
+autocmd BufNewFile,BufRead *.ru setlocal filetype=ruby
 autocmd FileType ruby setlocal tabstop=2
 autocmd FileType ruby setlocal shiftwidth=2
 autocmd FileType ruby setlocal makeprg=ruby\ -c\ %
