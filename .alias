@@ -5,3 +5,6 @@ alias mysqlr="mysql -uroot -p"
 alias svncdiff="svn diff --diff-cmd=colordiff"
 alias svns="svn status -u"
 alias cpanm="cpanm -v"
+
+# For DeNA gateway1
+alias sshgateway="ssh ohishi@gateway1.lunar.hq.bidders.co.jp"
