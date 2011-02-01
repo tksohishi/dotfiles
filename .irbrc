@@ -8,7 +8,7 @@ require 'pp'             # p よりも見やすい
 require 'wirble'         # シンタックスハイライト
 
 # IRB設定
-IRB.conf[:AUTO_INDENT] = true  # オートインデントを有効に
+#IRB.conf[:AUTO_INDENT] = true  # オートインデントを有効に
 IRB.conf[:SAVE_HISTORY] = 1000 # 履歴を1000残す
 
 # alias
