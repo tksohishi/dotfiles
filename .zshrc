@@ -265,3 +265,6 @@ export PATH=$PATH:$HOME/.vim/bin
 # Node and npm
 export PATH=$PATH:/usr/local/share/npm/bin
 export NODE_PATH=/usr/local/lib/node
+
+# rvm
+if [[ -s $HOME/.rvm/scripts/rvm ]] ; then source $HOME/.rvm/scripts/rvm ; fi
