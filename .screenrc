@@ -5,7 +5,7 @@ vbell off
 startup_message off
 autodetach on
 shelltitle tmp
-shell -${SHELL}
+shell zsh
 
 # TODO:what's is defhstatus
 #defhstatus screen@$HOSTNAME
@@ -26,11 +26,12 @@ defencoding utf-8
 # for Terminal.app screen scroll back enable
 # ref: http://blog.s21g.com/articles/1047
 # TODO:on vim, can't scroll back 
+# TODO: Scroll back is not working on iTerm2
 termcapinfo xterm* ti@:te@
 
 # key bind
 bind s
-bind c screen ${SHELL}
+bind c screen zsh
 
 # use - in order to over 10 windows
 bind - command -c minus
