@@ -8,7 +8,7 @@
     diff = auto
     status = auto
 [color "branch"]
-    current = yellow reverse
+    current = yellow bold
     local = yellow
     remote = blue
 [color "diff"]
