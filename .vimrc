@@ -225,3 +225,6 @@ autocmd FileType javascript setlocal shiftwidth=2
 
 "" for golang
 autocmd BufRead,BufNewFile *.go setf go
+
+"" pathogen
+call pathogen#runtime_append_all_bundles()
