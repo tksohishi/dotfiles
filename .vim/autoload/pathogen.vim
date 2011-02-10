@@ -1,0 +1,1 @@
+/Users/ohishi.takeshi/dotfile/.vim/bundle/vim-pathogen/autoload/pathogen.vim
