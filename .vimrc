@@ -124,20 +124,18 @@ endif
 imap <C-]> <C-x><C-o>
 
 " ========== vim plugin setting ==========
+" Using pathogen for management
 
-" minibufexpl.vim
-" qbuf.vimでバッファ管理していて快適なのでこちらは使わない 10/2/2010
-"let g:miniBufExplMapWindowNavVim = 1
-"let g:miniBufExplMapWindowNavArrows = 1
-"let g:miniBufExplMapCTabSwitchBufs = 1
-"let g:miniBufExplModSelTarget = 1
+" pathogen.vim
+call pathogen#runtime_append_all_bundles()
 
 " qbuf.vim
 let g:qb_hotkey = ";;"
 
-" taglist.vim requires ctags
+" taglist.vim(*requires ctags)
 " http://nanasi.jp/articles/vim/taglist_vim.html
 " http://bit.ly/5maYv5
+" https://github.com/vim-scripts/taglist.vim.git
 let Tlist_Show_One_File = 1     " 現在編集中のソースのタグしか表示しない
 let Tlist_Exit_OnlyWindow = 1   " taglistのウィンドーが最後のウィンドーならばVimを閉じる
 let Tlist_Use_Right_Window = 1  " 右側でtaglistのウィンドーを表示
@@ -145,25 +143,26 @@ map T :TlistToggle<CR>
 
 " tasklist.vim
 " http://www.vim.org/scripts/script.php?script_id=2607
+" https://github.com/superjudge/tasklist-pathogen.git
 map F :TaskList<CR>
 
 " fuf.vim
 " http://subtech.g.hatena.ne.jp/cho45/20091205/1259980904
-let g:fuf_modesDisable = ['mrucmd']
-let g:fuf_file_exclude = '\v\~$|\.(o|exe|bak|swp|gif|jpg|png)$|(^|[/\\])\.(hg|git|bzr)($|[/\\])'
-let g:fuf_mrufile_exclude = '\v\~$|\.bak$|\.swp|\.howm$|\.(gif|jpg|png)$'
-let g:fuf_mrufile_maxItem = 10000
-let g:fuf_enumeratingLimit = 20
-let g:fuf_keyPreview = '<C-]>'
-let g:fuf_previewHeight = 0
+"let g:fuf_modesDisable = ['mrucmd']
+"let g:fuf_file_exclude = '\v\~$|\.(o|exe|bak|swp|gif|jpg|png)$|(^|[/\\])\.(hg|git|bzr)($|[/\\])'
+"let g:fuf_mrufile_exclude = '\v\~$|\.bak$|\.swp|\.howm$|\.(gif|jpg|png)$'
+"let g:fuf_mrufile_maxItem = 10000
+"let g:fuf_enumeratingLimit = 20
+"let g:fuf_keyPreview = '<C-]>'
+"let g:fuf_previewHeight = 0
 
-nmap bg :FufBuffer<CR>
-nmap bG :FufFile <C-r>=expand('%:~:.')[:-1-len(expand('%:~:.:t'))]<CR><CR>
-nmap gb :FufFile **/<CR>
-nmap br :FufMruFile<CR>
-nmap bq :FufQuickfix<CR>
-nmap bl :FufLine<CR>
-nnoremap <silent> <C-]> :FufTag! <C-r>=expand('<cword>')<CR><CR>
+"nmap bg :FufBuffer<CR>
+"nmap bG :FufFile <C-r>=expand('%:~:.')[:-1-len(expand('%:~:.:t'))]<CR><CR>
+"nmap gb :FufFile **/<CR>
+"nmap br :FufMruFile<CR>
+"nmap bq :FufQuickfix<CR>
+"nmap bl :FufLine<CR>
+"nnoremap <silent> <C-]> :FufTag! <C-r>=expand('<cword>')<CR><CR>
 
 " ========== programming lang setting ==========
 
@@ -172,10 +171,10 @@ nnoremap <silent> <C-]> :FufTag! <C-r>=expand('<cword>')<CR><CR>
 autocmd FileType python setlocal tabstop=2
 autocmd FileType python setlocal shiftwidth=2
 " Ctrl-nで入力補完,再度Ctrl-nで決定
-autocmd FileType python setlocal complete+=k/Users/takeshi/.vim/plugin/pydiction/pydiction isk+=.,(
+"autocmd FileType python setlocal complete+=k/Users/takeshi/.vim/plugin/pydiction/pydiction isk+=.,(
 " omni-completion Ctr-x Ctr-o (Ctr-Space) for python
 " ref: http://blog.dispatched.ch/2009/05/24/vim-as-python-ide/
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+"autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 
 "" for perl programming
 " check perl code with :make
@@ -226,5 +225,4 @@ autocmd FileType javascript setlocal shiftwidth=2
 "" for golang
 autocmd BufRead,BufNewFile *.go setf go
 
-"" pathogen
-call pathogen#runtime_append_all_bundles()
+
