@@ -24,6 +24,7 @@
     ui = true
 [core]
     whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+    editor = /usr/bin/vim
 [branch]
     autosetupmerge = true
 [alias]
@@ -38,5 +39,5 @@
     last = log -1 HEAD
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
 [github]
-	user = skyfive
-	token = 90a550c5f1a663f5b50a7acb4847cb89
+    user = skyfive
+    token = 90a550c5f1a663f5b50a7acb4847cb89
