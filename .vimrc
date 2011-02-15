@@ -57,9 +57,11 @@ set wrap              " 画面幅で折り返す
 set list              " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:< " 不可視文字の表示形式
 set notitle           " タイトル書き換えない
+set cursorline        " カーソル行の強調
 
 " Moving
 set scrolloff=5       " 行送り
+vnoremap v $h         " v連打で行末まで選択
 " 同じ高さのインデントに移動する
 nn <C-k> k:call search ("^". matchstr (getline (line (".")+ 1), '\(\s*\)') ."\\S", 'b')<CR>^
 nn <C-j> :call search ("^". matchstr (getline (line (".")), '\(\s*\)') ."\\S")<CR>^
