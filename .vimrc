@@ -19,6 +19,7 @@ set smarttab       " 行頭の余白内で Tab を打ち込むと、'shiftwidth'
 " Indent
 set autoindent     " 新しい行のインデントを現在行と同じにする
 set smartindent    " 新しい行を作った時高度な自動インデントを行う
+autocmd FileType * setlocal formatoptions-=ro " Disable auto-comment
 
 " Input
 set backspace=indent,eol,start " バックスペースでなんでも消せるように
