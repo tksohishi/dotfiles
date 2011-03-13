@@ -19,6 +19,7 @@ set smarttab       " 行頭の余白内で Tab を打ち込むと、'shiftwidth'
 " Indent
 set autoindent     " 新しい行のインデントを現在行と同じにする
 set smartindent    " 新しい行を作った時高度な自動インデントを行う
+autocmd FileType * setlocal formatoptions-=ro " Disable auto-comment
 
 " Input
 set backspace=indent,eol,start " バックスペースでなんでも消せるように
@@ -57,9 +58,11 @@ set wrap              " 画面幅で折り返す
 set list              " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:< " 不可視文字の表示形式
 set notitle           " タイトル書き換えない
+set cursorline        " カーソル行の強調
 
 " Moving
 set scrolloff=5       " 行送り
+vnoremap v $h         " v連打で行末まで選択
 " 同じ高さのインデントに移動する
 nn <C-k> k:call search ("^". matchstr (getline (line (".")+ 1), '\(\s*\)') ."\\S", 'b')<CR>^
 nn <C-j> :call search ("^". matchstr (getline (line (".")), '\(\s*\)') ."\\S")<CR>^
@@ -128,6 +131,7 @@ imap <C-]> <C-x><C-o>
 
 " pathogen.vim
 call pathogen#runtime_append_all_bundles()
+call pathogen#helptags()
 
 " qbuf.vim
 let g:qb_hotkey = ";;"
