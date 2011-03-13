@@ -131,7 +131,7 @@ imap <C-]> <C-x><C-o>
 
 " pathogen.vim
 call pathogen#runtime_append_all_bundles()
-call pathogen#helptags()
+"call pathogen#helptags()
 
 " qbuf.vim
 let g:qb_hotkey = ";;"
