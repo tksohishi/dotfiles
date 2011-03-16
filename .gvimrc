@@ -8,6 +8,7 @@ if has('gui_macvim')
     set lines=50           " Window size(height)
     colorscheme koehler    " other candidates: murphy,slate,torte
     set guifont=Monaco:h13 " Font Monaco 13pt
+    set hlsearch           " 検索文字をハイライト
     " For MobaSiF
     " set noexpandtab      " Not using MobaSiF anymore, I hope...
 endif
