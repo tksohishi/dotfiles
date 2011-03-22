@@ -35,6 +35,7 @@ set ignorecase " 大文字小文字無視
 set smartcase  " 大文字ではじめたら大文字小文字無視しない
 set incsearch  " インクリメンタルサーチ
 set hlsearch   " 検索文字をハイライト
+nmap <ESC><ESC> ;nohlsearch<CR><ESC> " 検索ハイライトESC×2で除去
 
 " File
 filetype on         " ファイルタイプを有効に
