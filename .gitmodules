@@ -34,3 +34,6 @@
 [submodule ".vim/bundle/nginx"]
 	path = .vim/bundle/nginx
 	url = https://github.com/vim-scripts/nginx.vim.git
+[submodule ".vim/bundle/railscasts-theme"]
+	path = .vim/bundle/railscasts-theme
+	url = https://github.com/jpo/vim-railscasts-theme.git

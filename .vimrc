@@ -34,6 +34,8 @@ set wrapscan   " 最後まで検索したら先頭へ戻る
 set ignorecase " 大文字小文字無視
 set smartcase  " 大文字ではじめたら大文字小文字無視しない
 set incsearch  " インクリメンタルサーチ
+set hlsearch   " 検索文字をハイライト
+nmap <ESC><ESC> ;nohlsearch<CR><ESC> " 検索ハイライトESC×2で除去
 
 " File
 filetype on         " ファイルタイプを有効に
@@ -57,7 +59,6 @@ set wrap              " 画面幅で折り返す
 set list              " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:< " 不可視文字の表示形式
 set notitle           " タイトル書き換えない
-set cursorline        " カーソル行の強調
 
 " Moving
 set scrolloff=5       " 行送り
