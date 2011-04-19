@@ -218,6 +218,8 @@ autocmd FileType xml  setlocal tabstop=2
 autocmd FileType xml  setlocal shiftwidth=2
 autocmd FileType css  setlocal tabstop=2
 autocmd BufNewFile,BufRead *.css setlocal syntax=css3
+" HTML編集時のインデントを無効にする.
+autocmd FileType html set indentexpr&
 
 "" for JavaScript
 " javascript lint required to install from http://www.javascriptlint.com/download.htm
@@ -229,3 +231,9 @@ autocmd FileType javascript setlocal shiftwidth=2
 autocmd BufRead,BufNewFile *.go setf go
 
 
+"" for Markdown
+autocmd BufNewFile,BufRead *.mkd      setfiletype mkd
+autocmd BufNewFile,BufRead *.md       setfiletype mkd
+autocmd BufNewFile,BufRead *.markdown setfiletype mkd
+autocmd BufNewFile,BufRead *.mdown    setfiletype mkd
+autocmd BufNewFile,BufRead *.mkdn     setfiletype mkd
