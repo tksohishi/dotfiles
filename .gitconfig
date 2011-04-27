@@ -40,4 +40,4 @@
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
 [github]
     user = skyfive
-    token = 90a550c5f1a663f5b50a7acb4847cb89
+    token = ca6040c2e0bac62a434b5433092a2536
