@@ -24,6 +24,7 @@ Bundle 'nginx.vim'
 Bundle 'matchit.zip'
 Bundle 'QuickBuf'
 Bundle 'wombat256.vim'
+Bundle 'css_color.vim'
 
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'vim-ruby/vim-ruby'
@@ -31,6 +32,7 @@ Bundle 'thinca/vim-ref'
 Bundle 'jpo/vim-railscasts-theme'
 Bundle 'Shougo/unite.vim'
 Bundle 'altercation/vim-colors-solarized'
+Bundle 'plasticboy/vim-markdown'
 
 filetype plugin indent on
 
