@@ -10,3 +10,5 @@
 .colordiffrc
 .my.cnf
 .irbrc
+.bashrc
+.bash_profile
