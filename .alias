@@ -1,4 +1,4 @@
-alias sshlinode="ssh takeshi@li90-224.members.linode.com"
+alias sshlinode1="ssh takeshi@li90-224.members.linode.com"
 alias sshbobpplinode="ssh starsky5@linode.bobpp.jp"
 
 alias mysqlr="mysql -uroot -p"
@@ -11,5 +11,6 @@ alias mvim='env LANG=ja_JP.UTF-8 open -a /Applications/MacVim.app "$@"'
 alias sshgateway="ssh ohishi@gateway1.lunar.hq.bidders.co.jp"
 
 # For ngmoco
-alias sshmobagestaging="ssh deploy@10.15.100.241"
 alias sshmobagegateway="ssh -A -p 50001 plus@login.milp.ngmoco.com"
+alias sshmobagestaging="ssh deploy@10.15.100.241"
+alias sshmobagestaging-sandbox="ssh deploy@10.15.100.243"

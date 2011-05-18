@@ -6,8 +6,35 @@
 " ========== general setting ========== "
 " Basic
 set nocompatible    " vi互換外す
-colorscheme evening
+set t_Co=256        " 256色対応
+colorscheme koehler
 syntax enable       " syntaxを有効に
+
+" Vundle
+filetype off
+
+set rtp+=~/.vim/vundle/
+call vundle#rc()
+
+Bundle 'rails.vim'
+Bundle 'surround.vim'
+Bundle 'taglist.vim'
+Bundle 'quickrun.vim'
+Bundle 'nginx.vim'
+Bundle 'matchit.zip'
+Bundle 'QuickBuf'
+Bundle 'wombat256.vim'
+Bundle 'css_color.vim'
+
+Bundle 'scrooloose/nerdcommenter'
+Bundle 'vim-ruby/vim-ruby'
+Bundle 'thinca/vim-ref'
+Bundle 'jpo/vim-railscasts-theme'
+Bundle 'Shougo/unite.vim'
+Bundle 'altercation/vim-colors-solarized'
+Bundle 'plasticboy/vim-markdown'
+
+filetype plugin indent on
 
 " Tab
 set tabstop=4      " Tab文字を画面上で何文字分に展開するか
@@ -35,12 +62,8 @@ set ignorecase " 大文字小文字無視
 set smartcase  " 大文字ではじめたら大文字小文字無視しない
 set incsearch  " インクリメンタルサーチ
 set hlsearch   " 検索文字をハイライト
-nmap <ESC><ESC> ;nohlsearch<CR><ESC> " 検索ハイライトESC×2で除去
 
 " File
-filetype on         " ファイルタイプを有効に
-filetype indent on  " ファイルタイプによるインデントを行う
-filetype plugin on  " .vim/ftplugin/を有効に
 set nobackup        " バックアップ取らない
 set nowritebackup   " バックアップ取らない(for crontab)
 set autoread        " 他で書き換えられたら自動で読み直す
@@ -127,11 +150,8 @@ endif
 imap <C-]> <C-x><C-o>
 
 " ========== vim plugin setting ==========
-" Using pathogen for management
-
-" pathogen.vim
-call pathogen#runtime_append_all_bundles()
-"call pathogen#helptags()
+" Using vundle for management
+" The configurtion for that is on the top of this file
 
 " qbuf.vim
 let g:qb_hotkey = ";;"
