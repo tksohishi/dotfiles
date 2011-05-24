@@ -25,6 +25,7 @@ Bundle 'matchit.zip'
 Bundle 'QuickBuf'
 Bundle 'wombat256.vim'
 Bundle 'css_color.vim'
+Bundle 'ZenCoding.vim'
 
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'vim-ruby/vim-ruby'
