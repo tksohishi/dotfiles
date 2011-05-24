@@ -6,6 +6,7 @@ alias svncdiff="svn diff --diff-cmd=colordiff"
 alias svns="svn status -u"
 alias cpanm="cpanm -v"
 alias mvim='env LANG=ja_JP.UTF-8 open -a /Applications/MacVim.app "$@"'
+alias oscreen='screen -dRR takeshi'
 
 # For DeNA gateway1
 alias sshgateway="ssh ohishi@gateway1.lunar.hq.bidders.co.jp"
