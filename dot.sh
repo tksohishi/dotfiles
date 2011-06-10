@@ -27,11 +27,11 @@ done
 for i in $filelist
 do
     if test -L ../"$i"; then
-	echo ../"$i" is link, delete it
-	rm ../"$i"
-    elif test -f ../"$i"; then
-	echo ../"$i" is file, rename it
-	mv ../"$i" ../"$i".org
+        echo ../"$i" is link, delete it
+        rm ../"$i"
+        elif test -f ../"$i"; then
+        echo ../"$i" is file, rename it
+        mv ../"$i" ../"$i".org
     fi
     ln -s $(pwd)/"$i" ../"$i"
 done
