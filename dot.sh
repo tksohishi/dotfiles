@@ -27,10 +27,10 @@ done
 for i in $filelist
 do
     if test -L ../"$i"; then
-        echo ../"$i" is link, delete it
+        echo ../"$i" is just a symbolic link, so deleted it
         rm ../"$i"
         elif test -f ../"$i"; then
-        echo ../"$i" is file, rename it
+        echo ../"$i" is file, so renamed it
         mv ../"$i" ../"$i".org
     fi
     ln -s $(pwd)/"$i" ../"$i"
