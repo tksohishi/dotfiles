@@ -1,5 +1,5 @@
 [user]
-    name = Takeshi Ohishi
+	name = Takeshi Ohishi
     email = tks.ohishi@gmail.com
 
 # ref: http://d.hatena.ne.jp/tokuhirom/20081212/1229080990
@@ -38,6 +38,3 @@
     unstage = reset HEAD --
     last = log -1 HEAD
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
-[github]
-    user = skyfive
-    token = ca6040c2e0bac62a434b5433092a2536
