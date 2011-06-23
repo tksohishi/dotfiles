@@ -13,9 +13,13 @@ syntax enable       " syntaxを有効に
 " Vundle
 filetype off
 
-set rtp+=~/.vim/vundle/
+set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 
+" let Vundle manage vundle
+Bundle 'gmarik/vundle'
+
+Bundle 'jQuery'
 Bundle 'rails.vim'
 Bundle 'surround.vim'
 Bundle 'taglist.vim'
@@ -26,6 +30,7 @@ Bundle 'QuickBuf'
 Bundle 'wombat256.vim'
 Bundle 'css_color.vim'
 Bundle 'ZenCoding.vim'
+Bundle 'perlomni.vim'
 
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'vim-ruby/vim-ruby'
