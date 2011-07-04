@@ -216,6 +216,9 @@ export PERL_AUTOINSTALL="--defaultdeps"
 # perlbrew
 [ -f $HOME/perl5/perlbrew/etc/bashrc ] && source $HOME/perl5/perlbrew/etc/bashrc
 
+# pythonbrew
+[ -f $HOME/.pythonbrew/etc/bashrc ] && source $HOME/.pythonbrew/etc/bashrc
+
 # virtualenvwrapper script
 #export WORKON_HOME=$HOME/.virtualenvs
 #source /usr/local/bin/virtualenvwrapper_bashrc
