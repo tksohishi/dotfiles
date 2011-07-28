@@ -31,12 +31,13 @@ Bundle 'wombat256.vim'
 Bundle 'css_color.vim'
 Bundle 'ZenCoding.vim'
 Bundle 'perlomni.vim'
+Bundle 'Puppet-Syntax-Highlighting'
+Bundle 'cucumber.zip'
 
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'thinca/vim-ref'
 Bundle 'jpo/vim-railscasts-theme'
-Bundle 'Shougo/unite.vim'
 Bundle 'altercation/vim-colors-solarized'
 Bundle 'plasticboy/vim-markdown'
 
@@ -75,6 +76,7 @@ set nowritebackup   " バックアップ取らない(for crontab)
 set autoread        " 他で書き換えられたら自動で読み直す
 set noswapfile      " スワップファイル作らない
 set hidden          " 編集中でも他のファイルを開けるようにする
+set modeline        " Modelineを有効にする
 
 " Backup
 " ref: http://d.hatena.ne.jp/viver/20090723/p1
