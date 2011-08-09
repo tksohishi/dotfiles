@@ -258,10 +258,14 @@ autocmd FileType javascript setlocal shiftwidth=2
 "" for golang
 autocmd BufRead,BufNewFile *.go setf go
 
-
 "" for Markdown
 autocmd BufNewFile,BufRead *.mkd      setfiletype mkd
 autocmd BufNewFile,BufRead *.md       setfiletype mkd
 autocmd BufNewFile,BufRead *.markdown setfiletype mkd
 autocmd BufNewFile,BufRead *.mdown    setfiletype mkd
 autocmd BufNewFile,BufRead *.mkdn     setfiletype mkd
+
+"" for cucumber
+autocmd FileType cucumber setlocal tabstop=2
+autocmd FileType cucumber setlocal shiftwidth=2
+
