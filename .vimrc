@@ -33,6 +33,7 @@ Bundle 'ZenCoding.vim'
 Bundle 'perlomni.vim'
 Bundle 'Puppet-Syntax-Highlighting'
 Bundle 'cucumber.zip'
+Bundle 'rvm.vim'
 
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'vim-ruby/vim-ruby'
