@@ -119,36 +119,6 @@ set whichwrap=b,s,h,l,<,>,[,]
 set laststatus=2
 set statusline=%F%m%r%h%w\%=[TYPE=%Y]\[FORMAT=%{&ff}]\[ENC=%{&fileencoding}]\[LOW=%l/%L]\[COL=%v]
 
-" Migemo
-"if has('migemo')
-"    set migemo
-"    set migemodict=/opt/local/share/migemo/utf-8/migemo-dict
-"endif
-
-" short cut for Copy, Cut, Paste
-" Copy  (Ctrl + c)
-"vnoremap <c-c>"+y
-" Cut   (Ctrl + x)
-"vnoremap <c-x>"+x
-" Paste (Ctrl + v)
-"map <c-v>"+gP
-
-" Copy and Paste
-" Macの場合は普通にComamnd-C，Command-Vも使えたりする
-if has('mac')
-    map <silent> gy :call YankPB()<CR>
-    function! YankPB()
-        let tmp = tempname()
-        call writefile(getline(a:firstline, a:lastline), tmp, 'b')
-        silent exec ":!cat " . tmp . " | iconv -f utf-8 -t shift-jis | pbcopy"
-    endfunction
-endif
-if has('win32')
-    noremap gy "+y
-    " ペーストがうまく動いてない
-    noremap gp "+p
-endif
-
 " マウス操作を有効にする
 " iTermのみ，Terminal.appでは無効
 if has('mac')
@@ -160,6 +130,7 @@ endif
 imap <C-]> <C-x><C-o>
 
 " ========== vim plugin setting ==========
+" NOTE
 " Using vundle for management
 " The configurtion for that is on the top of this file
 
@@ -180,23 +151,39 @@ map T :TlistToggle<CR>
 " https://github.com/superjudge/tasklist-pathogen.git
 map F :TaskList<CR>
 
-" fuf.vim
-" http://subtech.g.hatena.ne.jp/cho45/20091205/1259980904
-"let g:fuf_modesDisable = ['mrucmd']
-"let g:fuf_file_exclude = '\v\~$|\.(o|exe|bak|swp|gif|jpg|png)$|(^|[/\\])\.(hg|git|bzr)($|[/\\])'
-"let g:fuf_mrufile_exclude = '\v\~$|\.bak$|\.swp|\.howm$|\.(gif|jpg|png)$'
-"let g:fuf_mrufile_maxItem = 10000
-"let g:fuf_enumeratingLimit = 20
-"let g:fuf_keyPreview = '<C-]>'
-"let g:fuf_previewHeight = 0
-
-"nmap bg :FufBuffer<CR>
-"nmap bG :FufFile <C-r>=expand('%:~:.')[:-1-len(expand('%:~:.:t'))]<CR><CR>
-"nmap gb :FufFile **/<CR>
-"nmap br :FufMruFile<CR>
-"nmap bq :FufQuickfix<CR>
-"nmap bl :FufLine<CR>
-"nnoremap <silent> <C-]> :FufTag! <C-r>=expand('<cword>')<CR><CR>
+" unite.vim
+" https://github.com/Shougo/unite.vim
+" http://blog.remora.cx/2010/12/vim-ref-with-unite.html
+" 入力モードで開始する
+let g:unite_enable_start_insert=1
+" バッファ一覧
+noremap <C-P> :Unite buffer<CR>
+" ファイル一覧
+noremap <C-N> :Unite -buffer-name=file file<CR>
+" 最近使ったファイルの一覧
+noremap <C-Z> :Unite file_mru<CR>
+" ウィンドウを分割して開く
+au FileType unite nnoremap <silent> <buffer> <expr> <C-J> unite#do_action('split')
+au FileType unite inoremap <silent> <buffer> <expr> <C-J> unite#do_action('split')
+" ウィンドウを縦に分割して開く
+au FileType unite nnoremap <silent> <buffer> <expr> <C-K> unite#do_action('vsplit')
+au FileType unite inoremap <silent> <buffer> <expr> <C-K> unite#do_action('vsplit')
+" ESCキーを2回押すと終了する
+au FileType unite nnoremap <silent> <buffer> <ESC><ESC> :q<CR>
+au FileType unite inoremap <silent> <buffer> <ESC><ESC> <ESC>:q<CR>
+" 初期設定関数を起動する
+au FileType unite call s:unite_my_settings()
+function! s:unite_my_settings()
+  " Overwrite settings.
+endfunction
+" 様々なショートカット
+call unite#set_substitute_pattern('file', '\$\w\+', '\=eval(submatch(0))', 200)
+call unite#set_substitute_pattern('file', '^@@', '\=fnamemodify(expand("#"), ":p:h")."/"', 2)
+call unite#set_substitute_pattern('file', '^@', '\=getcwd()."/*"', 1)
+call unite#set_substitute_pattern('file', '^;r', '\=$VIMRUNTIME."/"')
+call unite#set_substitute_pattern('file', '^\~', escape($HOME, '\'), -2)
+call unite#set_substitute_pattern('file', '\\\@<! ', '\\ ', -20)
+call unite#set_substitute_pattern('file', '\\ \@!', '/', -30)
 
 " ========== programming lang setting ==========
 
@@ -204,24 +191,13 @@ map F :TaskList<CR>
 " indent 2 space
 autocmd FileType python setlocal tabstop=2
 autocmd FileType python setlocal shiftwidth=2
-" Ctrl-nで入力補完,再度Ctrl-nで決定
-"autocmd FileType python setlocal complete+=k/Users/takeshi/.vim/plugin/pydiction/pydiction isk+=.,(
-" omni-completion Ctr-x Ctr-o (Ctr-Space) for python
-" ref: http://blog.dispatched.ch/2009/05/24/vim-as-python-ide/
-"autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 
 "" for perl programming
 " check perl code with :make
-"autocmd FileType perl setlocal makeprg=perl\ -c\ %\ $*
 autocmd FileType perl setlocal errorformat=%f:%l:%m
 autocmd FileType perl setlocal autowrite
 autocmd FileType t    setlocal filetype=perl
 autocmd BufNewFile,BufRead *.psgi setlocal filetype=perl
-
-" MobaSiF
-autocmd BufNewFile,BufRead *.conf   setlocal filetype=perl
-autocmd BufNewFile,BufRead *.conf.* setlocal filetype=perl
-autocmd FileType perl setlocal makeprg=perl\ -c\ -Ipm\ %\ $*
 
 "" for objective-c programming
 "  *.m is not MATLAB file, but Objective-C
@@ -252,8 +228,6 @@ autocmd BufNewFile,BufRead *.css setlocal syntax=css3
 autocmd FileType html set indentexpr&
 
 "" for JavaScript
-" javascript lint required to install from http://www.javascriptlint.com/download.htm
-"autocmd FileType javascript :compiler jsl
 autocmd FileType javascript setlocal tabstop=2
 autocmd FileType javascript setlocal shiftwidth=2
 
