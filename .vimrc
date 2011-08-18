@@ -6,7 +6,8 @@
 " Basic
 set nocompatible    " vi互換外す
 set t_Co=256        " 256色対応
-colorscheme molokai " molokai http://winterdom.com/2008/08/molokaiforvim
+"colorscheme molokai " molokai http://winterdom.com/2008/08/molokaiforvim
+colorscheme desert
 syntax enable       " syntaxを有効に
 
 " Vundle
@@ -48,6 +49,10 @@ Bundle 'wombat256.vim'
 
 filetype plugin indent on
 
+" Basic
+let mapreader=","  " <Leader>は','
+set vb t_vb=       " ビープをならさない
+
 " Tab
 set tabstop=2      " Tab文字を画面上で何文字分に展開するか
 set shiftwidth=2   " cindentやautoindent時に挿入されるインデントの幅
@@ -62,11 +67,10 @@ autocmd FileType * setlocal formatoptions-=ro " Disable auto-comment
 
 " Input
 set backspace=indent,eol,start " バックスペースでなんでも消せるように
-set formatoptions+=m           " 整形オプション，マルチバイト系を追加
+set formatoptions=lmoq         " 整形オプション，マルチバイト系を追加
 set imdisable                  " 日本語入力OFF(TODO:下の2つ要らないかも)
 set iminsert=0                 " Insert mode時にIME OFF
 set imsearch=0                 " Search時にIME OFF
-set vb t_vb=                   " ビープをならさない
 
 " Search
 set wrapscan   " 最後まで検索したら先頭へ戻る
