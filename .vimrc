@@ -40,9 +40,9 @@ Bundle 'css_color.vim'
 Bundle 'plasticboy/vim-markdown'
 Bundle 'jQuery'
 Bundle 'nginx.vim'
-Bundle 'skyfive/molokai'
 
 " colorscheme
+Bundle 'skyfive/molokai'
 Bundle 'jpo/vim-railscasts-theme'
 Bundle 'altercation/vim-colors-solarized'
 Bundle 'wombat256.vim'
@@ -50,7 +50,7 @@ Bundle 'wombat256.vim'
 filetype plugin indent on
 
 " Basic
-let mapreader=","  " <Leader>は','
+let mapleader=","  " <Leader>は','
 set vb t_vb=       " ビープをならさない
 
 " Tab
@@ -140,11 +140,6 @@ let Tlist_Show_One_File = 1     " 現在編集中のソースのタグしか表�
 let Tlist_Exit_OnlyWindow = 1   " taglistのウィンドーが最後のウィンドーならばVimを閉じる
 let Tlist_Use_Right_Window = 1  " 右側でtaglistのウィンドーを表示
 map T :TlistToggle<CR>
-
-" tasklist.vim
-" http://www.vim.org/scripts/script.php?script_id=2607
-" https://github.com/superjudge/tasklist-pathogen.git
-map F :TaskList<CR>
 
 " NERD_commenter.vim
 " コメントの間にスペースを空ける
