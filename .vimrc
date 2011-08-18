@@ -1,13 +1,12 @@
 " .vimrc edited by Takeshi Ohishi
-" ChangeLog
-" 2010/10/2 organize some settings
-" 2009/4/23 add the comments and setting
+
 "  ref: http://relaxedcolumn.blog8.fc2.com/blog-entry-101.html
+
 " ========== general setting ========== "
 " Basic
 set nocompatible    " vi互換外す
 set t_Co=256        " 256色対応
-colorscheme koehler
+colorscheme molokai " molokai http://winterdom.com/2008/08/molokaiforvim
 syntax enable       " syntaxを有効に
 
 " Vundle
@@ -19,29 +18,33 @@ call vundle#rc()
 " let Vundle manage vundle
 Bundle 'gmarik/vundle'
 
-Bundle 'jQuery'
+" plugin
+Bundle 'unite.vim'
 Bundle 'rails.vim'
 Bundle 'surround.vim'
 Bundle 'taglist.vim'
 Bundle 'quickrun.vim'
-Bundle 'nginx.vim'
 Bundle 'matchit.zip'
 Bundle 'QuickBuf'
-Bundle 'wombat256.vim'
-Bundle 'css_color.vim'
 Bundle 'ZenCoding.vim'
 Bundle 'perlomni.vim'
-Bundle 'Puppet-Syntax-Highlighting'
-Bundle 'cucumber.zip'
 Bundle 'rvm.vim'
-Bundle 'unite.vim'
-
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'thinca/vim-ref'
+
+" syntax highlight
+Bundle 'cucumber.zip'
+Bundle 'Puppet-Syntax-Highlighting'
+Bundle 'css_color.vim'
+Bundle 'plasticboy/vim-markdown'
+Bundle 'jQuery'
+Bundle 'nginx.vim'
+
+" colorscheme
 Bundle 'jpo/vim-railscasts-theme'
 Bundle 'altercation/vim-colors-solarized'
-Bundle 'plasticboy/vim-markdown'
+Bundle 'wombat256.vim'
 
 filetype plugin indent on
 
@@ -123,7 +126,7 @@ set ttymouse=xterm2
 " The configurtion for that is on the top of this file
 
 " qbuf.vim
-let g:qb_hotkey = ";;"
+"let g:qb_hotkey = ";;"
 
 " taglist.vim(*requires ctags)
 " http://nanasi.jp/articles/vim/taglist_vim.html
