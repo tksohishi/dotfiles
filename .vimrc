@@ -21,6 +21,10 @@ Bundle 'gmarik/vundle'
 
 " plugin
 Bundle 'unite.vim'
+Bundle 'h1mesuke/unite-outline'
+Bundle 'unite-colorscheme'
+Bundle 'unite-font'
+Bundle 'CommentAnyWay'
 Bundle 'rails.vim'
 Bundle 'surround.vim'
 Bundle 'taglist.vim'
@@ -29,7 +33,6 @@ Bundle 'matchit.zip'
 Bundle 'ZenCoding.vim'
 Bundle 'perlomni.vim'
 Bundle 'rvm.vim'
-Bundle 'scrooloose/nerdcommenter'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'thinca/vim-ref'
 
@@ -141,45 +144,32 @@ let Tlist_Exit_OnlyWindow = 1   " taglistのウィンドーが最後のウィン
 let Tlist_Use_Right_Window = 1  " 右側でtaglistのウィンドーを表示
 map T :TlistToggle<CR>
 
-" NERD_commenter.vim
-" コメントの間にスペースを空ける
-let NERDSpaceDelims = 1
-" 未対応ファイルタイプのエラーメッセージを表示しない
-let NERDShutUp=1
-
 " unite.vim
 " https://github.com/Shougo/unite.vim
-" http://blog.remora.cx/2010/12/vim-ref-with-unite.html
-" 入力モードで開始する
-let g:unite_enable_start_insert=1
-" バッファ一覧
-noremap <C-P> :Unite buffer<CR>
-" ファイル一覧
-noremap <C-N> :Unite -buffer-name=file file<CR>
-" 最近使ったファイルの一覧
-noremap <C-Z> :Unite file_mru<CR>
-" ウィンドウを分割して開く
-au FileType unite nnoremap <silent> <buffer> <expr> <C-J> unite#do_action('split')
-au FileType unite inoremap <silent> <buffer> <expr> <C-J> unite#do_action('split')
-" ウィンドウを縦に分割して開く
-au FileType unite nnoremap <silent> <buffer> <expr> <C-K> unite#do_action('vsplit')
-au FileType unite inoremap <silent> <buffer> <expr> <C-K> unite#do_action('vsplit')
-" ESCキーを2回押すと終了する
-au FileType unite nnoremap <silent> <buffer> <ESC><ESC> :q<CR>
-au FileType unite inoremap <silent> <buffer> <ESC><ESC> <ESC>:q<CR>
-" 初期設定関数を起動する
-au FileType unite call s:unite_my_settings()
-function! s:unite_my_settings()
-  " Overwrite settings.
-endfunction
-" 様々なショートカット
-call unite#set_substitute_pattern('file', '\$\w\+', '\=eval(submatch(0))', 200)
-call unite#set_substitute_pattern('file', '^@@', '\=fnamemodify(expand("#"), ":p:h")."/"', 2)
-call unite#set_substitute_pattern('file', '^@', '\=getcwd()."/*"', 1)
-call unite#set_substitute_pattern('file', '^;r', '\=$VIMRUNTIME."/"')
-call unite#set_substitute_pattern('file', '^\~', escape($HOME, '\'), -2)
-call unite#set_substitute_pattern('file', '\\\@<! ', '\\ ', -20)
-call unite#set_substitute_pattern('file', '\\ \@!', '/', -30)
+" https://github.com/ujihisa/config/blob/master/_vimrc
+nnoremap ss :<C-u>Unite file_rec -default-action=split<Cr>
+nnoremap se :<C-u>Unite file_rec<Cr>
+nnoremap so :<C-u>Unite outline -auto-preview<Cr>
+nnoremap sc :<C-u>Unite colorscheme -auto-preview<Cr>
+nnoremap sf :<C-u>Unite file -default-action=split<Cr>
+nnoremap sm :<C-u>Unite file_mru -default-action=split<Cr>
+nnoremap sb :<C-u>Unite buffer -default-action=split<Cr>
+"nnoremap sra :<C-u>Unite rake<Cr>
+"nnoremap sre :<C-u>Unite ref/man ref/hoogle ref/pydoc -default-action=split<Cr>
+"nnoremap su q:Unite<Space>
+" AlterCommandWrapper unite Unite
+let g:unite_enable_start_insert = 1
+let g:unite_enable_split_vertically = 1
+let g:unite_cd_command = 'CD'
+
+let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'
+
+let g:unite_quick_match_table = {
+      \'a' : 1, 's' : 2, 'd' : 3, 'f' : 4, 'g' : 5, 'h' : 6, 'j' : 7, 'k' : 8, 'l' : 9, ':' : 10,
+      \'q' : 11, 'w' : 12, 'e' : 13, 'r' : 14, 't' : 15, 'y' : 16, 'u' : 17, 'i' : 18, 'o' : 19, 'p' : 20,
+      \'1' : 21, '2' : 22, '3' : 23, '4' : 24, '5' : 25, '6' : 26, '7' : 27, '8' : 28, '9' : 29, '0' : 30,
+      \}
+au FileType unite nmap <silent> <buffer> <ESC><ESC> <Plug>(unite_exit)
 
 " ========== programming lang setting ==========
 
