@@ -27,7 +27,6 @@ Bundle 'unite-font'
 Bundle 'CommentAnyWay'
 Bundle 'rails.vim'
 Bundle 'surround.vim'
-Bundle 'taglist.vim'
 Bundle 'quickrun.vim'
 Bundle 'matchit.zip'
 Bundle 'ZenCoding.vim'
@@ -102,7 +101,6 @@ set notitle           " タイトル書き換えない
 " Moving
 set scrolloff=5       " 行送り
 set whichwrap=b,s,h,l,<,>,[,] " カーソルを行頭、行末で止まらないようにする
-
 " 同じ高さのインデントに移動する
 nn <C-k> k:call search ("^". matchstr (getline (line (".")+ 1), '\(\s*\)') ."\\S", 'b')<CR>^
 nn <C-j> :call search ("^". matchstr (getline (line (".")), '\(\s*\)') ."\\S")<CR>^
@@ -122,46 +120,40 @@ set fileformats=unix,dos,mac
 set laststatus=2
 set statusline=%F%m%r%h%w\%=[TYPE=%Y]\[FORMAT=%{&ff}]\[ENC=%{&fileencoding}]\[LOW=%l/%L]\[COL=%v]
 
-" ターミナルでマウスを使用できるようにする
+" vim+iTerm2でマウスを使用できるようにする
 set mouse=a
 set guioptions+=a
 set ttymouse=xterm2
+
+" TODO
+" vim+iTerm2でCommand-C, Command-Vを有効に
 
 " ========== vim plugin setting ==========
 " NOTE
 " Using vundle for management
 " The configurtion for that is on the top of this file
 
-" qbuf.vim
-"let g:qb_hotkey = ";;"
-
-" taglist.vim(*requires ctags)
-" http://nanasi.jp/articles/vim/taglist_vim.html
-" http://bit.ly/5maYv5
-" https://github.com/vim-scripts/taglist.vim.git
-let Tlist_Show_One_File = 1     " 現在編集中のソースのタグしか表示しない
-let Tlist_Exit_OnlyWindow = 1   " taglistのウィンドーが最後のウィンドーならばVimを閉じる
-let Tlist_Use_Right_Window = 1  " 右側でtaglistのウィンドーを表示
-map T :TlistToggle<CR>
-
 " unite.vim
 " https://github.com/Shougo/unite.vim
 " https://github.com/ujihisa/config/blob/master/_vimrc
-nnoremap ss :<C-u>Unite file_rec -default-action=split<Cr>
+nnoremap ;; :<C-u>Unite buffer<Cr>
+nnoremap sb :<C-u>Unite buffer<Cr>
 nnoremap se :<C-u>Unite file_rec<Cr>
+nnoremap ss :<C-u>Unite file_rec<Cr>
 nnoremap so :<C-u>Unite outline -auto-preview<Cr>
 nnoremap sc :<C-u>Unite colorscheme -auto-preview<Cr>
-nnoremap sf :<C-u>Unite file -default-action=split<Cr>
-nnoremap sm :<C-u>Unite file_mru -default-action=split<Cr>
-nnoremap sb :<C-u>Unite buffer -default-action=split<Cr>
-"nnoremap sra :<C-u>Unite rake<Cr>
-"nnoremap sre :<C-u>Unite ref/man ref/hoogle ref/pydoc -default-action=split<Cr>
-"nnoremap su q:Unite<Space>
-" AlterCommandWrapper unite Unite
-let g:unite_enable_start_insert = 1
-let g:unite_enable_split_vertically = 1
-let g:unite_cd_command = 'CD'
+nnoremap sf :<C-u>Unite file<Cr>
+nnoremap sm :<C-u>Unite file_mru -winwidth=90<Cr>
+" ウィンドウを横分割して開く
+au FileType unite nnoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
+au FileType unite inoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
+" ウィンドウを縦分割して開く
+au FileType unite nnoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
+au FileType unite inoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
 
+let g:unite_enable_split_vertically = 1
+let g:unite_winwidth=50
+let g:unite_source_file_mru_time_format = '%D %H:%M '
 let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'
 
 let g:unite_quick_match_table = {
@@ -169,7 +161,6 @@ let g:unite_quick_match_table = {
       \'q' : 11, 'w' : 12, 'e' : 13, 'r' : 14, 't' : 15, 'y' : 16, 'u' : 17, 'i' : 18, 'o' : 19, 'p' : 20,
       \'1' : 21, '2' : 22, '3' : 23, '4' : 24, '5' : 25, '6' : 26, '7' : 27, '8' : 28, '9' : 29, '0' : 30,
       \}
-au FileType unite nmap <silent> <buffer> <ESC><ESC> <Plug>(unite_exit)
 
 " ========== programming lang setting ==========
 
