@@ -150,6 +150,9 @@ au FileType unite inoremap <silent> <buffer> <expr> <C-j> unite#do_action('split
 " ウィンドウを縦分割して開く
 au FileType unite nnoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
 au FileType unite inoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
+" ;;で挙動がおかしくなるのを防ぐ
+" TODO 何故か閉じてくれないので要調査
+au FileType unite nnoremap <silent> <buffer> ;; <Plug>(unite_exit)
 
 let g:unite_enable_split_vertically = 1
 let g:unite_winwidth=50
