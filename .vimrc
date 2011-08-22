@@ -20,7 +20,7 @@ call vundle#rc()
 Bundle 'gmarik/vundle'
 
 " plugin
-Bundle 'unite.vim'
+Bundle 'Shougo/unite.vim'
 Bundle 'h1mesuke/unite-outline'
 Bundle 'unite-colorscheme'
 Bundle 'unite-font'
@@ -136,13 +136,14 @@ set ttymouse=xterm2
 " unite.vim
 " https://github.com/Shougo/unite.vim
 " https://github.com/ujihisa/config/blob/master/_vimrc
-nnoremap ;; :<C-u>Unite buffer<Cr>
+nnoremap <silent> ;; :<C-u>Unite buffer -toggle<CR>
+nnoremap <silent> :: :<C-u>UniteWithBufferDir -buffer-name=files buffer file_mru bookmark file file_rec -toggle -winwidth=90<CR>
 nnoremap sb :<C-u>Unite buffer<Cr>
-nnoremap se :<C-u>Unite file_rec<Cr>
+nnoremap se :<C-u>Unite file<Cr>
+nnoremap sf :<C-u>Unite file<Cr>
 nnoremap ss :<C-u>Unite file_rec<Cr>
 nnoremap so :<C-u>Unite outline -auto-preview<Cr>
 nnoremap sc :<C-u>Unite colorscheme -auto-preview<Cr>
-nnoremap sf :<C-u>Unite file<Cr>
 nnoremap sm :<C-u>Unite file_mru -winwidth=90<Cr>
 " ウィンドウを横分割して開く
 au FileType unite nnoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
@@ -150,12 +151,10 @@ au FileType unite inoremap <silent> <buffer> <expr> <C-j> unite#do_action('split
 " ウィンドウを縦分割して開く
 au FileType unite nnoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
 au FileType unite inoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
-" ;;で挙動がおかしくなるのを防ぐ
-" TODO 何故か閉じてくれないので要調査
-au FileType unite nnoremap <silent> <buffer> ;; <Plug>(unite_exit)
 
 let g:unite_enable_split_vertically = 1
 let g:unite_winwidth=50
+let g:unite_split_rule='botright'
 let g:unite_source_file_mru_time_format = '%D %H:%M '
 let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'
 
