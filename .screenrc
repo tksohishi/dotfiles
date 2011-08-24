@@ -16,7 +16,7 @@ defhstatus I^En:^EtI
 # ref: http://www.hsbt.org/diary/20060901.html#p02
 hardstatus on
 hardstatus alwayslastline
-hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %{..Y} %m/%d %C%a"
+hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %{..Y} %m/%d %C:%s%a"
 
 # encoding
 defutf8 on
