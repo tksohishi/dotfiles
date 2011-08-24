@@ -1,12 +1,30 @@
-" .gvimrc created by Takeshi Ohishi "
+" .gvimrc
 
-"" The setting for MacVim
+" Macvim Setting
 if has('gui_macvim')
-    set transparency=10      " transparency 0-100
-    set columns=180          " Window size(width)
-    set lines=50             " Window size(height)
-    let g:molokai_original=1 " For molokai
-    colorscheme molokai      " other candidates: murphy,slate,torte,railscasts,solarized,koehler
-    set guifont=Monaco:h13   " Font Monaco 13pt
-    set cursorline           " カーソル行の強調
+
+  " {{{ Basic
+  set transparency=5
+  set columns=180          " Window size(width)
+  set lines=50             " Window size(height)
+  colorscheme molokai      " molokai
+  set guifont=Monaco:h13   " Font Monaco 13pt
+  set cmdheight=2
+  " No toolbar, No menubar, No scrollbars
+  set guioptions-=T
+  set guioptions-=m
+  set guioptions-=l
+  set guioptions-=L
+  set guioptions-=r
+  set guioptions-=R
+  " }}}
+
+  " {{{ Commands
+  " Large font
+  command! GuiLargeFont set guifont=Monaco:h48 cmdheight=1
+  command! GuiStandardFont set guifont=Monaco:h13 cmdheight=2
+  " }}}
+
 endif
+
+" vim:set tabstop=2 shiftwidth=2 expandtab foldmethod=marker nowrap:
