@@ -41,6 +41,7 @@ Bundle 'thinca/vim-ref'
 Bundle 'thinca/vim-quickrun'
 Bundle 'Shougo/neocomplcache'
 Bundle 'ujihisa/neco-look'
+Bundle 'tyru/open-browser.vim'
 
 " syntax highlight
 Bundle 'cucumber.zip'
@@ -697,6 +698,11 @@ augroup TakeshiRSpec
 augroup END
 
 let g:quickrun_config['ruby.rspec'] = {'command': 'rspec'}
+" }}}
+
+" {{{ open-browser.vim
+nmap <silent> [Space]x <Plug>(openbrowser-smart-search)
+vmap <silent> [Space]x <Plug>(openbrowser-smart-search)
 " }}}
 
 " }}}
