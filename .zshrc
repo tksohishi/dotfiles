@@ -219,10 +219,6 @@ export PERL_AUTOINSTALL="--defaultdeps"
 # pythonbrew
 [ -f $HOME/.pythonbrew/etc/bashrc ] && source $HOME/.pythonbrew/etc/bashrc
 
-# virtualenvwrapper script
-#export WORKON_HOME=$HOME/.virtualenvs
-#source /usr/local/bin/virtualenvwrapper_bashrc
-
 case "${OSTYPE}" in
 darwin*)
     SHELL=/usr/local/bin/zsh
@@ -243,27 +239,6 @@ precmd () {
     [[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
 }
 RPROMPT="%1(v|%F{green}%1v%f|)"
-
-
-# Golang
-export GOROOT=$HOME/local/go
-export GOBIN=$HOME/local/bin
-
-case "${OSTYPE}" in
-freebsd*)
-    export GOOS=freebsd
-    ;;
-darwin*)
-    export GOOS=darwin
-    ;;
-linux*)
-    export GOOS=linux
-    ;;
-esac
-export GOARCH=386
-
-# perlomni.vim
-export PATH=$PATH:$HOME/.vim/bin
 
 # Node and npm
 export PATH=$PATH:/usr/local/share/npm/bin
