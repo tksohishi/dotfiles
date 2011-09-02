@@ -32,6 +32,7 @@ Bundle 'Shougo/unite.vim'
 Bundle 'h1mesuke/unite-outline'
 Bundle 'ujihisa/unite-colorscheme'
 Bundle 'ujihisa/unite-font'
+Bundle 'tsukkee/unite-help'
 Bundle 'tyru/caw.vim'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-rails'
@@ -41,6 +42,7 @@ Bundle 'thinca/vim-ref'
 Bundle 'thinca/vim-quickrun'
 Bundle 'Shougo/neocomplcache'
 Bundle 'ujihisa/neco-look'
+Bundle 'tyru/open-browser.vim'
 
 " syntax highlight
 Bundle 'cucumber.zip'
@@ -617,6 +619,7 @@ nnoremap <silent> ;r :<C-u>Unite file_rec<CR>
 nnoremap <silent> ;o :<C-u>Unite outline -auto-preview<CR>
 nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
 nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
+nnoremap <silent> ;h :<C-u>Unite help<CR>
 
 let g:unite_enable_split_vertically = 1
 let g:unite_winwidth=50
@@ -697,6 +700,11 @@ augroup TakeshiRSpec
 augroup END
 
 let g:quickrun_config['ruby.rspec'] = {'command': 'rspec'}
+" }}}
+
+" {{{ open-browser.vim
+nmap <silent> [Space]x <Plug>(openbrowser-smart-search)
+vmap <silent> [Space]x <Plug>(openbrowser-smart-search)
 " }}}
 
 " }}}
