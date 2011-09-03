@@ -13,4 +13,5 @@
 .bashrc
 .bash_profile
 .gemrc
+.rvmrc
 .ssh/config
