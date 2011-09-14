@@ -617,7 +617,7 @@ nnoremap <silent> :: :<C-u>UniteWithBufferDir -buffer-name=files buffer file_mru
 nnoremap <silent> ;b :<C-u>Unite buffer<CR>
 nnoremap <silent> ;f :<C-u>Unite file<CR>
 nnoremap <silent> ;r :<C-u>Unite file_rec<CR>
-nnoremap <silent> ;o :<C-u>Unite outline -auto-preview<CR>
+nnoremap <silent> ;o :<C-u>Unite outline<CR>
 nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
 nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
@@ -709,8 +709,8 @@ vmap <silent> [Space]x <Plug>(openbrowser-smart-search)
 " }}}
 
 " {{{ poslist.vim
-nmap <C-o> <Plug>(poslist_prev)
-nmap <C-i> <Plug>(poslist_next)
+nmap <C-o> <Plug>(poslist-prev-pos)
+nmap <C-i> <Plug>(poslist-next-pos)
 " }}}
 
 " }}}
