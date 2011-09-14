@@ -48,11 +48,12 @@ Bundle 'thinca/vim-poslist'
 " syntax highlight
 Bundle 'cucumber.zip'
 Bundle 'Puppet-Syntax-Highlighting'
-Bundle 'css_color.vim'
 Bundle 'plasticboy/vim-markdown'
 Bundle 'jQuery'
 Bundle 'nginx.vim'
 Bundle 'mikbe/rspec.vim'
+Bundle 'othree/html5.vim'
+Bundle 'hail2u/vim-css3-syntax'
 
 " colorscheme
 Bundle 'molokai'
@@ -254,8 +255,8 @@ augroup MyAutoCommands
   autocmd FileType php                  setlocal tabstop=2 shiftwidth=2 expandtab nowrap
   autocmd FileType python               setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=pythoncomplete#Complete
   autocmd FileType thrift               setlocal tabstop=2 shiftwidth=2 expandtab nowrap
-  autocmd FileType css                  setlocal omnifunc=csscomplete#CompleteCSS
-  autocmd FileType html,markdown        setlocal omnifunc=htmlcomplete#CompleteTags
+  autocmd FileType css                  setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=csscomplete#CompleteCSS
+  autocmd FileType html,markdown        setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=htmlcomplete#CompleteTags
   autocmd FileType javascript           setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=javascriptcomplete#CompleteJS
   autocmd FileType xml                  setlocal omnifunc=xmlcomplete#CompleteTags
 
