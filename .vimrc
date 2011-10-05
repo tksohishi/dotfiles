@@ -682,8 +682,8 @@ let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
 
 " {{{ rsense
 let g:rsenseUseOmniFunc = 1
-if filereadable(expand('~/dev/rsense/bin/rsense'))
-  let g:rsenseHome = expand('~/dev/rsense')
+if filereadable(expand('~/.vim/lib/rsense/bin/rsense'))
+  let g:rsenseHome = expand('~/vim/lib/rsense')
 
   let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
 endif
