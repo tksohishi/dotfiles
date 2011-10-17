@@ -44,6 +44,7 @@ Bundle 'Shougo/neocomplcache'
 Bundle 'ujihisa/neco-look'
 Bundle 'tyru/open-browser.vim'
 Bundle 'thinca/vim-poslist'
+Bundle 'sudo.vim'
 
 " syntax highlight
 Bundle 'cucumber.zip'
