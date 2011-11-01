@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo Bootstrap for creating my own environment like dotfiles and zsh
 
@@ -38,3 +38,8 @@ done
 
 echo complete link making
 
+if test -f $HOME/.oh-my-zsh; then
+    echo oh-my-zsh is already installed
+else
+    echo please check out https://github.com/robbyrussell/oh-my-zsh
+fi
