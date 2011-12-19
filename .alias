@@ -6,3 +6,8 @@ alias mvim='env LANG=jp_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@
 alias macvim='env LANG=ja_JP.UTF-8 open -a /Applications/MacVim.app "$@"'
 alias oscreen='screen -dRR takeshi'
 alias cassandra-cli-lo='cassandra-cli -host localhost -port 9160'
+alias now='date +%Y%m%d%H%M%S'
+alias be='bundle exec'
+alias berake='bundle exec rake'
+alias gs='git status'
+alias gd='git diff'
