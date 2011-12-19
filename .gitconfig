@@ -24,7 +24,7 @@
     ui = true
 [core]
     whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
-    editor = /usr/bin/vim
+    editor = vim
 [branch]
     autosetupmerge = true
 [alias]
@@ -35,6 +35,8 @@
     df = diff
     lg = log -p
     add = add -v
+    fetch = fetch -v --all
+    push = push -v
     unstage = reset HEAD --
     last = log -1 HEAD
     tree = log --graph --pretty=oneline --abbrev-commit --decorate

@@ -1,22 +1,21 @@
 #!/bin/bash
-# NOTICE: this shell script make link on ../ directry
 
-echo dot file link maker
+echo Bootstrap for creating my own environment like dotfiles and zsh
 
-if test -f filelist; then
+if test -f list; then
     echo start!
 else
-    echo make filelist!
-    ls -A > filelist
-    $EDITOR $(pwd)/filelist
+    echo make list!
+    ls -A > list
+    $EDITOR $(pwd)/list
 fi
 
-filelist=`cat filelist`
+list=`cat list`
 y=yes
 n=no
 echo make the following files links
 echo -------------------------------
-echo "$filelist"
+echo "$list"
 echo -------------------------------
 echo OK? choose one!
 select Answer in yes Ctrl-C:cancel
@@ -24,7 +23,7 @@ do
     break;
 done
 
-for i in $filelist
+for i in $list
 do
     if test -L ../"$i"; then
         echo ../"$i" is just a symbolic link, so deleted it
@@ -34,7 +33,13 @@ do
         mv ../"$i" ../"$i".org
     fi
     ln -s $(pwd)/"$i" ../"$i"
+    echo $i is created
 done
 
-#ls -ltra ../
 echo complete link making
+
+if test -f $HOME/.oh-my-zsh; then
+    echo oh-my-zsh is already installed
+else
+    echo please check out https://github.com/robbyrussell/oh-my-zsh
+fi

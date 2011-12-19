@@ -1,6 +1,4 @@
-if [ -f /etc/bashrc ]; then
-    source /etc/bashrc
-fi
+export TEST=1
 
 # LANG
 export LANG=ja_JP.UTF-8
@@ -13,5 +11,3 @@ if [ -f $HOME/.alias ]; then
     source $HOME/.alias
 fi
 
-# oh-my-zsh config
-export ZSH_CUSTOM=$HOME/.zsh_custom

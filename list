@@ -5,7 +5,6 @@
 .vim
 .vimrc
 .gvimrc
-.zshrc
 .gitconfig
 .colordiffrc
 .my.cnf
@@ -14,3 +13,4 @@
 .bash_profile
 .gemrc
 .rvmrc
+.zsh_custom

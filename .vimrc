@@ -621,6 +621,10 @@ endif
 
 " {{{ Vim Plugin Setting
 
+" {{{ Git Plugin (Standard Plugin)
+autocmd MyAutoCommands FileType gitcommit DiffGitCached
+" }}}
+
 " {{{ unite.vim
 " https://github.com/Shougo/unite.vim
 nnoremap <silent> ;; :<C-u>Unite buffer -toggle<CR>
