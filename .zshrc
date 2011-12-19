@@ -1,13 +1,21 @@
 # users generic .zshrc file for zsh(1)
 
-# EDITOR is vi
-export EDITOR=vi
+# EDITOR is vim
+export EDITOR=vim
 
 ## Environment variable configuration
 #
 # LANG
 #
-export LANG=ja_JP.UTF-8
+case "${OSTYPE}" in
+darwin*)
+    export LANG=ja_JP.UTF-8
+    ;;
+linux*)
+    export LANG=C
+    ;;
+esac
+
 
 
 ## Default shell configuration
@@ -124,41 +132,16 @@ esac
 alias la="ls -a"
 alias lf="ls -F"
 alias ll="ls -l"
+alias lsa="ls -la"
 
 alias du="du -h"
 alias df="df -h"
 
 alias su="su -l"
 
-#alias mysql="mysql5"
 alias grep="grep --color=auto"
 
-case "${OSTYPE}" in
-darwin*)
-    alias updateports="sudo port selfupdate; sudo port outdated"
-    alias portupgrade="sudo port upgrade installed"
-    ;;
-freebsd*)
-    case ${UID} in
-    0)
-        updateports() 
-        {
-            if [ -f /usr/ports/.portsnap.INDEX ]
-            then
-                portsnap fetch update
-            else
-                portsnap fetch extract update
-            fi
-            (cd /usr/ports/; make index)
-
-            portversion -v -l \<
-        }
-        alias appsupgrade='pkgdb -F && BATCH=YES NO_CHECKSUM=YES portupgrade -a'
-        ;;
-    esac
-    ;;
-esac
-
+alias p="ps auxww"
 
 ## terminal configuration
 #
@@ -210,9 +193,6 @@ export PERL_AUTOINSTALL="--defaultdeps"
 #
 [ -f ~/.profile ] && source ~/.profile
 
-# tab-completion in python interpreter enabled
-[ -f ~/.pythonrc.py ] && export PYTHONSTARTUP=$HOME/.pythonrc.py
-
 # perlbrew
 [ -f $HOME/perl5/perlbrew/etc/bashrc ] && source $HOME/perl5/perlbrew/etc/bashrc
 
@@ -221,7 +201,12 @@ export PERL_AUTOINSTALL="--defaultdeps"
 
 case "${OSTYPE}" in
 darwin*)
-    SHELL=/usr/local/bin/zsh
+    if [[ -f /usr/local/bin/zsh ]]
+    then
+        export SHELL=/usr/local/bin/zsh
+    else
+        export SHELL=/bin/zsh
+    fi
     ;;
 linux*)
     export SHELL=/bin/zsh
@@ -240,9 +225,29 @@ precmd () {
 }
 RPROMPT="%1(v|%F{green}%1v%f|)"
 
+# PATH
+[ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
+
 # Node and npm
-export PATH=$PATH:/usr/local/share/npm/bin
-export NODE_PATH=/usr/local/lib/node
+[ -f /usr/local/share/npm/bin ] && export PATH=$PATH:/usr/local/share/npm/bin
+[ -d /usr/local/lib/node ] && export NODE_PATH=/usr/local/lib/node_modules
 
 # rvm
-if [[ -s $HOME/.rvm/scripts/rvm ]] ; then source $HOME/.rvm/scripts/rvm ; fi
+# Use rubies instead of rvm
+# if [[ -s $HOME/.rvm/scripts/rvm ]] ; then source $HOME/.rvm/scripts/rvm ; fi
+
+init_rubies() {
+	if [ -s "$HOME/.rubies/src/rubies.sh" ]; then
+		source "$HOME/.rubies/src/rubies.sh"
+		enable_rubies_cd_hook
+		return 0
+	fi
+	return 1
+}
+
+# https://github.com/niw/profiles/blob/master/.zshrc#L320
+if init_rubies; then
+    #RPROMPT="${RPROMPT} %{$fg[red]%}\${RUBIES_RUBY_NAME}%{$reset_color%}"
+fi
+
+# vim:ts=4:sw=4:noexpandtab:foldmethod=marker:nowrap:ft=sh:
