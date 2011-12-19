@@ -275,8 +275,8 @@ augroup MyAutoCommands
   autocmd FileType unite nnoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
   autocmd FileType unite inoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
   " ウィンドウを縦分割して開く
-  autocmd FileType unite nnoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
-  autocmd FileType unite inoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
+  autocmd FileType unite nnoremap <silent> <buffer> <expr> <C-k> unite#do_action('vsplit')
+  autocmd FileType unite inoremap <silent> <buffer> <expr> <C-k> unite#do_action('vsplit')
 
   " File Types
   autocmd BufNewFile,BufRead *.as       setlocal filetype=actionscript tabstop=2 shiftwidth=2 expandtab nowrap
@@ -624,7 +624,7 @@ endif
 " {{{ unite.vim
 " https://github.com/Shougo/unite.vim
 nnoremap <silent> ;; :<C-u>Unite buffer -toggle<CR>
-nnoremap <silent> :: :<C-u>UniteWithBufferDir -buffer-name=files buffer file_mru bookmark file file_rec -toggle -winwidth=90<CR>
+"nnoremap <silent> :: :<C-u>UniteWithBufferDir -buffer-name=files buffer file_mru bookmark file file_rec -toggle<CR>
 nnoremap <silent> ;b :<C-u>Unite buffer<CR>
 nnoremap <silent> ;f :<C-u>Unite file<CR>
 nnoremap <silent> ;r :<C-u>Unite file_rec<CR>
@@ -634,7 +634,7 @@ nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
 
 let g:unite_enable_split_vertically = 1
-let g:unite_winwidth=50
+let g:unite_winwidth=70
 let g:unite_split_rule='botright'
 let g:unite_source_file_mru_time_format = '%D %H:%M '
 let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'
