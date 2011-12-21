@@ -1,5 +1,3 @@
-export TEST=1
-
 # LANG
 export LANG=ja_JP.UTF-8
 
