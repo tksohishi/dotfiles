@@ -45,6 +45,7 @@ Bundle 'ujihisa/neco-look'
 Bundle 'tyru/open-browser.vim'
 Bundle 'thinca/vim-poslist'
 Bundle 'sudo.vim'
+Bundle 'Lokaltog/vim-powerline'
 
 " syntax highlight
 Bundle 'cucumber.zip'
@@ -206,6 +207,7 @@ set wrap              " 画面幅で折り返す
 set list              " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:< " 不可視文字の表示形式
 set notitle           " タイトル書き換えない
+set t_Co=256          " 256色対応
 
 " Moving
 set scrolloff=5       " 行送り
