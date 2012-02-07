@@ -41,5 +41,5 @@
     last = log -1 HEAD
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
 [github]
-    user = skyfive
-    token = ca6040c2e0bac62a434b5433092a2536
+    user = tksohishi
+    token = dd89d4b15d4fd5adf1328698f7e6b684
