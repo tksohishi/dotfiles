@@ -629,8 +629,8 @@ autocmd MyAutoCommands FileType gitcommit DiffGitCached
 
 " {{{ unite.vim
 " https://github.com/Shougo/unite.vim
-nnoremap <silent> ;; :<C-u>Unite buffer -toggle<CR>
-"nnoremap <silent> :: :<C-u>UniteWithBufferDir -buffer-name=files buffer file_mru bookmark file file_rec -toggle<CR>
+nnoremap <silent> ;; :<C-u>Unite buffer_tab -toggle<CR>
+nnoremap <silent> :: :<C-u>Unite buffer -toggle<CR>
 nnoremap <silent> ;b :<C-u>Unite buffer<CR>
 nnoremap <silent> ;f :<C-u>Unite file<CR>
 nnoremap <silent> ;r :<C-u>Unite file_rec<CR>
