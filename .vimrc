@@ -18,49 +18,57 @@ augroup END
 
 "}}}
 
-" {{{ Vundle
-filetype off
+" {{{ NeoBundle
+filetype plugin indent off
 
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
+if has('vim_starting')
+  set runtimepath+=~/.vim/bundle/neobundle.vim/
+  call neobundle#rc(expand('~/.vim/bundle/'))
+endif
 
-" let Vundle manage vundle itself
-Bundle 'gmarik/vundle'
+" let NeoBundle manage NeoBundle
+NeoBundle 'Shougo/neobundle.vim'
 
-" plugin
-Bundle 'Shougo/unite.vim'
-Bundle 'h1mesuke/unite-outline'
-Bundle 'ujihisa/unite-colorscheme'
-Bundle 'ujihisa/unite-font'
-Bundle 'tsukkee/unite-help'
-Bundle 'tyru/caw.vim'
-Bundle 'tpope/vim-fugitive'
-Bundle 'tpope/vim-rails'
-Bundle 'mattn/zencoding-vim'
-Bundle 'thinca/vim-ref'
-Bundle 'thinca/vim-quickrun'
-Bundle 'Shougo/neocomplcache'
-Bundle 'ujihisa/neco-look'
-Bundle 'tyru/open-browser.vim'
-Bundle 'thinca/vim-poslist'
-Bundle 'sudo.vim'
-Bundle 'Lokaltog/vim-powerline'
+" vimproc is required to use NeoBundle
+" after install, turn shell ~/.vim/bundle/vimproc, (n,g)make -f your_machines_makefile
+NeoBundle 'Shougo/vimproc'
+
+" unite.vim related
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'h1mesuke/unite-outline'
+NeoBundle 'ujihisa/unite-colorscheme'
+NeoBundle 'ujihisa/unite-font'
+NeoBundle 'tsukkee/unite-help'
+
+" plugins
+NeoBundle 'Shougo/neocomplcache'
+NeoBundle 'Shougo/vimshell'
+NeoBundle 'Shougo/vimfiler'
+NeoBundle 'tpope/vim-rails'
+NeoBundle 'mattn/zencoding-vim'
+NeoBundle 'thinca/vim-ref'
+NeoBundle 'thinca/vim-quickrun'
+NeoBundle 'ujihisa/neco-look'
+NeoBundle 'tyru/open-browser.vim'
+NeoBundle 'thinca/vim-poslist'
+NeoBundle 'sudo.vim'
+NeoBundle 'Lokaltog/vim-powerline'
 
 " syntax highlight
-Bundle 'cucumber.zip'
-Bundle 'Puppet-Syntax-Highlighting'
-Bundle 'plasticboy/vim-markdown'
-Bundle 'jQuery'
-Bundle 'nginx.vim'
-Bundle 'mikbe/rspec.vim'
-Bundle 'othree/html5.vim'
-Bundle 'hail2u/vim-css3-syntax'
+NeoBundle 'cucumber.zip'
+NeoBundle 'Puppet-Syntax-Highlighting'
+NeoBundle 'plasticboy/vim-markdown'
+NeoBundle 'jQuery'
+NeoBundle 'nginx.vim'
+NeoBundle 'mikbe/rspec.vim'
+NeoBundle 'othree/html5.vim'
+NeoBundle 'hail2u/vim-css3-syntax'
 
 " colorscheme
-Bundle 'molokai'
-Bundle 'jpo/vim-railscasts-theme'
-Bundle 'altercation/vim-colors-solarized'
-Bundle 'wombat256.vim'
+NeoBundle 'molokai'
+NeoBundle 'jpo/vim-railscasts-theme'
+NeoBundle 'altercation/vim-colors-solarized'
+NeoBundle 'wombat256.vim'
 
 filetype plugin indent on
 
@@ -235,8 +243,6 @@ let &statusline .= '%<%f ' " Filename
 let &statusline .= '%m%r%h%w' " Modified flag, Readonly flag, Preview flag
 let &statusline .= '%{"[" . (&fileencoding != "" ? &fileencoding : &encoding) . "][" . &fileformat . "][" . &filetype . "]"}'
 let &statusline .= '%=' " Spaces
-let &statusline .= '%{fugitive#statusline()} ' " Git repository status, require vim-fugitive plugin.
-" FIXME make sure we can use vim-fugitive or not.
 let &statusline .= '%l/%L,%c%V' "Line number/Line total count, Column number, Virtual column number
 let &statusline .= '%4P' " Percentage through file of displayed window.
 " }}}
@@ -632,11 +638,13 @@ nnoremap <silent> ;; :<C-u>Unite buffer_tab -toggle<CR>
 nnoremap <silent> :: :<C-u>Unite buffer -toggle<CR>
 nnoremap <silent> ;b :<C-u>Unite buffer<CR>
 nnoremap <silent> ;f :<C-u>Unite file<CR>
-nnoremap <silent> ;r :<C-u>Unite file_rec<CR>
+nnoremap <silent> ;r :<C-u>Unite file_rec/async<CR>
+nnoremap <slient> ;R :<C-u>Unite file_rec<CR>
 nnoremap <silent> ;o :<C-u>Unite outline<CR>
 nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
 nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
+nnoremap <silent> ;n :<C-u>Unite neobundle::install::!<CR>
 
 let g:unite_enable_split_vertically = 1
 let g:unite_winwidth=70
