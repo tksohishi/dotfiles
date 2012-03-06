@@ -639,12 +639,12 @@ nnoremap <silent> :: :<C-u>Unite buffer -toggle<CR>
 nnoremap <silent> ;b :<C-u>Unite buffer<CR>
 nnoremap <silent> ;f :<C-u>Unite file<CR>
 nnoremap <silent> ;r :<C-u>Unite file_rec/async<CR>
-nnoremap <slient> ;R :<C-u>Unite file_rec<CR>
+nnoremap <silent> ;R :<C-u>Unite file_rec<CR>
 nnoremap <silent> ;o :<C-u>Unite outline<CR>
 nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
 nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
-nnoremap <silent> ;n :<C-u>Unite neobundle::install::!<CR>
+nnoremap <silent> ;n :<C-u>Unite neobundle/install:!<CR>
 
 let g:unite_enable_split_vertically = 1
 let g:unite_winwidth=70

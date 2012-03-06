@@ -14,3 +14,4 @@
 .gemrc
 .rvmrc
 .zsh_custom
+.gitignore_global
