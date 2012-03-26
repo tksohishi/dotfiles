@@ -43,29 +43,23 @@ NeoBundle 'tsukkee/unite-help'
 " plugins
 NeoBundle 'Shougo/neocomplcache'
 NeoBundle 'Shougo/vimshell'
-NeoBundle 'Shougo/vimfiler'
 NeoBundle 'tpope/vim-rails'
 NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'thinca/vim-ref'
 NeoBundle 'thinca/vim-quickrun'
-NeoBundle 'ujihisa/neco-look'
 NeoBundle 'tyru/open-browser.vim'
 NeoBundle 'thinca/vim-poslist'
-NeoBundle 'sudo.vim'
 NeoBundle 'Lokaltog/vim-powerline'
 
 " syntax highlight
-NeoBundle 'cucumber.zip'
-NeoBundle 'Puppet-Syntax-Highlighting'
-NeoBundle 'plasticboy/vim-markdown'
-NeoBundle 'jQuery'
-NeoBundle 'nginx.vim'
-NeoBundle 'mikbe/rspec.vim'
-NeoBundle 'othree/html5.vim'
-NeoBundle 'hail2u/vim-css3-syntax'
+NeoBundle 'tpope/vim-cucumber'
+NeoBundle 'juvenn/mustache.vim'
+NeoBundle 'vim-scripts/nginx.vim'
+NeoBundle 'tpope/vim-markdown'
+NeoBundle 'skwp/vim-rspec'
 
 " colorscheme
-NeoBundle 'molokai'
+NeoBundle 'tomasr/molokai'
 NeoBundle 'jpo/vim-railscasts-theme'
 NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'wombat256.vim'
@@ -644,10 +638,10 @@ nnoremap <silent> ;o :<C-u>Unite outline<CR>
 nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
 nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
-nnoremap <silent> ;n :<C-u>Unite neobundle/install:!<CR>
+nnoremap <silent> ;n :<C-u>Unite neobundle/install:! -winwidth=100<CR>
 
 let g:unite_enable_split_vertically = 1
-let g:unite_winwidth=70
+let g:unite_winwidth=80
 let g:unite_split_rule='botright'
 let g:unite_source_file_mru_time_format = '%D %H:%M '
 let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'

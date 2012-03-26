@@ -1,7 +1,5 @@
 alias where="command -v"
 
-alias j="jobs -l"
-
 alias la="ls -a"
 alias lf="ls -F"
 alias ll="ls -l"
@@ -20,8 +18,8 @@ alias svns="svn status -u"
 
 alias cpanm="cpanm -v"
 
-alias mvim='env LANG=jp_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
-alias macvim='env LANG=ja_JP.UTF-8 open -a /Applications/MacVim.app "$@"'
+alias v='view'
+alias vi='vim'
 
 alias oscreen='screen -dRR takeshi'
 
@@ -29,9 +27,12 @@ alias cassandra-cli-lo='cassandra-cli -host localhost -port 9160'
 
 alias now='date +%Y%m%d%H%M%S'
 
-alias be='bundle exec'
-alias berake='bundle exec rake'
+alias rt='rake test'
 
 alias gs='git status'
 alias gd='git diff'
 alias gdc='git diff --cached'
+
+alias t='tmux'
+
+alias js='jumpstat'

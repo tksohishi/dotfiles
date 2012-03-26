@@ -21,15 +21,38 @@ init_editor() {
 	done
 }
 
-# automating 'bundle exec' {{{
-# ref: https://github.com/gma/bundler-exec
-bundler_installed()
-{
-	which bundle > /dev/null 2>&1
+init_rbenv() {
+	eval "$(rbenv init -)"
+	_set_current_rbenv_version
 }
 
-within_bundler_project()
-{
+_set_current_rbenv_version() {
+	export CURRENT_RBENV_VERSION="$(rbenv version-name)"
+}
+
+# automating 'bundle exec' {{{
+# ref: https://github.com/gma/bundler-exec
+rbenv_installed() {
+	which rbenv > /dev/null 2>&1
+}
+
+rubies_installed() {
+	which rubies > /dev/null 2>&1
+}
+
+is_in_house_bundle_exists() {
+	[ -f "$(pwd)/bundle.rb" ] && return 0 || return 1
+}
+
+bundler_installed() {
+	if rbenv_installed; then
+		rbenv which bundle > /dev/null 2>&1
+	else
+		which bundle > /dev/null 2>&1
+	fi
+}
+
+within_bundler_project() {
 	local dir="$(pwd)"
 	while [ "$(dirname $dir)" != "/" ]; do
 		[ -f "$dir/Gemfile" ] && return
@@ -38,44 +61,17 @@ within_bundler_project()
 	false
 }
 
-run_with_bundler()
-{
-	if bundler_installed && within_bundler_project; then
+run_with_bundler() {
+	if is_in_house_bundle_exists; then
+		./bundle.rb exec "$@"
+	elif bundler_installed && within_bundler_project; then
 		bundle exec "$@"
 	else
 		"$@"
 	fi
 }
 
-BUNDLED_COMMANDS="${BUNDLED_COMMANDS:-
-cap
-capify
-cucumber
-foreman
-guard
-haml
-heroku
-html2haml
-rackup
-rails
-rake
-rake2thor
-rspec
-ruby
-sass
-sass-convert
-serve
-shotgun
-spec
-spork
-thin
-thor
-tilt
-tt
-turn
-unicorn
-unicorn_rails
-}"
+BUNDLED_COMMANDS=(cap capfify cucumber foreman guard haml heroku html2haml rackup rails rake rake2thor rspec ruby sass sass-convert serve shotgun spec spork thin thor tilt tt turn unicorn unicorn_rails)
 
 for CMD in $BUNDLED_COMMANDS; do
 	if [[ $CMD != "bundle" && $CMD != "gem" ]]; then
@@ -83,9 +79,21 @@ for CMD in $BUNDLED_COMMANDS; do
 	fi
 done
 # }}}
+
+# override cd
+cd() {
+	builtin cd "$@"
+	local result=$?
+	rbenv_installed && _set_current_rbenv_version
+	return $result
+}
+
 # }}}
 
 # default {{{
+# shell
+export SHELL=zsh
+
 # LANG
 export LANG=ja_JP.UTF-8
 
@@ -129,17 +137,27 @@ bindkey "\\en" history-beginning-search-forward-end
 # }}}
 
 # perlbrew {{{
-PERLBREW_ROOT=$HOME/.perl5/perlbrew
-[ -d $PERLBREW_ROOT ] && source $PERLBREW_ROOT/etc/bashrc
+#PERLBREW_ROOT=$HOME/.perl5/perlbrew
+#[ -d $PERLBREW_ROOT ] && source $PERLBREW_ROOT/etc/bashrc
 # }}}
 
 # rubies {{{
-init_rubies
+#init_rubies
+# }}}
+
+# rbenv {{{
+init_rbenv
 # }}}
 
 # rprompt {{{
 setopt transient_rprompt
-RPROMPT="${RPROMPT} %{$fg[red]%}\${RUBIES_RUBY_NAME}%{$reset_color%}"
+RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RBENV_VERSION}%{$reset_color%}"
+# }}}
+
+# autojump {{{
+if [ -f `brew --prefix`/etc/autojump ]; then
+	. `brew --prefix`/etc/autojump
+fi
 # }}}
 
 # vim:ts=4:sw=4:noexpandtab:foldmethod=marker:nowrap:ft=sh:
