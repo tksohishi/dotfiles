@@ -242,11 +242,11 @@ let &statusline .= '%4P' " Percentage through file of displayed window.
 " }}}
 
 " {{{ Colorscheme
-if $TERM =~? '256' || has('gui_running')
-  colorscheme molokai
-else
-  colorscheme desert
-endif
+"if $TERM =~? '256' || has('gui_running')
+colorscheme molokai
+"else
+  "colorscheme desert
+"endif
 " }}}
 
 "{{{ Syntax and File Types
