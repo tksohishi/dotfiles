@@ -42,7 +42,9 @@ NeoBundle 'tsukkee/unite-help'
 
 " plugins
 NeoBundle 'Shougo/neocomplcache'
+NeoBundle 'ujihisa/neco-look'
 NeoBundle 'Shougo/vimshell'
+NeoBundle 'Shougo/vimfiler'
 NeoBundle 'tpope/vim-rails'
 NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'thinca/vim-ref'
@@ -50,6 +52,8 @@ NeoBundle 'thinca/vim-quickrun'
 NeoBundle 'tyru/open-browser.vim'
 NeoBundle 'thinca/vim-poslist'
 NeoBundle 'Lokaltog/vim-powerline'
+NeoBundle 'mileszs/ack.vim'
+NeoBundle 'motemen/git-vim'
 
 " syntax highlight
 NeoBundle 'tpope/vim-cucumber'
@@ -57,12 +61,14 @@ NeoBundle 'juvenn/mustache.vim'
 NeoBundle 'vim-scripts/nginx.vim'
 NeoBundle 'tpope/vim-markdown'
 NeoBundle 'skwp/vim-rspec'
+NeoBundle 'kchmck/vim-coffee-script'
+NeoBundle 'derekwyatt/vim-scala'
+NeoBundle 'sprsquish/thrift.vim'
 
 " colorscheme
 NeoBundle 'tomasr/molokai'
 NeoBundle 'jpo/vim-railscasts-theme'
 NeoBundle 'altercation/vim-colors-solarized'
-NeoBundle 'wombat256.vim'
 
 filetype plugin indent on
 
@@ -630,15 +636,16 @@ autocmd MyAutoCommands FileType gitcommit DiffGitCached
 " https://github.com/Shougo/unite.vim
 nnoremap <silent> ;; :<C-u>Unite buffer_tab -toggle<CR>
 nnoremap <silent> :: :<C-u>Unite buffer -toggle<CR>
-nnoremap <silent> ;b :<C-u>Unite buffer<CR>
-nnoremap <silent> ;f :<C-u>Unite file<CR>
+nnoremap <silent> ;f :<C-u>Unite file file/new<CR>
 nnoremap <silent> ;r :<C-u>Unite file_rec/async<CR>
 nnoremap <silent> ;R :<C-u>Unite file_rec<CR>
 nnoremap <silent> ;o :<C-u>Unite outline<CR>
 nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
 nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
-nnoremap <silent> ;n :<C-u>Unite neobundle/install:! -winwidth=100<CR>
+nnoremap <silent> ;g :<C-u>Unite grep<CR>
+nnoremap <silent> ;ni :<C-u>Unite neobundle/install -winwidth=100<CR>
+nnoremap <silent> ;n! :<C-u>Unite neobundle/install:! -winwidth=100<CR>
 
 let g:unite_enable_split_vertically = 1
 let g:unite_winwidth=80
@@ -696,12 +703,13 @@ endif
 let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
 let g:neocomplcache_omni_patterns.c = '\%(\.\|->\)\h\w*'
 let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
+" use rsense instead
+" let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
 
 " {{{ rsense
 let g:rsenseUseOmniFunc = 1
 if filereadable(expand('~/.vim/lib/rsense/bin/rsense'))
   let g:rsenseHome = expand('~/vim/lib/rsense')
-
   let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
 endif
 " }}}
@@ -729,6 +737,10 @@ vmap <silent> [Space]x <Plug>(openbrowser-smart-search)
 " {{{ poslist.vim
 nmap <C-o> <Plug>(poslist-prev-pos)
 nmap <C-i> <Plug>(poslist-next-pos)
+" }}}
+
+" {{{ git-vim
+let g:git_blame_width = 60
 " }}}
 
 " }}}
