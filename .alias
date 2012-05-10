@@ -36,3 +36,6 @@ alias gdc='git diff --cached'
 alias t='tmux'
 
 alias js='jumpstat'
+
+alias basource='source ~/.bashrc'
+alias zsource='source ~/.zshrc'
