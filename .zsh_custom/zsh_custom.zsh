@@ -61,10 +61,14 @@ within_bundler_project() {
 	false
 }
 
+# colored echo output
+# http://d.hatena.ne.jp/daijiroc/20090207/1233980551
 run_with_bundler() {
 	if is_in_house_bundle_exists; then
+		echo -e "run\e[36m ./bundle.rb exec $@ \e[m"
 		./bundle.rb exec "$@"
 	elif bundler_installed && within_bundler_project; then
+		echo "run\e[36m bundle exec $@ \e[m"
 		bundle exec "$@"
 	else
 		"$@"
