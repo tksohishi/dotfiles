@@ -28,6 +28,9 @@ alias cassandra-cli-lo='cassandra-cli -host localhost -port 9160'
 alias now='date +%Y%m%d%H%M%S'
 
 alias rt='rake test'
+alias rtu='rake test:units'
+alias rtf='rake test:functionals'
+alias rti='rake test:integration'
 
 alias gs='git status'
 alias gd='git diff'
