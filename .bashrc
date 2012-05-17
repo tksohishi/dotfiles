@@ -8,14 +8,19 @@ export LANG=ja_JP.UTF-8
 # EDITOR is vim
 export EDITOR=vim
 
-# mine
-if [ -f $HOME/.bashrc.mine ]; then
-    source $HOME/.bashrc.mine
+# local bashrc
+if [ -f $HOME/.bashrc.local ]; then
+    source $HOME/.bashrc.local
 fi
 
 # alias
 if [ -f $HOME/.alias ]; then
     source $HOME/.alias
+fi
+
+# local alias
+if [ -f $HOME/.alias.local ]; then
+    source $HOME/.alias.local
 fi
 
 # oh-my-zsh config

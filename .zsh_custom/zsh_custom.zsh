@@ -104,15 +104,21 @@ export LANG=ja_JP.UTF-8
 # EDITOR is vim
 init_editor
 
-# mine
-if [ -f $HOME/.zshrc.mine ]; then
-	source $HOME/.zshrc.mine
+# local zshrc
+if [ -f $HOME/.zshrc.local ]; then
+	source $HOME/.zshrc.local
 fi
 
 # alias
 if [ -f $HOME/.alias ]; then
 	source $HOME/.alias
 fi
+
+# local alias
+if [ -f $HOME/.alias.local ]; then
+	source $HOME/.alias.local
+fi
+
 # }}}
 
 # correct {{{
