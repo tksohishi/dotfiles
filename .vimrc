@@ -54,6 +54,7 @@ NeoBundle 'thinca/vim-poslist'
 NeoBundle 'Lokaltog/vim-powerline'
 NeoBundle 'mileszs/ack.vim'
 NeoBundle 'motemen/git-vim'
+NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'sudo.vim'
 
 " syntax highlight
