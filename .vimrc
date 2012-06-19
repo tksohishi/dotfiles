@@ -66,6 +66,8 @@ NeoBundle 'skwp/vim-rspec'
 NeoBundle 'kchmck/vim-coffee-script'
 NeoBundle 'derekwyatt/vim-scala'
 NeoBundle 'sprsquish/thrift.vim'
+NeoBundle 'tobym/vim-play'
+NeoBundle 'jsx/jsx.vim'
 
 " colorscheme
 NeoBundle 'tomasr/molokai'
