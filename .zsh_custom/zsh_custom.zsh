@@ -170,4 +170,10 @@ if [ -f `brew --prefix`/etc/autojump ]; then
 fi
 # }}}
 
+# java {{{
+if [ -x /usr/libexec/java_home ]; then
+	export JAVA_HOME=`/usr/libexec/java_home`
+fi
+# }}}
+
 # vim:ts=4:sw=4:noexpandtab:foldmethod=marker:nowrap:ft=sh:
