@@ -35,6 +35,7 @@ alias rti='rake test:integration'
 alias gs='git status'
 alias gd='git diff'
 alias gdc='git diff --cached'
+alias gm='git checkout master'
 
 alias t='tmux'
 
