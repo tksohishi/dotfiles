@@ -270,7 +270,7 @@ augroup MyAutoCommands
   " See :help fo-table
   autocmd FileType *                    setlocal formatoptions-=ro | setlocal formatoptions+=mM
 
-  autocmd FileType ruby,eruby,haml      setlocal tabstop=2 shiftwidth=2 expandtab nowrap makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
+  autocmd FileType ruby                 setlocal tabstop=2 shiftwidth=2 expandtab nowrap makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
   autocmd FileType vim                  setlocal tabstop=2 shiftwidth=2 expandtab nowrap
   autocmd FileType actionscript         setlocal fileencoding=utf-8 tabstop=4 shiftwidth=4 noexpandtab nowrap
   autocmd FileType php                  setlocal tabstop=2 shiftwidth=2 expandtab nowrap
@@ -280,6 +280,8 @@ augroup MyAutoCommands
   autocmd FileType html,markdown        setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=htmlcomplete#CompleteTags
   autocmd FileType javascript           setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=javascriptcomplete#CompleteJS
   autocmd FileType xml                  setlocal omnifunc=xmlcomplete#CompleteTags
+  autocmd FileType yaml                 setlocal tabstop=2 shiftwidth=2 expandtab nowrap
+  autocmd FileType mustache,eruby,haml  setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=htmlcomplete#CompleteTags
 
   " Unite
   " ウィンドウを横分割して開く

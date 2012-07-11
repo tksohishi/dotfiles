@@ -75,7 +75,7 @@ run_with_bundler() {
 	fi
 }
 
-BUNDLED_COMMANDS=(cap capfify cucumber foreman guard haml heroku html2haml rackup rails rake rake2thor rspec ruby sass sass-convert serve shotgun spec spork thin thor tilt tt turn unicorn unicorn_rails)
+BUNDLED_COMMANDS=(cap capfify cucumber foreman guard haml hayaku heroku html2haml racksh rackup rails rake rake2thor rspec ruby sass sass-convert sequel serve shotgun spec spork thin thor tilt tt turn unicorn unicorn_rails)
 
 for CMD in $BUNDLED_COMMANDS; do
 	if [[ $CMD != "bundle" && $CMD != "gem" ]]; then
