@@ -35,7 +35,7 @@ alias rti='rake test:integration'
 alias gs='git status'
 alias gd='git diff'
 alias gdc='git diff --cached'
-alias gm='git checkout master'
+alias gcm='git checkout master'
 
 alias t='tmux'
 
@@ -43,3 +43,5 @@ alias js='jumpstat'
 
 alias basource='source ~/.bashrc'
 alias zsource='source ~/.zshrc'
+
+alias rrehash='rehash && rbenv rehash'
