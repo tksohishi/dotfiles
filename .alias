@@ -20,6 +20,7 @@ alias cpanm="cpanm -v"
 
 alias v='view'
 alias vi='vim'
+alias mvim='open -a macvim "$@"'
 
 alias oscreen='screen -dRR takeshi'
 
@@ -45,3 +46,5 @@ alias basource='source ~/.bashrc'
 alias zsource='source ~/.zshrc'
 
 alias rrehash='rehash && rbenv rehash'
+
+alias mou='open -a Mou "$@"'
