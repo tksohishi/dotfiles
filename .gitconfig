@@ -42,9 +42,8 @@
     last = log -1 HEAD
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
     fixup = commit --amend -C HEAD
-[github]
-    user = tksohishi
-    token = dd89d4b15d4fd5adf1328698f7e6b684
 [tig "bind"]
     generic = g move-first-line
     generic = G move-last-line
+[include]
+    path = ~/.gitconfig.local
