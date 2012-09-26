@@ -41,7 +41,6 @@ NeoBundle 'ujihisa/unite-font'
 NeoBundle 'tsukkee/unite-help'
 
 " plugins
-NeoBundle 'Shougo/neocomplcache'
 NeoBundle 'ujihisa/neco-look'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vimfiler'
@@ -178,10 +177,10 @@ endif
 set vb t_vb=       " ビープをならさない
 
 " Tab
-set tabstop=4      " Tab文字を画面上で何文字分に展開するか
-set shiftwidth=4   " cindentやautoindent時に挿入されるインデントの幅
+set tabstop=2      " Tab文字を画面上で何文字分に展開するか
+set shiftwidth=2   " cindentやautoindent時に挿入されるインデントの幅
 set softtabstop=0  " Tabキー押し下げ時の挿入される空白の量，0の場合はtabstopと同じ，BSにも影響する
-set noexpandtab    " Tab文字の代わりにスペースを入力しない
+set expandtab      " Tab文字の代わりにスペースを入力する
 set smarttab       " 行頭の余白内で Tab を打ち込むと、'shiftwidth' の数だけインデント
 
 " Indent
@@ -214,8 +213,8 @@ set fileformats=unix,dos,mac
 set showmatch         " 括弧の対応をハイライト
 set showcmd           " 入力中のコマンドを表示
 set number            " 行番号表示
-set ruler
-set wrap              " 画面幅で折り返す
+set ruler             " ルーラー表示
+set nowrap            " 画面幅で折り返さない
 set list              " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:< " 不可視文字の表示形式
 set notitle           " タイトル書き換えない
@@ -269,20 +268,13 @@ filetype plugin on
 augroup MyAutoCommands
   " Disable automatically insert comment.
   " See :help fo-table
-  autocmd FileType *                    setlocal formatoptions-=ro | setlocal formatoptions+=mM
-
-  autocmd FileType ruby                 setlocal tabstop=2 shiftwidth=2 expandtab nowrap makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
-  autocmd FileType vim                  setlocal tabstop=2 shiftwidth=2 expandtab nowrap
-  autocmd FileType actionscript         setlocal fileencoding=utf-8 tabstop=4 shiftwidth=4 noexpandtab nowrap
-  autocmd FileType php                  setlocal tabstop=2 shiftwidth=2 expandtab nowrap
-  autocmd FileType python               setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=pythoncomplete#Complete
-  autocmd FileType thrift               setlocal tabstop=2 shiftwidth=2 expandtab nowrap
-  autocmd FileType css                  setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=csscomplete#CompleteCSS
-  autocmd FileType html,markdown        setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=htmlcomplete#CompleteTags
-  autocmd FileType javascript           setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=javascriptcomplete#CompleteJS
-  autocmd FileType xml                  setlocal omnifunc=xmlcomplete#CompleteTags
-  autocmd FileType yaml                 setlocal tabstop=2 shiftwidth=2 expandtab nowrap
-  autocmd FileType mustache,eruby,haml  setlocal tabstop=2 shiftwidth=2 expandtab nowrap omnifunc=htmlcomplete#CompleteTags
+  autocmd FileType *                        setlocal formatoptions-=ro | setlocal formatoptions+=mM
+  autocmd FileType ruby                     setlocal makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
+  autocmd FileType python                   setlocal omnifunc=pythoncomplete#Complete
+  autocmd FileType css                      setlocal omnifunc=csscomplete#CompleteCSS
+  autocmd FileType html,mustache,eruby,haml setlocal omnifunc=htmlcomplete#CompleteTags noautoindent
+  autocmd FileType javascript               setlocal omnifunc=javascriptcomplete#CompleteJS
+  autocmd FileType xml                      setlocal omnifunc=xmlcomplete#CompleteTags
 
   " Unite
   " ウィンドウを横分割して開く
@@ -293,14 +285,13 @@ augroup MyAutoCommands
   autocmd FileType unite inoremap <silent> <buffer> <expr> <C-k> unite#do_action('vsplit')
 
   " File Types
-  autocmd BufNewFile,BufRead *.as       setlocal filetype=actionscript tabstop=2 shiftwidth=2 expandtab nowrap
   autocmd BufNewFile,BufRead *.rl       setlocal filetype=ragel
   autocmd BufNewFile,BufRead *.srt      setlocal filetype=srt
   autocmd BufNewFile,BufRead nginx.*    setlocal filetype=nginx
   autocmd BufNewFile,BufRead Portfile   setlocal filetype=macports
   autocmd BufNewFile,BufRead *.vcf      setlocal filetype=vcard
   autocmd BufNewFile,BufRead *.module   setlocal filetype=php
-  autocmd BufNewFile,BufRead *.mustache setlocal syntax=mustache
+  autocmd BufNewFile,BufRead *.mustache setlocal filetype=mustache syntax=mustache
   autocmd BufNewFile,BufRead *.json     setlocal filetype=json
   autocmd BufNewFile,BufRead *.pp       setlocal filetype=puppet
   autocmd BufNewFile,BufRead *.mm       setlocal filetype=cpp
@@ -313,6 +304,7 @@ augroup MyAutoCommands
   autocmd BufNewFile,BufRead *.mdown    setlocal filetype=mkd
   autocmd BufNewFile,BufRead *.mkdn     setlocal filetype=mkd
   autocmd BufNewFile,BufRead *.ru       setlocal filetype=ruby
+  autocmd BufNewFile,BufRead *.ping     setlocal filetype=pig syntax=pig
 augroup END
 
 "  *.m is not MATLAB file, but Objective-C
@@ -644,6 +636,7 @@ autocmd MyAutoCommands FileType gitcommit DiffGitCached
 nnoremap <silent> ;; :<C-u>Unite buffer_tab -toggle<CR>
 nnoremap <silent> :: :<C-u>Unite buffer -toggle<CR>
 nnoremap <silent> ;f :<C-u>Unite file file/new<CR>
+nnoremap <silent> ;F :<C-u>UniteWithBufferDir file file/new<CR>
 nnoremap <silent> ;r :<C-u>Unite file_rec/async<CR>
 nnoremap <silent> ;R :<C-u>Unite file_rec<CR>
 nnoremap <silent> ;o :<C-u>Unite outline<CR>
@@ -665,60 +658,6 @@ let g:unite_quick_match_table = {
       \'q' : 11, 'w' : 12, 'e' : 13, 'r' : 14, 't' : 15, 'y' : 16, 'u' : 17, 'i' : 18, 'o' : 19, 'p' : 20,
       \'1' : 21, '2' : 22, '3' : 23, '4' : 24, '5' : 25, '6' : 26, '7' : 27, '8' : 28, '9' : 29, '0' : 30,
       \}
-" }}}
-
-" {{{ neocomplcache.vim
-
-" Use neocomplcache.
-let g:neocomplcache_enable_at_startup = 1
-" Use smartcase.
-let g:neocomplcache_enable_smart_case = 1
-" Use camel case completion.
-let g:neocomplcache_enable_camel_case_completion = 1
-" Use underbar completion.
-let g:neocomplcache_enable_underbar_completion = 1
-" Set minimum syntax keyword length.
-let g:neocomplcache_min_syntax_length = 3
-let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
-
-" Define dictionary.
-let g:neocomplcache_dictionary_filetype_lists = {
-    \ 'default' : '',
-    \ }
-
-" Define keyword.
-if !exists('g:neocomplcache_keyword_patterns')
-  let g:neocomplcache_keyword_patterns = {}
-endif
-let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
-
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <expr><CR> neocomplcache#smart_close_popup() . "\<CR>"
-" <TAB>: completion.
-inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><C-y> neocomplcache#close_popup()
-inoremap <expr><C-e> neocomplcache#cancel_popup()
-
-" Enable heavy omni completion.
-if !exists('g:neocomplcache_omni_patterns')
-  let g:neocomplcache_omni_patterns = {}
-endif
-let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplcache_omni_patterns.c = '\%(\.\|->\)\h\w*'
-let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
-" use rsense instead
-" let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
-
-" {{{ rsense
-let g:rsenseUseOmniFunc = 1
-if filereadable(expand('~/.vim/lib/rsense/bin/rsense'))
-  let g:rsenseHome = expand('~/vim/lib/rsense')
-  let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
-endif
 " }}}
 
 " }}}
@@ -763,4 +702,4 @@ set secure
 
 "}}}
 
-" vim: tabstop=2 shiftwidth=2 textwidth=0 expandtab foldmethod=marker nowrap
+" vim: foldmethod=marker
