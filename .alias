@@ -48,3 +48,5 @@ alias zsource='source ~/.zshrc'
 alias rrehash='rehash && rbenv rehash'
 
 alias mou='open -a Mou "$@"'
+
+alias sc='script/console'
