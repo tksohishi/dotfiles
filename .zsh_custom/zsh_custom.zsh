@@ -75,7 +75,8 @@ run_with_bundler() {
 	fi
 }
 
-BUNDLED_COMMANDS=(cap capfify cucumber foreman guard haml hayaku heroku html2haml racksh rackup rails rake rake2thor rspec ruby sass sass-convert sequel serve shotgun spec spork thin thor tilt tt turn unicorn unicorn_rails)
+BUNDLED_COMMANDS=(cap capfify cucumber foreman guard haml hayaku heroku html2haml mustache racksh rackup rails rake rake2thor rspec ruby \
+sass sass-convert script/server sequel serve shotgun spec spork thin thor tilt tt turn unicorn unicorn_rails)
 
 for CMD in $BUNDLED_COMMANDS; do
 	if [[ $CMD != "bundle" && $CMD != "gem" ]]; then
@@ -157,6 +158,10 @@ bindkey "\\en" history-beginning-search-forward-end
 
 # rbenv {{{
 init_rbenv
+# }}}
+
+# pythonbrew {{{
+[[ -s $HOME/.pythonbrew/etc/bashrc ]] && source $HOME/.pythonbrew/etc/bashrc
 # }}}
 
 # rprompt {{{
