@@ -33,6 +33,7 @@
     ci = commit -a
     br = branch
     co = checkout
+    cm = checkout master
     df = diff
     lg = log -p
     add = add -v
