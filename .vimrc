@@ -268,13 +268,13 @@ filetype plugin on
 augroup MyAutoCommands
   " Disable automatically insert comment.
   " See :help fo-table
-  autocmd FileType *                        setlocal formatoptions-=ro | setlocal formatoptions+=mM
-  autocmd FileType ruby                     setlocal makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
-  autocmd FileType python                   setlocal omnifunc=pythoncomplete#Complete
-  autocmd FileType css                      setlocal omnifunc=csscomplete#CompleteCSS
-  autocmd FileType html,mustache,eruby,haml setlocal omnifunc=htmlcomplete#CompleteTags noautoindent
-  autocmd FileType javascript               setlocal omnifunc=javascriptcomplete#CompleteJS
-  autocmd FileType xml                      setlocal omnifunc=xmlcomplete#CompleteTags
+  autocmd FileType *                   setlocal formatoptions-=ro | setlocal formatoptions+=mM
+  autocmd FileType ruby                setlocal makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
+  autocmd FileType python              setlocal omnifunc=pythoncomplete#Complete
+  autocmd FileType css                 setlocal omnifunc=csscomplete#CompleteCSS
+  autocmd FileType html,mustache,eruby setlocal omnifunc=htmlcomplete#CompleteTags noautoindent
+  autocmd FileType javascript          setlocal omnifunc=javascriptcomplete#CompleteJS
+  autocmd FileType xml                 setlocal omnifunc=xmlcomplete#CompleteTags
 
   " Unite
   " ウィンドウを横分割して開く
@@ -305,6 +305,7 @@ augroup MyAutoCommands
   autocmd BufNewFile,BufRead *.mkdn     setlocal filetype=mkd
   autocmd BufNewFile,BufRead *.ru       setlocal filetype=ruby
   autocmd BufNewFile,BufRead *.ping     setlocal filetype=pig syntax=pig
+  autocmd BufNewFIle,BufRead *.scala    setlocal filetype=scala syntax=scala
 augroup END
 
 "  *.m is not MATLAB file, but Objective-C
@@ -651,7 +652,8 @@ let g:unite_enable_split_vertically = 1
 let g:unite_winwidth=80
 let g:unite_split_rule='botright'
 let g:unite_source_file_mru_time_format = '%D %H:%M '
-let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'
+"let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'
+call unite#custom_source('file_rec', 'ignore_pattern', '\$global\|\.class$')
 
 let g:unite_quick_match_table = {
       \'a' : 1, 's' : 2, 'd' : 3, 'f' : 4, 'g' : 5, 'h' : 6, 'j' : 7, 'k' : 8, 'l' : 9, ':' : 10,
@@ -663,6 +665,7 @@ let g:unite_quick_match_table = {
 " }}}
 
 " {{{ quickrun.vim
+" by default, you can do quickrun with <Leader> + r
 if !exists('g:quickrun_config')
   let g:quickrun_config = {}
 endif
