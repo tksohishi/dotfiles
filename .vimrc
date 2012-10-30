@@ -266,24 +266,6 @@ syntax enable
 filetype plugin on
 
 augroup MyAutoCommands
-  " Disable automatically insert comment.
-  " See :help fo-table
-  autocmd FileType *                   setlocal formatoptions-=ro | setlocal formatoptions+=mM
-  autocmd FileType ruby                setlocal makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
-  autocmd FileType python              setlocal omnifunc=pythoncomplete#Complete
-  autocmd FileType css                 setlocal omnifunc=csscomplete#CompleteCSS
-  autocmd FileType html,mustache,eruby setlocal omnifunc=htmlcomplete#CompleteTags noautoindent
-  autocmd FileType javascript          setlocal omnifunc=javascriptcomplete#CompleteJS
-  autocmd FileType xml                 setlocal omnifunc=xmlcomplete#CompleteTags
-
-  " Unite
-  " ウィンドウを横分割して開く
-  autocmd FileType unite nnoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
-  autocmd FileType unite inoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
-  " ウィンドウを縦分割して開く
-  autocmd FileType unite nnoremap <silent> <buffer> <expr> <C-k> unite#do_action('vsplit')
-  autocmd FileType unite inoremap <silent> <buffer> <expr> <C-k> unite#do_action('vsplit')
-
   " File Types
   autocmd BufNewFile,BufRead *.rl       setlocal filetype=ragel
   autocmd BufNewFile,BufRead *.srt      setlocal filetype=srt
@@ -304,8 +286,28 @@ augroup MyAutoCommands
   autocmd BufNewFile,BufRead *.mdown    setlocal filetype=mkd
   autocmd BufNewFile,BufRead *.mkdn     setlocal filetype=mkd
   autocmd BufNewFile,BufRead *.ru       setlocal filetype=ruby
-  autocmd BufNewFile,BufRead *.ping     setlocal filetype=pig syntax=pig
-  autocmd BufNewFIle,BufRead *.scala    setlocal filetype=scala syntax=scala
+  autocmd BufNewFile,BufRead *.pig      setlocal filetype=pig syntax=pig
+  autocmd BufNewFile,BufRead *.piglet   setlocal filetype=pig syntax=pig
+  autocmd BufNewFile,BufRead *.scala    setlocal filetype=scala syntax=scala
+  autocmd BufNewFile,BufRead *.tsv      setlocal filetype=tsv
+
+  " See :help fo-table
+  autocmd FileType *                    setlocal formatoptions-=ro | setlocal formatoptions+=mM
+  autocmd FileType ruby                 setlocal makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
+  autocmd FileType python               setlocal omnifunc=pythoncomplete#Complete
+  autocmd FileType css                  setlocal omnifunc=csscomplete#CompleteCSS
+  autocmd FileType html,mustache,eruby  setlocal omnifunc=htmlcomplete#CompleteTags noautoindent
+  autocmd FileType javascript           setlocal omnifunc=javascriptcomplete#CompleteJS
+  autocmd FileType xml                  setlocal omnifunc=xmlcomplete#CompleteTags
+  autocmd FileType tsv                  setlocal noexpandtab
+
+  " Unite
+  " <Ctrl> j - horizontal split
+  " <Ctrl> k - vertical split
+  autocmd FileType unite nnoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
+  autocmd FileType unite inoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
+  autocmd FileType unite nnoremap <silent> <buffer> <expr> <C-k> unite#do_action('vsplit')
+  autocmd FileType unite inoremap <silent> <buffer> <expr> <C-k> unite#do_action('vsplit')
 augroup END
 
 "  *.m is not MATLAB file, but Objective-C
@@ -646,6 +648,7 @@ nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
 nnoremap <silent> ;g :<C-u>Unite grep<CR>
 nnoremap <silent> ;ni :<C-u>Unite neobundle/install -winwidth=100<CR>
+nnoremap <silent> ;nu :<C-u>Unite neobundle/update -auto-quit -winwidth=100<CR>
 nnoremap <silent> ;n! :<C-u>Unite neobundle/install:! -winwidth=100<CR>
 
 let g:unite_enable_split_vertically = 1
