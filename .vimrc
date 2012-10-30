@@ -67,7 +67,7 @@ NeoBundle 'derekwyatt/vim-scala'
 NeoBundle 'sprsquish/thrift.vim'
 NeoBundle 'tobym/vim-play'
 NeoBundle 'jsx/jsx.vim'
-NeoBundle 'motus/pig.vim'
+NeoBundle 'tksohishi/pig.vim' " 'motus/pig.vim'
 
 " colorscheme
 NeoBundle 'tomasr/molokai'
