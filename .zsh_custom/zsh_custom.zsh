@@ -172,8 +172,8 @@ RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RBENV_VERSION}%{$reset_color%}"
 # autojump {{{
 case "${OSTYPE}" in
 darwin*)
-if [ -f `brew --prefix`/etc/autojump ]; then
-	. `brew --prefix`/etc/autojump
+if [ -f `brew --prefix`/etc/autojump.sh ]; then
+	. `brew --prefix`/etc/autojump.sh
 fi
 ;
 esac
