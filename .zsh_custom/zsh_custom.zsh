@@ -102,6 +102,9 @@ export SHELL=zsh
 # LANG
 export LANG=ja_JP.UTF-8
 
+# REPORTTIME
+REPORTTIME=5
+
 # EDITOR is vim
 init_editor
 
