@@ -300,6 +300,7 @@ augroup MyAutoCommands
   autocmd FileType javascript           setlocal omnifunc=javascriptcomplete#CompleteJS
   autocmd FileType xml                  setlocal omnifunc=xmlcomplete#CompleteTags
   autocmd FileType tsv                  setlocal noexpandtab
+  autocmd FileType pig                  setlocal makeprg=pig\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
 
   " Unite
   " <Ctrl> j - horizontal split
