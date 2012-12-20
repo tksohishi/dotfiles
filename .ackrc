@@ -1,0 +1,10 @@
+--type-set=mustache=.mustache
+--type-set=yml=.yml
+--type-set=puppet=.pp
+--type-set=ruby=.erb
+--type-set=ruby=.rb
+--type-set=scala=.scala
+--type-set=haml=.haml
+--type-set=json=.json
+--type-set=pig=.pig
+--type-set=pig=.piglet
