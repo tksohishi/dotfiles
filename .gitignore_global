@@ -6,3 +6,4 @@
 .rbenv-version
 vendor/bundle
 .bundle
+*.sublime-*
