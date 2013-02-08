@@ -172,16 +172,6 @@ setopt transient_rprompt
 RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RBENV_VERSION}%{$reset_color%}"
 # }}}
 
-# autojump {{{
-case "${OSTYPE}" in
-darwin*)
-if [ -f `brew --prefix`/etc/autojump.sh ]; then
-	. `brew --prefix`/etc/autojump.sh
-fi
-;
-esac
-# }}}
-
 # java {{{
 if [ -x /usr/libexec/java_home ]; then
 	export JAVA_HOME=`/usr/libexec/java_home`
