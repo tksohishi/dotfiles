@@ -30,7 +30,6 @@ endif
 NeoBundle 'Shougo/neobundle.vim'
 
 " vimproc is required to use NeoBundle
-" after install, turn shell ~/.vim/bundle/vimproc, (n,g)make -f your_machines_makefile
 NeoBundle 'Shougo/vimproc'
 
 " unite.vim related
@@ -42,8 +41,8 @@ NeoBundle 'tsukkee/unite-help'
 
 " plugins
 NeoBundle 'ujihisa/neco-look'
-NeoBundle 'Shougo/vimshell'
-NeoBundle 'Shougo/vimfiler'
+"NeoBundle 'Shougo/vimshell'
+"NeoBundle 'Shougo/vimfiler'
 NeoBundle 'tpope/vim-rails'
 NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'thinca/vim-ref'
@@ -55,6 +54,7 @@ NeoBundle 'mileszs/ack.vim'
 NeoBundle 'motemen/git-vim'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'sudo.vim'
+NeoBundle 'ujihisa/tabpagecolorscheme'
 
 " syntax highlight
 NeoBundle 'tpope/vim-cucumber'
@@ -297,7 +297,7 @@ augroup MyAutoCommands
   autocmd FileType python               setlocal omnifunc=pythoncomplete#Complete
   autocmd FileType css                  setlocal omnifunc=csscomplete#CompleteCSS
   autocmd FileType html,mustache,eruby  setlocal omnifunc=htmlcomplete#CompleteTags noautoindent
-  autocmd FileType javascript           setlocal omnifunc=javascriptcomplete#CompleteJS
+  autocmd FileType javascript           setlocal makeprg=jsl\ -process\ % errorformat=%m\ in\ %f\ on\ line\ %l
   autocmd FileType xml                  setlocal omnifunc=xmlcomplete#CompleteTags
   autocmd FileType tsv                  setlocal noexpandtab
   autocmd FileType pig                  setlocal makeprg=pig\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
