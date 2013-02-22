@@ -8,3 +8,4 @@
 --type-set=json=.json
 --type-set=pig=.pig
 --type-set=pig=.piglet
+--ignore-dir=target

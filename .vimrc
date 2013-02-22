@@ -18,7 +18,7 @@ augroup END
 
 "}}}
 
-" {{{ NeoBundle
+" {{{ NeoBundle and Plugins
 filetype plugin indent off
 
 if has('vim_starting')
@@ -41,8 +41,6 @@ NeoBundle 'tsukkee/unite-help'
 
 " plugins
 NeoBundle 'ujihisa/neco-look'
-"NeoBundle 'Shougo/vimshell'
-"NeoBundle 'Shougo/vimfiler'
 NeoBundle 'tpope/vim-rails'
 NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'thinca/vim-ref'
@@ -68,7 +66,7 @@ NeoBundle 'sprsquish/thrift.vim'
 NeoBundle 'tobym/vim-play'
 NeoBundle 'jsx/jsx.vim'
 NeoBundle 'tksohishi/pig.vim' " 'motus/pig.vim'
-
+NeoBundle 'leafgarland/typescript-vim'
 " colorscheme
 NeoBundle 'tomasr/molokai'
 NeoBundle 'jpo/vim-railscasts-theme'
@@ -286,6 +284,7 @@ augroup MyAutoCommands
   autocmd BufNewFile,BufRead *.mdown    setlocal filetype=mkd
   autocmd BufNewFile,BufRead *.mkdn     setlocal filetype=mkd
   autocmd BufNewFile,BufRead *.ru       setlocal filetype=ruby
+  autocmd BufNewFile,BufRead Capfile    setlocal filetype=ruby
   autocmd BufNewFile,BufRead *.pig      setlocal filetype=pig syntax=pig
   autocmd BufNewFile,BufRead *.piglet   setlocal filetype=pig syntax=pig
   autocmd BufNewFile,BufRead *.scala    setlocal filetype=scala syntax=scala
@@ -645,15 +644,15 @@ nnoremap <silent> ;r :<C-u>Unite file_rec/async<CR>
 nnoremap <silent> ;R :<C-u>Unite file_rec<CR>
 nnoremap <silent> ;o :<C-u>Unite outline<CR>
 nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
-nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=90<CR>
+nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=120<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
 nnoremap <silent> ;g :<C-u>Unite grep<CR>
-nnoremap <silent> ;ni :<C-u>Unite neobundle/install -winwidth=100<CR>
-nnoremap <silent> ;nu :<C-u>Unite neobundle/update -auto-quit -winwidth=100<CR>
-nnoremap <silent> ;n! :<C-u>Unite neobundle/install:! -winwidth=100<CR>
+nnoremap <silent> ;ni :<C-u>Unite neobundle/install<CR>
+nnoremap <silent> ;nu :<C-u>Unite neobundle/update -auto-quit<CR>
+nnoremap <silent> ;n! :<C-u>Unite neobundle/install:!<CR>
 
 let g:unite_enable_split_vertically = 1
-let g:unite_winwidth=80
+let g:unite_winwidth=100
 let g:unite_split_rule='botright'
 let g:unite_source_file_mru_time_format = '%D %H:%M '
 "let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'
