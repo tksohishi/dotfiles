@@ -652,19 +652,21 @@ nnoremap <silent> ;nu :<C-u>Unite neobundle/update -auto-quit<CR>
 nnoremap <silent> ;n! :<C-u>Unite neobundle/install:!<CR>
 
 let g:unite_enable_split_vertically = 1
-let g:unite_winwidth=100
+let g:unite_winwidth=90
 let g:unite_split_rule='botright'
 let g:unite_source_file_mru_time_format = '%D %H:%M '
-"let g:unite_source_file_rec_ignore_pattern = 'phpdoc\|\%(^\|/\)\.$\|\~$\|\.\%(o|exe|dll|bak|sw[po]\)$\|\%(^\|/\)\.\%(hg\|git\|bzr\|svn\)\%($\|/\)'
-call unite#custom_source('file_rec', 'ignore_pattern', '\$global\|\.class$')
+let g:unite_source_buffer_time_format = ''
+" ref: http://vim-users.jp/2013/02/vim-advent-calendar-2012-ujihisa-3/
+" default:
+" \%(^\|/\)\.$\|\~$\|\.\%(o\|exe\|dll\|bak\|sw[po]\|class\)$\|\%(^\|/\)\%(\.hg\|\.git\|\.bzr\|\.svn\|tags\%(-.*\)\?\)\%($\|/\)
+call unite#custom_source('file_rec', 'ignore_pattern', (unite#sources#file_rec#define()[0]['ignore_pattern']) . '\|'. '\%(^\|/\)\%(\.vim/\|vendor/bundle/\|target/\)')
+call unite#custom_source('file_rec/async', 'ignore_pattern', (unite#sources#file_rec#define()[0]['ignore_pattern']). '\|'. '\%(^\|/\)\%(\.vim/\|vendor/\|target/\)')
 
 let g:unite_quick_match_table = {
       \'a' : 1, 's' : 2, 'd' : 3, 'f' : 4, 'g' : 5, 'h' : 6, 'j' : 7, 'k' : 8, 'l' : 9, ':' : 10,
       \'q' : 11, 'w' : 12, 'e' : 13, 'r' : 14, 't' : 15, 'y' : 16, 'u' : 17, 'i' : 18, 'o' : 19, 'p' : 20,
       \'1' : 21, '2' : 22, '3' : 23, '4' : 24, '5' : 25, '6' : 26, '7' : 27, '8' : 28, '9' : 29, '0' : 30,
       \}
-" }}}
-
 " }}}
 
 " {{{ quickrun.vim
