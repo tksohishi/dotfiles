@@ -289,6 +289,8 @@ augroup MyAutoCommands
   autocmd BufNewFile,BufRead *.piglet   setlocal filetype=pig syntax=pig
   autocmd BufNewFile,BufRead *.scala    setlocal filetype=scala syntax=scala
   autocmd BufNewFile,BufRead *.tsv      setlocal filetype=tsv
+  autocmd BufNewFile,BufRead *.mesos    setlocal filetype=python
+
 
   " See :help fo-table
   autocmd FileType *                    setlocal formatoptions-=ro | setlocal formatoptions+=mM

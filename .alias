@@ -37,6 +37,7 @@ alias gs='git status'
 alias gd='git diff'
 alias gdc='git diff --cached'
 alias gcm='git checkout master'
+alias gbc='git branch | grep -v master | xargs git branch -d'
 
 alias t='tmux'
 
