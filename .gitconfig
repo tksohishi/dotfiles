@@ -42,6 +42,8 @@
     last = log -1 HEAD
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
     fixup = commit --amend -C HEAD
+[push]
+    default = simple
 [tig "bind"]
     generic = g move-first-line
     generic = G move-last-line
