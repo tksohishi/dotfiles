@@ -43,7 +43,7 @@
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
     fixup = commit --amend -C HEAD
 [push]
-    default = simple
+    default = nothing
 [tig "bind"]
     generic = g move-first-line
     generic = G move-last-line
