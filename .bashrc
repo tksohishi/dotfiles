@@ -8,6 +8,9 @@ export LANG=ja_JP.UTF-8
 # EDITOR is vim
 export EDITOR=vim
 
+# REPORTTIME
+export REPORTTIME=10
+
 # local bashrc
 if [ -f $HOME/.bashrc.local ]; then
     source $HOME/.bashrc.local

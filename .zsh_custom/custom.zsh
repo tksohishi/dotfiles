@@ -1,26 +1,6 @@
-# custom global zsh config file
+# custom global zsh config file {{{
 
 # functions {{{
-# imported via functions in niw/profiles
-# ref: https://github.com/niw/profiles/blob/master/functions
-init_rubies() {
-	if [ -s "$HOME/.rubies/src/rubies.sh" ]; then
-		source "$HOME/.rubies/src/rubies.sh"
-		enable_rubies_cd_hook
-		return 0
-	fi
-	return 1
-}
-
-init_editor() {
-	for i in vim vi; do
-		if which "$i" 2>&1 1>/dev/null; then
-			export EDITOR="$i"
-			break
-		fi
-	done
-}
-
 init_rbenv() {
 	eval "$(rbenv init -)"
 	_set_current_rbenv_version
@@ -34,10 +14,6 @@ _set_current_rbenv_version() {
 # ref: https://github.com/gma/bundler-exec
 rbenv_installed() {
 	which rbenv > /dev/null 2>&1
-}
-
-rubies_installed() {
-	which rubies > /dev/null 2>&1
 }
 
 is_in_house_bundle_exists() {
@@ -96,17 +72,6 @@ cd() {
 # }}}
 
 # default {{{
-# shell
-export SHELL=zsh
-
-# LANG
-export LANG=ja_JP.UTF-8
-
-# REPORTTIME
-REPORTTIME=5
-
-# EDITOR is vim
-init_editor
 
 # local zshrc
 if [ -f $HOME/.zshrc.local ]; then
@@ -141,24 +106,6 @@ bindkey "^n" history-beginning-search-forward-end
 bindkey "\\en" history-beginning-search-forward-end
 # }}}
 
-# PATH {{{
-# local binary
-[ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
-
-# node.js and npm
-[ -d /usr/local/share/npm/bin ] && export PATH=/usr/local/share/npm/bin:$PATH
-[ -d /usr/local/lib/node ] && export NODE_PATH=/usr/local/lib/node_modules
-# }}}
-
-# perlbrew {{{
-#PERLBREW_ROOT=$HOME/.perl5/perlbrew
-#[ -d $PERLBREW_ROOT ] && source $PERLBREW_ROOT/etc/bashrc
-# }}}
-
-# rubies {{{
-#init_rubies
-# }}}
-
 # rbenv {{{
 init_rbenv
 # }}}
@@ -176,6 +123,17 @@ RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RBENV_VERSION}%{$reset_color%}"
 if [ -x /usr/libexec/java_home ]; then
 	export JAVA_HOME=`/usr/libexec/java_home`
 fi
+# }}}
+
+# PATH {{{
+# local binary
+# node.js and npm
+[ -d /usr/local/share/npm/bin ] && export PATH=/usr/local/share/npm/bin:$PATH
+[ -d /usr/local/lib/node ] && export NODE_PATH=/usr/local/lib/node_modules
+
+[ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
+# }}}
+
 # }}}
 
 # vim:ts=4:sw=4:noexpandtab:foldmethod=marker:nowrap:ft=sh:
