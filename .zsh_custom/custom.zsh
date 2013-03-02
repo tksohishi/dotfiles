@@ -2,7 +2,7 @@
 
 # functions {{{
 init_rbenv() {
-	eval "$(rbenv init -)"
+	eval "$(rbenv init - zsh)"
 	_set_current_rbenv_version
 }
 
