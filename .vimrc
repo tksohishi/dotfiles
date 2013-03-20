@@ -1,5 +1,4 @@
-" .vimrc
-" ref: https://github.com/niw/profiles/blob/master/.vimrc
+" .vimrc {{{
 
 ""{{{ Initialize
 
@@ -30,7 +29,12 @@ endif
 NeoBundle 'Shougo/neobundle.vim'
 
 " vimproc is required to use NeoBundle
-NeoBundle 'Shougo/vimproc'
+NeoBundle 'Shougo/vimproc', {
+  \  'build': {
+  \    'mac':  'make -f make_mac.mak',
+  \    'unix': 'make -f make_unix.mak'
+  \  },
+  \ }
 
 " unite.vim related
 NeoBundle 'Shougo/unite.vim'
@@ -38,6 +42,7 @@ NeoBundle 'h1mesuke/unite-outline'
 NeoBundle 'ujihisa/unite-colorscheme'
 NeoBundle 'ujihisa/unite-font'
 NeoBundle 'tsukkee/unite-help'
+NeoBundle 'Kocha/vim-unite-tig'
 
 " plugins
 NeoBundle 'ujihisa/neco-look'
@@ -649,6 +654,7 @@ nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
 nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=120<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
 nnoremap <silent> ;g :<C-u>Unite grep<CR>
+nnoremap <silent> ;t :<C-u>Unite tig<CR>
 nnoremap <silent> ;ni :<C-u>Unite neobundle/install<CR>
 nnoremap <silent> ;nu :<C-u>Unite neobundle/update -auto-quit<CR>
 nnoremap <silent> ;n! :<C-u>Unite neobundle/install:!<CR>
@@ -711,5 +717,7 @@ endif
 set secure
 
 "}}}
+
+" }}}
 
 " vim: foldmethod=marker
