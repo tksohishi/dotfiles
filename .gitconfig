@@ -25,9 +25,18 @@
     whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
     editor = vim
     excludesfile = ~/.gitignore_global
+    quotepath = false
 [branch]
     autosetupmerge = true
 [alias]
+    p = pull --ff-only
+    f = fetch -v -p
+    s = status
+    a = add -v
+    c = commit
+    r = remote -v
+    l = log
+
     st = status
     ci = commit -a
     br = branch
@@ -35,8 +44,7 @@
     cm = checkout master
     df = diff
     lg = log -p
-    r = remote -v
-    a = add -v
+    aa = add -v .
     fetchall = fetch -v --all
     unstage = reset HEAD --
     last = log -1 HEAD
@@ -44,6 +52,8 @@
     fixup = commit --amend -C HEAD
 [push]
     default = nothing
+[diff]
+    renames = true
 [tig "bind"]
     generic = g move-first-line
     generic = G move-last-line

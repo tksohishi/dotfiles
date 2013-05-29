@@ -58,6 +58,8 @@ NeoBundle 'motemen/git-vim'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'sudo.vim'
 NeoBundle 'ujihisa/tabpagecolorscheme'
+NeoBundle 'rking/ag.vim'
+NeoBundle 'tomtom/tcomment_vim'
 
 " syntax highlight
 NeoBundle 'tpope/vim-cucumber'
@@ -300,7 +302,7 @@ augroup MyAutoCommands
   " See :help fo-table
   autocmd FileType *                    setlocal formatoptions-=ro | setlocal formatoptions+=mM
   autocmd FileType ruby                 setlocal makeprg=ruby\ -c\ % errorformat=%m\ in\ %f\ on\ line\ %l
-  autocmd FileType python               setlocal omnifunc=pythoncomplete#Complete
+  autocmd FileType python               setlocal tabstop=4 shiftwidth=4 omnifunc=pythoncomplete#Complete
   autocmd FileType css                  setlocal omnifunc=csscomplete#CompleteCSS
   autocmd FileType html,mustache,eruby  setlocal omnifunc=htmlcomplete#CompleteTags noautoindent
   autocmd FileType javascript           setlocal makeprg=jsl\ -process\ % errorformat=%m\ in\ %f\ on\ line\ %l
@@ -653,14 +655,14 @@ nnoremap <silent> ;o :<C-u>Unite outline<CR>
 nnoremap <silent> ;c :<C-u>Unite colorscheme -auto-preview<CR>
 nnoremap <silent> ;m :<C-u>Unite file_mru -winwidth=120<CR>
 nnoremap <silent> ;h :<C-u>Unite help<CR>
-nnoremap <silent> ;g :<C-u>Unite grep<CR>
+nnoremap <silent> ;g :<C-u>Unite grep -winwidth=140<CR>
 nnoremap <silent> ;t :<C-u>Unite tig<CR>
 nnoremap <silent> ;ni :<C-u>Unite neobundle/install<CR>
 nnoremap <silent> ;nu :<C-u>Unite neobundle/update -auto-quit<CR>
 nnoremap <silent> ;n! :<C-u>Unite neobundle/install:!<CR>
 
 let g:unite_enable_split_vertically = 1
-let g:unite_winwidth=90
+let g:unite_winwidth=100
 let g:unite_split_rule='botright'
 let g:unite_source_file_mru_time_format = '%D %H:%M '
 let g:unite_source_buffer_time_format = ''
@@ -675,6 +677,20 @@ let g:unite_quick_match_table = {
       \'q' : 11, 'w' : 12, 'e' : 13, 'r' : 14, 't' : 15, 'y' : 16, 'u' : 17, 'i' : 18, 'o' : 19, 'p' : 20,
       \'1' : 21, '2' : 22, '3' : 23, '4' : 24, '5' : 25, '6' : 26, '7' : 27, '8' : 28, '9' : 29, '0' : 30,
       \}
+
+" unite-grep {{{
+" Use 'ag' as grep command in unite-grep
+" http://qiita.com/items/c8962f9325a5433dc50d
+let g:unite_source_grep_command = 'ag'
+let g:unite_source_grep_default_opts = '--nocolor --nogroup'
+let g:unite_source_grep_recursive_opt = ''
+let g:unite_source_grep_max_candidates = 200
+
+" Ran unite-grep on selected word
+" https://github.com/shingokatsushima/dotfiles/blob/master/.vimrc
+"vnoremap /g y:Unite grep::-iHRn:<C-R>=escape(@", '\\.*$^[]')<CR><CR>
+" }}}
+
 " }}}
 
 " {{{ quickrun.vim

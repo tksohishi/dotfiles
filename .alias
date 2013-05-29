@@ -51,3 +51,8 @@ alias rrehash='rehash && rbenv rehash'
 alias mou='open -a Mou "$@"'
 
 alias sc='script/console'
+
+alias cdiff='colordiff'
+alias less='less -R'
+
+alias ack='ag'
