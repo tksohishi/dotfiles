@@ -110,10 +110,6 @@ bindkey "\\en" history-beginning-search-forward-end
 init_rbenv
 # }}}
 
-# pythonbrew {{{
-[[ -s $HOME/.pythonbrew/etc/bashrc ]] && source $HOME/.pythonbrew/etc/bashrc
-# }}}
-
 # rprompt {{{
 setopt transient_rprompt
 RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RBENV_VERSION}%{$reset_color%}"
@@ -123,6 +119,11 @@ RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RBENV_VERSION}%{$reset_color%}"
 if [ -x /usr/libexec/java_home ]; then
 	export JAVA_HOME=`/usr/libexec/java_home`
 fi
+
+# some options
+export ANT_OPTS=-Xmx1024m
+export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m"
+export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
 # }}}
 
 # PATH {{{
