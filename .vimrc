@@ -667,10 +667,10 @@ let g:unite_split_rule='botright'
 let g:unite_source_file_mru_time_format = '%D %H:%M '
 let g:unite_source_buffer_time_format = ''
 " ref: http://vim-users.jp/2013/02/vim-advent-calendar-2012-ujihisa-3/
-" default:
-" \%(^\|/\)\.$\|\~$\|\.\%(o\|exe\|dll\|bak\|sw[po]\|class\)$\|\%(^\|/\)\%(\.hg\|\.git\|\.bzr\|\.svn\|tags\%(-.*\)\?\)\%($\|/\)
-call unite#custom_source('file_rec', 'ignore_pattern', (unite#sources#file_rec#define()[0]['ignore_pattern']) . '\|'. '\%(^\|/\)\%(\.vim/\|vendor/bundle/\|target/\)')
-call unite#custom_source('file_rec/async', 'ignore_pattern', (unite#sources#file_rec#define()[0]['ignore_pattern']). '\|'. '\%(^\|/\)\%(\.vim/\|vendor/\|target/\)')
+"      http://lingr.com/room/vim/archives/2013/06/07#message-15533431
+let s:file_rec_ignore_pattern = (unite#sources#rec#define()[0]['ignore_pattern']) . '\|\$global\|\.class$\|\<target\>\|\%(^\|/\)\%(\.vim/\|vendor/bundle/\|target/\)'
+call unite#custom_source('file_rec', 'ignore_pattern', s:file_rec_ignore_pattern)
+call unite#custom_source('file_rec/async', 'ignore_pattern', s:file_rec_ignore_pattern)
 
 let g:unite_quick_match_table = {
       \'a' : 1, 's' : 2, 'd' : 3, 'f' : 4, 'g' : 5, 'h' : 6, 'j' : 7, 'k' : 8, 'l' : 9, ':' : 10,
