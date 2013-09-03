@@ -56,3 +56,5 @@ alias cdiff='colordiff'
 alias less='less -R'
 
 alias ack='ag'
+
+alias zinc='zinc -nailed'

@@ -639,8 +639,8 @@ endif
 
 " {{{ Vim Plugin Setting
 
-" {{{ Git Plugin (Standard Plugin)
-autocmd MyAutoCommands FileType gitcommit DiffGitCached
+" {{{ Git Plugin (Standard Plugin) NOTE: disabled for now...
+"autocmd MyAutoCommands FileType gitcommit DiffGitCached
 " }}}
 
 " {{{ unite.vim
