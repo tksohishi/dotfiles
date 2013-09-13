@@ -74,6 +74,8 @@ NeoBundle 'tobym/vim-play'
 NeoBundle 'jsx/jsx.vim'
 NeoBundle 'tksohishi/pig.vim' " 'motus/pig.vim'
 NeoBundle 'leafgarland/typescript-vim'
+NeoBundle 'elzr/vim-json'
+
 " colorscheme
 NeoBundle 'tomasr/molokai'
 NeoBundle 'jpo/vim-railscasts-theme'
