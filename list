@@ -2,7 +2,6 @@
 .emacs
 .hgrc
 .screenrc
-.vim
 .vimrc
 .gvimrc
 .gitconfig
