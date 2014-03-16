@@ -1,5 +1,6 @@
 [user]
     name = Takeshi Ohishi
+    email = 
     #email = tks.ohishi@gmail.com
 # ref: http://d.hatena.ne.jp/tokuhirom/20081212/1229080990
 [color]
@@ -29,20 +30,24 @@
 [branch]
     autosetupmerge = true
 [alias]
-    p = pull --ff-only
-    f = fetch -v -p
-    s = status
     a = add -v
+    b = for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads/
     c = commit
-    r = remote -v
+    d = diff
+    f = fetch -v -p
     l = log
+    p = pull --ff-only
+    r = remote -v
+    s = status
 
     st = status
     ci = commit -a
     br = branch
     co = checkout
+    copre = checkout -
     cm = checkout master
     df = diff
+    dm = diff master
     lg = log -p
     aa = add -v .
     fetchall = fetch -v --all
@@ -50,6 +55,7 @@
     last = log -1 HEAD
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
     fixup = commit --amend -C HEAD
+    #fixallup = commit --all --amend -C HEAD
 [push]
     default = nothing
 [diff]
@@ -59,4 +65,7 @@
     generic = G move-last-line
 [include]
     path = ~/.gitconfig.local
+[mergetool]
+    keepBackup = true
+
 # vim: sw=4 ts=4
