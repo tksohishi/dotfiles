@@ -126,13 +126,27 @@ export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m"
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
 # }}}
 
+# GOPATH {{{
+[ -d $HOME/dev/goes ] && export GOPATH=$HOME/dev/goes
+# }}}
+
 # PATH {{{
 # local binary
 # node.js and npm
 [ -d /usr/local/share/npm/bin ] && export PATH=/usr/local/share/npm/bin:$PATH
 [ -d /usr/local/lib/node ] && export NODE_PATH=/usr/local/lib/node_modules
 
+# ~/local/bin
 [ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
+
+# GO
+[ -d $HOME/dev/goes ] && export PATH=$PATH:$GOPATH/bin
+# }}}
+
+# virtualenv {{{
+export WORKON_HOME=$HOME/.virtualenvs
+export PROJECT_HOME=$HOME/dev/pythons
+[ -x /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh
 # }}}
 
 # }}}
