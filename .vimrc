@@ -60,12 +60,13 @@ NeoBundle 'sudo.vim'
 NeoBundle 'ujihisa/tabpagecolorscheme'
 NeoBundle 'rking/ag.vim'
 NeoBundle 'tomtom/tcomment_vim'
+NeoBundle 'itspriddle/vim-marked'
 
 " syntax highlight
 NeoBundle 'tpope/vim-cucumber'
 NeoBundle 'juvenn/mustache.vim'
 NeoBundle 'vim-scripts/nginx.vim'
-NeoBundle 'tpope/vim-markdown'
+NeoBundle 'rcmdnk/vim-markdown'
 NeoBundle 'skwp/vim-rspec'
 NeoBundle 'kchmck/vim-coffee-script'
 NeoBundle 'derekwyatt/vim-scala'
@@ -287,11 +288,6 @@ augroup MyAutoCommands
   autocmd BufNewFile,BufRead *.thrift   setlocal filetype=thrift
   autocmd BufNewFile,BufRead *.psgi     setlocal filetype=perl
   autocmd BufNewFile,BufRead *.go       setlocal filetype=go
-  autocmd BufNewFile,BufRead *.mkd      setlocal filetype=mkd
-  autocmd BufNewFile,BufRead *.md       setlocal filetype=mkd
-  autocmd BufNewFile,BufRead *.markdown setlocal filetype=mkd
-  autocmd BufNewFile,BufRead *.mdown    setlocal filetype=mkd
-  autocmd BufNewFile,BufRead *.mkdn     setlocal filetype=mkd
   autocmd BufNewFile,BufRead *.ru       setlocal filetype=ruby
   autocmd BufNewFile,BufRead Capfile    setlocal filetype=ruby
   autocmd BufNewFile,BufRead *.pig      setlocal filetype=pig syntax=pig
@@ -300,6 +296,7 @@ augroup MyAutoCommands
   autocmd BufNewFile,BufRead *.tsv      setlocal filetype=tsv
   autocmd BufNewFile,BufRead *.mesos    setlocal filetype=python
 
+  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
 
   " See :help fo-table
   autocmd FileType *                    setlocal formatoptions-=ro | setlocal formatoptions+=mM
@@ -707,6 +704,13 @@ augroup TakeshiRSpec
 augroup END
 
 let g:quickrun_config['ruby.rspec'] = {'command': 'rspec'}
+let g:quickrun_config.markdown = {
+      \ 'outputter' : 'null',
+      \ 'command'   : 'open',
+      \ 'cmdopt'    : '-a',
+      \ 'args'      : 'Marked',
+      \ 'exec'      : '%c %o %a %s',
+      \ }
 " }}}
 
 " {{{ open-browser.vim
