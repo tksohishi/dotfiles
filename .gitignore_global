@@ -7,3 +7,5 @@
 vendor/bundle
 .bundle
 *.sublime-*
+*.pyc
+*.pyo
