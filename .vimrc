@@ -47,7 +47,6 @@ NeoBundle 'Kocha/vim-unite-tig'
 " plugins
 NeoBundle 'ujihisa/neco-look'
 NeoBundle 'tpope/vim-rails'
-NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'thinca/vim-ref'
 NeoBundle 'thinca/vim-quickrun'
 NeoBundle 'tyru/open-browser.vim'
