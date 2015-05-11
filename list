@@ -16,3 +16,4 @@
 .gitignore_global
 .tmux.conf
 .ackrc
+.lldbinit
