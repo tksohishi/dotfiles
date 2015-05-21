@@ -33,8 +33,6 @@ alias rtu='rake test:units'
 alias rtf='rake test:functionals'
 alias rti='rake test:integration'
 
-alias js='jumpstat'
-
 alias basource='source ~/.bashrc'
 alias zsource='source ~/.zshrc'
 
@@ -47,6 +45,4 @@ alias sc='script/console'
 alias cdiff='colordiff'
 alias less='less -R'
 
-alias ack='ag'
-
-alias zinc='zinc -nailed'
+alias gitclear="git status -s | sed -E 's/^.{3}//' | xargs git checkout"
