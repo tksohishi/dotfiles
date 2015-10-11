@@ -6,8 +6,17 @@ init_rbenv() {
 	_set_current_rbenv_version
 }
 
+init_rubies() {
+	source "$HOME/.rubies/src/rubies.sh"
+	_set_current_rubies_version
+}
+
 _set_current_rbenv_version() {
-	export CURRENT_RBENV_VERSION="$(rbenv version-name)"
+	export CURRENT_RUBY_VERSION="$(rbenv version-name)"
+}
+
+_set_current_rubies_version() {
+	export CURRENT_RUBY_VERSION="$(rubies version)"
 }
 
 # automating 'bundle exec' {{{
@@ -41,10 +50,10 @@ within_bundler_project() {
 # http://d.hatena.ne.jp/daijiroc/20090207/1233980551
 run_with_bundler() {
 	if is_in_house_bundle_exists; then
-		echo -e "run\e[36m ./bundle.rb exec $@ \e[m"
+		#echo -e "run\e[36m ./bundle.rb exec $@ \e[m"
 		./bundle.rb exec "$@"
 	elif bundler_installed && within_bundler_project; then
-		echo "run\e[36m bundle exec $@ \e[m"
+		#echo "run\e[36m bundle exec $@ \e[m"
 		bundle exec "$@"
 	else
 		"$@"
@@ -110,9 +119,13 @@ bindkey "\\en" history-beginning-search-forward-end
 init_rbenv
 # }}}
 
+# rubies {{{
+#init_rubies
+# }}}
+
 # rprompt {{{
 setopt transient_rprompt
-RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RBENV_VERSION}%{$reset_color%}"
+RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
 # }}}
 
 # java {{{
@@ -120,7 +133,7 @@ if [ -x /usr/libexec/java_home ]; then
 	export JAVA_HOME=`/usr/libexec/java_home`
 fi
 
-# some options
+# java options
 export ANT_OPTS=-Xmx2048m
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m"
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
@@ -148,6 +161,28 @@ export WORKON_HOME=$HOME/.virtualenvs
 export PROJECT_HOME=$HOME/dev/pythons
 [ -x /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh
 # }}}
+
+# zsh-notify {{{
+source $HOME/dev/zsh-notify/notify.plugin.zsh
+# }}}
+
+# peco {{{
+# search history
+function peco-select-history() {
+  local tac
+  if which tac > /dev/null; then
+    tac="tac"
+  else
+    tac="tail -r"
+  fi
+  BUFFER=$(\history -n 1 | eval $tac | peco)
+  CURSOR=$#BUFFER
+  zle clear-screen
+}
+zle -N peco-select-history
+bindkey '^r' peco-select-history
+# }}}
+
 
 # }}}
 

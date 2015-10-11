@@ -22,11 +22,12 @@ filetype plugin indent off
 
 if has('vim_starting')
   set runtimepath+=~/.vim/bundle/neobundle.vim/
-  call neobundle#rc(expand('~/.vim/bundle/'))
 endif
 
+call neobundle#begin(expand('~/.vim/bundle/'))
+
 " let NeoBundle manage NeoBundle
-NeoBundle 'Shougo/neobundle.vim'
+NeoBundleFetch 'Shougo/neobundle.vim'
 
 " vimproc is required to use NeoBundle
 NeoBundle 'Shougo/vimproc', {
@@ -81,7 +82,11 @@ NeoBundle 'tomasr/molokai'
 NeoBundle 'jpo/vim-railscasts-theme'
 NeoBundle 'altercation/vim-colors-solarized'
 
+call neobundle#end()
+
 filetype plugin indent on
+
+NeoBundleCheck
 
 " }}}
 
@@ -637,7 +642,7 @@ endif
 
 " {{{ Vim Plugin Setting
 
-" {{{ Git Plugin (Standard Plugin) NOTE: disabled for now...
+" {{{ Git Plugin (Standard Plugin)
 "autocmd MyAutoCommands FileType gitcommit DiffGitCached
 " }}}
 
@@ -666,9 +671,9 @@ let g:unite_source_file_mru_time_format = '%D %H:%M '
 let g:unite_source_buffer_time_format = ''
 " ref: http://vim-users.jp/2013/02/vim-advent-calendar-2012-ujihisa-3/
 "      http://lingr.com/room/vim/archives/2013/06/07#message-15533431
-let s:file_rec_ignore_pattern = (unite#sources#rec#define()[0]['ignore_pattern']) . '\|\$global\|\.class$\|\<target\>\|\%(^\|/\)\%(\.vim/\|vendor/bundle/\|target/\)'
-call unite#custom_source('file_rec', 'ignore_pattern', s:file_rec_ignore_pattern)
-call unite#custom_source('file_rec/async', 'ignore_pattern', s:file_rec_ignore_pattern)
+"let s:file_rec_ignore_pattern = (unite#sources#rec#define()[0]['ignore_pattern']) . '\|\$global\|\.class$\|\<target\>\|\%(^\|/\)\%(\.vim/\|vendor/bundle/\|target/\)'
+"call unite#custom_source('file_rec', 'ignore_pattern', s:file_rec_ignore_pattern)
+"call unite#custom_source('file_rec/async', 'ignore_pattern', s:file_rec_ignore_pattern)
 
 let g:unite_quick_match_table = {
       \'a' : 1, 's' : 2, 'd' : 3, 'f' : 4, 'g' : 5, 'h' : 6, 'j' : 7, 'k' : 8, 'l' : 9, ':' : 10,

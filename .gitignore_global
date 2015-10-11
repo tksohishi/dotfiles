@@ -9,3 +9,5 @@ vendor/bundle
 *.sublime-*
 *.pyc
 *.pyo
+
+_tmp_.patch
