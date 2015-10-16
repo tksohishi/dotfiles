@@ -163,7 +163,7 @@ export PROJECT_HOME=$HOME/dev/pythons
 # }}}
 
 # zsh-notify {{{
-source $HOME/dev/zsh-notify/notify.plugin.zsh
+# source $HOME/dev/zsh-notify/notify.plugin.zsh
 # }}}
 
 # peco {{{

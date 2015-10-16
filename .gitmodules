@@ -1,0 +1,3 @@
+[submodule ".zsh_custom/zsh-notify"]
+	path = .zsh_custom/zsh-notify
+	url = git@github.com:marzocchi/zsh-notify.git
