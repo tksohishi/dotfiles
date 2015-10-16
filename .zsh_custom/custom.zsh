@@ -129,9 +129,9 @@ RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
 # }}}
 
 # java {{{
-if [ -x /usr/libexec/java_home ]; then
-	export JAVA_HOME=`/usr/libexec/java_home`
-fi
+#if [ -x /usr/libexec/java_home ]; then
+#	export JAVA_HOME=`/usr/libexec/java_home`
+#fi
 
 # java options
 export ANT_OPTS=-Xmx2048m
@@ -163,7 +163,7 @@ export PROJECT_HOME=$HOME/dev/pythons
 # }}}
 
 # zsh-notify {{{
-# source $HOME/dev/zsh-notify/notify.plugin.zsh
+source $HOME/.zsh_custom/zsh-notify/notify.plugin.zsh
 # }}}
 
 # peco {{{
