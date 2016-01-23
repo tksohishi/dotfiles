@@ -10,6 +10,11 @@ _set_current_rbenv_version() {
 	export CURRENT_RUBY_VERSION="$(rbenv version-name)"
 }
 
+init_pyenv() {
+	eval "$(pyenv init -)"
+	export CURRENT_PYTHON_VERSION="$(pyenv version-name)"
+}
+
 # automating 'bundle exec' {{{
 # ref: https://github.com/gma/bundler-exec
 rbenv_installed() {
@@ -61,13 +66,14 @@ for CMD in $BUNDLED_COMMANDS; do
 done
 # }}}
 
-# override cd
+# override cd {{{
 cd() {
 	builtin cd "$@"
 	local result=$?
 	rbenv_installed && _set_current_rbenv_version
 	return $result
 }
+# }}}
 
 # }}}
 
@@ -106,16 +112,23 @@ bindkey "^n" history-beginning-search-forward-end
 bindkey "\\en" history-beginning-search-forward-end
 # }}}
 
-# rbenv {{{
-init_rbenv
+# rbenv (disabled) {{{
+# init_rbenv
+# }}}
+
+# pyenv {{{
+init_pyenv
 # }}}
 
 # rprompt {{{
 setopt transient_rprompt
-RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
+# rbenv version
+# RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
+# pyenv version
+RPROMPT="${RPROMPT} %{$fg[blue]%}\${CURRENT_PYTHON_VERSION}%{$reset_color%}"
 # }}}
 
-# java options
+# java options {{{
 export ANT_OPTS=-Xmx2048m
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m"
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
@@ -129,6 +142,7 @@ export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
 
 # ~/local/bin
 [ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
+# }}}
 
 # virtualenv {{{
 export WORKON_HOME=$HOME/.virtualenvs
@@ -152,7 +166,6 @@ function peco-select-history() {
 zle -N peco-select-history
 bindkey '^r' peco-select-history
 # }}}
-
 
 # }}}
 
