@@ -44,6 +44,7 @@ NeoBundle 'ujihisa/unite-colorscheme'
 NeoBundle 'ujihisa/unite-font'
 NeoBundle 'tsukkee/unite-help'
 NeoBundle 'Kocha/vim-unite-tig'
+NeoBundle 'Shougo/tabpagebuffer.vim' " Current buffer tab
 
 " plugins
 NeoBundle 'ujihisa/neco-look'
