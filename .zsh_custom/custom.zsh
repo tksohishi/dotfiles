@@ -6,17 +6,13 @@ init_rbenv() {
 	_set_current_rbenv_version
 }
 
-init_rubies() {
-	source "$HOME/.rubies/src/rubies.sh"
-	_set_current_rubies_version
-}
-
 _set_current_rbenv_version() {
 	export CURRENT_RUBY_VERSION="$(rbenv version-name)"
 }
 
-_set_current_rubies_version() {
-	export CURRENT_RUBY_VERSION="$(rubies version)"
+init_pyenv() {
+	eval "$(pyenv init -)"
+	export CURRENT_PYTHON_VERSION="$(pyenv version-name)"
 }
 
 # automating 'bundle exec' {{{
@@ -70,13 +66,14 @@ for CMD in $BUNDLED_COMMANDS; do
 done
 # }}}
 
-# override cd
+# override cd {{{
 cd() {
 	builtin cd "$@"
 	local result=$?
 	rbenv_installed && _set_current_rbenv_version
 	return $result
 }
+# }}}
 
 # }}}
 
@@ -115,32 +112,26 @@ bindkey "^n" history-beginning-search-forward-end
 bindkey "\\en" history-beginning-search-forward-end
 # }}}
 
-# rbenv {{{
-init_rbenv
+# rbenv (disabled) {{{
+# init_rbenv
 # }}}
 
-# rubies {{{
-#init_rubies
+# pyenv {{{
+init_pyenv
 # }}}
 
 # rprompt {{{
 setopt transient_rprompt
-RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
+# rbenv version
+# RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
+# pyenv version
+RPROMPT="${RPROMPT} %{$fg[blue]%}\${CURRENT_PYTHON_VERSION}%{$reset_color%}"
 # }}}
 
-# java {{{
-#if [ -x /usr/libexec/java_home ]; then
-#	export JAVA_HOME=`/usr/libexec/java_home`
-#fi
-
-# java options
+# java options {{{
 export ANT_OPTS=-Xmx2048m
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m"
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
-# }}}
-
-# GOPATH {{{
-[ -d $HOME/dev/goes ] && export GOPATH=$HOME/dev/goes
 # }}}
 
 # PATH {{{
@@ -151,19 +142,12 @@ export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
 
 # ~/local/bin
 [ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
-
-# GO
-[ -d $HOME/dev/goes ] && export PATH=$PATH:$GOPATH/bin
 # }}}
 
 # virtualenv {{{
 export WORKON_HOME=$HOME/.virtualenvs
 export PROJECT_HOME=$HOME/dev/pythons
 [ -x /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh
-# }}}
-
-# zsh-notify {{{
-source $HOME/.zsh_custom/zsh-notify/notify.plugin.zsh
 # }}}
 
 # peco {{{
@@ -182,7 +166,6 @@ function peco-select-history() {
 zle -N peco-select-history
 bindkey '^r' peco-select-history
 # }}}
-
 
 # }}}
 
