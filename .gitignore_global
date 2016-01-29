@@ -12,3 +12,6 @@ vendor/bundle
 
 _tmp_.patch
 .*.un~
+.cache
+.tox
+*.egg-info
