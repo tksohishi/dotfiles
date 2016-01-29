@@ -1,25 +1,51 @@
-# custom global zsh config file {{{
+# custom global zsh config file
 
 # functions {{{
+
+# for pyenv {{{
+
+pyenv_installed() {
+	which pyenv > /dev/null 2>&1
+}
+
+pyenv_virtualenvwrapper_installed() {
+	brew ls --versions pyenv-virtualenvwrapper > /dev/null 2>&1
+}
+
+init_pyenv() {
+	if pyenv_installed; then
+		eval "$(pyenv init -)"
+		export CURRENT_PYTHON_VERSION="$(pyenv version-name)"
+	fi
+
+	if pyenv_virtualenvwrapper_installed; then
+		pyenv virtualenvwrapper
+	fi
+}
+
+# }}}
+
+# for rbenv {{{
+
+rbenv_installed() {
+	which rbenv > /dev/null 2>&1
+}
+
 init_rbenv() {
-	eval "$(rbenv init - zsh)"
-	_set_current_rbenv_version
+	if rbenv_installed; then
+		eval "$(rbenv init - zsh)"
+		_set_current_rbenv_version
+	fi
 }
 
 _set_current_rbenv_version() {
 	export CURRENT_RUBY_VERSION="$(rbenv version-name)"
 }
 
-init_pyenv() {
-	eval "$(pyenv init -)"
-	export CURRENT_PYTHON_VERSION="$(pyenv version-name)"
-}
+# }}}
 
 # automating 'bundle exec' {{{
 # ref: https://github.com/gma/bundler-exec
-rbenv_installed() {
-	which rbenv > /dev/null 2>&1
-}
 
 is_in_house_bundle_exists() {
 	[ -f "$(pwd)/bundle.rb" ] && return 0 || return 1
@@ -112,8 +138,8 @@ bindkey "^n" history-beginning-search-forward-end
 bindkey "\\en" history-beginning-search-forward-end
 # }}}
 
-# rbenv (disabled) {{{
-# init_rbenv
+# rbenv {{{
+init_rbenv
 # }}}
 
 # pyenv {{{
@@ -122,16 +148,18 @@ init_pyenv
 
 # rprompt {{{
 setopt transient_rprompt
-# rbenv version
-# RPROMPT="${RPROMPT} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
-# pyenv version
-RPROMPT="${RPROMPT} %{$fg[blue]%}\${CURRENT_PYTHON_VERSION}%{$reset_color%}"
+# pyenv and rbenv
+RPROMPT="${RPROMPT} %{$fg[blue]%}\${CURRENT_PYTHON_VERSION}%{$reset_color%} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
 # }}}
 
 # java options {{{
 export ANT_OPTS=-Xmx2048m
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m"
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
+# }}}
+
+# golang {{{
+export GOPATH=$HOME/work/golang
 # }}}
 
 # PATH {{{
@@ -142,12 +170,13 @@ export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
 
 # ~/local/bin
 [ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
+
+# binary from go
+[ -d $GOPATH/bin ] && export PATH=$PATH:$GOPATH/bin
 # }}}
 
 # virtualenv {{{
 export WORKON_HOME=$HOME/.virtualenvs
-export PROJECT_HOME=$HOME/dev/pythons
-[ -x /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh
 # }}}
 
 # peco {{{
@@ -165,8 +194,6 @@ function peco-select-history() {
 }
 zle -N peco-select-history
 bindkey '^r' peco-select-history
-# }}}
-
 # }}}
 
 # vim:ts=4:sw=4:noexpandtab:foldmethod=marker:nowrap:ft=sh:
