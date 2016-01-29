@@ -4,7 +4,7 @@
 
 ### clone repository in home directory
 
-    git clone https://github.com/tksohishi/dotfiles.git ~/.dotfiles
+    git clone git@github.com:tksohishi/dotfiles.git ~/.dotfiles
     cd ~/.dotfiles
     git submodule update --init
 
