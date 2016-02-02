@@ -1,7 +1,5 @@
 [user]
     name = Takeshi Ohishi
-    email = 
-    #email = tks.ohishi@gmail.com
 # ref: http://d.hatena.ne.jp/tokuhirom/20081212/1229080990
 [color]
     branch = auto
@@ -64,9 +62,10 @@
 [tig "bind"]
     generic = g move-first-line
     generic = G move-last-line
-[include]
-    path = ~/.gitconfig.local
 [mergetool]
     keepBackup = true
+[include]
+    path = ~/.gitconfig.local
 
 # vim: sw=4 ts=4
+
