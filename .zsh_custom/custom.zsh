@@ -82,7 +82,7 @@ run_with_bundler() {
 	fi
 }
 
-BUNDLED_COMMANDS=(cap capfify chef cucumber foreman guard haml hayaku heroku html2haml jekyll knife mustache pry racksh rackup rails rake rake2thor rspec ruby \
+BUNDLED_COMMANDS=(cap capfify chef cucumber foreman guard haml hayaku heroku html2haml jekyll knife mustache pry racksh rackup rails rake2thor rspec ruby \
 s3_website sass sass-convert script/console script/server sequel serve shotgun spec spork thin thor tilt tt turn twurl unicorn unicorn_rails)
 
 for CMD in $BUNDLED_COMMANDS; do
@@ -160,19 +160,18 @@ export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
 
 # golang {{{
 export GOPATH=$HOME/work/golang
+export GOBIN=$GOPATH/bin
 # }}}
 
 # PATH {{{
-# local binary
-# node.js and npm
-[ -d /usr/local/share/npm/bin ] && export PATH=/usr/local/share/npm/bin:$PATH
-[ -d /usr/local/lib/node ] && export NODE_PATH=/usr/local/lib/node_modules
-
 # ~/local/bin
 [ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
 
 # binary from go
-[ -d $GOPATH/bin ] && export PATH=$PATH:$GOPATH/bin
+[ -d $GOBIN ] && export PATH=$PATH:$GOBIN
+
+# binray from nodebrew
+[ -d $HOME/.nodebrew ] && export PATH=$PATH:$HOME/.nodebrew/current/bin
 # }}}
 
 # virtualenv {{{

@@ -10,7 +10,6 @@ vendor/bundle
 *.pyc
 *.pyo
 
-_tmp_.patch
 .*.un~
 .cache
 .tox

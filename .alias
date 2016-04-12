@@ -18,9 +18,9 @@ alias svns="svn status -u"
 
 alias cpanm="cpanm -v"
 
-alias v='view'
 alias vi='vim'
 alias mvim='open -a macvim "$@"'
+alias mview='open -a macvim "$@" --args -R'
 
 alias oscreen='screen -dRR takeshi'
 
@@ -46,3 +46,8 @@ alias cdiff='colordiff'
 alias less='less -R'
 
 alias gitclear="git status -s | sed -E 's/^.{3}//' | xargs git checkout"
+
+alias agtodo="ag 'TODO: \(takeshi\)'"
+alias agfixme="ag 'FIXME: \(takeshi\)'"
+
+alias dmkdir="mkdir `date +'%Y-%m-%d'`"

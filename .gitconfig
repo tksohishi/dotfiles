@@ -55,6 +55,10 @@
     st = status
     tree = log --graph --pretty=oneline --abbrev-commit --decorate
     unstage = reset HEAD --
+    # http://stackoverflow.com/questions/1753070/git-ignore-files-only-locally
+    ignore = update-index --assume-unchanged
+    unignore = update-index --no-assume-unchanged
+    ignored = !git ls-files -v | grep "^[[:lower:]]"
 [push]
     default = nothing
 [diff]
