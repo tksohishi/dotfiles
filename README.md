@@ -4,13 +4,26 @@
 
 ### clone repository in home directory
 
-    git clone git@github.com:tksohishi/dotfiles.git ~/.dotfiles
-    cd ~/.dotfiles
-    git submodule update --init
+```shell
+git clone git@github.com:tksohishi/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+git submodule update --init
+```
 
 ### run bootstrap.sh
 
-    cd ~/.dotfiles
-    ./bootstrap.sh
+```shell
+./bootstrap.sh
+```
 
-### input 'y' to have done
+  input 'y' to have done
+
+### Set up vim
+
+```shell
+mkdir -p ~/.vim/bundle
+cd ~/.vim/bundle
+git clone https://github.com/Shougo/neobundle.vim.git
+vim
+# Run Neobundle/Install
+```
