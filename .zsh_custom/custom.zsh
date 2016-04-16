@@ -164,8 +164,8 @@ export GOBIN=$GOPATH/bin
 # }}}
 
 # PATH {{{
-# ~/local/bin
-[ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
+# ~/.local/bin
+[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
 
 # binary from go
 [ -d $GOBIN ] && export PATH=$PATH:$GOBIN
