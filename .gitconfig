@@ -45,6 +45,7 @@
     cm = checkout master
     co = checkout
     copre = checkout -
+    d = diff --compaction-heuristic
     dc = diff --cached
     df = diff
     dm = diff master
