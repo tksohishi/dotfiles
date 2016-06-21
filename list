@@ -17,3 +17,4 @@
 .tmux.conf
 .ackrc
 .lldbinit
+.editorconfig
