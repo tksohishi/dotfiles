@@ -158,14 +158,9 @@ export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m"
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
 # }}}
 
-# golang {{{
-export GOPATH=$HOME/work/golang
-export GOBIN=$GOPATH/bin
-# }}}
-
 # PATH {{{
-# ~/local/bin
-[ -d $HOME/local/bin ] && export PATH=$HOME/local/bin:$PATH
+# ~/.local/bin
+[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
 
 # binary from go
 [ -d $GOBIN ] && export PATH=$PATH:$GOBIN
