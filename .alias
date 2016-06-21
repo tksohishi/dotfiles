@@ -45,6 +45,7 @@ alias sc='script/console'
 alias cdiff='colordiff'
 alias less='less -R'
 
+alias gcd="git checkout develop"
 alias gitclear="git status -s | sed -E 's/^.{3}//' | xargs git checkout"
 
 alias agtodo="ag 'TODO: \(takeshi\)'"
