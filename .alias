@@ -47,8 +47,11 @@ alias less='less -R'
 
 alias gcd="git checkout develop"
 alias gitclear="git status -s | sed -E 's/^.{3}//' | xargs git checkout"
+alias gitcleanup="git branch --merged | grep -v "\*" | grep -v master | grep -v develp | xargs -n 1 git branch -d"
 
 alias agtodo="ag 'TODO: \(takeshi\)'"
 alias agfixme="ag 'FIXME: \(takeshi\)'"
 
 alias dmkdir="mkdir `date +'%Y-%m-%d'`"
+
+alias psgrep='ps aux | egrep -v "grep" | grep '
