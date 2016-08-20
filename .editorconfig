@@ -13,3 +13,6 @@ trim_trailing_whitespace = false
 
 [*.coffee]
 indent_size = 2
+
+[*.html]
+indent_size = 2
