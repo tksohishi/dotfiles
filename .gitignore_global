@@ -4,6 +4,7 @@
 .rubiesrc
 .ruby-version
 .rbenv-version
+.python-version
 vendor/bundle
 .bundle
 *.sublime-*
