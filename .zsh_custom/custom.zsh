@@ -8,19 +8,18 @@ pyenv_installed() {
 	which pyenv > /dev/null 2>&1
 }
 
-pyenv_virtualenvwrapper_installed() {
-	brew ls --versions pyenv-virtualenvwrapper > /dev/null 2>&1
-}
-
 init_pyenv() {
 	if pyenv_installed; then
 		eval "$(pyenv init -)"
-		export CURRENT_PYTHON_VERSION="$(pyenv version-name)"
+		set_current_python_version
 	fi
 
-	if pyenv_virtualenvwrapper_installed; then
-		pyenv virtualenvwrapper
-	fi
+	# FIXME: need to check if virtualenvwrapper is installed
+	pyenv virtualenvwrapper_lazy
+}
+
+set_current_python_version() {
+	export CURRENT_PYTHON_VERSION="$(pyenv version-name)"
 }
 
 # }}}
@@ -34,11 +33,11 @@ rbenv_installed() {
 init_rbenv() {
 	if rbenv_installed; then
 		eval "$(rbenv init - zsh)"
-		_set_current_rbenv_version
+		set_current_ruby_version
 	fi
 }
 
-_set_current_rbenv_version() {
+set_current_ruby_version() {
 	export CURRENT_RUBY_VERSION="$(rbenv version-name)"
 }
 
@@ -96,7 +95,8 @@ done
 cd() {
 	builtin cd "$@"
 	local result=$?
-	rbenv_installed && _set_current_rbenv_version
+	rbenv_installed && set_current_ruby_version
+	pyenv_installed && set_current_python_version
 	return $result
 }
 # }}}
@@ -138,6 +138,20 @@ bindkey "^n" history-beginning-search-forward-end
 bindkey "\\en" history-beginning-search-forward-end
 # }}}
 
+# PATH {{{
+
+# golang
+[ -d /usr/local/go ] && export PATH=$PATH:/usr/local/go/bin
+[ -d $GOPATH ] && export PATH=$PATH:$GOPATH/bin
+
+# nix
+[ -d $HOME/.nix-profile ] && export PATH=$HOME/.nix-profile/bin:$PATH
+
+# ~/.local/bin
+[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
+
+# }}}
+
 # rbenv {{{
 init_rbenv
 # }}}
@@ -156,17 +170,6 @@ RPROMPT="${RPROMPT} %{$fg[blue]%}\${CURRENT_PYTHON_VERSION}%{$reset_color%} %{$f
 export ANT_OPTS=-Xmx2048m
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m"
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=utf8"
-# }}}
-
-# PATH {{{
-# ~/.local/bin
-[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
-
-# binary from go
-[ -d $GOBIN ] && export PATH=$PATH:$GOBIN
-
-# binray from nodebrew
-[ -d $HOME/.nodebrew ] && export PATH=$PATH:$HOME/.nodebrew/current/bin
 # }}}
 
 # virtualenv {{{
@@ -188,6 +191,15 @@ function peco-select-history() {
 }
 zle -N peco-select-history
 bindkey '^r' peco-select-history
+# }}}
+
+# nix {{{
+
+# autojump
+if [ -f $HOME/.nix-profile/etc/profile.d/autojump.sh ]; then # nix installation
+  . $HOME/.nix-profile/etc/profile.d/autojump.sh
+fi
+
 # }}}
 
 # vim:ts=4:sw=4:noexpandtab:foldmethod=marker:nowrap:ft=sh:
