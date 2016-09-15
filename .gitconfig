@@ -41,6 +41,7 @@
     aa = add -v .
     br = branch
     ca = commit --amend --no-verify
+    chekcout = checkout
     ci = commit -a
     cm = checkout master
     co = checkout
