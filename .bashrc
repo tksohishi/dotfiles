@@ -32,7 +32,7 @@ bind '"\C-p": history-search-backward'
 bind '"\C-n": history-search-forward'
 
 # Golang
-export GOPATH=$HOME/work/golang
+export GOPATH=$HOME/Developments/golang
 
 # oh-my-zsh config
 export ZSH_CUSTOM=$HOME/.zsh_custom
