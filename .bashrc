@@ -31,8 +31,9 @@ bind '"\C-p": history-search-backward'
 # historical forward search with linehead string
 bind '"\C-n": history-search-forward'
 
-# Golang
-export GOPATH=$HOME/Developments/golang
+# GOPATH
+export GOPATH=$HOME/Workspace/go
 
 # oh-my-zsh config
 export ZSH_CUSTOM=$HOME/.zsh_custom
+
