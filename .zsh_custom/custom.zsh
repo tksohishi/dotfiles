@@ -160,10 +160,15 @@ init_rbenv
 init_pyenv
 # }}}
 
+# nvm {{{
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
+# }}}
+
 # rprompt {{{
 setopt transient_rprompt
 # pyenv and rbenv
-RPROMPT="${RPROMPT} %{$fg[blue]%}\${CURRENT_PYTHON_VERSION}%{$reset_color%} %{$fg[red]%}\${CURRENT_RUBY_VERSION}%{$reset_color%}"
+RPROMPT="${RPROMPT} %{$fg[blue]%}p:\${CURRENT_PYTHON_VERSION}%{$reset_color%} %{$fg[red]%}r:\${CURRENT_RUBY_VERSION}%{$reset_color%}"
 # }}}
 
 # java options {{{
