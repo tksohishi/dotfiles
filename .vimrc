@@ -189,8 +189,8 @@ endif
 set vb t_vb=       " ビープをならさない
 
 " Tab
-set tabstop=2      " Tab文字を画面上で何文字分に展開するか
-set shiftwidth=2   " cindentやautoindent時に挿入されるインデントの幅
+set tabstop=4      " Tab文字を画面上で何文字分に展開するか
+set shiftwidth=4   " cindentやautoindent時に挿入されるインデントの幅
 set softtabstop=0  " Tabキー押し下げ時の挿入される空白の量，0の場合はtabstopと同じ，BSにも影響する
 set expandtab      " Tab文字の代わりにスペースを入力する
 set smarttab       " 行頭の余白内で Tab を打ち込むと、'shiftwidth' の数だけインデント

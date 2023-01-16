@@ -15,3 +15,5 @@ vendor/bundle
 .cache
 .tox
 *.egg-info
+
+.env

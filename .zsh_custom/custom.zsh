@@ -150,10 +150,14 @@ bindkey "\\en" history-beginning-search-forward-end
 # ~/.local/bin
 [ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
 
+# homebrew on Apple Silicon Macs
+[ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
+
 # }}}
 
 # rbenv {{{
-init_rbenv
+# 12/26/2022: no more rbenv is needed for now
+# init_rbenv
 # }}}
 
 # pyenv {{{
@@ -165,10 +169,14 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
 # }}}
 
+# fnm
+eval "$(fnm env --use-on-cd)"
+
 # rprompt {{{
 setopt transient_rprompt
 # pyenv and rbenv
-RPROMPT="${RPROMPT} %{$fg[blue]%}p:\${CURRENT_PYTHON_VERSION}%{$reset_color%} %{$fg[red]%}r:\${CURRENT_RUBY_VERSION}%{$reset_color%}"
+# RPROMPT="${RPROMPT} %{$fg[blue]%}p:\${CURRENT_PYTHON_VERSION}%{$reset_color%} %{$fg[red]%}r:\${CURRENT_RUBY_VERSION}%{$reset_color%}"
+RPROMPT="${RPROMPT} %{$fg[blue]%}p:\${CURRENT_PYTHON_VERSION}%{$reset_color%}"
 # }}}
 
 # java options {{{
