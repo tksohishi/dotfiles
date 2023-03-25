@@ -37,3 +37,5 @@ export GOPATH=$HOME/Workspace/go
 # oh-my-zsh config
 export ZSH_CUSTOM=$HOME/.zsh_custom
 
+# Hide 'default interactive shell is now zsh'
+export BASH_SILENCE_DEPRECATION_WARNING=1
