@@ -23,6 +23,8 @@ alias mvim='open -a macvim "$@"'
 alias mview='open -a macvim "$@" --args -R'
 
 alias oscreen='screen -dRR takeshi'
+# TODO: only works on Mac with homebrew
+alias otmux='/opt/homebrew/bin/tmux attach || /opt/homebrew/bin/tmux new'
 
 alias cassandra-cli-lo='cassandra-cli -host localhost -port 9160'
 
