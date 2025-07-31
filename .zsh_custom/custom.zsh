@@ -142,6 +142,7 @@ bindkey "\\en" history-beginning-search-forward-end
 
 # golang
 [ -d /usr/local/go ] && export PATH=$PATH:/usr/local/go/bin
+export GOPATH=$HOME/.go
 [ -d $GOPATH ] && export PATH=$PATH:$GOPATH/bin
 
 # nix
@@ -176,7 +177,7 @@ eval "$(fnm env --use-on-cd)"
 setopt transient_rprompt
 # pyenv and rbenv
 # RPROMPT="${RPROMPT} %{$fg[blue]%}p:\${CURRENT_PYTHON_VERSION}%{$reset_color%} %{$fg[red]%}r:\${CURRENT_RUBY_VERSION}%{$reset_color%}"
-RPROMPT="${RPROMPT} %{$fg[blue]%}p:\${CURRENT_PYTHON_VERSION}%{$reset_color%}"
+# RPROMPT="${RPROMPT} %{$fg[blue]%}p:\${CURRENT_PYTHON_VERSION}%{$reset_color%}"
 # }}}
 
 # java options {{{
@@ -214,5 +215,13 @@ if [ -f $HOME/.nix-profile/etc/profile.d/autojump.sh ]; then # nix installation
 fi
 
 # }}}
+
+# mise
+eval "$(~/.local/bin/mise activate zsh)"
+
+# solana
+if [ -d $HOME/.local/share/solana/install/active_release/bin ]; then
+    export PATH="$PATH:$HOME/.local/share/solana/install/active_release/bin"
+fi
 
 # vim:ts=4:sw=4:noexpandtab:foldmethod=marker:nowrap:ft=sh:
