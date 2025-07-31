@@ -43,3 +43,5 @@ if test -f $HOME/.oh-my-zsh; then
 else
     echo please check out https://github.com/robbyrussell/oh-my-zsh
 fi
+
+echo install mise for installtions of node/python/etc https://github.com/jdx/mise
