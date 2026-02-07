@@ -4,13 +4,11 @@ This file provides guidance to AI coding agents working with code in this reposi
 
 ## Overview
 
-Personal dotfiles repository for macOS. Manages shell configs, editor settings, git config, and tool preferences via symlinks from `~/.dotfiles/` to `$HOME`.
+Personal dotfiles repository for macOS. Manages shell configs, editor settings, git config, tool preferences, and all installed applications (Homebrew packages, casks, and Mac App Store apps) via symlinks and a Brewfile.
 
 ## Setup and Deployment
 
-The `install.sh` script symlinks dotfiles to `$HOME`. The file list is defined in the script itself. It backs up existing files (appends `.bak`) before creating symlinks. Run `./install.sh` and confirm with "y" to deploy.
-
-Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory jumping), `mise` (runtime manager), `ghostty` (terminal).
+The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to install all packages from the `Brewfile`, then symlinks dotfiles to `$HOME`. The dotfile list is defined in the script itself. It backs up existing files (appends `.bak`) before creating symlinks. Run `./install.sh` and confirm with "y" to deploy.
 
 ## Architecture
 
@@ -24,6 +22,7 @@ Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory j
 
 ## Active Config Files
 
+- `Brewfile` — all Homebrew packages, casks, and Mac App Store apps
 - `.zshrc` — shell environment, history, completion, keybindings, PATH, tool init
 - `.alias` — shared shell aliases
 - `.vimrc` — vim settings, key mappings, status line
@@ -41,11 +40,12 @@ Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory j
 - Git config includes `~/.gitconfig.local` for machine-specific settings (e.g., work email)
 - No git aliases; git operations are delegated to AI agents
 
-## When Editing Dotfiles
+## When Editing
 
 - Changes to `.alias` affect the zsh shell
 - Changes to `.zshrc` affect zsh directly
 - The `files` array in `install.sh` must be updated when adding new dotfiles
+- To add or remove packages/apps, edit the `Brewfile` and run `brew bundle`
 
 ## Workflow
 

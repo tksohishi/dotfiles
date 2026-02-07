@@ -3,6 +3,17 @@ set -e
 
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Install Homebrew if not present
+if ! command -v brew &>/dev/null; then
+    echo "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# Install all packages, apps, and App Store apps
+echo "Installing packages from Brewfile..."
+brew bundle --file="$DOTFILES_DIR/Brewfile"
+
+# Symlink dotfiles
 files=(
     .alias
     .vimrc
@@ -15,7 +26,8 @@ files=(
     .config/mise/config.toml
 )
 
-echo "This will symlink the following files to $HOME:"
+echo ""
+echo "Symlinking dotfiles to $HOME:"
 echo ""
 printf "  %s\n" "${files[@]}"
 echo ""
@@ -40,5 +52,4 @@ for f in "${files[@]}"; do
 done
 
 echo ""
-echo "Done. Install prerequisites with:"
-echo "  brew install starship zoxide mise ghostty"
+echo "Done."
