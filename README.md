@@ -20,11 +20,11 @@ This will:
 Edit the `Brewfile` and run:
 
 ```shell
-brew bundle --file=~/.dotfiles/Brewfile
+brew bundle
 ```
 
 To check for installed packages not listed in the Brewfile:
 
 ```shell
-brew bundle cleanup --file=~/.dotfiles/Brewfile
+brew bundle cleanup
 ```

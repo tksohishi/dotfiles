@@ -2,6 +2,7 @@
 
 # Environment
 export EDITOR=vim
+export HOMEBREW_BUNDLE_FILE=~/.dotfiles/Brewfile
 
 # History
 HISTFILE=~/.zsh_history

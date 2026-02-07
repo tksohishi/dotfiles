@@ -11,7 +11,7 @@ fi
 
 # Install all packages, apps, and App Store apps
 echo "Installing packages from Brewfile..."
-brew bundle --file="$DOTFILES_DIR/Brewfile"
+HOMEBREW_BUNDLE_FILE="$DOTFILES_DIR/Brewfile" brew bundle
 
 # Symlink dotfiles
 files=(
