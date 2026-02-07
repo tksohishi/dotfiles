@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 fi
 
 # LANG
-export LANG=ja_JP.UTF-8
+# export LANG=ja_JP.UTF-8
 
 # EDITOR is vim
 export EDITOR=vim
@@ -26,26 +26,18 @@ if [ -f $HOME/.alias.local ]; then
     source $HOME/.alias.local
 fi
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
+# historical forward/backward search with linehead string
+# Only works in an interactive mode
+if [[ $- == *i* ]]; then
+    bind '"\C-p": history-search-backward'
+    bind '"\C-n": history-search-forward'
 fi
-
-# historical backward search with linehead string
-bind '"\C-p": history-search-backward'
-# historical forward search with linehead string
-bind '"\C-n": history-search-forward'
 
 # oh-my-zsh config
 export ZSH_CUSTOM=$HOME/.zsh_custom
 
 # Hide 'default interactive shell is now zsh'
 export BASH_SILENCE_DEPRECATION_WARNING=1
-
-# To launch `tmux` from bash if installed via homebrew
-if [ -f /opt/homebrew/bin/tmux ]; then
-    alias tmux=/opt/homebrew/bin/tmux
-fi
 
 # Launch `ssh-agent` by default
 if [ -f ~/.ssh/id_ed25519 ]; then
@@ -54,3 +46,22 @@ if [ -f ~/.ssh/id_ed25519 ]; then
     ssh-add --apple-use-keychain ~/.ssh/id_ed25519
   fi
 fi
+
+# PATH settings
+
+# golang
+[ -d /usr/local/go ] && export PATH=$PATH:/usr/local/go/bin
+[ -d $HOME/.go ] && export GOPATH=$HOME/.go
+[ -d $GOPATH ] && export PATH=$PATH:$GOPATH/bin
+
+# ~/.local/bin
+[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
+
+# homebrew on Apple Silicon Macs
+[ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
+
+# mise
+[ -f $HOME/.local/bin/mise ] && eval "$(mise activate bash)"
+
+PS1='\[\e[1;37m\]\u@\h \[\e[1;36m\]\w \$\[\e[0m\] '
+
