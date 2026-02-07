@@ -1,5 +1,3 @@
-alias where="command -v"
-
 alias la="ls -a"
 alias lf="ls -F"
 alias ll="ls -l"
@@ -7,54 +5,14 @@ alias ll="ls -l"
 alias du="du -h"
 alias df="df -h"
 
-alias su="su -l"
-
 alias grep="grep --color=auto"
-
-alias mysqlr="mysql -uroot -p"
-
-alias svncdiff="svn diff --diff-cmd=colordiff"
-alias svns="svn status -u"
-
-alias cpanm="cpanm -v"
-
-alias vi='vim'
-alias mvim='open -a macvim "$@"'
-alias mview='open -a macvim "$@" --args -R'
-
-alias oscreen='screen -dRR takeshi'
-# TODO: only works on Mac with homebrew
-alias otmux='/opt/homebrew/bin/tmux attach || /opt/homebrew/bin/tmux new'
-
-alias cassandra-cli-lo='cassandra-cli -host localhost -port 9160'
-
-alias now='date +%Y%m%d%H%M%S'
-
-alias rt='rake test'
-alias rtu='rake test:units'
-alias rtf='rake test:functionals'
-alias rti='rake test:integration'
-
-alias basource='source ~/.bashrc'
-alias zsource='source ~/.zshrc'
-
-alias rrehash='rehash && rbenv rehash'
-
-alias mou='open -a Mou "$@"'
-
-alias sc='script/console'
-
-alias cdiff='colordiff'
 alias less='less -R'
 
-alias gt="git tree"
-alias gcd="git checkout develop"
-alias gitclear="git status -s | sed -E 's/^.{3}//' | xargs git checkout"
-alias gitcleanup="git branch --merged | grep -v "\*" | grep -v master | grep -v develp | xargs -n 1 git branch -d"
+alias vi='vim'
 
-alias agtodo="ag 'TODO: \(takeshi\)'"
-alias agfixme="ag 'FIXME: \(takeshi\)'"
+alias otmux='/opt/homebrew/bin/tmux attach || /opt/homebrew/bin/tmux new'
 
+alias now='date +%Y%m%d%H%M%S'
 alias dmkdir="mkdir `date +'%Y-%m-%d'`"
-
 alias psgrep='ps aux | egrep -v "grep" | grep '
+alias zsource='source ~/.zshrc'
