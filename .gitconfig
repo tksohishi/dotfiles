@@ -1,67 +1,12 @@
 [user]
     name = Takeshi Ohishi
     email = tks.ohishi@gmail.com
-# ref: http://d.hatena.ne.jp/tokuhirom/20081212/1229080990
-[color]
-    branch = auto
-    diff = auto
-    status = auto
-[color "branch"]
-    current = yellow bold
-    local = yellow
-    remote = blue
-[color "diff"]
-    meta = yellow bold
-    frag = magenta bold
-    old = red bold
-    new = blue bold
-[color "status"]
-    added = yellow
-    changed = blue
-    untracked = cyan
 [color]
     ui = true
 [core]
-    whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
     editor = vim
     excludesfile = ~/.gitignore_global
     quotepath = false
-[branch]
-    autosetupmerge = true
-[alias]
-    a = add -v
-    b = for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads/
-    c = commit
-    d = diff
-    f = fetch -v -p
-    l = log -p
-    p = pull --ff-only
-    r = remote -v
-    s = status -s
-
-    aa = add -v .
-    br = branch
-    ca = commit --amend --no-verify
-    chekcout = checkout
-    ci = commit -a
-    cm = checkout master
-    co = checkout
-    copre = checkout -
-    d = diff --compaction-heuristic
-    dc = diff --cached
-    df = diff
-    dm = diff master
-    fetchall = fetch -v --all
-    fixup = commit --amend -C HEAD
-    last = log -1 HEAD
-    sp = stash pop
-    st = status
-    tree = log --graph --pretty=oneline --abbrev-commit --decorate
-    unstage = reset HEAD --
-    # http://stackoverflow.com/questions/1753070/git-ignore-files-only-locally
-    ignore = update-index --assume-unchanged
-    unignore = update-index --no-assume-unchanged
-    ignored = !git ls-files -v | grep "^[[:lower:]]"
 [diff]
     renames = true
 [tig "bind"]
@@ -73,4 +18,3 @@
     path = ~/.gitconfig.local
 
 # vim: sw=4 ts=4
-
