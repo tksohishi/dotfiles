@@ -4,7 +4,6 @@
 .zshrc
 .gitignore_global
 .tmux.conf
-.editorconfig
 .config/starship.toml
 .config/ghostty/config
 .config/mise/config.toml
