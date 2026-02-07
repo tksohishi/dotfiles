@@ -1,0 +1,4 @@
+# https://ghostty.org/docs/config/reference
+background-opacity = 0.9
+confirm-close-surface = false
+

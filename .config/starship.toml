@@ -1,0 +1,22 @@
+# Muse-inspired one-liner prompt
+add_newline = false
+
+format = """$directory$git_branch$git_status$character"""
+
+[directory]
+style = "117"
+truncation_length = 0
+truncate_to_repo = false
+
+[git_branch]
+format = " [\\($branch\\)](12)"
+
+[git_status]
+format = "([ $all_status$ahead_behind](133))"
+modified = "✘"
+staged = "✔"
+untracked = "?"
+
+[character]
+success_symbol = " [ᐅ](77)"
+error_symbol = " [ᐅ](red)"

@@ -8,13 +8,14 @@
 .colordiffrc
 .my.cnf
 .irbrc
-.bashrc
-.bash_profile
 .gemrc
 .rvmrc
-.zsh_custom
+.zshrc
 .gitignore_global
 .tmux.conf
 .ackrc
 .lldbinit
 .editorconfig
+.config/starship.toml
+.config/ghostty/config
+.config/mise/config.toml
