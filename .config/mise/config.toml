@@ -1,3 +1,6 @@
+[settings]
+trusted_config_paths = ["~/.dotfiles"]
+
 [tools]
 node = "24.13"
 python = "3.13"
