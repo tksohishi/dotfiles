@@ -1,6 +1,5 @@
 .alias
 .vimrc
-.gvimrc
 .gitconfig
 .zshrc
 .gitignore_global
