@@ -39,20 +39,16 @@ cask "ghostty"
 cask "google-chrome"
 cask "granola"
 cask "libreoffice"
-cask "loom"
 cask "notion-calendar"
 cask "rectangle"
 cask "session-manager-plugin"
-cask "signal"
 cask "slack"
 cask "spotify"
 cask "ticktick"
 cask "todoist"
 cask "visual-studio-code"
-cask "windsurf"
 cask "zoom"
 
-mas "Bear", id: 1091189122
 mas "CotEditor", id: 1024640650
 mas "Day One", id: 1055511498
 mas "Keynote", id: 409183694
