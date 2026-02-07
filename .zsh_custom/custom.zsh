@@ -20,19 +20,3 @@ zle -N history-beginning-search-forward-end history-search-end
 bindkey "^p" history-beginning-search-backward-end
 bindkey "^n" history-beginning-search-forward-end
 bindkey "\\en" history-beginning-search-forward-end
-
-# PATH
-
-# golang
-[ -d /usr/local/go ] && export PATH=$PATH:/usr/local/go/bin
-[ -d $HOME/.go ] && export GOPATH=$HOME/.go
-[ -d $GOPATH ] && export PATH=$PATH:$GOPATH/bin
-
-# ~/.local/bin
-[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
-
-# homebrew on Apple Silicon Macs
-[ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
-
-# mise
-[ -f $HOME/.local/bin/mise ] && eval "$($HOME/.local/bin/mise activate zsh)"
