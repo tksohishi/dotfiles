@@ -7,7 +7,6 @@ set shiftwidth=4
 set expandtab
 set smarttab
 set autoindent
-set smartindent
 
 " Search
 set wrapscan
