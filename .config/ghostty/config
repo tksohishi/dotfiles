@@ -3,4 +3,5 @@ background-opacity = 0.9
 confirm-close-surface = false
 window-height = 9999
 window-width = 9999
+window-inherit-working-directory = false
 
