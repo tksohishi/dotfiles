@@ -1,7 +1,7 @@
 # Muse-inspired one-liner prompt
 add_newline = false
 
-format = """$directory$git_branch$git_status$python$nodejs$cmd_duration$character"""
+format = """$cmd_duration$directory$git_branch$git_status$python$nodejs$character"""
 
 [directory]
 style = "117"
@@ -26,8 +26,8 @@ format = " [$version](green)"
 detect_extensions = []
 
 [cmd_duration]
-min_time = 2000
-format = " [$duration](220)"
+min_time = 60000
+format = "[$duration](220)\n"
 
 [character]
 success_symbol = " [ᐅ](77)"
