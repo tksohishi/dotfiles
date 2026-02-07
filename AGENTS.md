@@ -34,3 +34,8 @@ Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory j
 - Changes to `.alias` affect the zsh shell
 - Changes to `.zshrc` affect zsh directly
 - The `list` file must be updated when adding new dotfiles that need symlinking
+
+## Workflow
+
+- The working directory is already `~/.dotfiles/`, no need to specify paths with `-C` or `cd`
+- When changing a group of related files for a single purpose, commit and push together before moving on
