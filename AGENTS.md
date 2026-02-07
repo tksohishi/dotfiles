@@ -4,13 +4,13 @@ This file provides guidance to AI coding agents working with code in this reposi
 
 ## Overview
 
-Personal dotfiles repository for macOS/Linux. Manages shell configs, editor settings, git config, and tool preferences via symlinks from `~/.dotfiles/` to `$HOME`.
+Personal dotfiles repository for macOS. Manages shell configs, editor settings, git config, and tool preferences via symlinks from `~/.dotfiles/` to `$HOME`.
 
 ## Setup and Deployment
 
 The `bootstrap.sh` script symlinks files listed in `list` to the home directory. It backs up existing files (appends `.org`) before creating symlinks. Run `./bootstrap.sh` and confirm with "yes" to deploy.
 
-Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory jumping), `mise` (runtime manager).
+Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory jumping), `mise` (runtime manager), `ghostty` (terminal).
 
 ## Architecture
 
@@ -22,12 +22,24 @@ Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory j
 
 **Archived configs:** Legacy configs are preserved in `_archive/` but no longer active.
 
+## Active Config Files
+
+- `.zshrc` — shell environment, history, completion, keybindings, PATH, tool init
+- `.alias` — shared shell aliases
+- `.vimrc` — vim settings, key mappings, status line
+- `.gitconfig` — user, color, core settings, local include
+- `.gitignore_global` — OS/editor/secrets ignore patterns
+- `.tmux.conf` — terminal type, mouse, status bar, vi copy mode
+- `.config/starship.toml` — prompt with git, python, node, cmd_duration
+- `.config/ghostty/config` — font, opacity, window size, tab behavior
+- `.config/mise/config.toml` — node and python runtime versions
+
 ## Key Conventions
 
 - Keep configs minimal and simple
 - `vim` is the default editor everywhere (shell EDITOR, git core.editor, tmux vi-keys)
 - Git config includes `~/.gitconfig.local` for machine-specific settings (e.g., work email)
-- Indentation: 4 spaces by default (`.editorconfig`), 2 spaces for `.coffee` and `.html`
+- No git aliases; git operations are delegated to AI agents
 
 ## When Editing Dotfiles
 
