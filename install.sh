@@ -3,6 +3,10 @@ set -e
 
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Ask for sudo password upfront and keep session alive
+sudo -v
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
 # Install Homebrew if not present
 if ! command -v brew &>/dev/null; then
     echo "Installing Homebrew..."
