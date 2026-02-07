@@ -2,8 +2,6 @@
 
 # Environment
 export EDITOR=vim
-export REPORTTIME=10
-export LANG=ja_JP.UTF-8
 
 # History
 HISTFILE=~/.zsh_history
@@ -39,9 +37,6 @@ bindkey "^n" history-beginning-search-forward-end
 # PATH
 [ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
 [ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
-[ -d /usr/local/go ] && export PATH=$PATH:/usr/local/go/bin
-[ -d $HOME/.go ] && export GOPATH=$HOME/.go && export PATH=$PATH:$GOPATH/bin
-[ -d $HOME/.cargo/bin ] && export PATH=$PATH:$HOME/.cargo/bin
 
 # ssh-agent (macOS keychain)
 if [ -f ~/.ssh/id_ed25519 ]; then
