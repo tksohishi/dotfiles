@@ -1,29 +1,14 @@
 # dotfiles
 
-## How to setup
-
-### clone repository in home directory
+## Setup
 
 ```shell
 git clone git@github.com:tksohishi/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
-git submodule update --init
+~/.dotfiles/install.sh
 ```
 
-### run bootstrap.sh
+## Prerequisites
 
 ```shell
-./bootstrap.sh
-```
-
-  input 'y' to have done
-
-### Set up vim
-
-```shell
-mkdir -p ~/.vim/bundle
-cd ~/.vim/bundle
-git clone https://github.com/Shougo/neobundle.vim.git
-vim
-# Run Neobundle/Install
+brew install starship zoxide mise ghostty
 ```

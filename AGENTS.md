@@ -8,7 +8,7 @@ Personal dotfiles repository for macOS. Manages shell configs, editor settings, 
 
 ## Setup and Deployment
 
-The `bootstrap.sh` script symlinks files listed in `list` to the home directory. It backs up existing files (appends `.org`) before creating symlinks. Run `./bootstrap.sh` and confirm with "yes" to deploy.
+The `install.sh` script symlinks dotfiles to `$HOME`. The file list is defined in the script itself. It backs up existing files (appends `.bak`) before creating symlinks. Run `./install.sh` and confirm with "y" to deploy.
 
 Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory jumping), `mise` (runtime manager), `ghostty` (terminal).
 
@@ -45,7 +45,7 @@ Prerequisites (install via homebrew): `starship` (prompt), `zoxide` (directory j
 
 - Changes to `.alias` affect the zsh shell
 - Changes to `.zshrc` affect zsh directly
-- The `list` file must be updated when adding new dotfiles that need symlinking
+- The `files` array in `install.sh` must be updated when adding new dotfiles
 
 ## Workflow
 

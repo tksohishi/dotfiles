@@ -1,9 +1,0 @@
-.alias
-.vimrc
-.gitconfig
-.zshrc
-.gitignore_global
-.tmux.conf
-.config/starship.toml
-.config/ghostty/config
-.config/mise/config.toml
