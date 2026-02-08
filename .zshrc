@@ -1,5 +1,9 @@
 # .zshrc - minimal standalone zsh config
 
+# PATH (early, needed for tmux auto-attach)
+[ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
+[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
+
 # Auto-attach tmux
 if command -v tmux &>/dev/null && [ -z "$TMUX" ]; then
   tmux new-session -A -s main
@@ -39,10 +43,6 @@ bindkey "^n" history-beginning-search-forward-end
 [ -f ~/.alias ] && source ~/.alias
 [ -f ~/.alias.local ] && source ~/.alias.local
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
-
-# PATH
-[ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
-[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
 
 # ssh-agent (macOS keychain)
 if [ -f ~/.ssh/id_ed25519 ]; then
