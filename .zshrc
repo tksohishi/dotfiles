@@ -1,5 +1,10 @@
 # .zshrc - minimal standalone zsh config
 
+# Auto-attach tmux
+if command -v tmux &>/dev/null && [ -z "$TMUX" ]; then
+  tmux new-session -A -s main
+fi
+
 # Environment
 export EDITOR=vim
 export HOMEBREW_BUNDLE_FILE=~/.dotfiles/Brewfile
