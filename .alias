@@ -1,6 +1,4 @@
-alias la="ls -a"
-alias lf="ls -F"
-alias ll="ls -l"
+alias ls="ls -GF"
 
 alias du="du -h"
 alias df="df -h"
@@ -10,9 +8,5 @@ alias less='less -R'
 
 alias vi='vim'
 
-alias otmux='/opt/homebrew/bin/tmux attach || /opt/homebrew/bin/tmux new'
-
-alias now='date +%Y%m%d%H%M%S'
-alias dmkdir="mkdir `date +'%Y-%m-%d'`"
-alias psgrep='ps aux | egrep -v "grep" | grep '
 alias zsource='source ~/.zshrc'
+alias tsource='tmux source ~/.tmux.conf'
