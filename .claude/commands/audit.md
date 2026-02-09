@@ -8,11 +8,12 @@ Audit the current machine's installed packages against the Brewfile at `~/.dotfi
 Follow these steps:
 
 1. Find untracked packages (installed but not in Brewfile):
-   - Run `brew bundle cleanup ` to list packages not in the Brewfile
+   - Run `brew bundle cleanup` to list packages not in the Brewfile
    - Run `ls /Applications/` to find GUI apps not managed by Homebrew at all
 
 2. Find missing packages (in Brewfile but not installed):
-   - Run `brew bundle check  --verbose` to list packages in the Brewfile that aren't installed
+   - Run `brew bundle check --verbose` to list packages in the Brewfile that aren't installed
+   - Cross-check against `ls /Applications/` and `mas list` since some may be installed outside Homebrew
 
 3. Present a summary with two sections:
 
@@ -21,6 +22,7 @@ Follow these steps:
    - Suggest whether to add it to the Brewfile or uninstall it
 
    **Missing** (in Brewfile but not installed):
+   - Distinguish between truly missing apps and apps installed outside Homebrew
    - List each package
    - Ask if they should be installed or removed from the Brewfile
 
