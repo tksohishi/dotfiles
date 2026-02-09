@@ -23,8 +23,7 @@ Follow these steps:
    - Commit with message like "Remove <name> from Brewfile"
    - `git push origin main`
 
-4. Tell the user the command to run to uninstall the app:
-   - For formulae: `brew uninstall <name>`
-   - For casks: `brew uninstall --cask <name>`
-   - For Mac App Store: `mas uninstall <id>`
-   - Do NOT run the uninstall command yourself, as it may require sudo
+4. Uninstall the app:
+   - For formulae: run `brew uninstall <name>`
+   - For casks: run `brew uninstall --cask <name>`
+   - For Mac App Store: tell the user to run `mas uninstall <id>` (requires sudo)

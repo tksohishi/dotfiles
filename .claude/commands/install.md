@@ -26,8 +26,7 @@ Follow these steps:
    - Commit with message like "Add <name> to Brewfile"
    - `git push origin main`
 
-4. Tell the user the command to run to install the app:
-   - For formulae: `brew install <name>`
-   - For casks: `brew install --cask <name>`
-   - For Mac App Store: `mas install <id>`
-   - Do NOT run the install command yourself, as it may require sudo
+4. Install the app:
+   - For formulae: run `brew install <name>`
+   - For casks: run `brew install --cask <name>`
+   - For Mac App Store: tell the user to run `mas install <id>` (requires sudo)
