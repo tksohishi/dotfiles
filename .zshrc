@@ -1,13 +1,8 @@
 # .zshrc - minimal standalone zsh config
 
-# PATH (early, needed for tmux auto-attach)
+# PATH
 [ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
 [ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
-
-# Auto-attach tmux
-if command -v tmux &>/dev/null && [ -z "$TMUX" ]; then
-  tmux new-session -A -s main
-fi
 
 # Environment
 export EDITOR=vim
