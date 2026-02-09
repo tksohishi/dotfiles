@@ -22,7 +22,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 
 ## Active Config Files
 
-- `Brewfile` — all Homebrew packages, casks, and Mac App Store apps
+- `Brewfile` — all Homebrew packages, casks, Mac App Store apps, and manual install reminders
 - `.zshrc` — shell environment, history, completion, keybindings, PATH, tool init
 - `.alias` — shared shell aliases
 - `.vimrc` — vim settings, key mappings, status line
@@ -45,7 +45,8 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - Changes to `.alias` affect the zsh shell
 - Changes to `.zshrc` affect zsh directly
 - The `files` array in `install.sh` must be updated when adding new dotfiles
-- To add or remove packages/apps, edit the `Brewfile` and run `brew bundle`
+- To add or remove packages/apps, use the `/install` and `/uninstall` commands
+- For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
 
 ## Workflow
 
