@@ -37,7 +37,7 @@ cask "cmd-eikana"
 cask "codex-app"
 cask "cursor"
 cask "discord"
-cask "docker"
+cask "docker-desktop"
 cask "dropbox"
 cask "firefox"
 cask "ghostty"
@@ -66,4 +66,5 @@ mas "Speedtest", id: 1153157709
 mas "Tailscale", id: 1475387142
 mas "Telegram", id: 747648890
 mas "The Unarchiver", id: 425424353
+mas "DaVinci Resolve", id: 571213070
 mas "Xcode", id: 497799835
