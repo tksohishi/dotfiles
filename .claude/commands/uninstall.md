@@ -25,5 +25,5 @@ Follow these steps:
 
 4. Uninstall the app:
    - For formulae: run `brew uninstall <name>`
-   - For casks: run `brew uninstall --cask <name>`
+   - For casks: run `brew uninstall --cask <name>`. If it fails due to sudo/permission errors, tell the user to manually remove the listed files with `sudo rm -rf <paths>` then retry the brew uninstall
    - For Mac App Store: tell the user to run `mas uninstall <id>` (requires sudo)
