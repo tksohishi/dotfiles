@@ -6,3 +6,6 @@ window-height = 9999
 window-width = 9999
 window-inherit-working-directory = false
 
+# Shift+Enter for Claude Code inside tmux (Ghostty native support skips /terminal-setup)
+keybind = shift+enter=text:\x1b\r
+
