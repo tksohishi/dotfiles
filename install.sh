@@ -57,3 +57,13 @@ done
 
 echo ""
 echo "Done."
+
+# Remind about apps that need manual installation
+manual=$(grep '^# Manual install:' "$DOTFILES_DIR/Brewfile" | sed 's/^# Manual install: //')
+if [ -n "$manual" ]; then
+    echo ""
+    echo "The following apps need manual installation:"
+    echo "$manual" | while read -r app; do
+        echo "  - $app"
+    done
+fi
