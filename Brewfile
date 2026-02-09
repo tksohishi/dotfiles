@@ -67,5 +67,5 @@ mas "Speedtest", id: 1153157709
 mas "Tailscale", id: 1475387142
 mas "Telegram", id: 747648890
 mas "The Unarchiver", id: 425424353
-mas "DaVinci Resolve", id: 571213070
+# Manual install: DaVinci Resolve (https://www.blackmagicdesign.com/products/davinciresolve)
 mas "Xcode", id: 497799835
