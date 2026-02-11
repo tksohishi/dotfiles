@@ -7,5 +7,5 @@
 *.pyc
 *.pyo
 .env
-.env.local
-.claude/
+*.local
+*.local.*
