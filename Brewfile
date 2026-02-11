@@ -1,5 +1,6 @@
 brew "act"
 brew "awscli"
+brew "caddy"
 brew "cmake"
 brew "coreutils"
 brew "direnv"
