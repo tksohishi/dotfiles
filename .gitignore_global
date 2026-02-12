@@ -9,3 +9,5 @@
 .env
 *.local
 *.local.*
+*.override
+*.override.*
