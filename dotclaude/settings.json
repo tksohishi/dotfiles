@@ -24,7 +24,7 @@
       "Bash(gh api:*)",
       "Bash(gh repo view:*)",
       "WebSearch",
-      "WebFetch(domain:*)"
+      "WebFetch"
     ],
     "deny": [
       "Bash(git -C:*)",
