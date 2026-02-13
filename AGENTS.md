@@ -32,6 +32,9 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `.config/starship.toml` — prompt with git, python, node, cmd_duration
 - `.config/ghostty/config` — font, opacity, window size, tab behavior
 - `.config/mise/config.toml` — node and python runtime versions
+- `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`
+- `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
+- `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
 
 ## Key Conventions
 

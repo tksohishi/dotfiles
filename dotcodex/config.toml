@@ -1,0 +1,15 @@
+# TODO: Codex does not support config.local.toml or symlinks for config.toml.
+# Tracked base config is merged with local [projects] entries by install.sh.
+# https://github.com/openai/codex/issues/11061
+
+model = "gpt-5.2"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+
+web_search = "live"
+
+[analytics]
+enabled = false
+
+[feedback]
+enabled = false
