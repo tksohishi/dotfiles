@@ -18,6 +18,9 @@
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
 - No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
 
+## Shell Commands
+- Break compound commands (pipes, &&, redirections) into separate steps so each matches an existing permission rule and avoids unnecessary prompts
+
 ## Commits
 - Never add the AI agent as a commit author or co-author
 - Always commit using the default git settings
