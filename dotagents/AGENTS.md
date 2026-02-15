@@ -17,4 +17,3 @@
 ## Commits
 - Never add the AI agent as a commit author or co-author
 - Always commit using the default git settings
-- After making changes, always commit and push before moving on
