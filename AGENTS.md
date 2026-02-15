@@ -55,4 +55,5 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 ## Workflow
 
 - The working directory is already `~/.dotfiles/`. Do NOT use `git -C`, `cd`, or absolute paths in git/shell commands. Just run `git status`, `git add .zshrc`, etc. directly.
-- When changing a group of related files for a single purpose, commit and push together before moving on
+- After making changes, always commit and push before moving on
+- When changing a group of related files for a single purpose, commit and push together
