@@ -55,8 +55,8 @@ cask "simple-comic"
 cask "slack"
 cask "spotify"
 cask "ticktick"
-cask "visual-studio-code"
-cask "zoom"
+cask "visual-studio-code" # Password prompt: shell command
+cask "zoom" # Password prompt: audio device
 
 mas "CotEditor", id: 1024640650
 mas "Day One", id: 1055511498

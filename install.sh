@@ -12,6 +12,12 @@ done
 
 if [ "$SKIP_BREW" = false ]; then
     # Ask for sudo password upfront and keep session alive
+    echo "You will be prompted for your macOS password for Homebrew setup."
+    password_casks=$(grep '# Password prompt:' "$DOTFILES_DIR/Brewfile" | sed 's/.*cask "\([^"]*\)".*/\1/')
+    if [ -n "$password_casks" ]; then
+        echo "These casks will also prompt for your password during installation:"
+        echo "$password_casks" | while read -r c; do echo "  - $c"; done
+    fi
     sudo -v
     while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
