@@ -15,7 +15,6 @@ brew "mysql"
 brew "ollama"
 brew "pandoc"
 brew "poppler"
-brew "postgresql@14", restart_service: :changed
 brew "redis", restart_service: :changed
 brew "ripgrep"
 brew "starship"
