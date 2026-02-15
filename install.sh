@@ -130,6 +130,18 @@ else
 fi
 rm -f "$codex_tmp"
 
+# ── App customizations ────────────────────────────────────────
+ime_app="/Library/Input Methods/GoogleJapaneseInput.app"
+ime_icons="$DOTFILES_DIR/resources/google-japanese-ime"
+if [ -d "$ime_app" ] && [ -d "$ime_icons" ]; then
+    echo ""
+    echo "Replacing Google Japanese IME menu bar icons with dark variants..."
+    for f in "$ime_icons"/*.tiff; do
+        sudo cp "$f" "$ime_app/Contents/Resources/$(basename "$f")"
+    done
+    echo "Done. Restart your Mac for the new icons to take effect."
+fi
+
 echo ""
 echo "Done."
 

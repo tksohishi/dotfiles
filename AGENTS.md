@@ -35,6 +35,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
+- `resources/google-japanese-ime/` — dark menu bar icons for Google Japanese IME (from Mozc)
 
 ## Key Conventions
 
