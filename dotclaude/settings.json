@@ -24,7 +24,6 @@
       "Bash(git rev-parse *)",
       "Bash(git tag *)",
       "Bash(git remote *)",
-
       "Bash(gh pr *)",
       "Bash(gh issue *)",
       "Bash(gh api *)",
@@ -32,7 +31,6 @@
       "Bash(gh run *)",
       "Bash(gh browse *)",
       "Bash(gh search *)",
-
       "Bash(brew install *)",
       "Bash(brew uninstall *)",
       "Bash(brew list *)",
@@ -45,7 +43,6 @@
       "Bash(mas list *)",
       "Bash(mas search *)",
       "Bash(mas install *)",
-
       "Bash(ls *)",
       "Bash(pwd)",
       "Bash(which *)",
@@ -53,7 +50,6 @@
       "Bash(tree *)",
       "Bash(* --version)",
       "Bash(* --help)",
-
       "WebSearch",
       "WebFetch"
     ],
