@@ -52,6 +52,11 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
 - This is a public repo. Never commit personal information (API keys, tokens, personal URLs, email addresses, domain allowlists, etc.) to `dotagents/`, `dotclaude/`, or `dotcodex/`. Use `.local`/`.override` files for machine-specific or private settings.
 
+## Terminology
+
+- "AGENTS" or "AGENTS.md" = this file (`AGENTS.md` at the repo root, symlinked as `CLAUDE.md`)
+- "the global AGENTS" = `dotagents/AGENTS.md` (symlinked to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`)
+
 ## Workflow
 
 - The working directory is already `~/.dotfiles/`. Do NOT use `git -C`, `cd`, or absolute paths in git/shell commands. Just run `git status`, `git add .zshrc`, etc. directly.
