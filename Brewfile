@@ -33,7 +33,6 @@ cask "cmd-eikana"
 cask "codex-app"
 cask "cursor"
 cask "discord"
-cask "docker-desktop" # Password prompt: privileged helper
 cask "dropbox"
 cask "firefox"
 cask "ghostty"
