@@ -14,6 +14,10 @@
 - Front-load critical info (warnings, key concepts first)
 - Default to 1-2 sentence explanations; only expand when complexity requires it
 
+## Code Style
+- Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
+- No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
+
 ## Commits
 - Never add the AI agent as a commit author or co-author
 - Always commit using the default git settings
