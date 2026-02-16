@@ -31,7 +31,6 @@ cask "chatgpt"
 cask "chatgpt-atlas"
 cask "claude"
 cask "cmd-eikana"
-cask "codex-app"
 cask "cursor"
 cask "discord"
 cask "dropbox"
@@ -63,5 +62,6 @@ mas "Tailscale", id: 1475387142
 mas "Telegram", id: 747648890
 mas "The Unarchiver", id: 425424353
 # Manual install: Claude Code (claude install)
+# Manual install: Codex (https://openai.com/index/introducing-codex/)
 # Manual install: DaVinci Resolve (https://www.blackmagicdesign.com/products/davinciresolve)
 mas "Xcode", id: 497799835

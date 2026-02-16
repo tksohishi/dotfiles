@@ -50,6 +50,7 @@
       "Bash(tree *)",
       "Bash(* --version)",
       "Bash(* --help)",
+      "Bash(jq *)",
       "WebSearch",
       "WebFetch"
     ],
