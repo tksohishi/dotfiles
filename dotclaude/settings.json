@@ -60,6 +60,7 @@
     ]
   },
   "enabledPlugins": {
-    "document-skills@anthropic-agent-skills": true
+    "document-skills@anthropic-agent-skills": true,
+    "swift-lsp@claude-plugins-official": true
   }
 }
