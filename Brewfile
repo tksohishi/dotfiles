@@ -40,7 +40,6 @@ cask "google-japanese-ime" # Password prompt: input method
 cask "granola"
 cask "ledger-wallet"
 cask "libreoffice"
-cask "logi-options+" # Password prompt: driver
 cask "notion-calendar"
 cask "rectangle"
 cask "session-manager-plugin" # Password prompt: system plugin
