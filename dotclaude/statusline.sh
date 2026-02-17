@@ -10,7 +10,7 @@ used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 cwd=$(echo "$input" | jq -r '.workspace.current_dir')
 
 # -- Colors --
-green=$'\e[32m'
+green=$'\e[92m'
 yellow=$'\e[33m'
 red=$'\e[31m'
 dim=$'\e[2m'
