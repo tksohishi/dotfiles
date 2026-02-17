@@ -101,6 +101,18 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/settings.json -> ~/.claude/settings.json"
 
+# Claude Code status line script
+target="$HOME/.claude/statusline.sh"
+source="$DOTFILES_DIR/dotclaude/statusline.sh"
+if [ -L "$target" ]; then
+    rm "$target"
+elif [ -f "$target" ]; then
+    echo "Backing up $target to $target.bak"
+    mv "$target" "$target.bak"
+fi
+ln -s "$source" "$target"
+echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
+
 # Suggest installing enabled Claude Code plugins
 plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$source" 2>/dev/null)
 if [ -n "$plugins" ]; then

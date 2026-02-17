@@ -53,5 +53,9 @@
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": true,
     "swift-lsp@claude-plugins-official": true
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$HOME/.claude/statusline.sh\""
   }
 }
