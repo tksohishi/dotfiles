@@ -48,6 +48,7 @@ cask "slack"
 cask "spotify"
 cask "ticktick"
 cask "visual-studio-code" # Password prompt: shell command
+cask "voiceink"
 cask "zoom" # Password prompt: audio device
 
 mas "CotEditor", id: 1024640650
