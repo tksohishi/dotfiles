@@ -26,4 +26,10 @@ Follow these steps:
    - List each package
    - Ask if they should be installed or removed from the Brewfile
 
-4. Wait for the user to decide what to do before making any changes.
+4. Audit Claude Code plugins:
+   - Read `enabledPlugins` from `~/.dotfiles/dotclaude/settings.json` (using jq)
+   - Read installed plugins from `~/.claude/plugins/installed_plugins.json` (using jq)
+   - List any plugins that are enabled but not installed, and suggest the `/plugin install` command for each
+   - List any plugins that are installed but not enabled, and ask whether to enable or uninstall them
+
+5. Wait for the user to decide what to do before making any changes.
