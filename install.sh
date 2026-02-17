@@ -101,6 +101,16 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/settings.json -> ~/.claude/settings.json"
 
+# Suggest installing enabled Claude Code plugins
+plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$source" 2>/dev/null)
+if [ -n "$plugins" ]; then
+    echo ""
+    echo "Claude Code plugins to install (run inside Claude Code):"
+    echo "$plugins" | while read -r plugin; do
+        echo "  /plugin install $plugin"
+    done
+fi
+
 # Codex config (merge, not symlink; Codex overwrites symlinks)
 # https://github.com/openai/codex/issues/11061
 codex_src="$DOTFILES_DIR/dotcodex/config.toml"
