@@ -38,6 +38,7 @@
       "Bash(* --version)",
       "Bash(* --help)",
       "Bash(jq *)",
+      "Bash(pgrep *)",
       "WebSearch",
       "WebFetch"
     ],
