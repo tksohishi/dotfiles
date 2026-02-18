@@ -35,6 +35,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
+- `scripts/setup-gog.sh` — one-time Google Cloud project + gog CLI auth setup
 
 ## Key Conventions
 
@@ -42,6 +43,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `vim` is the default editor everywhere (shell EDITOR, git core.editor, tmux vi-keys)
 - Git config includes `~/.gitconfig.local` for machine-specific settings (e.g., work email)
 - No git aliases; git operations are delegated to AI agents
+- gog CLI provides Gmail/Calendar access; read commands are auto-approved, write commands prompt for confirmation
 
 ## When Editing
 

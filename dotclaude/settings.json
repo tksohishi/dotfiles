@@ -2,7 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "DISABLE_TELEMETRY": "1"
+    "DISABLE_TELEMETRY": "1",
+    "GOG_JSON": "1"
   },
   "attribution": {
     "commit": "",
@@ -39,6 +40,14 @@
       "Bash(* --help)",
       "Bash(jq *)",
       "Bash(pgrep *)",
+      "Bash(gog gmail search *)",
+      "Bash(gog gmail labels *)",
+      "Bash(gog gmail read *)",
+      "Bash(gog gmail threads *)",
+      "Bash(gog calendar list *)",
+      "Bash(gog calendar events *)",
+      "Bash(gog auth status *)",
+      "Bash(gog auth list *)",
       "WebSearch",
       "WebFetch"
     ],

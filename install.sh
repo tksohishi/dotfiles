@@ -164,3 +164,8 @@ if [ -n "$manual" ]; then
         echo "  - $app"
     done
 fi
+
+if [ -f "$DOTFILES_DIR/scripts/setup-gog.sh" ]; then
+    echo ""
+    echo "Optional: Run ./scripts/setup-gog.sh to configure gog CLI (Gmail/Calendar access)"
+fi
