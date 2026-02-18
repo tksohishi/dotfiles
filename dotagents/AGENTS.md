@@ -21,6 +21,7 @@
 ## Shell Commands
 - Break compound commands (pipes, &&, redirections) into separate steps so each matches an existing permission rule and avoids unnecessary prompts
 - Use `tmp/` for temporary file storage (e.g. intermediate JSON); it is globally gitignored
+- Prefer WebFetch/Fetch tools over `curl`; only fall back to `curl` when the tool is unavailable
 
 ## Commits
 - Never add the AI agent as a commit author or co-author
