@@ -15,4 +15,4 @@ Run steps 1-4 directly. For step 5, tell the user the command to run since it ma
 
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
-Report what was upgraded.
+Report what was upgraded. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output.
