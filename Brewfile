@@ -42,7 +42,6 @@ cask "ledger-wallet"
 cask "libreoffice"
 cask "notion-calendar"
 cask "rectangle"
-cask "session-manager-plugin" # Password prompt: system plugin
 cask "simple-comic"
 cask "slack"
 cask "spotify"
