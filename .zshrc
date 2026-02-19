@@ -7,6 +7,7 @@
 # Environment
 export EDITOR=vim
 export HOMEBREW_BUNDLE_FILE=~/.dotfiles/Brewfile
+export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1
 
 # History
 HISTFILE=~/.zsh_history
@@ -46,6 +47,9 @@ if [ -f ~/.ssh/id_ed25519 ]; then
         ssh-add --apple-use-keychain ~/.ssh/id_ed25519
     fi
 fi
+
+# Tab title: show current directory name
+precmd() { print -Pn "\e]0;%1~\a" }
 
 # Tool initialization
 command -v mise >/dev/null && eval "$(mise activate zsh)"

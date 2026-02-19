@@ -6,6 +6,9 @@ window-height = 9999
 window-width = 9999
 window-inherit-working-directory = false
 
+# Let zsh precmd control tab title, not shell integration
+shell-integration-features = cursor,sudo,no-title
+
 # Shift+Enter for Claude Code inside tmux (Ghostty native support skips /terminal-setup)
 keybind = shift+enter=text:\x1b\r
 
