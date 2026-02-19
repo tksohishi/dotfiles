@@ -207,6 +207,9 @@ echo ""
 echo "Configuring gog with credentials..."
 gog auth credentials set "$CRED_PATH"
 
+rm "$CRED_PATH"
+echo "Removed $CRED_PATH (backed up in 1Password and gog config)"
+
 echo ""
 echo "Authorizing $GMAIL_ADDR for Gmail and Calendar..."
 gog auth add "$GMAIL_ADDR" --services gmail,calendar
