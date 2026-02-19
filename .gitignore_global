@@ -5,6 +5,7 @@ tmp/
 .~lock.*
 *.tmp
 .*.un~
+node_modules/
 *.pyc
 *.pyo
 .env

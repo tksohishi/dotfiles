@@ -39,6 +39,7 @@
       "Bash(* --version)",
       "Bash(* --help)",
       "Bash(jq *)",
+      "Bash(glow *)",
       "Bash(pgrep *)",
       "Bash(gog gmail search *)",
       "Bash(gog gmail messages *)",
