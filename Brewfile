@@ -39,7 +39,7 @@ cask "dropbox"
 cask "firefox"
 cask "ghostty"
 cask "google-chrome"
-cask "google-cloud-sdk"
+cask "gcloud-cli"
 cask "google-japanese-ime" # Password prompt: input method
 cask "granola"
 cask "ledger-wallet"
