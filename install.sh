@@ -113,6 +113,24 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
 
+# Claude Code custom commands
+if [ -d "$DOTFILES_DIR/dotclaude/commands" ]; then
+    mkdir -p "$HOME/.claude/commands"
+    for cmd in "$DOTFILES_DIR/dotclaude/commands"/*; do
+        [ -f "$cmd" ] || continue
+        filename="$(basename "$cmd")"
+        target="$HOME/.claude/commands/$filename"
+        if [ -L "$target" ]; then
+            rm "$target"
+        elif [ -f "$target" ]; then
+            echo "Backing up $target to $target.bak"
+            mv "$target" "$target.bak"
+        fi
+        ln -s "$cmd" "$target"
+        echo "Linked dotclaude/commands/$filename -> ~/.claude/commands/$filename"
+    done
+fi
+
 # Suggest installing enabled Claude Code plugins
 plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$source" 2>/dev/null)
 if [ -n "$plugins" ]; then
