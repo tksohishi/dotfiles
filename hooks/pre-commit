@@ -1,0 +1,55 @@
+#!/bin/bash
+# Pre-commit hook: block personal information from being committed to public files.
+# Scans staged changes in dotagents/, dotclaude/, and dotcodex/ for patterns
+# that look like personal data (emails, API keys, tokens, private URLs, etc.).
+
+set -e
+
+SENSITIVE_DIRS="dotagents/ dotclaude/ dotcodex/"
+
+# Patterns that indicate personal information (extended regex)
+PATTERNS=(
+    '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'   # email addresses
+    '\bsk-[a-zA-Z0-9]{20,}'                               # OpenAI/Anthropic API keys
+    '\bghp_[a-zA-Z0-9]{36,}'                               # GitHub personal access tokens
+    '\bgho_[a-zA-Z0-9]{36,}'                               # GitHub OAuth tokens
+    '\bghs_[a-zA-Z0-9]{36,}'                               # GitHub server tokens
+    '\bBearer [a-zA-Z0-9._\-]{20,}'                        # Bearer tokens
+    '\bAIza[a-zA-Z0-9_\-]{35}'                             # Google API keys
+    '\bxox[baprs]-[a-zA-Z0-9\-]{10,}'                      # Slack tokens
+)
+
+# Collect staged files in sensitive directories
+staged_files=""
+for dir in $SENSITIVE_DIRS; do
+    files=$(git diff --cached --name-only --diff-filter=ACM -- "$dir" 2>/dev/null || true)
+    staged_files="$staged_files $files"
+done
+staged_files=$(echo "$staged_files" | xargs)
+
+if [ -z "$staged_files" ]; then
+    exit 0
+fi
+
+found=0
+for pattern in "${PATTERNS[@]}"; do
+    for file in $staged_files; do
+        matches=$(git diff --cached -U0 -- "$file" | grep -E '^\+' | grep -v '^\+\+\+' | grep -Eo "$pattern" || true)
+        if [ -n "$matches" ]; then
+            if [ "$found" -eq 0 ]; then
+                echo "ERROR: Personal information detected in staged changes:"
+                echo ""
+            fi
+            echo "  $file:"
+            echo "$matches" | while read -r m; do echo "    $m"; done
+            found=1
+        fi
+    done
+done
+
+if [ "$found" -ne 0 ]; then
+    echo ""
+    echo "This is a public repo. Use .local/.override files for private settings."
+    echo "To bypass this check: git commit --no-verify"
+    exit 1
+fi

@@ -70,6 +70,10 @@ for f in "${files[@]}"; do
     echo "Linked $f"
 done
 
+# ── Git hooks ─────────────────────────────────────────────────
+git -C "$DOTFILES_DIR" config core.hooksPath hooks
+echo "Configured git hooks from hooks/"
+
 # ── AI agent tool configs ─────────────────────────────────────
 echo ""
 echo "Installing AI agent tool configs..."
