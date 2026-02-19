@@ -129,6 +129,22 @@ if [ -d "$DOTFILES_DIR/dotclaude/commands" ]; then
         ln -s "$cmd" "$target"
         echo "Linked dotclaude/commands/$filename -> ~/.claude/commands/$filename"
     done
+    # Warn about commands not managed by dotfiles
+    unmanaged=""
+    for existing in "$HOME/.claude/commands"/*; do
+        [ -f "$existing" ] || continue
+        if [ -L "$existing" ]; then
+            link_target="$(readlink "$existing")"
+            case "$link_target" in "$DOTFILES_DIR/dotclaude/commands/"*) continue ;; esac
+        fi
+        unmanaged="$unmanaged  - $(basename "$existing")"$'\n'
+    done
+    if [ -n "$unmanaged" ]; then
+        echo ""
+        echo "Unmanaged commands in ~/.claude/commands/ (not tracked in dotfiles):"
+        printf '%s' "$unmanaged"
+        echo "Move them to dotclaude/commands/ to manage via dotfiles, or delete if unused."
+    fi
 fi
 
 # Suggest installing enabled Claude Code plugins
