@@ -2,6 +2,7 @@
 
 ## Problem Solving
 - Before proposing a solution, research the industry-standard approach to the problem and use it to inform your recommendation
+- When the user's prompt asks for your opinion (e.g. "what do you think?", "how about ~?", "would it make sense to ~?"), do NOT apply changes immediately. Explain your reasoning first and wait for approval before making edits
 
 ## Writing Style
 - Avoid using emdashes in writing
