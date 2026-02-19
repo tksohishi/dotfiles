@@ -42,7 +42,7 @@ This file provides guidance to AI coding agents working with code in this reposi
 
 ## Architecture
 
-<Describe the directory structure and how the project is organized. For new/empty projects, describe the intended structure based on the scaffolded files.>
+<Describe the directory structure and how the project is organized. For existing projects, read the actual structure. For new/empty projects, describe the intended structure based on the scaffolded files.>
 
 ## Key Conventions
 
@@ -81,9 +81,9 @@ ln -s AGENTS.md CLAUDE.md
 
 Claude Code only reads `CLAUDE.md` at the project root, so this symlink is required.
 
-## Step 5: Create .gitignore
+## Step 5: Create or update .gitignore
 
-Create a `.gitignore` appropriate to the project type if one does not already exist. Do not overwrite an existing `.gitignore`.
+If `.gitignore` does not exist, create one with the entries below. If it already exists, check for missing entries from the list below and append them. Do not duplicate entries or reorganize the existing file.
 
 ### Node/TypeScript
 
@@ -119,9 +119,18 @@ tmp/
 .DS_Store
 ```
 
-## Step 6: Scaffold project files
+## Step 6: Scaffold project files (empty projects only)
 
-Only scaffold files that do not already exist. Never overwrite existing files.
+**Skip this step entirely** if any project files already exist (package.json, tsconfig.json, pyproject.toml, setup.py, src/, etc.). Existing projects were likely set up by a dedicated tool (create-next-app, create-vite, uv init, etc.) and scaffolding would conflict.
+
+Only proceed with scaffolding if the directory was empty (or contained only git/editor config files) when the command started. Even then, ask first:
+
+```
+Scaffold starter project files? (Select "No" if you plan to use a project generator like create-next-app, create-vite, etc.)
+Options: Yes, No
+```
+
+If the user selects No, skip to Step 7.
 
 ### Node/TypeScript
 
