@@ -17,6 +17,7 @@
 ## Code Style
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
 - No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
+- Use pnpm, not npm, for all Node.js package management (install, run, exec, etc.)
 
 ## Shell Commands
 - Break compound commands (pipes, &&, redirections) into separate steps so each matches an existing permission rule and avoids unnecessary prompts

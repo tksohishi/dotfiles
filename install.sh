@@ -152,6 +152,14 @@ else
 fi
 rm -f "$codex_tmp"
 
+# Enable pnpm via corepack (requires mise-managed node)
+if command -v mise &>/dev/null; then
+    echo ""
+    echo "Setting up mise tools and pnpm..."
+    mise install
+    corepack enable pnpm
+fi
+
 echo ""
 echo "Done."
 

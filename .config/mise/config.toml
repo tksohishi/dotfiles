@@ -2,6 +2,6 @@
 trusted_config_paths = ["~/.dotfiles"]
 
 [tools]
-node = "24.13"
+node = { version = "24.13", postinstall = "corepack enable pnpm" }
 python = "3.13"
 "aqua:openai/codex" = "latest"
