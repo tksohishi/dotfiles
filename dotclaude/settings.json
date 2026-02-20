@@ -74,6 +74,14 @@
       "Bash(jq *)",
       "Bash(glow *)",
       "Bash(pgrep *)",
+      "Bash(date*)",
+      "Bash(uname *)",
+      "Bash(whoami*)",
+      "Bash(file *)",
+      "Bash(stat *)",
+      "Bash(diff *)",
+      "Bash(mise *)",
+      "Bash(lsof *)",
       "Bash(gog gmail search *)",
       "Bash(gog gmail messages *)",
       "Bash(gog gmail get *)",
@@ -100,12 +108,19 @@
       "WebFetch"
     ],
     "deny": [
-      "Bash(git -C:*)",
-      "Bash(git --no-pager:*)",
-      "Bash(git commit --amend:*)",
-      "Bash(git push --force:*)",
-      "Bash(git push -f:*)",
-      "Bash(git reset --hard:*)"
+      "Bash(git -C *)",
+      "Bash(git --no-pager *)",
+      "Bash(git commit --amend *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)",
+      "Bash(sudo *)",
+      "Bash(shutdown*)",
+      "Bash(reboot*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)"
     ]
   },
   "enabledPlugins": {
