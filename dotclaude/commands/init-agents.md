@@ -83,21 +83,28 @@ Claude Code only reads `CLAUDE.md` at the project root, so this symlink is requi
 
 ## Step 5: Create or update .gitignore
 
-If `.gitignore` does not exist, create one with the entries below. If it already exists, check for missing entries from the list below and append them. Do not duplicate entries or reorganize the existing file.
+If `.gitignore` does not exist, create one with the "All project types" entries plus the entries for the detected project type. If it already exists, check for missing entries from the lists below and append them. Do not duplicate entries or reorganize the existing file.
 
-### Node/TypeScript
+### All project types (always include)
 
 ```
-node_modules/
-dist/
+.DS_Store
 .env
 .env.*
 !.env.example
 tmp/
+```
+
+### Node/TypeScript (add these)
+
+```
+node_modules/
+dist/
+coverage/
 *.tsbuildinfo
 ```
 
-### Python
+### Python (add these)
 
 ```
 __pycache__/
@@ -105,18 +112,8 @@ __pycache__/
 .venv/
 dist/
 *.egg-info/
-.env
-.env.*
-!.env.example
-tmp/
-```
-
-### Non-coding
-
-```
-.env
-tmp/
-.DS_Store
+coverage/
+.coverage
 ```
 
 ## Step 6: Scaffold project files (empty projects only)
