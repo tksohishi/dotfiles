@@ -29,3 +29,4 @@
 ## Commits
 - Never add the AI agent as a commit author or co-author
 - Always commit using the default git settings
+- Use plain quoted strings for multi-line commit messages, not heredoc/subshell syntax (heredocs trigger security prompts in Claude Code)
