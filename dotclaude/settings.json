@@ -74,6 +74,7 @@
       "Bash(jq *)",
       "Bash(glow *)",
       "Bash(pgrep *)",
+      "Bash(rg *)",
       "Bash(date*)",
       "Bash(uname *)",
       "Bash(whoami*)",
