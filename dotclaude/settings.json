@@ -81,6 +81,7 @@
       "Bash(stat *)",
       "Bash(diff *)",
       "Bash(mise *)",
+      "Bash(uv *)",
       "Bash(lsof *)",
       "Bash(gog gmail search *)",
       "Bash(gog gmail messages *)",
