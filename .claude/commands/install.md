@@ -30,3 +30,10 @@ Follow these steps:
    - For formulae: run `brew install <name>`
    - For casks: run `brew install --cask <name>`
    - For Mac App Store: tell the user to run `mas install <id>` (requires sudo)
+
+5. Suggest allowlist updates for CLI tools:
+   - Skip this step for casks and Mac App Store apps (GUI apps don't need shell permissions)
+   - For formulae that provide CLI commands, check if the tool or its safe subcommands would be useful to allow in `~/.dotfiles/dotclaude/settings.json`
+   - Assess which subcommands are safe (read-only, non-destructive) vs. disruptive (executes arbitrary code, mutates remote state, deletes data)
+   - Suggest specific `Bash(<command> *)` or granular `Bash(<command> <subcommand> *)` rules as appropriate
+   - Ask the user before adding any rules

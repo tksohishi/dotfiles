@@ -33,3 +33,7 @@ Follow these steps:
    - For formulae: run `brew uninstall <name>`
    - For casks: run `brew uninstall --cask <name>`. If it fails due to sudo/permission errors, tell the user to manually remove the listed files with `sudo rm -rf <paths>` then retry the brew uninstall
    - For Mac App Store: tell the user to run `mas uninstall <id>` (requires sudo)
+
+6. Clean up allowlist rules:
+   - Check `~/.dotfiles/dotclaude/settings.json` for any `Bash(<name> *)` or `Bash(<name> <subcommand> *)` rules related to the uninstalled tool
+   - If found, remove them and inform the user
