@@ -35,6 +35,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`
 - `dotclaude/commands/init-agents.md` — `/init-agents` command: scaffolds new projects with AGENTS.md
+- `dotclaude/keybindings.json` — Claude Code keybindings, unbinds Ctrl+B (see [#22626](https://github.com/anthropics/claude-code/issues/22626))
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
 - `scripts/setup-gog.sh` — one-time Google Cloud project + gog CLI auth setup

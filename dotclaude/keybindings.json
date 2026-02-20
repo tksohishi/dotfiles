@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "context": "Global",
+      "bindings": {
+        "ctrl+b": null,
+        "ctrl+shift+b": "task:background"
+      }
+    }
+  ]
+}

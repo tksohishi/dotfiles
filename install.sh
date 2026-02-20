@@ -105,6 +105,18 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/settings.json -> ~/.claude/settings.json"
 
+# Claude Code keybindings
+target="$HOME/.claude/keybindings.json"
+source="$DOTFILES_DIR/dotclaude/keybindings.json"
+if [ -L "$target" ]; then
+    rm "$target"
+elif [ -f "$target" ]; then
+    echo "Backing up $target to $target.bak"
+    mv "$target" "$target.bak"
+fi
+ln -s "$source" "$target"
+echo "Linked dotclaude/keybindings.json -> ~/.claude/keybindings.json"
+
 # Claude Code status line script
 target="$HOME/.claude/statusline.sh"
 source="$DOTFILES_DIR/dotclaude/statusline.sh"
