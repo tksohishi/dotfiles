@@ -63,6 +63,7 @@
       "Bash(mas list *)",
       "Bash(mas search *)",
       "Bash(mas install *)",
+      "Bash(ln *)",
       "Bash(ls *)",
       "Bash(pwd)",
       "Bash(which *)",
