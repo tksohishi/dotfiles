@@ -180,6 +180,16 @@ else
 fi
 rm -f "$codex_tmp"
 
+# ── MCP servers reminder ──────────────────────────────────────
+# MCP configs are tracked in settings.json (Claude Code) and config.toml (Codex).
+# Servers auto-install via npx on first use; just list them as a reminder.
+mcp_servers=$(jq -r '.mcpServers // {} | keys[]' "$DOTFILES_DIR/dotclaude/settings.json" 2>/dev/null)
+if [ -n "$mcp_servers" ]; then
+    echo ""
+    echo "MCP servers configured (auto-install on first use):"
+    echo "$mcp_servers" | while read -r srv; do echo "  - $srv"; done
+fi
+
 # Enable pnpm via corepack (requires mise-managed node)
 if command -v mise &>/dev/null; then
     echo ""

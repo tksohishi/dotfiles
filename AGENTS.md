@@ -55,6 +55,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - Changes to `.zshrc` affect zsh directly
 - The `files` array in `install.sh` must be updated when adding new dotfiles
 - To add or remove packages/apps, use the `/install` and `/uninstall` commands
+- `/install` also handles MCP servers: it adds them to both Claude Code and Codex, and tracks configs in dotfiles
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
 - This is a public repo. Never commit personal information (API keys, tokens, personal URLs, email addresses, domain allowlists, etc.) to `dotagents/`, `dotclaude/`, or `dotcodex/`. Use `.local`/`.override` files for machine-specific or private settings.
 
