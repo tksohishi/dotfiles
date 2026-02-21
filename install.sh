@@ -180,14 +180,32 @@ else
 fi
 rm -f "$codex_tmp"
 
-# ── MCP servers reminder ──────────────────────────────────────
-# MCP configs are tracked in settings.json (Claude Code) and config.toml (Codex).
-# Servers auto-install via npx on first use; just list them as a reminder.
-mcp_servers=$(jq -r '.mcpServers // {} | keys[]' "$DOTFILES_DIR/dotclaude/settings.json" 2>/dev/null)
-if [ -n "$mcp_servers" ]; then
+# ── MCP servers ───────────────────────────────────────────────
+# Source of truth: [mcp_servers.*] in dotcodex/config.toml
+# Codex gets them via the merge above. Claude Code needs explicit `claude mcp add`.
+mcp_names=$(awk '/^\[mcp_servers\./ { gsub(/\[mcp_servers\./, ""); gsub(/\]/, ""); print }' "$DOTFILES_DIR/dotcodex/config.toml")
+if [ -n "$mcp_names" ] && command -v claude &>/dev/null; then
     echo ""
-    echo "MCP servers configured (auto-install on first use):"
-    echo "$mcp_servers" | while read -r srv; do echo "  - $srv"; done
+    echo "Setting up MCP servers for Claude Code..."
+    echo "$mcp_names" | while read -r name; do
+        cmd=$(awk -v s="[mcp_servers.$name]" '
+            $0 == s { found=1; next }
+            /^\[/ { found=0 }
+            found && /^command/ { gsub(/.*= *"/, ""); gsub(/"/, ""); print }
+        ' "$DOTFILES_DIR/dotcodex/config.toml")
+        args=$(awk -v s="[mcp_servers.$name]" '
+            $0 == s { found=1; next }
+            /^\[/ { found=0 }
+            found && /^args/ { gsub(/.*= *\[/, ""); gsub(/\]/, ""); gsub(/"/, ""); gsub(/, */, " "); print }
+        ' "$DOTFILES_DIR/dotcodex/config.toml")
+        if [ -n "$cmd" ]; then
+            claude mcp add --scope user "$name" -- $cmd $args 2>/dev/null && echo "  Added MCP server: $name" || echo "  MCP server already configured: $name"
+        fi
+    done
+elif [ -n "$mcp_names" ]; then
+    echo ""
+    echo "MCP servers to set up (install Claude Code first, then re-run):"
+    echo "$mcp_names" | while read -r name; do echo "  - $name"; done
 fi
 
 # Enable pnpm via corepack (requires mise-managed node)

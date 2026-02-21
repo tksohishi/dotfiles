@@ -18,16 +18,20 @@ First, determine whether this is an **MCP server** or a **Homebrew package**:
    - Search the web for the official install command (usually an npx command or HTTP URL)
    - Determine the server name, command, and any required environment variables
 
-2. Add to Claude Code (user scope, so it's tracked in the symlinked settings.json):
+2. Add to Claude Code:
    - Run `claude mcp add --scope user <name> -- <command> [args...]`
    - Verify with `claude mcp list`
 
 3. Add to Codex:
    - Run `codex mcp add <name> -- <command> [args...]`
-   - Also add the `[mcp_servers.<name>]` entry to `~/.dotfiles/dotcodex/config.toml` so install.sh carries it to new machines
 
-4. Commit and push:
-   - `git add dotclaude/settings.json dotcodex/config.toml`
+4. Track in dotfiles (source of truth: `dotcodex/config.toml`):
+   - Read `~/.dotfiles/dotcodex/config.toml`
+   - Add a `[mcp_servers.<name>]` entry with `command` and `args` fields
+   - This is what `install.sh` uses to set up MCP servers on new machines
+
+5. Commit and push:
+   - `git add dotcodex/config.toml`
    - Commit with message like "Add <name> MCP server"
    - `git push origin main`
 
