@@ -1,16 +1,17 @@
 # /discover: Find new Mac tools worth installing
 
-Search the web for trending Mac tools (CLI and GUI), filter out what's already installed, and present the top 3 worth trying.
+Search the web for new and trending Mac tools, with a focus on developer tools used alongside AI coding agents (Claude Code, Codex, etc.). Filter out what's already installed and present the top 3 worth trying.
 
 ## Step 1: Search for trending tools
 
-Use web search to find recently popular or recommended Mac tools from these sources:
+Use web search to find tools that are new or gaining traction in the last few months. Focus searches on:
 
-- Hacker News (e.g. "best new mac tools", "mac cli tools")
-- Reddit: r/macapps, r/commandline
-- General web: "best new mac apps 2026", "best new command line tools 2026"
+- Tools that complement AI coding agents (MCP servers, terminal utilities, dev workflow tools)
+- Hacker News discussions from the last 3 months
+- Reddit (r/macapps, r/commandline, r/ClaudeAI) from the last 3 months
+- General web: recent "best dev tools", "best CLI tools", "best MCP servers"
 
-Cast a wide net. Collect tool names, what they do, and where you found them.
+Prioritize tools that enhance the agent-assisted development workflow: better terminal output, smarter file management, MCP integrations, code review tools, etc. Include the current year in search queries to surface recent content.
 
 ## Step 2: Read the Brewfile
 
@@ -23,6 +24,7 @@ Remove any tool that's already in the Brewfile. Also remove tools that:
 - Don't support macOS
 - Are abandoned or unmaintained (no updates in 2+ years)
 - Are duplicates of something already installed with no clear advantage
+- Are well-known staples that the user has likely already considered (e.g. fzf, bat, fd)
 
 ## Step 4: Deep-dive the top 3
 
