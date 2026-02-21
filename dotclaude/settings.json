@@ -13,6 +13,7 @@
     "allow": [
       "Bash(git *)",
       "Bash(gh pr view *)",
+      "Bash(gh pr list)",
       "Bash(gh pr list *)",
       "Bash(gh pr diff *)",
       "Bash(gh pr checks *)",
