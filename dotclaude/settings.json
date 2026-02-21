@@ -68,6 +68,8 @@
       "Bash(pnpm store status *)",
       "Bash(pnpm search *)",
       "Bash(brew *)",
+      "Bash(claude mcp *)",
+      "Bash(codex mcp *)",
       "Bash(mas list *)",
       "Bash(mas search *)",
       "Bash(mas install *)",
