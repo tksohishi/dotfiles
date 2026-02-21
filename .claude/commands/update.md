@@ -17,8 +17,4 @@ After upgrades complete, run `brew cleanup` to remove old versions and free disk
 
 Report what was upgraded. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output.
 
-After upgrades, check for interesting new formulae and casks:
-
-1. Run `brew update --auto-update 2>&1 | grep -E "^==> New (Formulae|Casks)"` (this info may already be in the `brew update` output from step 1; if so, reuse it)
-2. Review the new additions and highlight any that look relevant to the user's setup (developer tools, terminal utilities, productivity apps, etc.)
-3. If any look worth checking out, suggest them briefly with a one-line description. Don't overwhelm; only surface genuinely interesting additions.
+After upgrades, check for interesting new formulae and casks. The `brew update` output from step 1 lists new additions under "==> New Formulae" and "==> New Casks". Review those and highlight any that look relevant to the user's setup (developer tools, terminal utilities, productivity apps, etc.). If any look worth checking out, suggest them briefly with a one-line description. Don't overwhelm; only surface genuinely interesting additions.
