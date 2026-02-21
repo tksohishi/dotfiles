@@ -129,39 +129,17 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
 
-# Claude Code custom commands
-if [ -d "$DOTFILES_DIR/dotclaude/commands" ]; then
-    mkdir -p "$HOME/.claude/commands"
-    for cmd in "$DOTFILES_DIR/dotclaude/commands"/*; do
-        [ -f "$cmd" ] || continue
-        filename="$(basename "$cmd")"
-        target="$HOME/.claude/commands/$filename"
-        if [ -L "$target" ]; then
-            rm "$target"
-        elif [ -f "$target" ]; then
-            echo "Backing up $target to $target.bak"
-            mv "$target" "$target.bak"
-        fi
-        ln -s "$cmd" "$target"
-        echo "Linked dotclaude/commands/$filename -> ~/.claude/commands/$filename"
-    done
-    # Warn about commands not managed by dotfiles
-    unmanaged=""
-    for existing in "$HOME/.claude/commands"/*; do
-        [ -f "$existing" ] || continue
-        if [ -L "$existing" ]; then
-            link_target="$(readlink "$existing")"
-            case "$link_target" in "$DOTFILES_DIR/dotclaude/commands/"*) continue ;; esac
-        fi
-        unmanaged="$unmanaged  - $(basename "$existing")"$'\n'
-    done
-    if [ -n "$unmanaged" ]; then
-        echo ""
-        echo "Unmanaged commands in ~/.claude/commands/ (not tracked in dotfiles):"
-        printf '%s' "$unmanaged"
-        echo "Move them to dotclaude/commands/ to manage via dotfiles, or delete if unused."
-    fi
+# Claude Code custom commands (directory symlink)
+target="$HOME/.claude/commands"
+source="$DOTFILES_DIR/dotclaude/commands"
+if [ -L "$target" ]; then
+    rm "$target"
+elif [ -d "$target" ]; then
+    echo "Backing up $target to $target.bak"
+    mv "$target" "$target.bak"
 fi
+ln -s "$source" "$target"
+echo "Linked dotclaude/commands/ -> ~/.claude/commands/"
 
 # Suggest installing enabled Claude Code plugins
 plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$source" 2>/dev/null)

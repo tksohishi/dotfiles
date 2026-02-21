@@ -34,7 +34,8 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `.config/mise/config.toml` — node and python runtime versions
 - `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`
-- `dotclaude/commands/init-agents.md` — `/init-agents` command: scaffolds new projects with AGENTS.md
+- `dotclaude/commands/` — global Claude Code commands (symlinked as `~/.claude/commands/`), e.g. `/init-agents`
+- `.claude/commands/` — project-local Claude Code commands, e.g. `/discover`
 - `dotclaude/keybindings.json` — Claude Code keybindings, unbinds Ctrl+B (see [#22626](https://github.com/anthropics/claude-code/issues/22626))
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
