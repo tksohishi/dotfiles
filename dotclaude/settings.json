@@ -70,6 +70,7 @@
       "Bash(brew *)",
       "Bash(claude mcp *)",
       "Bash(codex mcp *)",
+      "mcp__context7__*",
       "Bash(mas list *)",
       "Bash(mas search *)",
       "Bash(mas install *)",
