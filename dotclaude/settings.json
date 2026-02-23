@@ -93,6 +93,7 @@
       "Bash(file *)",
       "Bash(stat *)",
       "Bash(diff *)",
+      "Bash(code *)",
       "Bash(mise *)",
       "Bash(uv sync *)",
       "Bash(uv sync)",
