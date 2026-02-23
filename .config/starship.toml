@@ -18,11 +18,11 @@ staged = "✔"
 untracked = "?"
 
 [python]
-format = " [$version](yellow)"
+format = " [py $version](yellow)"
 detect_extensions = []
 
 [nodejs]
-format = " [$version](green)"
+format = " [node $version](green)"
 detect_extensions = []
 
 [cmd_duration]
