@@ -7,7 +7,7 @@ Run the following update commands in order:
 
 1. `brew update` — refresh package index
 2. `brew upgrade` — upgrade all formulae
-3. `brew upgrade --cask --greedy` — upgrade all casks including ones that auto-update
+3. `brew upgrade --cask` — upgrade all casks
 4. `mise upgrade` — upgrade all mise-managed tools
 5. `mas upgrade` — upgrade Mac App Store apps (may require sudo)
 
