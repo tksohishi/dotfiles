@@ -33,7 +33,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `.config/ghostty/config` — font, opacity, window size, tab behavior
 - `.config/mise/config.toml` — node and python runtime versions
 - `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
-- `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`
+- `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`
 - `dotclaude/commands/` — global Claude Code commands (symlinked as `~/.claude/commands/`), e.g. `/init-agents`
 - `.claude/commands/` — project-local Claude Code commands, e.g. `/discover`
 - `dotclaude/keybindings.json` — Claude Code keybindings, unbinds Ctrl+B (see [#22626](https://github.com/anthropics/claude-code/issues/22626))

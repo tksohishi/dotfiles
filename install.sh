@@ -78,9 +78,9 @@ echo "Configured git hooks from hooks/"
 echo ""
 echo "Installing AI agent tool configs..."
 
-# Shared agent instructions -> ~/.claude/CLAUDE.md and ~/.codex/AGENTS.md
-mkdir -p "$HOME/.claude" "$HOME/.codex"
-for pair in ".claude/CLAUDE.md" ".codex/AGENTS.md"; do
+# Shared agent instructions -> ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md, ~/.gemini/GEMINI.md
+mkdir -p "$HOME/.claude" "$HOME/.codex" "$HOME/.gemini"
+for pair in ".claude/CLAUDE.md" ".codex/AGENTS.md" ".gemini/GEMINI.md"; do
     target="$HOME/$pair"
     source="$DOTFILES_DIR/dotagents/AGENTS.md"
     if [ -L "$target" ]; then
