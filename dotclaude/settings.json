@@ -84,6 +84,7 @@
       "Bash(* --help)",
       "Bash(jq *)",
       "Bash(glow *)",
+      "Bash(grep *)",
       "Bash(tg *)",
       "Bash(pgrep *)",
       "Bash(rg *)",
