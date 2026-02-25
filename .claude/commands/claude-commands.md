@@ -20,7 +20,8 @@ Manage `Bash(...)` permission rules in the `permissions.allow` array in `~/.dotf
    - Modify existing rules (e.g. tighten wildcards, remove dangerous subcommands)
 4. **If no rules exist:** Add new rules:
    - Research the command's subcommands to understand which are safe and which are dangerous
-   - If the command has useful subcommands, add wildcard rules per subcommand group (e.g. `gh pr view *`, `gh pr list *`) rather than a blanket `gh *`
+   - If the command has useful subcommands, add wildcard rules per subcommand group rather than a blanket `<command> *`
+   - `Bash(cmd *)` does NOT match bare `cmd` (no args). For multi-word commands where collision is impossible, use the no-space form `Bash(cmd*)` to cover both bare and with-args (e.g. `Bash(gh release list*)` matches `gh release list` and `gh release list --json tagName`). Keep the space form `Bash(cmd *)` for broad single-word prefixes where collisions matter (e.g. `ls *` to avoid matching `lsof`).
    - If the command is simple or read-only, a single `Bash(<command> *)` is fine
    - Use the existing rules in the file as a style reference
 5. **Safety check (for new and modified rules):** Exclude subcommands that can delete, overwrite, or destructively modify files, data, or remote state. Examples: `rm`, `delete`, `drop`, `push --force`, `reset --hard`, `prune`. If excluding dangerous subcommands leaves an incomplete set, list what was excluded and why, and ask the user if they want to add any of them anyway.
