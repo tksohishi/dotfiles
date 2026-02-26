@@ -37,6 +37,9 @@
 - Use `glow` to display markdown files in the terminal (e.g. `glow README.md`)
 - Prefer `gh` subcommands over `gh api` (e.g. `gh pr list` instead of `gh api repos/.../pulls`)
 
+## Git
+- Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
+
 ## Commits
 - Never add the AI agent as a commit author or co-author
 - Always commit using the default git settings
