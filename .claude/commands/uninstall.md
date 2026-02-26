@@ -23,17 +23,22 @@ Follow these steps:
    - Commit with message like "Remove <name> from Brewfile"
    - `git push origin main`
 
-4. For casks, capture the bundle ID and reset TCC permissions before uninstalling (tccutil requires the .app to still exist):
+4. For casks, check if the app is running and ask the user to quit it first:
    - Get the .app name: `brew info --json=v2 --cask <name> | jq -r '.casks[0].artifacts[] | .app? // empty | .[0]'`
+   - Check if running: `pgrep -f "<AppName>"` or similar
+   - If running, tell the user to quit the app before proceeding and wait for confirmation
+
+5. For casks, capture the bundle ID and reset TCC permissions before uninstalling (tccutil requires the .app to still exist):
+   - Reuse the .app name from step 4
    - Read the bundle ID: `defaults read "/Applications/<AppName>.app/Contents/Info.plist" CFBundleIdentifier`
    - Run `tccutil reset All <bundle_id>` to remove all privacy permissions (Accessibility, Screen Recording, Input Monitoring, etc.)
    - If any command fails, skip TCC cleanup (app may already be removed)
 
-5. Uninstall the app:
+6. Uninstall the app:
    - For formulae: run `brew uninstall <name>`
    - For casks: run `brew uninstall --cask <name>`. If it fails due to sudo/permission errors, tell the user to manually remove the listed files with `sudo rm -rf <paths>` then retry the brew uninstall
    - For Mac App Store: tell the user to run `mas uninstall <id>` (requires sudo)
 
-6. Clean up allowlist rules:
+7. Clean up allowlist rules:
    - Check `~/.dotfiles/dotclaude/settings.json` for any `Bash(<name> *)` or `Bash(<name> <subcommand> *)` rules related to the uninstalled tool
    - If found, remove them and inform the user
