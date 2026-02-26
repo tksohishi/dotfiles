@@ -1,12 +1,10 @@
 ---
-name: "release"
-description: "Release version $ARGUMENTS"
+description: Release version $ARGUMENTS
+argument-hint: <version>
+allowed-tools: [Bash, Read, Edit]
 ---
 
-Use this skill when the user asks to run `/release`.
-
-
-Release a new version of the current project. If a project-local `/release` command exists (`.claude/commands/release.md`), defer to it instead.
+Release a new version of the current project. If a project-local `/github-release` command exists (`.claude/commands/github-release.md`), defer to it instead.
 
 ## Step 1: Determine version
 

@@ -1,7 +1,12 @@
-description = "Release version $ARGUMENTS"
-prompt = """
+---
+name: "github-release"
+description: "Release version $ARGUMENTS"
+---
 
-Release a new version of the current project. If a project-local `/release` command exists (`.claude/commands/release.md`), defer to it instead.
+Use this skill when the user asks to run `/github-release`.
+
+
+Release a new version of the current project. If a project-local `/github-release` command exists (`.claude/commands/github-release.md`), defer to it instead.
 
 ## Step 1: Determine version
 
@@ -24,7 +29,7 @@ If there are no existing tags, suggest `0.1.0` or `1.0.0` and ask the user.
 Check for manifest files in the project root and update the version accordingly:
 
 **Swift** (`Package.swift` exists):
-- Find and update `Info.plist` using `/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString <version>\" <path>/Info.plist`
+- Find and update `Info.plist` using `/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString <version>" <path>/Info.plist`
 
 **Python** (`pyproject.toml` exists):
 - Update the `version` field in `pyproject.toml`
@@ -48,7 +53,7 @@ If any files were modified in Step 2:
 
 ```
 git add <changed files>
-git commit -m \"Bump version to <version>\"
+git commit -m "Bump version to <version>"
 ```
 
 Skip this step if no files were changed (tag-only projects).
@@ -64,9 +69,9 @@ git push --follow-tags
 
 Generate release notes from commits since the previous tag, organized into sections:
 
-- **Breaking Changes** (commits with \"breaking\", \"BREAKING\", or \"!\" in conventional commit type)
-- **New Features** (commits with \"feat\", \"add\")
-- **Fixes** (commits with \"fix\")
+- **Breaking Changes** (commits with "breaking", "BREAKING", or "!" in conventional commit type)
+- **New Features** (commits with "feat", "add")
+- **Fixes** (commits with "fix")
 - **Other** (everything else)
 
 Omit empty sections. If categorization is ambiguous, use `--generate-notes` as fallback:
@@ -78,7 +83,7 @@ gh release create v<version> --generate-notes
 If you did generate structured notes, pass them via `--notes`:
 
 ```
-gh release create v<version> --notes \"<notes>\"
+gh release create v<version> --notes "<notes>"
 ```
 
 ## Constraints
@@ -86,4 +91,3 @@ gh release create v<version> --notes \"<notes>\"
 - Follow semver; for pre-1.0 projects, minor = breaking
 - Never add AI agent as commit author or co-author
 - Use plain quoted strings for commit messages
-"""
