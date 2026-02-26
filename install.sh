@@ -78,6 +78,11 @@ echo "Configured git hooks from hooks/"
 echo ""
 echo "Installing AI agent tool configs..."
 
+# Generate Gemini/Codex command artifacts from dotclaude/commands
+if [ -x "$DOTFILES_DIR/scripts/agent-commands.sh" ]; then
+    "$DOTFILES_DIR/scripts/agent-commands.sh" sync
+fi
+
 # Shared agent instructions -> ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md, ~/.gemini/GEMINI.md
 mkdir -p "$HOME/.claude" "$HOME/.codex" "$HOME/.gemini"
 for pair in ".claude/CLAUDE.md" ".codex/AGENTS.md" ".gemini/GEMINI.md"; do
@@ -141,8 +146,20 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/commands/ -> ~/.claude/commands/"
 
+# Gemini custom commands (directory symlink)
+target="$HOME/.gemini/commands"
+source="$DOTFILES_DIR/dotgemini/commands"
+if [ -L "$target" ]; then
+    rm "$target"
+elif [ -d "$target" ]; then
+    echo "Backing up $target to $target.bak"
+    mv "$target" "$target.bak"
+fi
+ln -s "$source" "$target"
+echo "Linked dotgemini/commands/ -> ~/.gemini/commands/"
+
 # Suggest installing enabled Claude Code plugins
-plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$source" 2>/dev/null)
+plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$DOTFILES_DIR/dotclaude/settings.json" 2>/dev/null)
 if [ -n "$plugins" ]; then
     echo ""
     echo "Claude Code plugins to install (run inside Claude Code):"
@@ -179,6 +196,19 @@ else
     echo "Merged dotcodex/config.toml -> ~/.codex/config.toml"
 fi
 rm -f "$codex_tmp"
+
+# Codex custom command skills namespace
+mkdir -p "$HOME/.codex/skills"
+target="$HOME/.codex/skills/.dotfiles"
+source="$DOTFILES_DIR/dotcodex/skills/.dotfiles"
+if [ -L "$target" ]; then
+    rm "$target"
+elif [ -d "$target" ]; then
+    echo "Backing up $target to $target.bak"
+    mv "$target" "$target.bak"
+fi
+ln -s "$source" "$target"
+echo "Linked dotcodex/skills/.dotfiles -> ~/.codex/skills/.dotfiles"
 
 # ── MCP servers ───────────────────────────────────────────────
 # Source of truth: [mcp_servers.*] in dotcodex/config.toml
