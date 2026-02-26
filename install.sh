@@ -78,9 +78,13 @@ echo "Configured git hooks from hooks/"
 echo ""
 echo "Installing AI agent tool configs..."
 
-# Generate Gemini/Codex command artifacts from dotclaude/commands
-if [ -x "$DOTFILES_DIR/scripts/agent-commands.sh" ]; then
-    "$DOTFILES_DIR/scripts/agent-commands.sh" sync
+# Generate Gemini/Codex command artifacts from dotagents/commands
+if [ -f "$DOTFILES_DIR/scripts/agent-commands.ts" ]; then
+    if command -v bun &>/dev/null; then
+        bun "$DOTFILES_DIR/scripts/agent-commands.ts" sync
+    else
+        echo "Skipping command sync (bun not found)"
+    fi
 fi
 
 # Shared agent instructions -> ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md, ~/.gemini/GEMINI.md
@@ -136,7 +140,7 @@ echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
 
 # Claude Code custom commands (directory symlink)
 target="$HOME/.claude/commands"
-source="$DOTFILES_DIR/dotclaude/commands"
+source="$DOTFILES_DIR/dotagents/commands"
 if [ -L "$target" ]; then
     rm "$target"
 elif [ -d "$target" ]; then
@@ -144,7 +148,7 @@ elif [ -d "$target" ]; then
     mv "$target" "$target.bak"
 fi
 ln -s "$source" "$target"
-echo "Linked dotclaude/commands/ -> ~/.claude/commands/"
+echo "Linked dotagents/commands/ -> ~/.claude/commands/"
 
 # Gemini custom commands (directory symlink)
 target="$HOME/.gemini/commands"

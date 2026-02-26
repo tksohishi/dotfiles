@@ -34,14 +34,14 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `.config/mise/config.toml` — node and python runtime versions
 - `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`
-- `dotclaude/commands/` — global Claude Code commands (symlinked as `~/.claude/commands/`), e.g. `/init-agents`
+- `dotagents/commands/` — global agent command source (symlinked as `~/.claude/commands/`, compiled to Gemini and Codex formats)
 - `dotgemini/commands/` — global Gemini CLI commands (symlinked as `~/.gemini/commands/`)
 - `dotcodex/skills/.dotfiles/` — global Codex command-equivalent skills (symlinked as `~/.codex/skills/.dotfiles/`)
 - `.claude/commands/` — project-local Claude Code commands, e.g. `/discover`
 - `dotclaude/keybindings.json` — Claude Code keybindings, unbinds Ctrl+B (see [#22626](https://github.com/anthropics/claude-code/issues/22626))
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
-- `scripts/agent-commands.sh` — create/sync/delete global commands across Claude, Gemini, and Codex
+- `scripts/agent-commands.ts` — create/sync/delete global commands across Claude, Gemini, and Codex
 - `scripts/setup-gog.sh` — one-time Google Cloud project + gog CLI auth setup
 
 ## Key Conventions
@@ -57,7 +57,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - Changes to `.alias` affect the zsh shell
 - Changes to `.zshrc` affect zsh directly
 - The `files` array in `install.sh` must be updated when adding new dotfiles
-- `dotclaude/commands/*.md` is the source of truth for global agent commands, then run `scripts/agent-commands.sh sync`
+- `dotagents/commands/*.md` is the source of truth for global agent commands, then run `bun scripts/agent-commands.ts sync`
 - To add or remove packages/apps, use the `/install` and `/uninstall` commands
 - `/install` also handles MCP servers: it adds them to both Claude Code and Codex, and tracks configs in dotfiles
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
