@@ -29,14 +29,14 @@ Use `--skip-brew` to skip Homebrew installation and only symlink files.
 
 **AI agent configs:**
 - `dotagents/AGENTS.md` symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`
-- `dotagents/commands/` symlinked to `~/.claude/commands/` (source of truth)
+- `dotclaude/commands/` symlinked to `~/.claude/commands/` (source of truth)
 - `dotclaude/settings.json` symlinked to `~/.claude/settings.json`
 - `dotclaude/statusline.sh` symlinked to `~/.claude/statusline.sh`
 - `dotgemini/commands/` symlinked to `~/.gemini/commands/`
 - `dotcodex/config.toml` merged into `~/.codex/config.toml`
 - `dotcodex/skills/.dotfiles/` symlinked to `~/.codex/skills/.dotfiles/`
 
-**Global agent commands:** `dotagents/commands/*.md` is the source of truth. `bun scripts/agent-commands.ts sync` generates Gemini command TOML files and Codex skills from that source.
+**Global agent commands:** `dotclaude/commands/*.md` is the source of truth. `bun scripts/agent-commands.ts sync` generates Gemini command TOML files and Codex skills from that source.
 
 Command lifecycle helpers:
 

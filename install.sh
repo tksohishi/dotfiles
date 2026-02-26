@@ -78,7 +78,7 @@ echo "Configured git hooks from hooks/"
 echo ""
 echo "Installing AI agent tool configs..."
 
-# Generate Gemini/Codex command artifacts from dotagents/commands
+# Generate Gemini/Codex command artifacts from dotclaude/commands
 if [ -f "$DOTFILES_DIR/scripts/agent-commands.ts" ]; then
     if command -v bun &>/dev/null; then
         bun "$DOTFILES_DIR/scripts/agent-commands.ts" sync
@@ -140,7 +140,7 @@ echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
 
 # Claude Code custom commands (directory symlink)
 target="$HOME/.claude/commands"
-source="$DOTFILES_DIR/dotagents/commands"
+source="$DOTFILES_DIR/dotclaude/commands"
 if [ -L "$target" ]; then
     rm "$target"
 elif [ -d "$target" ]; then
@@ -148,7 +148,7 @@ elif [ -d "$target" ]; then
     mv "$target" "$target.bak"
 fi
 ln -s "$source" "$target"
-echo "Linked dotagents/commands/ -> ~/.claude/commands/"
+echo "Linked dotclaude/commands/ -> ~/.claude/commands/"
 
 # Gemini custom commands (directory symlink)
 target="$HOME/.gemini/commands"

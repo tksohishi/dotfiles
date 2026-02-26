@@ -9,7 +9,7 @@ const scriptFile = fileURLToPath(import.meta.url);
 const scriptDir = path.dirname(scriptFile);
 const rootDir = path.resolve(scriptDir, "..");
 
-const sourceDir = path.join(rootDir, "dotagents", "commands");
+const sourceDir = path.join(rootDir, "dotclaude", "commands");
 const geminiDir = path.join(rootDir, "dotgemini", "commands");
 const codexSkillsDir = path.join(rootDir, "dotcodex", "skills", ".dotfiles");
 
@@ -21,7 +21,7 @@ function usage(): void {
   bun scripts/agent-commands.ts list
 
 Source of truth:
-  dotagents/commands/*.md
+  dotclaude/commands/*.md
 
 Generated targets:
   dotgemini/commands/*.toml
