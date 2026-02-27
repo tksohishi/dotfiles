@@ -11,4 +11,9 @@ Follow these steps:
 2. Run `scripts/sync-codex-config.sh`
 3. Merge `~/.dotfiles/dotgemini/settings.json` into `~/.gemini/settings.json` and overwrite only the `tools` key
 4. Copy `~/.dotfiles/dotcodex/rules/default.rules` to `~/.codex/rules/default.rules`
-5. Show the changed files, then commit and push
+5. Validate generated files:
+   - `jq . dotgemini/settings.json > /dev/null` (valid JSON)
+   - `codex execpolicy check --pretty --rules dotcodex/rules/default.rules -- git status` (should return `"decision": "allow"`)
+   - `codex execpolicy check --pretty --rules dotcodex/rules/default.rules -- sudo rm` (should return `"decision": "forbidden"`)
+   - If any check fails, stop and report the error
+6. Show the changed files, then commit and push
