@@ -34,10 +34,8 @@ Follow these steps:
    - Run `tccutil reset All <bundle_id>` to remove all privacy permissions (Accessibility, Screen Recording, Input Monitoring, etc.)
    - If any command fails, skip TCC cleanup (app may already be removed)
 
-6. For casks, check for login items:
-   - Reuse the .app name from step 4
-   - Check: `osascript -e 'tell application "System Events" to get the name of every login item'`
-   - If the app appears in the list, tell the user to remove it from System Settings > General > Login Items (there is no safe CLI command to remove a single login item)
+6. For casks, remind the user to check for leftover login items:
+   - After uninstalling, tell the user to check System Settings > General > Login Items and remove the app if it still appears there
 
 7. Uninstall the app:
    - For formulae: run `brew uninstall <name>`
