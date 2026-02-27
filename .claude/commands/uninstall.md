@@ -35,9 +35,9 @@ Follow these steps:
    - If any command fails, skip TCC cleanup (app may already be removed)
 
 6. For casks, check for login items:
-   - Reuse the bundle ID from step 5
-   - Check: `sfltool dumpbtm | grep -A2 "<bundle_id>"`
-   - If found, tell the user to remove it from System Settings > General > Login Items (there is no safe CLI command to remove a single login item)
+   - Reuse the .app name from step 4
+   - Check: `osascript -e 'tell application "System Events" to get the name of every login item'`
+   - If the app appears in the list, tell the user to remove it from System Settings > General > Login Items (there is no safe CLI command to remove a single login item)
 
 7. Uninstall the app:
    - For formulae: run `brew uninstall <name>`
