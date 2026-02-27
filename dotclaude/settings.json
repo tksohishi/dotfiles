@@ -95,6 +95,7 @@
       "Bash(whoami*)",
       "Bash(file *)",
       "Bash(stat *)",
+      "Bash(curl -s *)",
       "Bash(diff *)",
       "Bash(env)",
       "Bash(code *)",
