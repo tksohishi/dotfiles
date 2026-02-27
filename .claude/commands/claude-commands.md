@@ -1,6 +1,6 @@
 ---
 description: Manage Claude Code command allowlist (add, remove, modify)
-allowed-tools: Read, Edit
+allowed-tools: Read, Edit, Bash
 argument-hint: <command>
 ---
 
@@ -26,4 +26,9 @@ Manage `Bash(...)` permission rules in the `permissions.allow` array in `~/.dotf
    - Use the existing rules in the file as a style reference
 5. **Safety check (for new and modified rules):** Exclude subcommands that can delete, overwrite, or destructively modify files, data, or remote state. Examples: `rm`, `delete`, `drop`, `push --force`, `reset --hard`, `prune`. If excluding dangerous subcommands leaves an incomplete set, list what was excluded and why, and ask the user if they want to add any of them anyway.
 6. Maintain alphabetical order within the allow array
-7. Report what was added, removed, or modified
+7. Sync to Codex and Gemini:
+   - Run `bun scripts/agent-commands.ts sync-allowlist`
+   - Copy `dotcodex/rules/default.rules` to `~/.codex/rules/default.rules`
+   - Merge `dotgemini/settings.json` into `~/.gemini/settings.json` (overwrite only the `tools` key using `jq -s '.[0] * {tools: (.[1].tools // {})}' ~/.gemini/settings.json dotgemini/settings.json`)
+8. Commit and push all changed files together (`dotclaude/settings.json`, `dotcodex/rules/default.rules`, `dotgemini/settings.json`)
+9. Report what was added, removed, or modified
