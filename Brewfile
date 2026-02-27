@@ -1,5 +1,4 @@
 tap "polymarket/polymarket-cli"
-tap "steipete/tap"
 tap "tksohishi/tap"
 brew "act"
 brew "awscli"
