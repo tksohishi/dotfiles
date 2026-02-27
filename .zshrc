@@ -2,6 +2,7 @@
 
 # PATH
 [ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
+[ -d $HOME/.bun/bin ] && export PATH=$HOME/.bun/bin:$PATH
 [ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
 
 # Environment
