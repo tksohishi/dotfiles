@@ -34,11 +34,17 @@ Follow these steps:
    - Run `tccutil reset All <bundle_id>` to remove all privacy permissions (Accessibility, Screen Recording, Input Monitoring, etc.)
    - If any command fails, skip TCC cleanup (app may already be removed)
 
-6. Uninstall the app:
+6. For casks, remove login items before uninstalling:
+   - Reuse the bundle ID from step 5
+   - Check for login items: `sfltool dumpbtm | grep -A2 "<bundle_id>"`
+   - If found, remove it: `sfltool resetbtm`
+   - Note: `sfltool resetbtm` clears ALL login items; if the user has many, tell them to manually remove it from System Settings > General > Login Items instead
+
+7. Uninstall the app:
    - For formulae: run `brew uninstall <name>`
    - For casks: run `brew uninstall --cask <name>`. If it fails due to sudo/permission errors, tell the user to manually remove the listed files with `sudo rm -rf <paths>` then retry the brew uninstall
    - For Mac App Store: tell the user to run `mas uninstall <id>` (requires sudo)
 
-7. Clean up allowlist rules:
+8. Clean up allowlist rules:
    - Check `~/.dotfiles/dotclaude/settings.json` for any `Bash(<name> *)` or `Bash(<name> <subcommand> *)` rules related to the uninstalled tool
    - If found, remove them and inform the user
