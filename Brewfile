@@ -70,4 +70,5 @@ mas "Telegram", id: 747648890
 mas "The Unarchiver", id: 425424353
 # Manual install: Claude Code (claude install)
 cask "codex-app"
+# Manual install: OpenUsage (https://github.com/robinebers/openusage/releases)
 mas "Xcode", id: 497799835
