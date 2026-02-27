@@ -39,9 +39,14 @@ Follow these steps:
 
 7. Uninstall the app:
    - For formulae: run `brew uninstall <name>`
-   - For casks: run `brew uninstall --cask <name>`. If it fails due to sudo/permission errors, tell the user to manually remove the listed files with `sudo rm -rf <paths>` then retry the brew uninstall
+   - For casks: run `brew uninstall --zap --cask <name>` (--zap removes app preferences, caches, and other associated files). If it fails due to sudo/permission errors, tell the user to manually remove the listed files with `sudo rm -rf <paths>` then retry the brew uninstall
    - For Mac App Store: tell the user to run `mas uninstall <id>` (requires sudo)
 
-8. Clean up allowlist rules:
+8. For casks, check for leftover LaunchAgents:
+   - Reuse the bundle ID from step 5
+   - Check: `ls ~/Library/LaunchAgents/ | grep "<bundle_id>"`
+   - If found, tell the user which plist files remain and offer to remove them
+
+9. Clean up allowlist rules:
    - Check `~/.dotfiles/dotclaude/settings.json` for any `Bash(<name> *)` or `Bash(<name> <subcommand> *)` rules related to the uninstalled tool
    - If found, remove them and inform the user
