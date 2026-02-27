@@ -32,4 +32,11 @@ Follow these steps:
    - List any plugins that are enabled but not installed, and suggest the `/plugin install` command for each
    - List any plugins that are installed but not enabled, and ask whether to enable or uninstall them
 
-5. Wait for the user to decide what to do before making any changes.
+5. Audit Codex auto-learned rules:
+   - Read `~/.codex/rules/default.rules` and compare against tracked `~/.dotfiles/dotcodex/rules/default.rules`
+   - List new auto-learned patterns that look reusable
+   - Skip one-off patterns with hardcoded file paths, commit messages, or URLs
+   - Suggest useful patterns to import into `~/.dotfiles/dotclaude/settings.json` (source of truth)
+   - After import, remind to run `bun scripts/agent-commands.ts sync-allowlist`
+
+6. Wait for the user to decide what to do before making any changes.

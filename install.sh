@@ -82,8 +82,9 @@ echo "Installing AI agent tool configs..."
 if [ -f "$DOTFILES_DIR/scripts/agent-commands.ts" ]; then
     if command -v bun &>/dev/null; then
         bun "$DOTFILES_DIR/scripts/agent-commands.ts" sync
+        bun "$DOTFILES_DIR/scripts/agent-commands.ts" sync-allowlist
     else
-        echo "Skipping command sync (bun not found)"
+        echo "Skipping command and allowlist sync (bun not found)"
     fi
 fi
 
@@ -162,6 +163,38 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotgemini/commands/ -> ~/.gemini/commands/"
 
+# Gemini settings (merge tools only, keep runtime config)
+gemini_src="$DOTFILES_DIR/dotgemini/settings.json"
+gemini_dst="$HOME/.gemini/settings.json"
+if [ -f "$gemini_src" ]; then
+    mkdir -p "$HOME/.gemini"
+    if [ -f "$gemini_dst" ] && command -v jq &>/dev/null; then
+        gemini_tmp="$(mktemp)"
+        if jq -s '.[0] * {tools: (.[1].tools // {})}' "$gemini_dst" "$gemini_src" > "$gemini_tmp"; then
+            if [ -f "$gemini_dst" ] && diff -q "$gemini_tmp" "$gemini_dst" >/dev/null 2>&1; then
+                echo "Skipped dotgemini/settings.json (unchanged)"
+            else
+                if [ -f "$gemini_dst" ] && [ ! -L "$gemini_dst" ]; then
+                    cp "$gemini_dst" "${gemini_dst}.bak"
+                    echo "Backing up $gemini_dst to ${gemini_dst}.bak"
+                fi
+                cp "$gemini_tmp" "$gemini_dst"
+                echo "Merged dotgemini/settings.json tools -> ~/.gemini/settings.json"
+            fi
+        else
+            echo "Skipping Gemini settings merge (invalid JSON)"
+        fi
+        rm -f "$gemini_tmp"
+    else
+        if [ -f "$gemini_dst" ] && [ ! -L "$gemini_dst" ]; then
+            cp "$gemini_dst" "${gemini_dst}.bak"
+            echo "Backing up $gemini_dst to ${gemini_dst}.bak"
+        fi
+        cp "$gemini_src" "$gemini_dst"
+        echo "Copied dotgemini/settings.json -> ~/.gemini/settings.json"
+    fi
+fi
+
 # Suggest installing enabled Claude Code plugins
 plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$DOTFILES_DIR/dotclaude/settings.json" 2>/dev/null)
 if [ -n "$plugins" ]; then
@@ -213,6 +246,23 @@ elif [ -d "$target" ]; then
 fi
 ln -s "$source" "$target"
 echo "Linked dotcodex/skills/.dotfiles -> ~/.codex/skills/.dotfiles"
+
+# Codex allowlist rules (copy, not symlink)
+codex_rules_src="$DOTFILES_DIR/dotcodex/rules/default.rules"
+codex_rules_dst="$HOME/.codex/rules/default.rules"
+if [ -f "$codex_rules_src" ]; then
+    mkdir -p "$HOME/.codex/rules"
+    if [ -f "$codex_rules_dst" ] && diff -q "$codex_rules_src" "$codex_rules_dst" >/dev/null 2>&1; then
+        echo "Skipped dotcodex/rules/default.rules (unchanged)"
+    else
+        if [ -f "$codex_rules_dst" ] && [ ! -L "$codex_rules_dst" ]; then
+            cp "$codex_rules_dst" "${codex_rules_dst}.bak"
+            echo "Backing up $codex_rules_dst to ${codex_rules_dst}.bak"
+        fi
+        cp "$codex_rules_src" "$codex_rules_dst"
+        echo "Copied dotcodex/rules/default.rules -> ~/.codex/rules/default.rules"
+    fi
+fi
 
 # ── MCP servers ───────────────────────────────────────────────
 # Source of truth: [mcp_servers.*] in dotcodex/config.toml
