@@ -65,26 +65,16 @@ git tag v<version>
 git push --follow-tags
 ```
 
-## Step 5: Create GitHub release
+## Step 5: Verify the release
 
-Generate release notes from commits since the previous tag, organized into sections:
-
-- **Breaking Changes** (commits with "breaking", "BREAKING", or "!" in conventional commit type)
-- **New Features** (commits with "feat", "add")
-- **Fixes** (commits with "fix")
-- **Other** (everything else)
-
-Omit empty sections. If categorization is ambiguous, use `--generate-notes` as fallback:
+A GitHub Actions workflow automatically creates the release when a version tag is pushed. Verify it succeeded:
 
 ```
-gh release create v<version> --generate-notes
+gh run list --limit 1
+gh release view v<version>
 ```
 
-If you did generate structured notes, pass them via `--notes`:
-
-```
-gh release create v<version> --notes "<notes>"
-```
+If the workflow failed, check the logs with `gh run view <run-id> --log-failed` and inform the user.
 
 ## Constraints
 
