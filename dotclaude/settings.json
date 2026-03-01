@@ -98,6 +98,7 @@
       "Bash(date*)",
       "Bash(uname *)",
       "Bash(whoami*)",
+      "Bash(fd *)",
       "Bash(file *)",
       "Bash(stat *)",
       "Bash(diff *)",

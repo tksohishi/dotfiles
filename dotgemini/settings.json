@@ -85,6 +85,7 @@
       "run_shell_command(date)",
       "run_shell_command(uname)",
       "run_shell_command(whoami)",
+      "run_shell_command(fd)",
       "run_shell_command(file)",
       "run_shell_command(stat)",
       "run_shell_command(diff)",

@@ -35,6 +35,7 @@
 - Use `tmp/` for temporary file storage (e.g. intermediate JSON); it is globally gitignored
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
 - Use `glow` to display markdown files in the terminal (e.g. `glow README.md`)
+- Prefer `fd` over `find` for file searches (e.g. `fd -e ts` instead of `find . -name "*.ts"`)
 - Prefer `gh` subcommands over `gh api` (e.g. `gh pr list` instead of `gh api repos/.../pulls`)
 
 ## Git
