@@ -89,7 +89,7 @@ Keep it under 150 lines. The agent's instruction-following quality degrades as t
 ln -s AGENTS.md CLAUDE.md
 ```
 
-Claude Code reads both `CLAUDE.md` and `AGENTS.md`, but the symlink ensures compatibility with older versions.
+Claude Code only reads `CLAUDE.md`, not `AGENTS.md`. This symlink is required for Claude Code to pick up the instructions. Other tools (Codex, Gemini CLI, Copilot) read `AGENTS.md` natively.
 
 ## Step 4: Initialize git and commit
 
@@ -105,4 +105,4 @@ git commit -m "Initialize project with AGENTS.md"
 ## Important notes
 
 - Never overwrite existing AGENTS.md or CLAUDE.md
-- The CLAUDE.md symlink ensures broadest compatibility across tools
+- The CLAUDE.md symlink is required for Claude Code; without it Claude Code won't read AGENTS.md
