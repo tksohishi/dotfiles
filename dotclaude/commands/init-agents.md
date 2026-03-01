@@ -16,43 +16,72 @@ If the project has source code, explore the codebase to understand the structure
 
 ## Step 2: Create AGENTS.md
 
-If the project has no source code yet (empty or brand new repo), ask the user to describe the project and create a minimal AGENTS.md:
+AGENTS.md is a constraint system to prevent specific mistakes, not documentation. The agent can already read your code, infer patterns, and figure out conventions. Focus on what it *cannot* figure out on its own.
+
+### Design principles
+
+- **Start minimal, add reactively.** Only add a rule when you notice the agent making the same mistake twice.
+- **The litmus test for each line:** "Would removing this cause the agent to make mistakes?" If not, cut it.
+- **Examples over prose.** Point to canonical files (e.g. "Forms: follow `app/components/DashForm.tsx`") rather than describing patterns.
+- **Don't duplicate what tools enforce.** If a linter or formatter handles it, don't add it here.
+- **Anchor to stable things.** Commands, boundaries, and architectural decisions stay accurate. File-by-file descriptions go stale fast.
+
+### Template for new projects (no source code yet)
 
 ```markdown
 # AGENTS.md
 
-This file provides guidance to AI coding agents working with code in this repository.
+## Overview
 
-## Summary
+<1-2 sentence project description>
 
-<1-2 sentence project description from the user>
+## Commands
+
+<exact build/test/lint/run commands; the single most-referenced section>
+
+## Boundaries
+
+<"never do" rules: files not to touch, secrets handling, etc.>
 ```
 
-If the project has existing source code, create a more complete AGENTS.md based on what you found:
+### Template for existing projects
 
 ```markdown
 # AGENTS.md
 
-This file provides guidance to AI coding agents working with code in this repository.
-
-## Summary
+## Overview
 
 <1-2 sentence project description, derived from README or codebase>
 
-## Tech Stack
+## Commands
 
-<Languages, frameworks, key dependencies; keep it to a short list>
+<exact build/test/lint/run commands the agent cannot guess>
 
 ## Architecture
 
-<Key entrypoints and how the project is organized. Don't list every file; focus on what an agent needs to know to navigate the codebase effectively.>
+<Key entrypoints and how the project is organized. Don't list every file; focus on non-obvious structure, especially in monorepos. Point to canonical example files.>
+
+## Boundaries
+
+<"never do" rules: files not to touch, directories to avoid, secrets, migrations, etc.>
+
+## Gotchas
+
+<Non-obvious things that will cause the agent to produce broken code. Only include if they exist.>
 ```
 
-Guidelines:
-- Be concise; agents scan, they don't read novels
-- Only include information that helps an agent work on the codebase
-- Don't pad with generic advice (e.g. "write clean code")
-- The user will add sections (Key Conventions, Setup, etc.) as the project evolves
+### What NOT to include
+
+- Generic advice ("write clean code", "follow best practices")
+- Standard language conventions the agent already knows
+- Detailed API documentation (link to it instead)
+- File-by-file descriptions (the agent can read files)
+- Information that changes frequently
+- Style rules that a linter/formatter handles
+
+### Size target
+
+Keep it under 150 lines. The agent's instruction-following quality degrades as the file grows. Shorter is better.
 
 ## Step 3: Create CLAUDE.md symlink
 
@@ -60,7 +89,7 @@ Guidelines:
 ln -s AGENTS.md CLAUDE.md
 ```
 
-Claude Code only reads `CLAUDE.md` at the project root, so this symlink is required.
+Claude Code reads both `CLAUDE.md` and `AGENTS.md`, but the symlink ensures compatibility with older versions.
 
 ## Step 4: Initialize git and commit
 
@@ -76,4 +105,4 @@ git commit -m "Initialize project with AGENTS.md"
 ## Important notes
 
 - Never overwrite existing AGENTS.md or CLAUDE.md
-- The CLAUDE.md symlink is critical; without it Claude Code won't read AGENTS.md
+- The CLAUDE.md symlink ensures broadest compatibility across tools
