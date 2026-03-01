@@ -184,6 +184,7 @@
       "Bash(gog auth status *)",
       "Bash(gog auth list *)",
       "Bash(gog auth services *)",
+      "Bash(wayfinder *)",
       "WebSearch",
       "WebFetch"
     ],

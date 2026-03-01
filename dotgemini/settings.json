@@ -161,7 +161,8 @@
       "run_shell_command(gog calendar time)",
       "run_shell_command(gog auth status)",
       "run_shell_command(gog auth list)",
-      "run_shell_command(gog auth services)"
+      "run_shell_command(gog auth services)",
+      "run_shell_command(wayfinder)"
     ],
     "exclude": [
       "run_shell_command(git -C)",
