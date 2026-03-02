@@ -109,6 +109,7 @@
       "Bash(fd *)",
       "Bash(file *)",
       "Bash(stat *)",
+      "Bash(summarize *)",
       "Bash(diff *)",
       "Bash(env)",
       "Bash(code *)",
