@@ -93,6 +93,7 @@
       "Bash(* --version)",
       "Bash(* --help)",
       "Bash(jq *)",
+      "Bash(gitleaks *)",
       "Bash(glow *)",
       "Bash(http GET *)",
       "Bash(http HEAD *)",

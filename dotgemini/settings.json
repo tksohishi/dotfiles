@@ -80,6 +80,7 @@
       "run_shell_command(wc)",
       "run_shell_command(tree)",
       "run_shell_command(jq)",
+      "run_shell_command(gitleaks)",
       "run_shell_command(glow)",
       "run_shell_command(http GET)",
       "run_shell_command(http HEAD)",
