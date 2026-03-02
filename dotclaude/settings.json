@@ -186,6 +186,12 @@
       "Bash(gog auth list *)",
       "Bash(gog auth services *)",
       "Bash(wayfinder *)",
+      "Bash(wrangler whoami*)",
+      "Bash(wrangler pages project list*)",
+      "Bash(wrangler pages project get *)",
+      "Bash(wrangler pages deployment list *)",
+      "Bash(wrangler pages deployment get *)",
+      "Bash(wrangler pages download *)",
       "WebSearch",
       "WebFetch"
     ],
