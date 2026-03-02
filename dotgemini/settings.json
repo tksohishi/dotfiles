@@ -59,6 +59,13 @@
       "run_shell_command(pnpm search)",
       "run_shell_command(brew)",
       "run_shell_command(claude mcp)",
+      "run_shell_command(claude plugin disable)",
+      "run_shell_command(claude plugin enable)",
+      "run_shell_command(claude plugin install)",
+      "run_shell_command(claude plugin list)",
+      "run_shell_command(claude plugin marketplace)",
+      "run_shell_command(claude plugin update)",
+      "run_shell_command(claude plugin validate)",
       "run_shell_command(codex completion)",
       "run_shell_command(codex execpolicy check)",
       "run_shell_command(codex features)",
@@ -163,7 +170,13 @@
       "run_shell_command(gog auth status)",
       "run_shell_command(gog auth list)",
       "run_shell_command(gog auth services)",
-      "run_shell_command(wayfinder)"
+      "run_shell_command(wayfinder)",
+      "run_shell_command(wrangler whoami)",
+      "run_shell_command(wrangler pages project list)",
+      "run_shell_command(wrangler pages project get)",
+      "run_shell_command(wrangler pages deployment list)",
+      "run_shell_command(wrangler pages deployment get)",
+      "run_shell_command(wrangler pages download)"
     ],
     "exclude": [
       "run_shell_command(git -C)",
