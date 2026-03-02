@@ -29,7 +29,7 @@ if [ "$SKIP_BREW" = false ]; then
 
     # Install all packages, apps, and App Store apps (no upgrades)
     echo "Installing packages from Brewfile..."
-    HOMEBREW_BUNDLE_FILE="$DOTFILES_DIR/Brewfile" brew bundle --no-upgrade
+    HOMEBREW_BUNDLE_FILE="$DOTFILES_DIR/Brewfile" brew bundle --no-upgrade || echo "Some packages failed to install (see above). Continuing..."
 fi
 
 # Symlink dotfiles
