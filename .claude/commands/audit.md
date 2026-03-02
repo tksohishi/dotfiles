@@ -39,4 +39,10 @@ Follow these steps:
    - Suggest useful patterns to import into `~/.dotfiles/dotclaude/settings.json` (source of truth)
    - After import, remind to run `bun scripts/agent-commands.ts sync-allowlist`
 
-6. Wait for the user to decide what to do before making any changes.
+6. Audit uv Python cache:
+   - Run `uv python list --only-installed` to list uv-cached Python versions
+   - Run `mise ls python` to get the mise-configured Python version
+   - Flag any uv-cached versions that differ from the mise version (these are stale and can cause uv to pick the wrong Python)
+   - Suggest `uv python uninstall <version>` for each stale version
+
+7. Wait for the user to decide what to do before making any changes.
