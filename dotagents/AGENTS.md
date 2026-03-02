@@ -37,6 +37,8 @@
 - Use `glow` to display markdown files in the terminal (e.g. `glow README.md`)
 - Prefer `fd` over `find` for file searches (e.g. `fd -e ts` instead of `find . -name "*.ts"`)
 - Prefer `gh` subcommands over `gh api` (e.g. `gh pr list` instead of `gh api repos/.../pulls`)
+- Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
+- Prefer `bun` (or `node`) over `python` for ad-hoc scripting
 
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
