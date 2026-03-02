@@ -39,6 +39,7 @@
 - Prefer `gh` subcommands over `gh api` (e.g. `gh pr list` instead of `gh api repos/.../pulls`)
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
 - Prefer `bun` (or `node`) over `python` for ad-hoc scripting
+- Use `summarize <url>` to research YouTube links; direct access to YouTube is blocked for agents
 
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
