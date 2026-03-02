@@ -1,4 +1,4 @@
-tap "polymarket/polymarket-cli"
+tap "polymarket/polymarket-cli", "https://github.com/Polymarket/polymarket-cli"
 tap "tksohishi/tap"
 brew "act"
 brew "awscli"
