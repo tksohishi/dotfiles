@@ -38,7 +38,8 @@
 - Prefer `fd` over `find` for file searches (e.g. `fd -e ts` instead of `find . -name "*.ts"`)
 - Prefer `gh` subcommands over `gh api` (e.g. `gh pr list` instead of `gh api repos/.../pulls`)
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
-- Prefer `bun` (or `node`) over `python` for ad-hoc scripting
+- Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
+- Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 - Use `summarize <url>` to research YouTube links; direct access to YouTube is blocked for agents
 
 ## Git
