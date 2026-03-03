@@ -169,6 +169,8 @@
       "Bash(go mod download*)",
       "Bash(go mod graph*)",
       "Bash(go fmt *)",
+      "Bash(go test *)",
+      "Bash(go build *)",
       "Bash(direnv status*)",
       "Bash(gog gmail search *)",
       "Bash(gog gmail messages *)",
