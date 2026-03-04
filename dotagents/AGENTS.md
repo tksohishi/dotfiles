@@ -41,7 +41,7 @@
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
-- Use `summarize <url>` to research YouTube links; direct access to YouTube is blocked for agents
+
 
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
