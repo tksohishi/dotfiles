@@ -34,12 +34,12 @@ Follow these steps:
    - For non-mise Python versions, check `brew uses --installed python@<version>` to see if they're brew dependencies
    - Only flag versions that are truly stale (not used by mise or any brew formula)
 
-6. **Present results in three categories:**
+6. **Present results in three categories with emoji headers:**
 
-   **OK** — things that are in sync, no action needed. Keep brief (one-liners).
+   **🟢 OK** — things that are in sync, no action needed. Keep brief (one-liners).
 
-   **Warning** — minor drift or potential issues, not urgent. E.g. installed-but-not-enabled plugins, Python versions kept as brew dependencies.
+   **🟡 Warning** — minor drift or potential issues, not urgent. E.g. packages needing upgrade, Python versions kept as brew dependencies.
 
-   **Action Needed** — things that require a decision. E.g. untracked apps, missing packages, stale rules. List each with a suggested action.
+   **🔴 Action Needed** — things that require a decision. E.g. untracked apps, missing packages, stale rules. List each with a suggested action.
 
 7. Wait for the user to decide what to do before making any changes.
