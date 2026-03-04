@@ -31,6 +31,7 @@
 - Python: uv, not pip
 
 ## Shell Commands
+- When debugging or looking up CLI usage, check official docs first (e.g. `--help`, Context7) before falling back to web search
 - Break compound commands (pipes, &&, redirections) into separate steps so each matches an existing permission rule and avoids unnecessary prompts
 - Use `tmp/` for temporary file storage (e.g. intermediate JSON); it is globally gitignored
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
