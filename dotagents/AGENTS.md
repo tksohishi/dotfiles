@@ -37,15 +37,7 @@
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
 - Use `glow` to display markdown files in the terminal (e.g. `glow README.md`)
 - Prefer `fd` over `find` for file searches (e.g. `fd -e ts` instead of `find . -name "*.ts"`)
-- **Always use `gh` subcommands, never `gh api`.** Common mappings:
-  - `gh pr list`, `gh pr view`, `gh pr diff`, `gh pr checks` (not `gh api repos/.../pulls`)
-  - `gh issue list`, `gh issue view` (not `gh api repos/.../issues`)
-  - `gh run list`, `gh run view` (not `gh api repos/.../actions/runs`)
-  - `gh release list`, `gh release view` (not `gh api repos/.../releases`)
-  - `gh repo view`, `gh repo view --json description` (not `gh api repos/...`)
-  - `gh issue comment`, `gh pr comment`, `gh pr review` (not `gh api repos/.../comments`)
-  - `gh search repos`, `gh search issues`, `gh search prs` (not `gh api search/...`)
-  - Use `--json <fields>` for structured output instead of `gh api` with `jq`
+- **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists.
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
