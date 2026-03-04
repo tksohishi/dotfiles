@@ -10,6 +10,7 @@
     "pr": ""
   },
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(git *)",
       "Bash(gh pr view *)",
