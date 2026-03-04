@@ -35,7 +35,6 @@
 - Avoid shell redirections (`2>&1`, `>`, `|`) in commands; they break allowlist matching. The Bash tool already captures both stdout and stderr, so redirections are unnecessary.
 - Use `tmp/` for temporary file storage (e.g. intermediate JSON); it is globally gitignored
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
-- Use `glow` to display markdown files in the terminal (e.g. `glow README.md`)
 - Prefer `fd` over `find` for file searches (e.g. `fd -e ts` instead of `find . -name "*.ts"`)
 - **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists.
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
