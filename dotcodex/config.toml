@@ -24,4 +24,4 @@ args = ["-y", "@upstash/context7-mcp@latest"]
 
 [mcp_servers.playwright]
 command = "npx"
-args = ["@playwright/mcp@latest"]
+args = ["@playwright/mcp@latest", "--headless"]
