@@ -3,7 +3,7 @@
 # https://github.com/openai/codex/issues/11061
 
 model = "gpt-5.3-codex"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "xhigh"
 plan_mode_reasoning_effort = "xhigh"
 personality = "pragmatic"
 
