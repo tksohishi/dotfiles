@@ -41,7 +41,8 @@
   - `gh issue list`, `gh issue view` (not `gh api repos/.../issues`)
   - `gh run list`, `gh run view` (not `gh api repos/.../actions/runs`)
   - `gh release list`, `gh release view` (not `gh api repos/.../releases`)
-  - `gh repo view` (not `gh api repos/...`)
+  - `gh repo view`, `gh repo view --json description` (not `gh api repos/...`)
+  - `gh issue comment`, `gh pr comment`, `gh pr review` (not `gh api repos/.../comments`)
   - `gh search repos`, `gh search issues`, `gh search prs` (not `gh api search/...`)
   - Use `--json <fields>` for structured output instead of `gh api` with `jq`
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
