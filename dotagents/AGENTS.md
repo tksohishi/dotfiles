@@ -53,6 +53,7 @@
 
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
+- After `gh repo create`, always configure repo defaults: `gh repo edit --enable-wiki=false --enable-projects=false --delete-branch-on-merge --enable-squash-merge`
 
 ## Commits
 - Never add the AI agent as a commit author or co-author
