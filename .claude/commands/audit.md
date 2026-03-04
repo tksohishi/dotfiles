@@ -7,42 +7,39 @@ Audit the current machine's installed packages against the Brewfile at `~/.dotfi
 
 Follow these steps:
 
-1. Find untracked packages (installed but not in Brewfile):
+1. **Homebrew packages:**
    - Run `brew bundle cleanup` to list packages not in the Brewfile
-   - Run `ls /Applications/` to find GUI apps not managed by Homebrew at all
-
-2. Find missing packages (in Brewfile but not installed):
    - Run `brew bundle check --verbose` to list packages in the Brewfile that aren't installed
-   - Cross-check against `ls /Applications/` and `mas list` since some may be installed outside Homebrew
+   - For packages that need updates (not truly missing), note them as needing `brew upgrade`
 
-3. Present a summary with two sections:
+2. **GUI apps:**
+   - Run `ls /Applications/` and cross-check against casks and MAS entries in the Brewfile
+   - Check `# Manual install:` comments in the Brewfile for known unmanaged apps
+   - For untracked apps, check `brew search` and `mas search` to see if they're available
 
-   **Untracked** (installed but not in Brewfile):
-   - List each package with a brief description of what it is
-   - Suggest whether to add it to the Brewfile or uninstall it
-
-   **Missing** (in Brewfile but not installed):
-   - Distinguish between truly missing apps and apps installed outside Homebrew
-   - List each package
-   - Ask if they should be installed or removed from the Brewfile
-
-4. Audit Claude Code plugins:
+3. **Claude Code plugins:**
    - Read `enabledPlugins` from `~/.dotfiles/dotclaude/settings.json` (using jq)
    - Read installed plugins from `~/.claude/plugins/installed_plugins.json` (using jq)
-   - List any plugins that are enabled but not installed, and suggest the `/plugin install` command for each
-   - List any plugins that are installed but not enabled, and ask whether to enable or uninstall them
+   - List marketplace plugins from `ls ~/.claude/plugins/marketplaces/*/external_plugins/`
+   - Marketplace plugins (with `.mcp.json`) work without `enabledPlugins` entries; don't flag those as mismatches
+   - Only flag installed-but-not-enabled for non-marketplace plugins
 
-5. Audit Codex auto-learned rules:
-   - Read `~/.codex/rules/default.rules` and compare against tracked `~/.dotfiles/dotcodex/rules/default.rules`
-   - List new auto-learned patterns that look reusable
-   - Skip one-off patterns with hardcoded file paths, commit messages, or URLs
-   - Suggest useful patterns to import into `~/.dotfiles/dotclaude/settings.json` (source of truth)
-   - After import, remind to run `bun scripts/agent-commands.ts sync-allowlist`
+4. **Codex auto-learned rules:**
+   - Diff `~/.codex/rules/default.rules` against tracked `~/.dotfiles/dotcodex/rules/default.rules`
+   - List new auto-learned patterns that look reusable (skip one-off patterns with hardcoded paths/URLs)
+   - Suggest importing useful patterns into `~/.dotfiles/dotclaude/settings.json` (source of truth)
 
-6. Audit uv Python cache:
-   - Run `uv python list --only-installed` to list uv-cached Python versions
-   - Run `mise ls python` to get the mise-configured Python version
-   - Flag any uv-cached versions that differ from the mise version (these are stale and can cause uv to pick the wrong Python)
-   - Suggest `uv python uninstall <version>` for each stale version
+5. **uv Python cache:**
+   - Run `uv python list --only-installed` and `mise ls python`
+   - For non-mise Python versions, check `brew uses --installed python@<version>` to see if they're brew dependencies
+   - Only flag versions that are truly stale (not used by mise or any brew formula)
+
+6. **Present results in three categories:**
+
+   **OK** — things that are in sync, no action needed. Keep brief (one-liners).
+
+   **Warning** — minor drift or potential issues, not urgent. E.g. installed-but-not-enabled plugins, Python versions kept as brew dependencies.
+
+   **Action Needed** — things that require a decision. E.g. untracked apps, missing packages, stale rules. List each with a suggested action.
 
 7. Wait for the user to decide what to do before making any changes.
