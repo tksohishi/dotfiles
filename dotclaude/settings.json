@@ -90,6 +90,7 @@
       "Bash(codex features *)",
       "Bash(codex mcp *)",
       "mcp__context7__*",
+      "mcp__playwright__*",
       "Bash(mas list *)",
       "Bash(mas search *)",
       "Bash(mas install *)",
