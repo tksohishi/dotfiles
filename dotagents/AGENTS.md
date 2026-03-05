@@ -32,7 +32,7 @@
 
 ## Shell Commands
 - When debugging or looking up CLI usage, check official docs first (e.g. `--help`, Context7) before falling back to web search
-- Avoid shell redirections (`2>&1`, `>`, `|`) in commands; they break allowlist matching. The Bash tool already captures both stdout and stderr, so redirections are unnecessary.
+- Avoid shell redirections (`2>&1`, `>`, `|`) and subshells (`$()`, backticks) in commands; they break allowlist matching and trigger unnecessary permission prompts. Break compound commands into separate steps, using `tmp/` for intermediate output if needed.
 - Use `tmp/` for temporary file storage (e.g. intermediate JSON); it is globally gitignored
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
 - Prefer `fd` over `find` for file searches (e.g. `fd -e ts` instead of `find . -name "*.ts"`)
@@ -49,4 +49,4 @@
 ## Commits
 - Never add the AI agent as a commit author or co-author
 - Always commit using the default git settings
-- Use plain quoted strings for multi-line commit messages, not heredoc/subshell syntax (heredocs trigger security prompts in Claude Code)
+- Use plain quoted strings for commit messages, not heredoc/subshell syntax; `$()` and heredocs trigger security prompts
