@@ -43,6 +43,7 @@ files=(
     .config/starship.toml
     .config/ghostty/config
     .config/mise/config.toml
+    .config/zed/settings.json
 )
 
 echo ""
