@@ -7,12 +7,9 @@
     "mode": "dark",
     "dark": "One Dark"
   },
+  "disable_ai": true,
   "features": {
-    "copilot": false
+    "edit_prediction_provider": "none"
   },
-  "assistant": {
-    "enabled": false
-  },
-  "show_completions_on_input": false,
-  "show_inline_completions": false
+  "show_completions_on_input": false
 }
