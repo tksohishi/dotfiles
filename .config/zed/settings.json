@@ -3,10 +3,7 @@
 {
   "ui_font_size": 16,
   "buffer_font_size": 15,
-  "theme": {
-    "mode": "dark",
-    "dark": "One Dark"
-  },
+  "theme": "One Dark",
   "disable_ai": true,
   "features": {
     "edit_prediction_provider": "none"
