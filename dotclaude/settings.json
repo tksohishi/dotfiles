@@ -93,6 +93,7 @@
       "mcp__playwright__*",
       "Bash(mas list *)",
       "Bash(mas search *)",
+      "Bash(mas outdated*)",
       "Bash(mas install *)",
       "Bash(ln *)",
       "Bash(ls *)",

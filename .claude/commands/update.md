@@ -10,9 +10,9 @@ Run the following update commands in order:
 3. `brew upgrade --cask` — upgrade all casks
 4. `mise upgrade` — upgrade all mise-managed tools
 5. `claude update` — update Claude Code itself
-6. `mas upgrade` — upgrade Mac App Store apps (may require sudo)
+6. `mas outdated` — check for Mac App Store updates
 
-Run steps 1-5 directly. For step 6, tell the user the command to run since it may require sudo.
+Run steps 1-6 directly. If step 6 shows available updates, tell the user to run `mas upgrade` themselves (it requires a password).
 
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
