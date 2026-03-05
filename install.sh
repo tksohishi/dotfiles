@@ -235,18 +235,20 @@ else
 fi
 rm -f "$codex_tmp"
 
-# Codex custom command skills namespace
+# Codex custom command skills (symlink each skill individually)
 mkdir -p "$HOME/.codex/skills"
-target="$HOME/.codex/skills/.dotfiles"
-source="$DOTFILES_DIR/dotcodex/skills/.dotfiles"
-if [ -L "$target" ]; then
-    rm "$target"
-elif [ -d "$target" ]; then
-    echo "Backing up $target to $target.bak"
-    mv "$target" "$target.bak"
-fi
-ln -s "$source" "$target"
-echo "Linked dotcodex/skills/.dotfiles -> ~/.codex/skills/.dotfiles"
+for skill_dir in "$DOTFILES_DIR"/dotcodex/skills/.dotfiles/*/; do
+    skill_name="$(basename "$skill_dir")"
+    target="$HOME/.codex/skills/$skill_name"
+    if [ -L "$target" ]; then
+        rm "$target"
+    elif [ -d "$target" ]; then
+        echo "Backing up $target to $target.bak"
+        mv "$target" "$target.bak"
+    fi
+    ln -s "$skill_dir" "$target"
+    echo "Linked Codex skill: $skill_name"
+done
 
 # Codex allowlist rules (copy, not symlink)
 codex_rules_src="$DOTFILES_DIR/dotcodex/rules/default.rules"
