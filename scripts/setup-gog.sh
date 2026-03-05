@@ -122,7 +122,12 @@ echo "Then add yourself as a test user:"
 echo "  https://console.cloud.google.com/auth/audience?project=$PROJECT_ID"
 echo "  Click 'Add users', enter: $ACCOUNT"
 echo ""
-read -rp "Press Enter when the consent screen and test user are configured..."
+echo "Finally, publish the app on the same Audience page:"
+echo "  Click 'Publish App' and confirm."
+echo "  (Apps in Testing mode expire refresh tokens after 7 days.)"
+echo "  The unverified app warning is fine for personal use."
+echo ""
+read -rp "Press Enter when the consent screen, test user, and publishing are configured..."
 
 # ── Create OAuth client (manual) ─────────────────────────────
 echo ""
