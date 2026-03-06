@@ -29,6 +29,6 @@ Manage `Bash(...)` permission rules in the `permissions.allow` array in `~/.dotf
 7. Sync to Codex and Gemini:
    - Run `bun scripts/agent-commands.ts sync-allowlist`
    - Copy `dotcodex/rules/default.rules` to `~/.codex/rules/default.rules`
-   - Merge `dotgemini/settings.json` into `~/.gemini/settings.json` (overwrite only the `tools` key using `jq -s '.[0] * {tools: (.[1].tools // {})}' ~/.gemini/settings.json dotgemini/settings.json`)
+   - Run `scripts/sync-gemini-settings.sh`
 8. Commit and push all changed files together (`dotclaude/settings.json`, `dotcodex/rules/default.rules`, `dotgemini/settings.json`)
 9. Report what was added, removed, or modified
