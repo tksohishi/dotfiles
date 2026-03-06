@@ -18,6 +18,7 @@ setopt hist_ignore_dups
 setopt share_history
 
 # Completion
+fpath=("$HOME/.zsh/completions" $fpath)
 autoload -U compinit
 compinit
 

@@ -10,7 +10,6 @@
     "pr": ""
   },
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(git *)",
       "Bash(gh pr view *)",
@@ -236,7 +235,8 @@
       "Read(**/.env.*)",
       "Read(~/.ssh/**)",
       "Read(~/.aws/**)"
-    ]
+    ],
+    "defaultMode": "acceptEdits"
   },
   "statusLine": {
     "type": "command",
@@ -246,5 +246,6 @@
     "document-skills@anthropic-agent-skills": true,
     "swift-lsp@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true
-  }
+  },
+  "effortLevel": "high"
 }
