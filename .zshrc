@@ -28,7 +28,7 @@ setopt auto_pushd
 setopt correct
 setopt list_packed
 setopt nolistbeep
-disable -r log
+disable log
 
 # Keybindings (emacs mode)
 bindkey -e
