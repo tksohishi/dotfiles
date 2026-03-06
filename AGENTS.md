@@ -42,6 +42,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
 - `scripts/agent-commands.ts` — create/sync/delete global commands across Claude, Gemini, and Codex
+- `scripts/sync-gemini-settings.sh` — merge `dotgemini/settings.json` tools into `~/.gemini/settings.json`
 - `scripts/setup-gog.sh` — one-time Google Cloud project + gog CLI auth setup
 
 ## Key Conventions
