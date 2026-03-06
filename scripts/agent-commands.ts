@@ -275,7 +275,7 @@ async function syncAllowlist(): Promise<void> {
 
   const geminiSettings = {
     tools: {
-      allowed: allowPatterns.map(toGeminiToolRule),
+      core: allowPatterns.map(toGeminiToolRule),
       exclude: denyPatterns.map(toGeminiToolRule),
     },
   };

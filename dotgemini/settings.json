@@ -1,6 +1,6 @@
 {
   "tools": {
-    "allowed": [
+    "core": [
       "run_shell_command(git)",
       "run_shell_command(gh pr view)",
       "run_shell_command(gh pr list)",

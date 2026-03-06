@@ -14,7 +14,7 @@ if [ ! -f "$src" ]; then
 fi
 
 if [ -f "$dst" ]; then
-    jq -s '.[0] * {tools: (.[1].tools // {})}' "$dst" "$src" > "$tmp"
+    jq -s '.[0] + {tools: (.[1].tools // {})}' "$dst" "$src" > "$tmp"
 else
     cp "$src" "$tmp"
 fi
