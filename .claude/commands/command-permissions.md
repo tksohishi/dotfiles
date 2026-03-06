@@ -4,7 +4,7 @@ allowed-tools: Read, Edit, Bash
 argument-hint: <command>
 ---
 
-# /claude-commands: Manage Claude Code command allowlist
+# /command-permissions: Manage Claude Code command allowlist
 
 The user wants to manage permissions for: $ARGUMENTS
 
