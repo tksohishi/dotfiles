@@ -63,6 +63,7 @@ cask "simple-comic"
 cask "slack"
 cask "spokenly"
 cask "spotify"
+cask "superhuman"
 cask "ticktick"
 cask "visual-studio-code" # Password prompt: shell command
 cask "zed"
