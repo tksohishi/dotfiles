@@ -71,6 +71,32 @@ for f in "${files[@]}"; do
     echo "Linked $f"
 done
 
+# ── dnsmasq ───────────────────────────────────────────────────
+if [ -d /opt/homebrew/etc/dnsmasq.d ]; then
+    target="/opt/homebrew/etc/dnsmasq.d/test.conf"
+    source="$DOTFILES_DIR/dnsmasq/test.conf"
+    if [ -L "$target" ]; then
+        rm "$target"
+    elif [ -f "$target" ]; then
+        mv "$target" "$target.bak"
+    fi
+    ln -s "$source" "$target"
+    echo "Linked dnsmasq/test.conf -> $target"
+
+    # Enable conf-dir include if not already
+    dnsmasq_conf="/opt/homebrew/etc/dnsmasq.conf"
+    if grep -q '^#conf-dir=/opt/homebrew/etc/dnsmasq.d/,\*\.conf' "$dnsmasq_conf" 2>/dev/null; then
+        sed -i '' 's|^#conf-dir=/opt/homebrew/etc/dnsmasq.d/,\*\.conf|conf-dir=/opt/homebrew/etc/dnsmasq.d/,*.conf|' "$dnsmasq_conf"
+        echo "Enabled conf-dir in dnsmasq.conf"
+    fi
+
+    echo ""
+    echo "dnsmasq post-install (requires sudo):"
+    echo "  sudo brew services start dnsmasq"
+    echo "  sudo mkdir -p /etc/resolver"
+    echo "  echo 'nameserver 127.0.0.1' | sudo tee /etc/resolver/test"
+fi
+
 # ── Git hooks ─────────────────────────────────────────────────
 git -C "$DOTFILES_DIR" config core.hooksPath hooks
 echo "Configured git hooks from hooks/"
