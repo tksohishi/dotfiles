@@ -13,3 +13,4 @@ node_modules/
 *.local.*
 *.override
 *.override.*
+playwright-mcp/
