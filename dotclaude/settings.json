@@ -53,6 +53,7 @@
       "Bash(npm prefix *)",
       "Bash(npm root *)",
       "Bash(npm bin *)",
+      "Bash(npx tsc*)",
       "Bash(pnpm list *)",
       "Bash(pnpm ls *)",
       "Bash(pnpm view *)",

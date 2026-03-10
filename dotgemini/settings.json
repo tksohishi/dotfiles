@@ -43,6 +43,7 @@
       "run_shell_command(npm prefix)",
       "run_shell_command(npm root)",
       "run_shell_command(npm bin)",
+      "run_shell_command(npx tsc)",
       "run_shell_command(pnpm list)",
       "run_shell_command(pnpm ls)",
       "run_shell_command(pnpm view)",
