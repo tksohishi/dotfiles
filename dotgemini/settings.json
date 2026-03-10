@@ -58,6 +58,8 @@
       "run_shell_command(pnpm bin)",
       "run_shell_command(pnpm store status)",
       "run_shell_command(pnpm search)",
+      "run_shell_command(pnpm dev)",
+      "run_shell_command(pnpm test)",
       "run_shell_command(bun --version)",
       "run_shell_command(bun pm)",
       "run_shell_command(brctl)",

@@ -68,6 +68,8 @@
       "Bash(pnpm bin *)",
       "Bash(pnpm store status *)",
       "Bash(pnpm search *)",
+      "Bash(pnpm dev*)",
+      "Bash(pnpm test*)",
       "Bash(bun --version*)",
       "Bash(bun pm *)",
       "Bash(brctl *)",
