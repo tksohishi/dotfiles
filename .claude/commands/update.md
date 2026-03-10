@@ -16,6 +16,6 @@ Run steps 1-6 directly. If step 6 shows available updates, tell the user to run 
 
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
-Report what was upgraded, but only packages listed in the Brewfile (skip transitive dependencies). For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output.
+Report what was upgraded, but only packages listed in the Brewfile (skip transitive dependencies). For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output. For any Brewfile package with a **major version bump**, fetch its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`) and summarize breaking changes, new features, and deprecations.
 
 After upgrades, check for interesting new formulae and casks. The `brew update` output from step 1 lists new additions under "==> New Formulae" and "==> New Casks". Review those and highlight any that look relevant to the user's setup (developer tools, terminal utilities, productivity apps, etc.). If any look worth checking out, suggest them briefly with a one-line description. Don't overwhelm; only surface genuinely interesting additions.
