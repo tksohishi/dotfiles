@@ -97,6 +97,23 @@ if [ -d /opt/homebrew/etc/dnsmasq.d ]; then
     echo "  echo 'nameserver 127.0.0.1' | sudo tee /etc/resolver/test"
 fi
 
+# ── caddy ─────────────────────────────────────────────────────
+if command -v caddy &>/dev/null; then
+    target="/opt/homebrew/etc/Caddyfile"
+    source="$DOTFILES_DIR/.config/caddy/Caddyfile"
+    if [ -L "$target" ]; then
+        rm "$target"
+    elif [ -f "$target" ]; then
+        mv "$target" "$target.bak"
+    fi
+    ln -s "$source" "$target"
+    echo "Linked .config/caddy/Caddyfile -> $target"
+
+    echo ""
+    echo "Caddy post-install:"
+    echo "  brew services start caddy"
+fi
+
 # ── Git hooks ─────────────────────────────────────────────────
 git -C "$DOTFILES_DIR" config core.hooksPath hooks
 echo "Configured git hooks from hooks/"
