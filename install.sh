@@ -99,18 +99,23 @@ fi
 
 # ── caddy ─────────────────────────────────────────────────────
 if command -v caddy &>/dev/null; then
+    local_caddy="$DOTFILES_DIR/.config/caddy/Caddyfile.local"
     target="/opt/homebrew/etc/Caddyfile"
-    source="$DOTFILES_DIR/.config/caddy/Caddyfile"
-    if [ -L "$target" ]; then
-        rm "$target"
-    elif [ -f "$target" ]; then
-        mv "$target" "$target.bak"
+    if [ -f "$local_caddy" ]; then
+        if [ -L "$target" ]; then
+            rm "$target"
+        elif [ -f "$target" ]; then
+            mv "$target" "$target.bak"
+        fi
+        ln -s "$local_caddy" "$target"
+        echo "Linked Caddyfile.local -> $target"
+    else
+        echo "Skipped Caddy (no .config/caddy/Caddyfile.local found, see Caddyfile.example)"
     fi
-    ln -s "$source" "$target"
-    echo "Linked .config/caddy/Caddyfile -> $target"
 
     echo ""
     echo "Caddy post-install:"
+    echo "  caddy trust   # trust local CA (requires sudo)"
     echo "  brew services start caddy"
 fi
 
