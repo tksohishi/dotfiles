@@ -42,7 +42,7 @@
 
 
 ## Playwright
-- Use `playwright` (visible Firefox) when visual inspection matters (testing UI, debugging layout)
+- Use `playwright` (visible WebKit) when visual inspection matters (testing UI, debugging layout)
 - Use `playwright-headless` (headless Chrome) for non-visual tasks (fetching pages, research)
 
 ## Git
