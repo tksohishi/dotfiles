@@ -42,8 +42,8 @@
 
 
 ## Playwright
-- Use `playwright` (visible Firefox) for webapp testing and frontend design
-- Use `playwright-headless` (headless Chrome) for research
+- Use `playwright` (visible Firefox) when visual inspection matters (testing UI, debugging layout)
+- Use `playwright-headless` (headless Chrome) for non-visual tasks (fetching pages, research)
 
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
