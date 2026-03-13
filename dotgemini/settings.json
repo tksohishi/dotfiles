@@ -64,6 +64,7 @@
       "run_shell_command(bun pm)",
       "run_shell_command(brctl)",
       "run_shell_command(brew)",
+      "run_shell_command(cd)",
       "run_shell_command(cargo build)",
       "run_shell_command(cargo check)",
       "run_shell_command(cargo clippy)",

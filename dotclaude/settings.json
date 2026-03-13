@@ -72,6 +72,7 @@
       "Bash(bun pm *)",
       "Bash(brctl *)",
       "Bash(brew *)",
+      "Bash(cd *)",
       "Bash(cargo build*)",
       "Bash(cargo check*)",
       "Bash(cargo clippy*)",
