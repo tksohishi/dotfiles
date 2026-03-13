@@ -92,6 +92,7 @@
       "Bash(codex mcp *)",
       "mcp__context7__*",
       "mcp__playwright__*",
+      "mcp__playwright-headless__*",
       "Bash(mas list *)",
       "Bash(mas search *)",
       "Bash(mas outdated*)",
