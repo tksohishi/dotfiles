@@ -35,7 +35,7 @@
 - **Never use shell redirections (`2>&1`, `>`, `|`) or subshells (`$()`, backticks) in commands.** They break allowlist matching and trigger permission prompts. Break into separate steps; use `tmp/` (globally gitignored) for intermediate output.
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
 - **Never run `find` on `$HOME` or other broad directories.** It traverses thousands of files, triggers a flood of permission prompts, and is a security risk. Use `fd` for file searches, scoped to the project directory (e.g. `fd -e ts` instead of `find . -name "*.ts"`). If you need to locate something outside the project, ask the user.
-- **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists.
+- **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists. Fall back to `gh api` only when no subcommand covers the operation, and research the endpoint first.
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
