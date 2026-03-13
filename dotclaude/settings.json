@@ -272,8 +272,9 @@
       "Bash(sudo *)",
       "Bash(shutdown*)",
       "Bash(reboot*)",
+      "Read(**/.dev.vars)",
       "Read(**/.env)",
-      "Read(**/.env.*)",
+      "Read(**/.env.local)",
       "Read(~/.ssh/**)",
       "Read(~/.aws/**)"
     ],
