@@ -58,6 +58,7 @@ cask "google-japanese-ime" # Password prompt: input method
 cask "granola"
 cask "ledger-wallet"
 cask "libreoffice"
+cask "logi-options+"
 cask "microsoft-office" # Password prompt: installer pkg
 cask "notion-calendar"
 cask "rectangle"
