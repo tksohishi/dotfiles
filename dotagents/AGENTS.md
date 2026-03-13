@@ -41,6 +41,10 @@
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 
 
+## Playwright
+- Use `playwright` (visible Firefox) for webapp testing and frontend design
+- Use `playwright-headless` (headless Chrome) for research
+
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
 - After `gh repo create`, always configure repo defaults: `gh repo edit --enable-wiki=false --enable-projects=false --delete-branch-on-merge --enable-squash-merge`
