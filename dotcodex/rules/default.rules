@@ -238,7 +238,6 @@ prefix_rule(pattern=["wrangler", "pages", "deployment", "list"], decision="allow
 prefix_rule(pattern=["wrangler", "pages", "deployment", "get"], decision="allow")
 prefix_rule(pattern=["wrangler", "pages", "download"], decision="allow")
 prefix_rule(pattern=["git", "-C"], decision="forbidden")
-prefix_rule(pattern=["git", "--no-pager"], decision="forbidden")
 prefix_rule(pattern=["git", "commit", "--amend"], decision="forbidden")
 prefix_rule(pattern=["git", "push", "--force"], decision="forbidden")
 prefix_rule(pattern=["git", "push", "-f"], decision="forbidden")

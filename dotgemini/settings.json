@@ -240,7 +240,6 @@
     ],
     "exclude": [
       "run_shell_command(git -C)",
-      "run_shell_command(git --no-pager)",
       "run_shell_command(git commit --amend)",
       "run_shell_command(git push --force)",
       "run_shell_command(git push -f)",

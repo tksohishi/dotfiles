@@ -265,7 +265,6 @@
     ],
     "deny": [
       "Bash(git -C *)",
-      "Bash(git --no-pager *)",
       "Bash(git commit --amend *)",
       "Bash(git push --force *)",
       "Bash(git push -f *)",
@@ -287,7 +286,6 @@
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": true,
     "swift-lsp@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true
   }
 }
