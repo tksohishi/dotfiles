@@ -4,6 +4,8 @@
 [ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
 [ -d $HOME/.bun/bin ] && export PATH=$HOME/.bun/bin:$PATH
 [ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
+[ -d /opt/homebrew/opt/rustup/bin ] && export PATH=/opt/homebrew/opt/rustup/bin:$PATH
+[ -d $HOME/.cargo/bin ] && export PATH=$HOME/.cargo/bin:$PATH
 
 # Environment
 export EDITOR=vim
