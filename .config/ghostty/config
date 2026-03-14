@@ -1,6 +1,6 @@
 # https://ghostty.org/docs/config/reference
 font-family = JetBrainsMonoNL Nerd Font
-font-family = Sarasa Mono J
+font-family = Osaka
 font-size = 12
 background-opacity = 0.9
 confirm-close-surface = false
