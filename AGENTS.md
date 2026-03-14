@@ -38,7 +38,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `dotgemini/commands/` — global Gemini CLI commands (symlinked as `~/.gemini/commands/`)
 - `dotcodex/skills/.dotfiles/` — global Codex command-equivalent skills (symlinked as `~/.codex/skills/.dotfiles/`)
 - `.claude/commands/` — project-local Claude Code commands, e.g. `/discover`
-- `dotclaude/keybindings.json` — Claude Code keybindings, unbinds Ctrl+B (see [#22626](https://github.com/anthropics/claude-code/issues/22626))
+- `dotclaude/keybindings.json` — Claude Code keybindings (e.g. Ctrl+Shift+B for background tasks)
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
 - `scripts/agent-commands.ts` — create/sync/delete global commands across Claude, Gemini, and Codex
