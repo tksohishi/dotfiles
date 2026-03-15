@@ -29,6 +29,7 @@
 ## Package Managers
 - Node.js: pnpm, not npm
 - Python: uv, not pip
+- Global CLI tools: prefer `brew install` over `npm install -g`, `pip install`, or `go install`. Homebrew tracks everything in the Brewfile.
 
 ## Shell Commands
 - When debugging or looking up CLI usage, check official docs first (e.g. `--help`, Context7) before falling back to web search

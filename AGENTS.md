@@ -52,6 +52,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - Git config includes `~/.gitconfig.local` for machine-specific settings (e.g., work email)
 - No git aliases; git operations are delegated to AI agents
 - gog CLI provides Gmail/Calendar access; read commands are auto-approved, write commands prompt for confirmation
+- Prefer Homebrew (`brew install`) over global installs via npm, pip, or go. Homebrew keeps everything in the Brewfile and makes setup reproducible.
 
 ## When Editing
 
