@@ -2,12 +2,9 @@
 font-family = JetBrainsMonoNL Nerd Font
 font-family = Osaka
 font-size = 12
-background-opacity = 0.9
 confirm-close-surface = false
-window-height = 9999
-window-width = 9999
+maximize = true
 window-inherit-working-directory = false
-tab-inherit-working-directory = false
 split-inherit-working-directory = false
 
 # Let zsh precmd control tab title, not shell integration
