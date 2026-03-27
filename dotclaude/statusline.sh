@@ -34,9 +34,9 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
     [ -z "$line" ] && continue
     x="${line:0:1}"
     y="${line:1:1}"
-    [ "$x" = "?" ] && ((untracked++)) && continue
-    [ "$x" != " " ] && ((staged++))
-    [ "$y" != " " ] && ((unstaged++))
+    [ "$x" = "?" ] && untracked=$((untracked + 1)) && continue
+    [ "$x" != " " ] && staged=$((staged + 1))
+    [ "$y" != " " ] && unstaged=$((unstaged + 1))
   done <<< "$porcelain"
 
   dirty=""
