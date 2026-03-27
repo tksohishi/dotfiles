@@ -72,26 +72,26 @@ else
   ctx_part="${red}${remaining}%${reset} context"
 fi
 
-# -- Rate limits --
+# -- Rate limits (remaining) --
 rate_part=""
 if [ -n "$rate_5h" ]; then
-  r5=${rate_5h%.*}
-  if [ "$r5" -gt 80 ] 2>/dev/null; then
-    rate_part="${red}${r5}%${reset}"
-  elif [ "$r5" -gt 50 ] 2>/dev/null; then
+  r5=$((100 - ${rate_5h%.*}))
+  if [ "$r5" -gt 50 ] 2>/dev/null; then
+    rate_part="${green}${r5}%${reset}"
+  elif [ "$r5" -gt 20 ] 2>/dev/null; then
     rate_part="${yellow}${r5}%${reset}"
   else
-    rate_part="${green}${r5}%${reset}"
+    rate_part="${red}${r5}%${reset}"
   fi
   rate_part="${rate_part} 5h"
   if [ -n "$rate_7d" ]; then
-    r7=${rate_7d%.*}
-    if [ "$r7" -gt 80 ] 2>/dev/null; then
-      rate_part+=" ${red}${r7}%${reset}"
-    elif [ "$r7" -gt 50 ] 2>/dev/null; then
+    r7=$((100 - ${rate_7d%.*}))
+    if [ "$r7" -gt 50 ] 2>/dev/null; then
+      rate_part+=" ${green}${r7}%${reset}"
+    elif [ "$r7" -gt 20 ] 2>/dev/null; then
       rate_part+=" ${yellow}${r7}%${reset}"
     else
-      rate_part+=" ${green}${r7}%${reset}"
+      rate_part+=" ${red}${r7}%${reset}"
     fi
     rate_part+=" 7d"
   fi
