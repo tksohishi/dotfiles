@@ -69,6 +69,7 @@
       "Bash(pnpm dev*)",
       "Bash(pnpm test*)",
       "Bash(bun --version*)",
+      "Bash(bun info*)",
       "Bash(bun pm *)",
       "Bash(brctl *)",
       "Bash(brew *)",
