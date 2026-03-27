@@ -219,6 +219,7 @@
       "Bash(uv tool dir*)",
       "Bash(lsof *)",
       "Bash(pandoc *)",
+      "Bash(pbcopy *)",
       "Bash(ping *)",
       "Bash(pdftotext *)",
       "Bash(python -m markitdown *)",
@@ -314,6 +315,5 @@
     "document-skills@anthropic-agent-skills": true,
     "swift-lsp@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true
-  },
-  "model": "opus"
+  }
 }

@@ -208,6 +208,7 @@
       "run_shell_command(uv tool dir)",
       "run_shell_command(lsof)",
       "run_shell_command(pandoc)",
+      "run_shell_command(pbcopy)",
       "run_shell_command(ping)",
       "run_shell_command(pdftotext)",
       "run_shell_command(python -m markitdown)",
