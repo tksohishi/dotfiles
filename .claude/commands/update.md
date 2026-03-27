@@ -14,6 +14,8 @@ Run the following update commands in order:
 
 Run steps 1-6 directly. If step 6 shows available updates, tell the user to run `mas upgrade` themselves (it requires a password).
 
+After `brew upgrade`, run `agent-browser install` to update its browser binaries.
+
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
 Report what was upgraded, but only packages listed in the Brewfile (skip transitive dependencies). For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output. For any Brewfile package with a **major version bump**, fetch its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`) and summarize breaking changes, new features, and deprecations.
