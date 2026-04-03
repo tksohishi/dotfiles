@@ -47,6 +47,11 @@
 - Use `playwright` (visible WebKit) when visual inspection matters (testing UI, debugging layout)
 - Use `playwright-headless` (headless Chrome) for non-visual tasks (fetching pages, research)
 
+## agent-browser
+- Use `agent-browser` to fetch content from sites that block simple HTTP requests (e.g. X/Twitter)
+- To read an X post: `agent-browser open <url>`, then `agent-browser snapshot` to get the accessible text
+- Always close when done: `agent-browser close`
+
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
 - After `gh repo create`, always configure repo defaults: `gh repo edit --enable-wiki=false --enable-projects=false --delete-branch-on-merge --enable-squash-merge`
