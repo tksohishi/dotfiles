@@ -43,6 +43,11 @@
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 
 
+## Gmail and Calendar
+- Use `gog` CLI for Gmail and Calendar operations, not MCP Gmail/Calendar tools
+- `gog gmail draft create` for drafting emails; `gog gmail search` for searching
+- `gog calendar` for calendar operations
+
 ## Playwright
 - Use `playwright` (visible WebKit) when visual inspection matters (testing UI, debugging layout)
 - Use `playwright-headless` (headless Chrome) for non-visual tasks (fetching pages, research)
