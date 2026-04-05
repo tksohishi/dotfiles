@@ -19,6 +19,11 @@ Initialize a `.obsidian/` directory in the current project with default settings
    ```
    - `defaultViewMode: "preview"` = open notes in Reading view
    - `theme: "obsidian"` = dark mode
-3. Add `.obsidian/` to the project's `.gitignore` if not already present
+3. Write `.obsidian/core-plugins.json` disabling sync:
+   ```json
+   ["file-explorer", "global-search", "graph", "backlink", "outgoing-link", "page-preview", "tag-pane"]
+   ```
+   This list enables only useful read-only plugins. Sync is excluded (disabled by omission).
+4. Add `.obsidian/` to the project's `.gitignore` if not already present
 4. Open the vault: `open "obsidian://open?path=<absolute-path-to-current-directory>"`
 5. Report what was created
