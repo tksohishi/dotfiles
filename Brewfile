@@ -63,6 +63,7 @@ cask "libreoffice"
 cask "logi-options+"
 cask "microsoft-office" # Password prompt: installer pkg
 cask "notion-calendar"
+cask "obsidian"
 cask "rectangle"
 cask "simple-comic"
 cask "slack"
