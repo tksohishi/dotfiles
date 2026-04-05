@@ -1,9 +1,9 @@
 ---
 name: "init-agents"
-description: "Initialize a new project with AGENTS.md. Use when the user asks to create, init, or set up AGENTS.md, CLAUDE.md, or agent instructions for a project."
+description: "/init-agents: Initialize a new project with AGENTS.md"
 ---
 
-Use this skill when the user asks to initialize, create, or set up AGENTS.md (or CLAUDE.md) for a project. This includes requests like "init agents", "create agents.md", "set up agent instructions", or `/init-agents`.
+Use this skill when the user asks to run `/init-agents`.
 
 # /init-agents: Initialize a new project with AGENTS.md
 
