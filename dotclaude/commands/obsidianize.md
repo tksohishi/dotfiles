@@ -20,4 +20,5 @@ Initialize a `.obsidian/` directory in the current project with default settings
    - `defaultViewMode: "preview"` = open notes in Reading view
    - `theme: "obsidian"` = dark mode
 3. Add `.obsidian/` to the project's `.gitignore` if not already present
-4. Report what was created
+4. Open the vault: `obsidian vault=<current-directory-name>`
+5. Report what was created
