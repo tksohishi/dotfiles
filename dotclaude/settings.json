@@ -74,6 +74,7 @@
       "Bash(bun outdated*)",
       "Bash(bun pm *)",
       "Bash(bun why *)",
+      "Bash(bc*)",
       "Bash(brctl *)",
       "Bash(brew *)",
       "Bash(cd *)",

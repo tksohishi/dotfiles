@@ -66,6 +66,7 @@
       "run_shell_command(bun outdated)",
       "run_shell_command(bun pm)",
       "run_shell_command(bun why)",
+      "run_shell_command(bc)",
       "run_shell_command(brctl)",
       "run_shell_command(brew)",
       "run_shell_command(cd)",
