@@ -196,6 +196,7 @@
       "Bash(whoami*)",
       "Bash(fd *)",
       "Bash(file *)",
+      "Bash(seats *)",
       "Bash(sheets *)",
       "Bash(stat *)",
       "Bash(summarize *)",
