@@ -84,6 +84,7 @@
       "Bash(cargo doc *)",
       "Bash(cargo fmt*)",
       "Bash(cargo test*)",
+      "Bash(claude update*)",
       "Bash(claude mcp *)",
       "Bash(claude plugin disable *)",
       "Bash(claude plugin enable *)",

@@ -76,6 +76,7 @@
       "run_shell_command(cargo doc)",
       "run_shell_command(cargo fmt)",
       "run_shell_command(cargo test)",
+      "run_shell_command(claude update)",
       "run_shell_command(claude mcp)",
       "run_shell_command(claude plugin disable)",
       "run_shell_command(claude plugin enable)",
