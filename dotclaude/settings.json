@@ -196,6 +196,7 @@
       "Bash(whoami*)",
       "Bash(fd *)",
       "Bash(file *)",
+      "Bash(sheets *)",
       "Bash(stat *)",
       "Bash(summarize *)",
       "Bash(diff *)",
