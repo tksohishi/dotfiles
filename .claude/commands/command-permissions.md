@@ -26,9 +26,5 @@ Manage `Bash(...)` permission rules in the `permissions.allow` array in `~/.dotf
    - Use the existing rules in the file as a style reference
 5. **Safety check (for new and modified rules):** Exclude subcommands that can delete, overwrite, or destructively modify files, data, or remote state. Examples: `rm`, `delete`, `drop`, `push --force`, `reset --hard`, `prune`. If excluding dangerous subcommands leaves an incomplete set, list what was excluded and why, and ask the user if they want to add any of them anyway.
 6. Maintain alphabetical order within the allow array
-7. Sync to Codex and Gemini:
-   - Run `bun scripts/agent-commands.ts sync-allowlist`
-   - Copy `dotcodex/rules/default.rules` to `~/.codex/rules/default.rules`
-   - Run `scripts/sync-gemini-settings.sh`
-8. Commit and push all changed files together (`dotclaude/settings.json`, `dotcodex/rules/default.rules`, `dotgemini/settings.json`)
-9. Report what was added, removed, or modified
+7. Commit and push `dotclaude/settings.json`
+8. Report what was added, removed, or modified
