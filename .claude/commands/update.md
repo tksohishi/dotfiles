@@ -6,15 +6,14 @@ allowed-tools: [Bash]
 Run the following update commands in order:
 
 1. `brew update` — refresh package index
-2. `brew upgrade` — upgrade all formulae
-3. `brew upgrade --cask` — upgrade all casks
-4. `mise upgrade` — upgrade all mise-managed tools
-5. `claude update` — update Claude Code itself
-6. `mas outdated` — check for Mac App Store updates
+2. `brew upgrade --formula` — upgrade all formulae (formulae only; cask apps auto-update themselves)
+3. `mise upgrade` — upgrade all mise-managed tools
+4. `claude update` — update Claude Code itself
+5. `mas outdated` — check for Mac App Store updates
 
-Run steps 1-6 directly. If step 6 shows available updates, tell the user to run `mas upgrade` themselves (it requires a password).
+Run steps 1-5 directly. If step 5 shows available updates, tell the user to run `mas upgrade` themselves (it requires a password).
 
-After `brew upgrade`, run `agent-browser install` to update its browser binaries.
+After `brew upgrade --formula`, run `agent-browser install` to update its browser binaries.
 
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
