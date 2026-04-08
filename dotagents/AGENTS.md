@@ -53,8 +53,8 @@
 - Use `playwright-headless` (headless Chrome) for non-visual tasks (fetching pages, research)
 
 ## agent-browser
-- Use `agent-browser` to fetch content from sites that block simple HTTP requests (e.g. X/Twitter, LinkedIn)
-- To read an X post or LinkedIn profile: `agent-browser open <url>`, then `agent-browser snapshot` to get the accessible text
+- Use `agent-browser` to fetch content from sites that block simple HTTP requests (e.g. LinkedIn)
+- Do NOT use for X/Twitter; it requires login and blocks bot browsers
 - LinkedIn requires login. If not logged in, close the session and reopen with `--headed` flag so the user can log in: `agent-browser close`, then `agent-browser open --headed "https://www.linkedin.com/login"`. After user logs in, navigate to the target profile.
 - For LinkedIn profiles, go directly to `/details/experience/` or `/details/education/` URLs to skip the Activity feed and get structured career data.
 - Always close when done: `agent-browser close`
