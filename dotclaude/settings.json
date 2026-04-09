@@ -228,7 +228,6 @@
       "Bash(uv tool dir*)",
       "Bash(lsof *)",
       "Bash(pandoc *)",
-      "Bash(cat tmp/clipboard.txt | pbcopy)",
       "Bash(pbcopy *)",
       "Bash(ping *)",
       "Bash(pdftotext *)",
