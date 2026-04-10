@@ -337,6 +337,8 @@
       "Bash(git push --force *)",
       "Bash(git push -f *)",
       "Bash(git reset --hard *)",
+      "Bash(curl *)",
+      "Bash(curl)",
       "Bash(sudo *)",
       "Bash(shutdown*)",
       "Bash(reboot*)",
