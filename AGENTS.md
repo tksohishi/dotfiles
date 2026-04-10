@@ -32,6 +32,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `.config/starship.toml` — prompt with git, python, node, cmd_duration
 - `.config/ghostty/config` — font, opacity, window size, tab behavior
 - `.config/mise/config.toml` — node and python runtime versions
+- `macos.sh` — macOS defaults (Dock, Finder, keyboard, trackpad, etc.)
 - `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`
 - `dotclaude/commands/` — global agent command source (symlinked as `~/.claude/commands/`, compiled to Gemini and Codex formats)

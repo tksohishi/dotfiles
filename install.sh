@@ -119,6 +119,11 @@ if command -v caddy &>/dev/null; then
     echo "  brew services start caddy"
 fi
 
+# ── macOS defaults ────────────────────────────────────────────
+echo ""
+echo "Applying macOS defaults..."
+bash "$DOTFILES_DIR/macos.sh"
+
 # ── Git hooks ─────────────────────────────────────────────────
 git -C "$DOTFILES_DIR" config core.hooksPath hooks
 echo "Configured git hooks from hooks/"
