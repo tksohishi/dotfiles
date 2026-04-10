@@ -320,6 +320,10 @@
       "Bash(wrangler pages deployment list *)",
       "Bash(wrangler pages deployment get *)",
       "Bash(wrangler pages download *)",
+      "Skill(pbcopy)",
+      "Skill(github-release *)",
+      "Skill(init-agents)",
+      "Skill(obsidianize)",
       "WebSearch",
       "WebFetch"
     ],
