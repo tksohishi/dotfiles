@@ -54,9 +54,11 @@
 
 ## agent-browser
 - Use `agent-browser` to fetch content from sites that block simple HTTP requests (e.g. LinkedIn)
-- Do NOT use for X/Twitter; it requires login and blocks bot browsers
 - LinkedIn requires login. If not logged in, close the session and reopen with `--headed` flag so the user can log in: `agent-browser close`, then `agent-browser open --headed "https://www.linkedin.com/login"`. After user logs in, navigate to the target profile.
 - For LinkedIn profiles, go directly to `/details/experience/` or `/details/education/` URLs to skip the Activity feed and get structured career data.
+- Common workflow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`
+- To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text)
+- Never guess subcommands. Run `agent-browser --help` if unsure.
 - Always close when done: `agent-browser close`
 
 ## Git
