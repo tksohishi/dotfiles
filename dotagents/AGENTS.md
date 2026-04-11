@@ -48,12 +48,10 @@
 - `gog gmail draft create` for drafting emails; `gog gmail search` for searching
 - `gog calendar` for calendar operations
 
-## Playwright
-- Use `playwright` (visible WebKit) when visual inspection matters (testing UI, debugging layout)
-- Use `playwright-headless` (headless Chrome) for non-visual tasks (fetching pages, research)
-
-## agent-browser
-- Use `agent-browser` to fetch content from sites that block simple HTTP requests (e.g. LinkedIn)
+## Browser Automation
+- Default to `agent-browser` for all browser automation (headless by default, `--headed` for visual)
+- For concurrent sessions: use `--session <name> --profile <path>` with unique profile paths per session
+- WebFetch/httpie for simple HTTP requests; agent-browser for sites that need a real browser
 - LinkedIn requires login. If not logged in, close the session and reopen with `--headed` flag so the user can log in: `agent-browser close`, then `agent-browser open --headed "https://www.linkedin.com/login"`. After user logs in, navigate to the target profile.
 - For LinkedIn profiles, go directly to `/details/experience/` or `/details/education/` URLs to skip the Activity feed and get structured career data.
 - Common workflow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`
