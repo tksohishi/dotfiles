@@ -205,6 +205,18 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/commands/ -> ~/.claude/commands/"
 
+# Claude Code hooks (directory symlink)
+target="$HOME/.claude/hooks"
+source="$DOTFILES_DIR/dotclaude/hooks"
+if [ -L "$target" ]; then
+    rm "$target"
+elif [ -d "$target" ]; then
+    echo "Backing up $target to $target.bak"
+    mv "$target" "$target.bak"
+fi
+ln -s "$source" "$target"
+echo "Linked dotclaude/hooks/ -> ~/.claude/hooks/"
+
 # Gemini custom commands (directory symlink)
 target="$HOME/.gemini/commands"
 source="$DOTFILES_DIR/dotgemini/commands"

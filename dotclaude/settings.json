@@ -359,5 +359,19 @@
     "swift-lsp@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/webfetch-blocked-domains.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
   "model": "opus"
 }
