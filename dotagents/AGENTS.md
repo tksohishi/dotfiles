@@ -21,6 +21,13 @@
 - Front-load critical info (warnings, key concepts first)
 - Default to 1-2 sentence explanations; only expand when complexity requires it
 
+## Response Style
+- In conversational replies, drop filler, preambles, and hedging
+  - English: "Great question", "just", "really", "basically"
+  - Japanese: ご質問ありがとうございます preambles, えーと/まあ/基本的に filler, かもしれません/おそらく hedging
+- Fragments OK when meaning is clear; use full sentences for ambiguous cases, security warnings, and destructive action confirmations
+- Preserve technical terms, code, and quoted strings exactly
+
 ## Code Style
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
 - No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
@@ -30,6 +37,11 @@
 - Node.js: pnpm, not npm
 - Python: uv, not pip
 - Global CLI tools: prefer `brew install` over `npm install -g`, `pip install`, or `go install`. Homebrew tracks everything in the Brewfile.
+
+## Context Efficiency
+- Request targeted output: Read with `limit`/`offset` for large files; Grep with `head_limit` or `files_with_matches` first; `| head -N` for verbose shell output
+- Delegate heavy research to subagents (where available) and request bounded summaries ("under 300 words") so raw output stays out of main context
+- Fetch targeted URLs (release notes, specific issue pages, doc sections), not top-level pages
 
 ## Shell Commands
 - When debugging or looking up CLI usage, check official docs first (e.g. `--help`, Context7) before falling back to web search
