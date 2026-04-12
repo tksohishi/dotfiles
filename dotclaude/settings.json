@@ -372,6 +372,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/check-narration.ts",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   },
   "model": "opus"

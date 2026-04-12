@@ -9,6 +9,7 @@
 
 ## Interaction
 - When asked for your opinion (e.g. "what do you think?", "would it make sense to ~?"), explain your reasoning first and wait for approval before making edits
+- State what you are about to do before running any Bash, Edit, or Write. One sentence is enough. Give short updates when you find something, change direction, or hit a blocker. A Stop hook checks each turn and logs violations to `~/.claude/turn-checks/`.
 
 ## Writing Style
 - Avoid using emdashes in writing
