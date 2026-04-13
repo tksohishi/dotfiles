@@ -199,6 +199,7 @@
       "Bash(file *)",
       "Bash(seats *)",
       "Bash(sheets *)",
+      "Bash(sips *)",
       "Bash(stat *)",
       "Bash(summarize *)",
       "Bash(diff *)",
