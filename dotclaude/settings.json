@@ -206,6 +206,7 @@
       "Bash(dig *)",
       "Bash(env)",
       "Bash(code *)",
+      "Bash(codesign *)",
       "Bash(mise *)",
       "Bash(mkdir *)",
       "Bash(uv sync*)",
