@@ -61,20 +61,20 @@ Skip this step if no files were changed (tag-only projects).
 ## Step 4: Tag and push
 
 ```
+git push
 git tag v<version>
-git push --follow-tags
+git push origin v<version>
 ```
+
+Push branch and tag separately. `--follow-tags` only pushes annotated tags, so it skips the lightweight tag created by `git tag v<version>`.
 
 ## Step 5: Verify the release
 
-A GitHub Actions workflow automatically creates the release when a version tag is pushed. Verify it succeeded:
+A GitHub Actions workflow automatically creates the release when a version tag is pushed. Delegate polling to `/loop` so the workflow is checked on a cadence without blocking the turn:
 
-```
-gh run list --limit 1
-gh release view v<version>
-```
+Invoke via the Skill tool: `loop` with args `check v<version> release workflow: run gh run list --limit 1; if still running or queued, keep looping; if success, run gh release view v<version> and stop; if failure, run gh run view <id> --log-failed and stop.`
 
-If the workflow failed, check the logs with `gh run view <run-id> --log-failed` and inform the user.
+`/loop` will self-pace, run the first check immediately, and schedule follow-ups until the workflow finishes.
 
 ## Constraints
 
