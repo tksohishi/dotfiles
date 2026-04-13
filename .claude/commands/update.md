@@ -19,4 +19,6 @@ After upgrades complete, run `brew cleanup` to remove old versions and free disk
 
 Report what was upgraded, but only packages listed in the Brewfile (skip transitive dependencies). For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output. For any Brewfile package with a **major version bump**, fetch its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`) and summarize breaking changes, new features, and deprecations.
 
+If `claude update` upgraded Claude Code (any version bump, not just major), fetch the changelog from `https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md` and summarize significant changes between the prior and new version: new features, breaking changes, settings/hooks schema changes, and notable bug fixes. Skip trivial entries (typo fixes, internal refactors).
+
 After upgrades, check for interesting new formulae and casks. The `brew update` output from step 1 lists new additions under "==> New Formulae" and "==> New Casks". Review those and highlight any that look relevant to the user's setup (developer tools, terminal utilities, productivity apps, etc.). If any look worth checking out, suggest them briefly with a one-line description. Don't overwhelm; only surface genuinely interesting additions.
