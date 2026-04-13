@@ -1,5 +1,5 @@
 #!/bin/bash
-# Pre-hook: block WebFetch for domains that require agent-browser or playwright-headless.
+# Pre-hook: block WebFetch for domains that require agent-browser.
 # Reads tool input JSON from stdin, checks URL against blocked domains list.
 
 SCRIPT_DIR="$(dirname "$0")"

@@ -25,7 +25,3 @@ args = ["-y", "@upstash/context7-mcp@latest"]
 [mcp_servers.playwright]
 command = "npx"
 args = ["@playwright/mcp@latest", "--browser", "webkit"]
-
-[mcp_servers.playwright-headless]
-command = "npx"
-args = ["@playwright/mcp@latest", "--headless"]
