@@ -45,7 +45,7 @@
 - Fetch targeted URLs (release notes, specific issue pages, doc sections), not top-level pages
 
 ## Shell Commands
-- When debugging or looking up CLI usage, check official docs first (e.g. `--help`, Context7) before falling back to web search
+- When debugging or looking up CLI usage, check official docs first (e.g. `--help`, `ctx7 library <name>` then `ctx7 docs <id> "<query>"`) before falling back to web search
 - **Never use command substitution (`$()`, backticks) or heredocs in commands.** They break allowlist matching and trigger permission prompts. Simple pipes (`|`) and redirections (`<`, `>`) are fine.
 - When running commands in a different directory, `cd` first as a separate command, then run the actual command. Never chain with `&&`.
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
