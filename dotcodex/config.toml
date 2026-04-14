@@ -18,8 +18,7 @@ enabled = false
 [tui]
 status_line = [
   "git-branch",
-  "used-tokens",
-  "context-window-size",
+  "context-remaining-percent",
   "five-hour-limit",
   "weekly-limit",
   "model-with-reasoning",
