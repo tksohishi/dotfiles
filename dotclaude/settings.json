@@ -379,7 +379,6 @@
       "WebFetch"
     ],
     "deny": [
-      "Bash(*; echo *)",
       "Bash(*$(*)*)",
       "Bash(git -C *)",
       "Bash(git commit --amend *)",
