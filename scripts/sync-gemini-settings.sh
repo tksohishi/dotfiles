@@ -1,6 +1,6 @@
 #!/bin/bash
 # Merge dotgemini/settings.json -> ~/.gemini/settings.json
-# Overwrites the "tools" key from source; preserves everything else in destination.
+# Overwrites the "tools" and "model" keys from source; preserves everything else in destination.
 
 set -euo pipefail
 
@@ -14,7 +14,7 @@ if [ ! -f "$src" ]; then
 fi
 
 if [ -f "$dst" ]; then
-    jq -s '.[0] + {tools: (.[1].tools // {})}' "$dst" "$src" > "$tmp"
+    jq -s '.[0] + {tools: (.[1].tools // {}), model: (.[1].model // .[0].model)}' "$dst" "$src" > "$tmp"
 else
     cp "$src" "$tmp"
 fi
