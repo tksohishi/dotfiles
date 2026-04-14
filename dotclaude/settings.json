@@ -189,6 +189,8 @@
       "Bash(https --print=* http://*)",
       "Bash(https --print=* https://*)",
       "Bash(grep *)",
+      "Bash(head *)",
+      "Bash(tail *)",
       "Bash(tg *)",
       "Bash(pgrep *)",
       "Bash(ps *)",
