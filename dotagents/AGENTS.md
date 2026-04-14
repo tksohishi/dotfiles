@@ -64,7 +64,7 @@
 
 ## Browser Automation
 - Default to `agent-browser` for all browser automation (headless by default, `--headed` for visual)
-- For concurrent sessions: use `--session <name> --profile <path>` with unique profile paths per session
+- For concurrent sessions, use `--session <name>` to isolate cookies/storage. Add `--profile <path>` only when you need login persistence across restarts (unique path per profile).
 - WebFetch/httpie for simple HTTP requests; agent-browser for sites that need a real browser
 - LinkedIn requires login. If not logged in, close the session and reopen with `--headed` flag so the user can log in: `agent-browser close`, then `agent-browser open --headed "https://www.linkedin.com/login"`. After user logs in, navigate to the target profile.
 - For LinkedIn profiles, go directly to `/details/experience/` or `/details/education/` URLs to skip the Activity feed and get structured career data.
