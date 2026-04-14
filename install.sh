@@ -205,6 +205,18 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/commands/ -> ~/.claude/commands/"
 
+# Claude Code custom skills (directory symlink)
+target="$HOME/.claude/skills"
+source="$DOTFILES_DIR/dotclaude/skills"
+if [ -L "$target" ]; then
+    rm "$target"
+elif [ -d "$target" ]; then
+    echo "Backing up $target to $target.bak"
+    mv "$target" "$target.bak"
+fi
+ln -s "$source" "$target"
+echo "Linked dotclaude/skills/ -> ~/.claude/skills/"
+
 # Claude Code hooks (directory symlink)
 target="$HOME/.claude/hooks"
 source="$DOTFILES_DIR/dotclaude/hooks"

@@ -36,6 +36,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`
 - `dotclaude/commands/` — global agent command source (symlinked as `~/.claude/commands/`, compiled to Gemini and Codex formats)
+- `dotclaude/skills/` — global Claude Code skills (symlinked as `~/.claude/skills/`). Each skill is a directory containing a `SKILL.md` with `name` + `description` frontmatter. Skills are the preferred format for new Claude-only capabilities; only the description loads into context until invoked.
 - `dotgemini/commands/` — global Gemini CLI commands (symlinked as `~/.gemini/commands/`)
 - `dotcodex/skills/.dotfiles/` — global Codex command-equivalent skills (symlinked as `~/.codex/skills/.dotfiles/`)
 - `.claude/commands/` — project-local Claude Code commands, e.g. `/discover`
@@ -60,7 +61,8 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - Changes to `.alias` affect the zsh shell
 - Changes to `.zshrc` affect zsh directly
 - The `files` array in `install.sh` must be updated when adding new dotfiles
-- `dotclaude/commands/*.md` is the source of truth for global agent commands, then run `bun scripts/agent-commands.ts sync`
+- `dotclaude/commands/*.md` is the source of truth for global agent commands (sync across all agents via `bun scripts/agent-commands.ts sync`). Use this when a capability should be available in Claude, Codex, and Gemini.
+- `dotclaude/skills/<name>/SKILL.md` is the source for Claude-only skills. Skills are preferred over commands for Claude because only the description loads into context until invoked. Use this when the capability is Claude-specific or when you want to bundle helper scripts/assets alongside. No sync step required; the directory is symlinked directly.
 - To add or remove packages/apps, use the `/install` and `/uninstall` commands
 - `/install` also handles MCP servers: it adds them to both Claude Code and Codex, and tracks configs in dotfiles
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
