@@ -15,5 +15,14 @@ enabled = false
 [feedback]
 enabled = false
 
+[tui]
+status_line = [
+  "git-branch",
+  "context-remaining",
+  "five-hour-limit",
+  "weekly-limit",
+  "model-with-reasoning",
+]
+
 [sandbox_workspace_write]
 network_access = true
