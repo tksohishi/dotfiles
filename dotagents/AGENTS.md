@@ -63,15 +63,33 @@
 - `gog calendar` for calendar operations
 
 ## Browser Automation
-- Default to `agent-browser` for all browser automation (headless by default, `--headed` for visual)
-- For concurrent sessions, use `--session <name>` to isolate cookies/storage. Add `--profile <path>` only when you need login persistence across restarts (unique path per profile).
-- WebFetch/httpie for simple HTTP requests; agent-browser for sites that need a real browser
-- LinkedIn requires login. If not logged in, close the session and reopen with `--headed` flag so the user can log in: `agent-browser close`, then `agent-browser open --headed "https://www.linkedin.com/login"`. After user logs in, navigate to the target profile.
-- For LinkedIn profiles, go directly to `/details/experience/` or `/details/education/` URLs to skip the Activity feed and get structured career data.
-- Common workflow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`
-- To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text)
+
+### When to use
+- Default to `agent-browser` for all browser automation (headless by default). Use WebFetch/httpie for simple HTTP requests; agent-browser only for sites that need a real browser.
 - Never guess subcommands. Run `agent-browser --help` if unsure.
-- Always close when done: `agent-browser close`
+- Always close when done: `agent-browser close`.
+
+### Workflow
+- Common flow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`.
+- To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text).
+
+### Sessions and profiles
+- For concurrent sessions, use `--session <name>` to isolate cookies/storage. Add `--profile <path>` only when you need login persistence across restarts (unique path per profile).
+- `--session` persists cookies/storage only, NOT headed mode. Chrome's user-data-dir is always `~/.agent-browser/chrome-profile/` regardless of `--session`.
+
+### Headed mode (for Cloudflare, sign-in, cookie capture)
+- Pair `--headed` with `--args "--window-position=100,100"` — `--headed` alone can launch Chrome off-screen on macOS.
+- Pass BOTH `--headed` AND `--args` on every call. If either is missing and doesn't match the daemon's current config, the daemon respawns Chrome (headless, or visible but with lost page state).
+- The warning `--args, --headed ignored: daemon already running` is harmless when flags match the daemon; suppress with `-q` if it interferes with output parsing.
+- Verify headed mode is active: `pgrep -lf "Google Chrome for Testing" | grep -v crashpad | grep -v Helper` — output must NOT contain `--headless=new`.
+- Cloudflare challenges auto-clear within 2-3s in truly-headed mode; they never clear in headless.
+
+### LinkedIn
+- Requires login. If not logged in: `agent-browser close`, then `agent-browser open --headed --args "--window-position=100,100" "https://www.linkedin.com/login"`. After login, navigate to the target profile.
+- For profiles, go directly to `/details/experience/` or `/details/education/` URLs to skip the Activity feed and get structured career data.
+
+### Recovery
+- When stuck, clean restart with `agent-browser close --all`. Avoid `pkill` — it leaves a stale `SingletonLock` in the profile dir that breaks subsequent launches.
 
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
