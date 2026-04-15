@@ -135,6 +135,7 @@
       "Bash(ctx7 library *)",
       "Bash(ctx7 whoami*)",
       "Bash(agent-browser *)",
+      "Bash(awk *)",
       "Bash(gcloud auth list*)",
       "Bash(gcloud auth print-access-token*)",
       "Bash(gcloud components list*)",
