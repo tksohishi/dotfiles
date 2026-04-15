@@ -48,6 +48,7 @@
 - When debugging or looking up CLI usage, check official docs first (e.g. `--help`, `ctx7 library <name>` then `ctx7 docs <id> "<query>"`) before falling back to web search
 - **Never use command substitution (`$()`, backticks) or heredocs in commands.** They break allowlist matching and trigger permission prompts. Simple pipes (`|`) and redirections (`<`, `>`) are fine.
 - When running commands in a different directory, `cd` first as a separate command, then run the actual command. Never chain with `&&`.
+- Never use `for`, `while`, or `until` loops in Bash commands. If you need to iterate, enumerate items first (Grep, Read, Glob, `ls`), then make separate tool calls per item.
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
 - **Never run `find` on `$HOME` or other broad directories.** It traverses thousands of files, triggers a flood of permission prompts, and is a security risk. Use `fd` for file searches, scoped to the project directory (e.g. `fd -e ts` instead of `find . -name "*.ts"`). If you need to locate something outside the project, ask the user.
 - **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists. Fall back to `gh api` only when no subcommand covers the operation, and research the endpoint first.
