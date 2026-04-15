@@ -54,6 +54,7 @@
 - **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists. Fall back to `gh api` only when no subcommand covers the operation, and research the endpoint first.
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
 - Prefer dedicated tools (Grep, Read, Glob) over Bash one-liners with `grep` or `cat`. Never use `awk` or `sed`; save intermediate output to a file, then use Read/Grep tools. For JSON use `jq`. Never use `grep` for simple pattern search — that's the Grep tool's job.
+- For intermediate files (pdftotext output, downloaded HTML, etc.), use project-local `tmp/` (globally gitignored), not `/tmp`. Keeps operations in the project directory and avoids `cd`-chain patterns.
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 
