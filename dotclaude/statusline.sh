@@ -9,7 +9,9 @@ model=$(echo "$input" | jq -r '.model.display_name // empty')
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 cwd=$(echo "$input" | jq -r '.workspace.current_dir')
 rate_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+rate_5h_resets=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 rate_7d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+rate_7d_resets=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
 # -- Colors --
 green=$'\e[92m'
@@ -72,8 +74,28 @@ else
   ctx_part="${red}${remaining}%${reset} context"
 fi
 
+# -- Format seconds as human-readable time remaining --
+format_time_left() {
+  local secs=$1
+  [ "$secs" -le 0 ] 2>/dev/null && echo "resetting" && return
+  if [ "$secs" -lt 3600 ]; then
+    echo "$((secs / 60))m left"
+  elif [ "$secs" -lt 86400 ]; then
+    local h=$((secs / 3600))
+    local m=$(((secs % 3600) / 60))
+    if [ "$m" -eq 0 ]; then
+      echo "${h}h left"
+    else
+      echo "${h}h ${m}m left"
+    fi
+  else
+    echo "$((secs / 86400))d left"
+  fi
+}
+
 # -- Rate limits (remaining) --
 rate_part=""
+now=$(date +%s)
 if [ -n "$rate_5h" ]; then
   r5=$((100 - ${rate_5h%.*}))
   if [ "$r5" -gt 50 ] 2>/dev/null; then
@@ -84,6 +106,10 @@ if [ -n "$rate_5h" ]; then
     rate_part="${red}${r5}%${reset}"
   fi
   rate_part="${rate_part} 5h"
+  if [ -n "$rate_5h_resets" ]; then
+    left_5h=$(format_time_left $((rate_5h_resets - now)))
+    rate_part+=" ${dim}(${left_5h})${reset}"
+  fi
   if [ -n "$rate_7d" ]; then
     r7=$((100 - ${rate_7d%.*}))
     if [ "$r7" -gt 50 ] 2>/dev/null; then
@@ -94,6 +120,10 @@ if [ -n "$rate_5h" ]; then
       rate_part+=" ${red}${r7}%${reset}"
     fi
     rate_part+=" 7d"
+    if [ -n "$rate_7d_resets" ]; then
+      left_7d=$(format_time_left $((rate_7d_resets - now)))
+      rate_part+=" ${dim}(${left_7d})${reset}"
+    fi
   fi
 fi
 
