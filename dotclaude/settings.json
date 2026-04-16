@@ -285,6 +285,7 @@
       "Bash(pandoc *)",
       "Bash(pbcopy *)",
       "Bash(ping *)",
+      "Bash(pdfgrep *)",
       "Bash(pdftotext *)",
       "Bash(python -m markitdown *)",
       "Bash(python *ooxml/scripts/pack.py *)",
