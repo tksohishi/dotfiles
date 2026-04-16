@@ -260,7 +260,7 @@ if [ -f "$gemini_src" ]; then
     mkdir -p "$HOME/.gemini"
     if [ -f "$gemini_dst" ] && command -v jq &>/dev/null; then
         gemini_tmp="$(mktemp)"
-        if jq -s '.[0] * {tools: (.[1].tools // {})}' "$gemini_dst" "$gemini_src" > "$gemini_tmp"; then
+        if jq -s '.[0] + {tools: (.[1].tools // {})}' "$gemini_dst" "$gemini_src" > "$gemini_tmp"; then
             if [ -f "$gemini_dst" ] && diff -q "$gemini_tmp" "$gemini_dst" >/dev/null 2>&1; then
                 echo "Skipped dotgemini/settings.json (unchanged)"
             else
