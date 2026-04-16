@@ -38,6 +38,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `dotclaude/commands/` — global agent command source (symlinked as `~/.claude/commands/`, compiled to Gemini and Codex formats)
 - `dotclaude/skills/` — global Claude Code skills (symlinked as `~/.claude/skills/`). Each skill is a directory containing a `SKILL.md` with `name` + `description` frontmatter. Skills are the preferred format for new Claude-only capabilities; only the description loads into context until invoked.
 - `dotgemini/commands/` — global Gemini CLI commands (symlinked as `~/.gemini/commands/`)
+- `dotgemini/policies/` — global Gemini CLI Policy Engine rules (TOML, symlinked as `~/.gemini/policies/`); used for deny/allow/ask_user decisions, replaces deprecated `tools.exclude`
 - `dotcodex/skills/.dotfiles/` — global Codex command-equivalent skills (symlinked as `~/.codex/skills/.dotfiles/`)
 - `.claude/commands/` — project-local Claude Code commands, e.g. `/discover`
 - `dotclaude/keybindings.json` — Claude Code keybindings (e.g. Ctrl+Shift+B for background tasks)

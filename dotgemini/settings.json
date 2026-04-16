@@ -302,16 +302,6 @@
       "run_shell_command(wrangler pages deployment list)",
       "run_shell_command(wrangler pages deployment get)",
       "run_shell_command(wrangler pages download)"
-    ],
-    "exclude": [
-      "run_shell_command(git -C)",
-      "run_shell_command(git commit --amend)",
-      "run_shell_command(git push --force)",
-      "run_shell_command(git push -f)",
-      "run_shell_command(git reset --hard)",
-      "run_shell_command(sudo)",
-      "run_shell_command(shutdown)",
-      "run_shell_command(reboot)"
     ]
   }
 }

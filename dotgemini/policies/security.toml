@@ -1,0 +1,21 @@
+# Gemini CLI Policy Engine deny rules.
+# Migrated from tools.exclude in settings.json (deprecated, removed in 1.0).
+# Docs: https://geminicli.com/docs/reference/policy-engine
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = [
+  "git -C",
+  "git commit --amend",
+  "git push --force",
+  "git push -f",
+  "git reset --hard",
+]
+decision = "deny"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["sudo", "shutdown", "reboot"]
+decision = "deny"
+priority = 100

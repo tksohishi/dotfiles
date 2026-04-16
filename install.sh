@@ -241,6 +241,18 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotgemini/commands/ -> ~/.gemini/commands/"
 
+# Gemini Policy Engine rules (directory symlink)
+target="$HOME/.gemini/policies"
+source="$DOTFILES_DIR/dotgemini/policies"
+if [ -L "$target" ]; then
+    rm "$target"
+elif [ -d "$target" ]; then
+    echo "Backing up $target to $target.bak"
+    mv "$target" "$target.bak"
+fi
+ln -s "$source" "$target"
+echo "Linked dotgemini/policies/ -> ~/.gemini/policies/"
+
 # Gemini settings (merge tools only, keep runtime config)
 gemini_src="$DOTFILES_DIR/dotgemini/settings.json"
 gemini_dst="$HOME/.gemini/settings.json"
