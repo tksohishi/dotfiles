@@ -286,6 +286,7 @@
       "Bash(docker network ls*)",
       "Bash(docker port *)",
       "Bash(docker ps*)",
+      "Bash(docker pull *)",
       "Bash(docker stats*)",
       "Bash(docker system df*)",
       "Bash(docker system events*)",
