@@ -129,6 +129,7 @@
       "Bash(claude plugin update *)",
       "Bash(claude plugin validate *)",
       "Bash(codex completion *)",
+      "Bash(codex exec *)",
       "Bash(codex execpolicy check *)",
       "Bash(codex features *)",
       "Bash(codex mcp *)",
@@ -431,6 +432,8 @@
     ],
     "deny": [
       "Bash(*$(*)*)",
+      "Bash(codex exec *--dangerously-bypass*)",
+      "Bash(codex exec *danger-full-access*)",
       "Bash(git -C *)",
       "Bash(git commit --amend *)",
       "Bash(git push --force *)",
