@@ -9,7 +9,7 @@
     "pr": ""
   },
   "permissions": {
-    "additionalDirectories": ["/tmp"],
+    "additionalDirectories": ["/tmp", "/Applications", "~/Library/LaunchAgents"],
     "allow": [
       "Bash(git add *)",
       "Bash(git blame *)",
