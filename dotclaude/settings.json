@@ -381,6 +381,7 @@
       "Skill(github-release *)",
       "Skill(init-agents)",
       "Skill(obsidianize)",
+      "Skill(update-config)",
       "WebSearch",
       "WebFetch"
     ],
