@@ -89,4 +89,4 @@ mas "The Unarchiver", id: 425424353
 # Manual install: Claude Code (claude install)
 cask "codex-app"
 # Manual install: OpenUsage (https://github.com/robinebers/openusage/releases)
-mas "Xcode", id: 497799835
+# Manual install: Xcode (Mac App Store) — tracked via `mas upgrade` but excluded from Brewfile because mas misdetects Xcode as uninstalled and triggers a sudo prompt on `brew bundle install`
