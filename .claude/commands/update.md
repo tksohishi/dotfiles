@@ -6,7 +6,7 @@ allowed-tools: [Bash]
 Run the following update commands in order:
 
 1. `brew update` — refresh package index
-2. `brew bundle install` — install any missing Brewfile entries without reinstalling already-present packages
+2. `brew bundle install --no-upgrade` — install any missing Brewfile entries without upgrading already-present ones (upgrades are handled by step 3 for formulae, auto-update for casks, and `mas upgrade` manually for App Store apps)
 3. `brew upgrade --formula` — upgrade all formulae (formulae only; cask apps auto-update themselves)
 4. `mise upgrade` — upgrade all mise-managed tools
 5. `claude update` — update Claude Code itself
