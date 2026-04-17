@@ -40,7 +40,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `dotgemini/commands/` — global Gemini CLI commands (symlinked as `~/.gemini/commands/`)
 - `dotgemini/policies/` — global Gemini CLI Policy Engine rules (TOML, symlinked as `~/.gemini/policies/`); used for deny/allow/ask_user decisions, replaces deprecated `tools.exclude`
 - `dotcodex/skills/.dotfiles/` — global Codex command-equivalent skills (symlinked as `~/.codex/skills/.dotfiles/`)
-- `.claude/commands/` — project-local Claude Code commands, e.g. `/discover`
+- `.claude/skills/<name>/SKILL.md` — project-local Claude Code skills, e.g. `/discover-apps`
 - `dotclaude/keybindings.json` — Claude Code keybindings (e.g. Ctrl+Shift+B for background tasks)
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
@@ -64,8 +64,8 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - The `files` array in `install.sh` must be updated when adding new dotfiles
 - `dotclaude/commands/*.md` is the source of truth for global agent commands (sync across all agents via `bun scripts/agent-commands.ts sync`). Use this when a capability should be available in Claude, Codex, and Gemini.
 - `dotclaude/skills/<name>/SKILL.md` is the source for Claude-only skills. Skills are preferred over commands for Claude because only the description loads into context until invoked. Use this when the capability is Claude-specific or when you want to bundle helper scripts/assets alongside. No sync step required; the directory is symlinked directly.
-- To add or remove packages/apps, use the `/install` and `/uninstall` commands
-- `/install` also handles MCP servers: it adds them to both Claude Code and Codex, and tracks configs in dotfiles
+- To add or remove packages/apps, use the `/install-app` and `/uninstall-app` skills
+- `/install-app` also handles MCP servers: it adds them to both Claude Code and Codex, and tracks configs in dotfiles
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
 - This is a public repo. Never commit personal information (API keys, tokens, personal URLs, email addresses, domain allowlists, etc.) to `dotagents/`, `dotclaude/`, or `dotcodex/`. Use `.local`/`.override` files for machine-specific or private settings.
 - Claude Code allowlist patterns: `Bash(cmd *)` does NOT match bare `cmd`. Use `Bash(cmd*)` (no space) for multi-word commands where collision is impossible (e.g. `gh release list*`). Keep the space form (`Bash(cmd *)`) for broad prefixes where collisions matter (e.g. `ls *` vs `lsof`).

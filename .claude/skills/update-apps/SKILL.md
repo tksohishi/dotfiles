@@ -1,6 +1,6 @@
 ---
+name: update-apps
 description: Update all Homebrew packages, casks, and Mac App Store apps
-allowed-tools: [Bash]
 ---
 
 Run the following update commands in order:

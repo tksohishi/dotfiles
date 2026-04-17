@@ -46,13 +46,13 @@ bun scripts/agent-commands.ts delete <name>
 bun scripts/agent-commands.ts sync
 ```
 
-**Project commands:** `.claude/commands/` contains project-level Claude commands.
+**Project skills:** `.claude/skills/<name>/SKILL.md` contains project-level Claude skills.
 
 **Scripts:** `scripts/setup-gog.sh` sets up the gog CLI for Gmail/Calendar access via Google Cloud.
 
 ## Adding or removing packages
 
-Use the `/install` and `/uninstall` Claude Code commands, or edit the `Brewfile` directly and run:
+Use the `/install-app` and `/uninstall-app` Claude Code skills, or edit the `Brewfile` directly and run:
 
 ```shell
 brew bundle

@@ -1,10 +1,7 @@
 ---
+name: command-permissions
 description: Manage Claude Code command allowlist (add, remove, modify)
-allowed-tools: Read, Edit, Bash
-argument-hint: <command>
 ---
-
-# /command-permissions: Manage Claude Code command allowlist
 
 The user wants to manage permissions for: $ARGUMENTS
 

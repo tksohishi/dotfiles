@@ -1,4 +1,7 @@
-# /discover: Find new Mac tools worth installing
+---
+name: discover-apps
+description: Find new Mac tools worth installing
+---
 
 Search the web for new and trending Mac tools, with a focus on developer tools used alongside AI coding agents (Claude Code, Codex, etc.). Filter out what's already installed and present the top 3 worth trying.
 
@@ -51,4 +54,4 @@ Show the 3 tools in a numbered list using this format per tool:
 
 After presenting, ask: "Want me to install any of these?"
 
-If the user picks one or more, use the `/install` command workflow for each.
+If the user picks one or more, use the `/install-app` skill workflow for each.

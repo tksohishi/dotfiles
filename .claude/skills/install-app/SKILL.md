@@ -1,7 +1,6 @@
 ---
+name: install-app
 description: Install an app via Homebrew and add it to the Brewfile
-argument-hint: <app-name or mcp-server-name>
-allowed-tools: [Bash, Read, Edit, Write, WebSearch, WebFetch]
 ---
 
 The user wants to install: $ARGUMENTS

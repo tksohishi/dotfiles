@@ -1,6 +1,6 @@
 ---
+name: sync-allowlist
 description: Sync command allowlists across Claude, Codex, and Gemini
-allowed-tools: [Bash, Read]
 ---
 
 Sync command allowlists from `~/.dotfiles/dotclaude/settings.json` into Codex and Gemini.

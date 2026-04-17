@@ -1,7 +1,6 @@
 ---
+name: uninstall-app
 description: Uninstall an app via Homebrew and remove it from the Brewfile
-argument-hint: <app-name>
-allowed-tools: [Bash, Read, Edit, Write]
 ---
 
 The user wants to uninstall: $ARGUMENTS
