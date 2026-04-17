@@ -44,6 +44,7 @@ files=(
     .config/ghostty/config
     .config/mise/config.toml
     .config/zed/settings.json
+    .config/httpie/config.json
 )
 
 echo ""
