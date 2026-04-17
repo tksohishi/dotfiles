@@ -288,7 +288,7 @@
       "Bash(orbctl list*)",
       "Bash(orbctl logs *)",
       "Bash(orbctl restart *)",
-      "Bash(orbctl ssh *)",
+      "Bash(orbctl ssh*)",
       "Bash(orbctl start *)",
       "Bash(orbctl status*)",
       "Bash(orbctl stop *)",
