@@ -12,6 +12,7 @@ export EDITOR=vim
 export CODEX_SANDBOX_NETWORK_DISABLED=0
 export HOMEBREW_BUNDLE_FILE=~/.dotfiles/Brewfile
 export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1
+export CLAUDE_CODE_EFFORT_LEVEL=high
 
 # History
 HISTFILE=~/.zsh_history
