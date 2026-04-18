@@ -3,7 +3,6 @@
   "env": {
     "GOG_JSON": "1"
   },
-  "effortLevel": "high",
   "attribution": {
     "commit": "",
     "pr": ""
