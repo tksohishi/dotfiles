@@ -75,9 +75,10 @@
 - Common flow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`.
 - To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text).
 
-### Sessions and profiles
-- For concurrent sessions, use `--session <name>` to isolate cookies/storage. Add `--profile <path>` only when you need login persistence across restarts (unique path per profile).
-- `--session` persists cookies/storage only, NOT headed mode. Chrome's user-data-dir is always `~/.agent-browser/chrome-profile/` regardless of `--session`.
+### Per-project config (authoritative)
+- Each project gets `agent-browser.json` at its root (use the `/agent-browser-init` skill to generate). This is the source of truth for per-project browser behavior — do not override with `--session` / `--profile` flags.
+- The config sets `session` (unique per-project daemon, enables parallel use across projects) and `profile: .agent-browser` (project-local Chrome user-data-dir, required for parallel Chrome instances to avoid `SingletonLock` conflicts).
+- `agent-browser close` closes the current project's session; `close --all` closes every active session across projects.
 
 ### Headed mode (for Cloudflare, sign-in, cookie capture)
 - Pair `--headed` with `--args "--window-position=100,100"` — `--headed` alone can launch Chrome off-screen on macOS.
