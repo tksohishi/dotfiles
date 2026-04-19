@@ -478,6 +478,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/agent-browser-context.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/git-commit-subject.sh",
+            "timeout": 5
           }
         ]
       }
