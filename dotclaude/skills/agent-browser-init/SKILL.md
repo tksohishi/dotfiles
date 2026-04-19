@@ -40,9 +40,11 @@ Pinning `profile` to a project-local `.agent-browser/` directory gives each proj
     ```json
     {
       "session": "<session-name>",
-      "profile": ".agent-browser"
+      "profile": "./.agent-browser"
     }
     ```
+
+    The leading `./` is **required**. agent-browser's `--profile <name|path>` heuristic treats bare strings without a path separator as Chrome profile names and fails with `Chrome profile ".agent-browser" not found`. Any string containing `/` is treated as a directory path. `./.agent-browser` is the minimal portable form; an absolute path also works but makes the config non-portable.
 
 5. **Add `.agent-browser/` to `.gitignore`** (create the file if missing). Skip if already present. Do not add `agent-browser.json` itself — that's checked in so collaborators get the same config.
 
