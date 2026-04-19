@@ -1,6 +1,6 @@
 ---
 name: agent-browser-init
-description: Set up agent-browser in the current project. Writes `agent-browser.json` and gitignores `.agent-browser/`. Use when enabling agent-browser in a project for the first time.
+description: Initialize agent-browser in the current project with an isolated session and a gitignored profile directory
 ---
 
 ## What this does
