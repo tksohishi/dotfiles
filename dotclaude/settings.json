@@ -448,6 +448,10 @@
       "Read(~/.ssh/**)",
       "Read(~/.aws/**)"
     ],
+    "ask": [
+      "Bash(brew install*)",
+      "Bash(brew uninstall*)"
+    ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
       "/tmp",
