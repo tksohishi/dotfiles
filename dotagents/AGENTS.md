@@ -102,3 +102,5 @@
 - Never add the AI agent as a commit author or co-author
 - Always commit using the default git settings
 - Use plain quoted strings for commit messages; `$()`, backticks, and heredocs trigger permission prompts
+- Default to multi-line messages for non-trivial changes: subject + blank line + bullet body. Subject under 72 chars, single focused concept, imperative mood. Body bullets cover what + why (not just what). Single-line messages only for truly trivial changes (typo, one-line tweak)
+- If a commit touches two unrelated concepts, split it into two commits rather than packing both into one subject line
