@@ -7,12 +7,14 @@
 [ -d /opt/homebrew/opt/rustup/bin ] && export PATH=/opt/homebrew/opt/rustup/bin:$PATH
 [ -d $HOME/.cargo/bin ] && export PATH=$HOME/.cargo/bin:$PATH
 [ -d $HOME/.orbstack/bin ] && export PATH=$HOME/.orbstack/bin:$PATH
+[ -d $HOME/.local/share/go/bin ] && export PATH=$HOME/.local/share/go/bin:$PATH
 
 # Environment
 export EDITOR=vim
 export CODEX_SANDBOX_NETWORK_DISABLED=0
 export HOMEBREW_BUNDLE_FILE=~/.dotfiles/Brewfile
 export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1
+export GOPATH="$HOME/.local/share/go"
 
 # History
 HISTFILE=~/.zsh_history
