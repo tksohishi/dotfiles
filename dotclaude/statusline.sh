@@ -65,10 +65,13 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
 fi
 
 # -- Context remaining --
+# Thresholds tuned for 1M context: yellow at 50% used, red at 75% used.
+# Anthropic docs describe "context rot" qualitatively but publish no numeric
+# threshold; these match the middle of the options considered in dotfiles.
 remaining=$((100 - ${used_pct:-0}))
 if [ "$remaining" -gt 50 ]; then
   ctx_part="${green}${remaining}%${reset} context"
-elif [ "$remaining" -gt 20 ]; then
+elif [ "$remaining" -gt 25 ]; then
   ctx_part="${yellow}${remaining}%${reset} context"
 else
   ctx_part="${red}${remaining}%${reset} context"
