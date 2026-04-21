@@ -37,11 +37,14 @@
 ## Package Managers
 - Node.js: pnpm, not npm
 - Python: uv, not pip
+- Bun auto-loads `.env` (and `.env.local`, `.env.{NODE_ENV}`) from the working directory. Just run `bun script.ts`; don't add `--env-file=.env` redundantly. Use the flag only for non-default filenames (e.g. `--env-file=.env.staging`).
 - Global CLI tools: prefer `brew install` over `npm install -g`, `pip install`, or `go install`. Homebrew tracks everything in the Brewfile.
 
 ## Context Efficiency
 - Request targeted output: Read with `limit`/`offset` for large files; Grep with `head_limit` or `files_with_matches` first; `| head -N` for verbose shell output
 - Delegate heavy research to subagents (where available) and request bounded summaries ("under 300 words") so raw output stays out of main context
+- When delegating to a subagent, apply a cost threshold: spawn only for multi-source synthesis (10+ URLs or cross-source comparison). For 1-3 page lookups, use WebFetch directly. Subagent overhead runs ~10x the tokens of a direct fetch for simple factual questions.
+- When spawning a subagent, always pass `model: "sonnet"` explicitly unless the task specifically needs Opus (complex code, deep research). Don't rely on the agent definition's default or inheritance.
 - Fetch targeted URLs (release notes, specific issue pages, doc sections), not top-level pages
 
 ## Shell Commands
