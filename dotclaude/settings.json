@@ -455,9 +455,7 @@
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
-      "/tmp",
-      "/Applications",
-      "~/Library/LaunchAgents"
+      "/tmp"
     ]
   },
   "hooks": {

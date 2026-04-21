@@ -2,6 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(bun scripts/*)"
+    ],
+    "additionalDirectories": [
+      "/Applications",
+      "~/Library/LaunchAgents"
     ]
   }
 }
