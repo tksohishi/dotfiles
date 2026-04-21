@@ -258,6 +258,7 @@
       "Bash(sheets *)",
       "Bash(sips *)",
       "Bash(stat *)",
+      "Bash(strings *)",
       "Bash(summarize *)",
       "Bash(diff *)",
       "Bash(dig *)",
