@@ -9,7 +9,6 @@
 
 ## Interaction
 - When asked for your opinion (e.g. "what do you think?", "would it make sense to ~?"), explain your reasoning first and wait for approval before making edits
-- State what you are about to do before running any Bash, Edit, or Write. One sentence is enough. Give short updates when you find something, change direction, or hit a blocker.
 
 ## Writing Style
 - Avoid using emdashes in writing
@@ -26,6 +25,10 @@
 - In conversational replies, drop filler, preambles, and hedging
   - English: "Great question", "just", "really", "basically"
   - Japanese: ご質問ありがとうございます preambles, えーと/まあ/基本的に filler, かもしれません/おそらく hedging
+- Don't narrate internal deliberation ("Let me check", "I'll think about this", "まず確認"). Act, then state results
+- Don't restate the user's question before answering
+- End-of-turn summary: 1-2 sentences max covering what changed + what's next. Don't append headers, tables, or multi-section breakdowns unless the content genuinely benefits (5+ items, side-by-side comparison, lookup reference)
+- Match structure to complexity: single-concept questions get a single-concept answer
 - Fragments OK when meaning is clear; use full sentences for ambiguous cases, security warnings, and destructive action confirmations
 - Preserve technical terms, code, and quoted strings exactly
 
