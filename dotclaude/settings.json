@@ -132,6 +132,7 @@
       "Bash(codex execpolicy check *)",
       "Bash(codex features *)",
       "Bash(codex mcp *)",
+      "Bash(crontab -l*)",
       "Bash(ctx7 docs *)",
       "Bash(ctx7 library *)",
       "Bash(ctx7 whoami*)",
