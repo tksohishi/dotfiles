@@ -8,11 +8,14 @@ BLOCKED_FILE="$SCRIPT_DIR/webfetch-blocked-domains.txt"
 TOOL_INPUT=$(cat)
 URL=$(echo "$TOOL_INPUT" | jq -r '.tool_input.url')
 
+# Extract lowercase hostname (strip scheme, userinfo, port, path)
+HOST=$(echo "$URL" | awk -F/ '{print $3}' | awk -F@ '{print $NF}' | awk -F: '{print $1}' | tr '[:upper:]' '[:lower:]')
+
 while IFS= read -r domain; do
-  domain=$(echo "$domain" | xargs)
+  domain=$(echo "$domain" | xargs | tr '[:upper:]' '[:lower:]')
   [ -z "$domain" ] && continue
   [[ "$domain" = \#* ]] && continue
-  if echo "$URL" | grep -qi "$domain"; then
+  if [ "$HOST" = "$domain" ] || [[ "$HOST" == *.$domain ]]; then
     echo "WebFetch blocked for this domain. Use agent-browser to fetch the content." >&2
     exit 2
   fi
