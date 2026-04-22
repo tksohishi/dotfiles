@@ -258,6 +258,7 @@
       "Bash(seats *)",
       "Bash(sheets *)",
       "Bash(sips *)",
+      "Bash(sort *)",
       "Bash(stat *)",
       "Bash(strings *)",
       "Bash(summarize *)",
