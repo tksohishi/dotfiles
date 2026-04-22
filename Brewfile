@@ -1,5 +1,4 @@
 tap "polymarket/polymarket-cli", "https://github.com/Polymarket/polymarket-cli"
-tap "steipete/tap"
 tap "tksohishi/tap"
 brew "agent-browser"
 brew "act"
