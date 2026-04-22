@@ -13,8 +13,7 @@ while IFS= read -r domain; do
   [ -z "$domain" ] && continue
   [[ "$domain" = \#* ]] && continue
   if echo "$URL" | grep -qi "$domain"; then
-    echo "WebFetch blocked for this domain. Use agent-browser instead:" >&2
-    echo "  agent-browser open \"$URL\" && agent-browser snapshot -ic && agent-browser close" >&2
+    echo "WebFetch blocked for this domain. Use agent-browser to fetch the content." >&2
     exit 2
   fi
 done < "$BLOCKED_FILE"
