@@ -230,6 +230,7 @@
       "Bash(grep *)",
       "Bash(head *)",
       "Bash(tail *)",
+      "Bash(tee *)",
       "Bash(tg *)",
       "Bash(pgrep *)",
       "Bash(ps *)",
