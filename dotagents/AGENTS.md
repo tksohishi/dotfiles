@@ -87,14 +87,14 @@
 - `agent-browser close` closes the current project's session; `close --all` closes every active session across projects.
 
 ### Headed mode (for Cloudflare, sign-in, cookie capture)
-- Pair `--headed` with `--args "--window-position=100,100"` — `--headed` alone can launch Chrome off-screen on macOS.
-- Pass BOTH `--headed` AND `--args` on every call. If either is missing and doesn't match the daemon's current config, the daemon respawns Chrome (headless, or visible but with lost page state).
+- Use `--headed` for flows that need a visible browser.
+- Pass `--headed` on every call that should stay attached to a headed daemon. If the launch options don't match the daemon's current config, the daemon can respawn Chrome and lose page state.
 - The warning `--args, --headed ignored: daemon already running` is harmless when flags match the daemon; suppress with `-q` if it interferes with output parsing.
 - Verify headed mode is active: `pgrep -lf "Google Chrome for Testing" | grep -v crashpad | grep -v Helper` — output must NOT contain `--headless=new`.
 - Cloudflare challenges auto-clear within 2-3s in truly-headed mode; they never clear in headless.
 
 ### LinkedIn
-- Requires login. If not logged in: `agent-browser close`, then `agent-browser open --headed --args "--window-position=100,100" "https://www.linkedin.com/login"`. After login, navigate to the target profile.
+- Requires login. If not logged in: `agent-browser close`, then `agent-browser --headed open "https://www.linkedin.com/login"`. After login, navigate to the target profile.
 - For profiles, go directly to `/details/experience/` or `/details/education/` URLs to skip the Activity feed and get structured career data.
 
 ### Recovery
