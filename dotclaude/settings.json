@@ -212,19 +212,11 @@
       "Bash(ghostty +version*)",
       "Bash(glow *)",
       "Bash(http GET *)",
-      "Bash(http -* GET *)",
       "Bash(http HEAD *)",
-      "Bash(http -* HEAD *)",
-      "Bash(http --print=* http://*)",
-      "Bash(http --print=* https://*)",
       "Bash(http http://*)",
       "Bash(http https://*)",
       "Bash(https GET *)",
-      "Bash(https -* GET *)",
       "Bash(https HEAD *)",
-      "Bash(https -* HEAD *)",
-      "Bash(https --print=* http://*)",
-      "Bash(https --print=* https://*)",
       "Bash(https http://*)",
       "Bash(https https://*)",
       "Bash(grep *)",
@@ -496,6 +488,11 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/git-commit-subject.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/httpie-flag-order.sh",
             "timeout": 5
           }
         ]

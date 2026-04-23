@@ -56,6 +56,7 @@
 - When running commands in a different directory, `cd` first as a separate command, then run the actual command. Never chain with `&&`.
 - Never use `for`, `while`, or `until` loops in Bash commands. If you need to iterate, enumerate items first (Grep, Read, Glob, `ls`), then make separate tool calls per item.
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
+- When calling `http`/`https` (httpie), put all flags AFTER the URL, never between the command and URL/method. Canonical form: `http [METHOD] <URL> [flags...]`. The allowlist assumes this ordering; a PreToolUse hook blocks flag-first invocations.
 - Use Glob or `fd` for file search, scoped to the project directory. Ask before searching outside the project.
 - **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists. Fall back to `gh api` only when no subcommand covers the operation, and research the endpoint first.
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
