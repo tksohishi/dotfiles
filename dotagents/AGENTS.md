@@ -47,7 +47,7 @@
 - Request targeted output: Read with `limit`/`offset` for large files; Grep with `head_limit` or `files_with_matches` first; `| head -N` for verbose shell output
 - Delegate heavy research to subagents (where available) and request bounded summaries ("under 300 words") so raw output stays out of main context
 - When delegating to a subagent, apply a cost threshold: spawn only for multi-source synthesis (10+ URLs or cross-source comparison). For 1-3 page lookups, use WebFetch directly. Subagent overhead runs ~10x the tokens of a direct fetch for simple factual questions.
-- When spawning a subagent, always pass `model: "sonnet"` explicitly unless the task specifically needs Opus (complex code, deep research). Don't rely on the agent definition's default or inheritance.
+- When spawning a subagent, pass `model: "sonnet"` explicitly for bulk fetch-and-summarize; pass `model: "opus"` when the task needs judgment on source credibility or contrarian conclusions (Sonnet hedges toward consensus). Don't rely on inheritance.
 - Fetch targeted URLs (release notes, specific issue pages, doc sections), not top-level pages
 
 ## Shell Commands
