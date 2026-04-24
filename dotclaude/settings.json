@@ -423,6 +423,7 @@
     ],
     "deny": [
       "Bash(*$(*)*)",
+      "Bash(agent-browser *--all*)",
       "Bash(codex exec *--dangerously-bypass*)",
       "Bash(codex exec *danger-full-access*)",
       "Bash(git -C *)",

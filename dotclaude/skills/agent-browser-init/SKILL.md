@@ -52,7 +52,7 @@ Pinning `profile` to a project-local `.agent-browser/` directory gives each proj
     - Session name chosen
     - `agent-browser open <url>` works immediately; `.agent-browser/` is created on first launch
     - To run in parallel with other projects, nothing extra needed
-    - `agent-browser close` closes only this session; `agent-browser close --all` closes every active session
+    - `agent-browser close` closes only this session. `close --all` exists but is denied in Claude settings so one command can't wipe out parallel sessions; run it manually if truly needed.
 
 ## Do not
 
