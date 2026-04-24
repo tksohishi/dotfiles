@@ -99,49 +99,14 @@ ln -s AGENTS.md CLAUDE.md
 
 AGENTS.md is the cross-agent standard. Claude Code reads CLAUDE.md, so this symlink ensures both files stay in sync. Other tools read AGENTS.md natively.
 
-## Step 4: Configure per-project agent directories
-
-Create project-local directories for per-project agent configs and skills:
-
-```bash
-mkdir -p .claude .codex
-```
-
-Create `.claude/settings.local.json` to expose this project's auto-memory directory to Claude Code without permission prompts:
-
-```json
-{
-  "permissions": {
-    "additionalDirectories": [
-      "~/.claude/projects/<sanitized-cwd>/"
-    ]
-  }
-}
-```
-
-Where `<sanitized-cwd>` is the absolute path of the current working directory with `/` and `.` replaced by `-`. Examples:
-
-- `/Users/you/myproject` → `-Users-you-myproject`
-- `/Users/you/.dotfiles` → `-Users-you--dotfiles` (the leading `.` of `.dotfiles` becomes a second `-`)
-
-Resolve the current directory with `pwd` first, then construct the string and write it into the settings file.
-
-Append to `.gitignore` (create the file if missing):
-
-```
-.claude/settings.local.json
-```
-
-`settings.local.json` is developer-specific. The base `.claude/` and `.codex/` directories remain tracked so per-project skills or settings added later stay in version control.
-
-## Step 5: Initialize git and commit
+## Step 4: Initialize git and commit
 
 If the current directory is not already a git repository, run `git init`.
 
 Stage and commit:
 
 ```bash
-git add AGENTS.md CLAUDE.md .gitignore .claude .codex
+git add AGENTS.md CLAUDE.md
 git commit -m "Initialize project with AGENTS.md"
 ```
 
