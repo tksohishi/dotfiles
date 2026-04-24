@@ -18,7 +18,7 @@ After `brew upgrade --formula`, run `agent-browser install` to update its browse
 
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
-Report what was upgraded, but only packages listed in the Brewfile (skip transitive dependencies). Also report any Brewfile entries that were newly installed because they were missing locally. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output. For any Brewfile package with a **major version bump**, fetch its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`) and summarize breaking changes, new features, and deprecations.
+Report what was upgraded, but only packages listed in the Brewfile. Transitive dependencies should be omitted entirely unless they had a **major version bump**, in which case surface them as informational. Also report any Brewfile entries that were newly installed because they were missing locally. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output. For any Brewfile package with a **major version bump**, fetch its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`) and summarize breaking changes, new features, and deprecations.
 
 If `claude update` upgraded Claude Code (any version bump, not just major), fetch the changelog from `https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md` and summarize significant changes between the prior and new version: new features, breaking changes, settings/hooks schema changes, and notable bug fixes. Skip trivial entries (typo fixes, internal refactors).
 
