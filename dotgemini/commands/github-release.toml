@@ -53,23 +53,64 @@ git commit -m \"Bump version to <version>\"
 
 Skip this step if no files were changed (tag-only projects).
 
-## Step 4: Tag and push
+## Step 4: Push branch
 
 ```
 git push
-git tag v<version>
-git push origin v<version>
 ```
 
-Push branch and tag separately. `--follow-tags` only pushes annotated tags, so it skips the lightweight tag created by `git tag v<version>`.
+Push the branch only. The tag is created as part of Step 6 via `gh release create --target`.
 
-## Step 5: Verify the release
+## Step 5: Draft release notes
 
-A GitHub Actions workflow automatically creates the release when a version tag is pushed. Delegate polling to `/loop` so the workflow is checked on a cadence without blocking the turn:
+Build grouped release notes from the commit range since the previous tag.
+
+1. Get the previous tag: `git describe --tags --abbrev=0` (captured in Step 1; reuse that value).
+2. List commits: `git log <previous-tag>..HEAD --oneline`.
+3. Group commit subjects under these sections; include a section only if it has entries:
+   - **Breaking** — breaking API or behavior changes
+   - **Features** — new capabilities
+   - **Fixes** — bug fixes
+   - **Changes** — behavior changes, tightened constraints, enforcement
+   - **Docs** — documentation updates
+4. Skip purely internal commits (refactors, formatting, CI-only, dependency bumps) unless they materially affect users.
+5. Reuse commit subjects as-is when they are already concise; rewrite only when the subject is unclear without its body.
+6. Format:
+
+   ```
+   ## Breaking
+   - Subject
+
+   ## Features
+   - Subject
+
+   ## Fixes
+   - Subject
+   ```
+
+## Step 6: Create release (also creates the tag)
+
+```
+gh release create v<version> --target <branch-or-sha> --title v<version> --notes \"<drafted notes>\"
+```
+
+This creates the tag on the remote and the GitHub release with real notes in one operation. Use the current branch name (e.g., `main`) as `--target`; resolve it with `git rev-parse --abbrev-ref HEAD` if unsure.
+
+The tag push triggers any release workflow. Workflows that use the idempotent pattern `if gh release view ...; then skip; else gh release create ...` will preserve the notes drafted here (verified against `tksohishi/wayfinder` and `tksohishi/tgcli` as of 2026-04-24). If the target project's workflow uses a different pattern, fall back to `gh release edit v<version> --notes \"<notes>\"` after the workflow completes.
+
+Mirror the tag locally so the local repo sees it:
+
+```
+git fetch --tags
+```
+
+## Step 7: Verify the release
+
+The release workflow builds artifacts and attaches them to the release. Delegate polling to `/loop` so it runs on a cadence without blocking the turn:
 
 Invoke via the Skill tool: `loop` with args `check v<version> release workflow: run gh run list --limit 1; if still running or queued, keep looping; if success, run gh release view v<version> and stop; if failure, run gh run view <id> --log-failed and stop.`
 
-`/loop` will self-pace, run the first check immediately, and schedule follow-ups until the workflow finishes.
+`/loop` self-paces, runs the first check immediately, and schedules follow-ups until the workflow finishes.
 
 ## Constraints
 
