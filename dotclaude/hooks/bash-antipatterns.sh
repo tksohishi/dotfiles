@@ -35,6 +35,7 @@ CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
 LOOP_RE='(^|[^[:alnum:]_])(for|while|until)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
 HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
+EXIT_STATUS_RE='\$\?'
 
 REASON=""
 
@@ -44,6 +45,8 @@ elif [[ "$CMD" =~ $LOOP_RE ]]; then
   REASON="Don't use for/while/until loops in Bash. Enumerate items with Glob/Grep/Read, then make one Bash call per item."
 elif [[ "$CMD" =~ $HEAD_RE ]]; then
   REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
+elif [[ "$CMD" =~ $EXIT_STATUS_RE ]]; then
+  REASON="Don't use \$? in Bash commands. The previous command's exit status is already in the tool result; read it there, and make the follow-up check a separate Bash call."
 fi
 
 if [ -z "$REASON" ]; then
