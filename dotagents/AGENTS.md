@@ -10,6 +10,17 @@
 ## Interaction
 - When asked for your opinion (e.g. "what do you think?", "would it make sense to ~?"), explain your reasoning first and wait for approval before making edits
 
+## Enforcement Hierarchy
+When the user asks to prevent, enforce, or change a behavior, consider options in this order before proposing a fix:
+
+1. **Deterministic** — PreToolUse hook, deny/allow permission rule, wrapper script, pre-commit check, config constraint. Works without relying on the agent noticing.
+2. **Skill or command edit** — for behaviors tied to a specific invocation (e.g. how `/update-apps` reports output).
+3. **Memory or AGENTS.md** — soft guidance; use only when the behavior requires judgment or has no detectable signature.
+
+Memory is the reflex because it is cheap to write, but it is a soft reminder the agent can still violate. Most "prevent X" requests have a detectable signature (command shape, file content, settings value) that a hook or rule can catch. Past rules that drifted into hooks (cd-chain, loops, bare `head`, `$?`, backslash-whitespace) all started as memory that failed to stick.
+
+When proposing a fix, name the deterministic option first, note the tradeoffs (false-positive risk, maintenance cost), and mention memory only as fallback.
+
 ## Writing Style
 - Avoid using emdashes in writing
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
