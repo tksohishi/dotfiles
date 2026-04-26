@@ -123,3 +123,6 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Use plain quoted strings for commit messages; `$()`, backticks, and heredocs trigger permission prompts
 - Format: subject + blank line + bullet body. Subject is a short single focused concept in imperative mood; bullets cover what + why
 - Split unrelated concepts into separate commits
+
+## Personal Extensions
+@~/.claude/personal.md
