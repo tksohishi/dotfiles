@@ -410,3 +410,10 @@ if [ -f "$DOTFILES_DIR/scripts/setup-gog.sh" ]; then
     echo ""
     echo "Optional: Run ./scripts/setup-gog.sh to configure gog CLI (Gmail/Calendar access)"
 fi
+
+if [ ! -f "$HOME/.claude/personal.md" ]; then
+    echo ""
+    echo "Optional: Create ~/.claude/personal.md for semi-private context (identifiers,"
+    echo "          conventions, etc.). Auto-imported by Claude via @~/.claude/personal.md"
+    echo "          in dotagents/AGENTS.md."
+fi
