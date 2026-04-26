@@ -24,6 +24,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Writing Style
 - Avoid using emdashes in writing
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
+- Markdown bold across Japanese punctuation: `**…。**続き` won't render because `。` + CJK breaks CommonMark right-flanking rules. Move the period outside (`**…**。続き`) or split into separate sentences.
 
 ## Documentation Style
 - Be concise; engineers scan, they don't read novels
