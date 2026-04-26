@@ -231,6 +231,7 @@
       "Bash(defaults read-type *)",
       "Bash(uname *)",
       "Bash(uptime*)",
+      "Bash(uuidgen*)",
       "Bash(whoami*)",
       "Bash(memory_pressure*)",
       "Bash(vm_stat*)",
