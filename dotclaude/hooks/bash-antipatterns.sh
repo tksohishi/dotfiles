@@ -12,6 +12,13 @@
 #                                   per-operation allowlist concern that
 #                                   motivates the loop ban does not apply.
 #   3. `head <file>` (not piped)  — use the Read tool with offset/limit.
+#   4. `sed -n <range> <file>`    — same; the most common reflex for reading
+#                                   a slice of a file. Piping into sed is
+#                                   left alone. Bash(sed *) is also in
+#                                   permissions.deny as a fallback, but the
+#                                   hook fires first and gives the agent an
+#                                   instructive "use Read tool" message
+#                                   instead of a generic permission denial.
 #
 # Known limitations / future considerations:
 #
@@ -44,6 +51,7 @@ CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
 LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
 LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
 HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
+SED_READ_RE='(^|;|&&|\|\|)[[:space:]]*sed[[:space:]]+-n[[:space:]]'
 EXIT_STATUS_RE='\$\?'
 
 REASON=""
@@ -54,6 +62,8 @@ elif [[ "$CMD" =~ $LOOP_RE ]] && [[ "$CMD" =~ $LOOP_DONE_RE ]]; then
   REASON="Don't use for/while loops in Bash. Enumerate items with Glob/Grep/Read, then make one Bash call per item. (Polling with 'until cond; do sleep N; done' is allowed.)"
 elif [[ "$CMD" =~ $HEAD_RE ]]; then
   REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
+elif [[ "$CMD" =~ $SED_READ_RE ]]; then
+  REASON="Don't use 'sed -n' to read a slice of a file; use the Read tool with offset/limit. The Read tool returns line-numbered output, which is what subsequent Edit calls need anyway. Piping into sed ('cmd | sed -n 5p') is allowed."
 elif [[ "$CMD" =~ $EXIT_STATUS_RE ]]; then
   REASON="Don't use \$? in Bash commands. The previous command's exit status is already in the tool result; read it there, and make the follow-up check a separate Bash call."
 fi
