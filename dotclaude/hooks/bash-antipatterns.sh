@@ -4,17 +4,22 @@
 # Blocks:
 #   1. `cd <dir> && <cmd>`        — working dir is already correct; use absolute
 #                                   paths or a separate Bash call.
-#   2. `for/while/until ... do`   — enumerate with Glob/Grep/Read, then one
-#                                   Bash call per item.
+#   2. `for/while ... do`         — enumerate with Glob/Grep/Read, then one
+#                                   Bash call per item. `until` is exempt:
+#                                   it is almost always a polling primitive
+#                                   (`until <check>; do sleep N; done`),
+#                                   not iteration over a collection, so the
+#                                   per-operation allowlist concern that
+#                                   motivates the loop ban does not apply.
 #   3. `head <file>` (not piped)  — use the Read tool with offset/limit.
 #
 # Known limitations / future considerations:
 #
 # - Quoted strings can false-positive `cd <dir> &&` (the cd-chain rule still
-#   uses a loose word boundary). The for/while/until rule now requires both
-#   (a) the keyword at a command-segment boundary (^ ; && || |) and (b) a
-#   standalone `done` token elsewhere in the command, so quoted message
-#   bodies like `git commit -m "wait until X; do Y"` no longer trip it. A
+#   uses a loose word boundary). The for/while rule requires both (a) the
+#   keyword at a command-segment boundary (^ ; && || |) and (b) a standalone
+#   `done` token elsewhere in the command, so quoted message bodies like
+#   `git commit -m "wait while X; do Y"` no longer trip it. A
 #   `bash -c "for ...; do ...; done"` wrapper would still match (it has
 #   real loop syntax inside the wrapper).
 # - Global scope. Lives in ~/.claude/hooks/, fires in every project. If a
@@ -36,7 +41,7 @@ TOOL_INPUT=$(cat)
 CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 
 CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
-LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while|until)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
+LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
 LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
 HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
 EXIT_STATUS_RE='\$\?'
@@ -46,7 +51,7 @@ REASON=""
 if [[ "$CMD" =~ $CD_CHAIN_RE ]]; then
   REASON="Don't chain 'cd <dir> && <cmd>'. The working directory is already correct; run the command with an absolute path, or cd in a separate Bash call."
 elif [[ "$CMD" =~ $LOOP_RE ]] && [[ "$CMD" =~ $LOOP_DONE_RE ]]; then
-  REASON="Don't use for/while/until loops in Bash. Enumerate items with Glob/Grep/Read, then make one Bash call per item."
+  REASON="Don't use for/while loops in Bash. Enumerate items with Glob/Grep/Read, then make one Bash call per item. (Polling with 'until cond; do sleep N; done' is allowed.)"
 elif [[ "$CMD" =~ $HEAD_RE ]]; then
   REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
 elif [[ "$CMD" =~ $EXIT_STATUS_RE ]]; then
