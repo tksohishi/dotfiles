@@ -127,6 +127,8 @@
       "Bash(claude plugin marketplace *)",
       "Bash(claude plugin update *)",
       "Bash(claude plugin validate *)",
+      "Bash(command -V *)",
+      "Bash(command -v *)",
       "Bash(codex completion *)",
       "Bash(codex exec *)",
       "Bash(codex execpolicy check *)",
