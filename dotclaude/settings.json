@@ -497,6 +497,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/bash-verify-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
