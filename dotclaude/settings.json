@@ -247,6 +247,7 @@
       "Bash(du *)",
       "Bash(fd *)",
       "Bash(file *)",
+      "Bash(fc-list*)",
       "Bash(seats *)",
       "Bash(sheets *)",
       "Bash(sips *)",
