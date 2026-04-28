@@ -65,6 +65,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Shell Commands
 - When looking up technical documentation (CLI, library, SDK, platform, service, framework), default to `ctx7` first (`ctx7 library <name>` then `ctx7 docs <id> "<query>"`) before WebFetch/WebSearch. For CLI tools, also run `--help`. Fall back to WebFetch only when ctx7 has no hit or the specific info is missing from the indexed content.
 - **Never use command substitution (`$()`, backticks) or heredocs in commands.** They break allowlist matching and trigger permission prompts. Simple pipes (`|`) and redirections (`<`, `>`) are fine.
+- Quote paths with spaces in double quotes (`~/"Library/Application Support/..."`) instead of backslash-escaped whitespace; the backslash form triggers a permission prompt.
 - When running commands in a different directory, `cd` first as a separate command, then run the actual command. Never chain with `&&`.
 - Never use `for` or `while` loops in Bash commands. If you need to iterate, enumerate items first (Grep, Read, Glob, `ls`), then make separate tool calls per item. `until <check>; do sleep N; done` is allowed for polling (one-shot wait via Bash run_in_background).
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable

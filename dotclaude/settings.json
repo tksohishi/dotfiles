@@ -497,6 +497,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/no-feedback-memory.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
