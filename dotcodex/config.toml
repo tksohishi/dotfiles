@@ -3,7 +3,7 @@
 # https://github.com/openai/codex/issues/11061
 
 sandbox_mode = "workspace-write"
-approval_policy = "untrusted"
+approval_policy = "on-request"
 
 model = "gpt-5.5"
 model_reasoning_effort = "medium"
