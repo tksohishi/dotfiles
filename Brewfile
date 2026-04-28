@@ -70,7 +70,6 @@ cask "orbstack"
 cask "rectangle"
 cask "simple-comic"
 cask "slack"
-cask "spokenly"
 cask "spotify"
 cask "ticktick"
 cask "visual-studio-code" # Password prompt: shell command
