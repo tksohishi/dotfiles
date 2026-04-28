@@ -11,7 +11,7 @@ Personal dotfiles repository for macOS. Manages shell configs, editor settings, 
 - **command-permissions**: Manage Claude Code Bash permissions (allow, ask, deny) for a given command. Full instructions: `.claude/skills/command-permissions/SKILL.md`
 - **discover-apps**: Find new Mac tools worth installing. Full instructions: `.claude/skills/discover-apps/SKILL.md`
 - **install-app**: Install an app via Homebrew and add it to the Brewfile. Full instructions: `.claude/skills/install-app/SKILL.md`
-- **sync-allowlist**: Sync command allowlists across Claude, Codex, and Gemini. Full instructions: `.claude/skills/sync-allowlist/SKILL.md`
+- **sync-allowlist**: Sync command allowlist from Claude Code into Codex. Full instructions: `.claude/skills/sync-allowlist/SKILL.md`
 - **uninstall-app**: Uninstall an app via Homebrew and remove it from the Brewfile. Full instructions: `.claude/skills/uninstall-app/SKILL.md`
 - **update-apps**: Update all Homebrew packages, casks, and Mac App Store apps. Full instructions: `.claude/skills/update-apps/SKILL.md`
 

@@ -13,7 +13,6 @@ const sourceDir = path.join(rootDir, "dotclaude", "commands");
 const geminiDir = path.join(rootDir, "dotgemini", "commands");
 const codexSkillsDir = path.join(rootDir, "dotcodex", "skills", ".dotfiles");
 const claudeSettingsPath = path.join(rootDir, "dotclaude", "settings.json");
-const geminiSettingsPath = path.join(rootDir, "dotgemini", "settings.json");
 const codexRulesPath = path.join(rootDir, "dotcodex", "rules", "default.rules");
 
 function usage(): void {
@@ -30,7 +29,6 @@ Source of truth:
 Generated targets:
   dotgemini/commands/*.toml
   dotcodex/skills/.dotfiles/*/SKILL.md
-  dotgemini/settings.json
   dotcodex/rules/default.rules`);
 }
 
@@ -241,10 +239,6 @@ function toCodexPrefixRule(pattern: string[], decision: "allow" | "forbidden"): 
   return `prefix_rule(pattern=[${encoded}], decision="${decision}")`;
 }
 
-function toGeminiToolRule(pattern: string[]): string {
-  return `run_shell_command(${pattern.join(" ")})`;
-}
-
 async function syncAllowlist(): Promise<void> {
   const raw = await readFile(claudeSettingsPath, "utf8");
   const settings = JSON.parse(raw) as ClaudeSettings;
@@ -273,17 +267,8 @@ async function syncAllowlist(): Promise<void> {
     codexLines.push(toCodexPrefixRule(pattern, "forbidden"));
   }
 
-  const geminiSettings = {
-    tools: {
-      core: allowPatterns.map(toGeminiToolRule),
-      exclude: denyPatterns.map(toGeminiToolRule),
-    },
-  };
-
   await mkdir(path.dirname(codexRulesPath), { recursive: true });
-  await mkdir(path.dirname(geminiSettingsPath), { recursive: true });
   await writeFile(codexRulesPath, `${codexLines.join("\n")}\n`, "utf8");
-  await writeFile(geminiSettingsPath, `${JSON.stringify(geminiSettings, null, 2)}\n`, "utf8");
 }
 
 async function syncCommands(): Promise<void> {
