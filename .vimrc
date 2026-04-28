@@ -29,7 +29,9 @@ set number
 set ruler
 set showcmd
 set showmatch
-set nowrap
+set wrap
+set linebreak
+set breakindent
 set list
 set listchars=tab:>.,trail:_,extends:>,precedes:<
 set scrolloff=5
