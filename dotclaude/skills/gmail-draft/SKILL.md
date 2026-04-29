@@ -36,7 +36,7 @@ bun ~/.claude/skills/gmail-draft/draft.ts \
 ## HTML conventions
 
 - Wrap body in a single outer `<div>...</div>`.
-- Paragraph break: `<div><br></div>`. Never `<p>`.
+- Paragraph break: `<div><br></div>` to match Gmail compose output. `<p>` works for simple bodies but has shown rendering issues in reply/quote contexts; safer to default to `<div>`.
 - Bullets: `-` prefix in text. Avoid `<ul>`/`<li>` unless intentional.
 - Bold: `<b>...</b>`. Avoid inline styles and `<style>` blocks.
 - Quotes inside body: prefer `&quot;` for safety.
