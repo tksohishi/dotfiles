@@ -24,7 +24,7 @@ if ! echo "$CONTENT" | head -20 | grep -qE '^type:[[:space:]]*feedback[[:space:]
   exit 0
 fi
 
-REASON="Don't write feedback-type memory. Behavior rules belong in dotagents/AGENTS.md (Enforcement Hierarchy level 3). Update the relevant AGENTS.md section, or use type: project|user|reference if this is genuinely project-specific, time-bound, or a watch item."
+REASON="Feedback-type memory blocked per Enforcement Hierarchy level 3. Surface to the user: this attempt may indicate ~/.dotfiles/dotagents/AGENTS.md needs a rule update to cover this case."
 
 jq -nc --arg reason "$REASON" '{
   hookSpecificOutput: {
