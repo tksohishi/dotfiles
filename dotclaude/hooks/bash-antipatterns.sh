@@ -22,13 +22,13 @@
 #
 # Known limitations / future considerations:
 #
-# - Quoted strings can false-positive `cd <dir> &&` (the cd-chain rule still
-#   uses a loose word boundary). The for/while rule requires both (a) the
-#   keyword at a command-segment boundary (^ ; && || |) and (b) a standalone
-#   `done` token elsewhere in the command, so quoted message bodies like
-#   `git commit -m "wait while X; do Y"` no longer trip it. A
-#   `bash -c "for ...; do ...; done"` wrapper would still match (it has
-#   real loop syntax inside the wrapper).
+# - Quoted regions are stripped before pattern matching, so antipatterns
+#   inside ssh --command, docker exec sh -c, etc. don't false-positive
+#   (and aren't checked at all — those bytes run on a remote shell where
+#   our conventions don't apply). Naive stripping doesn't handle escaped
+#   quotes (`\"` inside `"..."`) or nested quoting; both are practically
+#   non-issues in agent-issued commands. A `bash -c "for ...; do ...; done"`
+#   wrapper is now intentionally invisible — same reasoning.
 # - Global scope. Lives in ~/.claude/hooks/, fires in every project. If a
 #   project needs different behavior, scope down via that project's
 #   .claude/settings.json.
@@ -47,6 +47,11 @@
 TOOL_INPUT=$(cat)
 CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 
+# Strip quoted regions before pattern matching. Anything inside '...' or "..."
+# is bound for a remote shell (ssh --command, docker exec sh -c, etc.) and
+# isn't subject to the local-conventions checks below.
+CMD_BARE=$(echo "$CMD" | sed -e "s/'[^']*'//g" -e 's/"[^"]*"//g')
+
 CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
 LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
 LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
@@ -56,15 +61,15 @@ EXIT_STATUS_RE='\$\?'
 
 REASON=""
 
-if [[ "$CMD" =~ $CD_CHAIN_RE ]]; then
+if [[ "$CMD_BARE" =~ $CD_CHAIN_RE ]]; then
   REASON="Don't chain 'cd <dir> && <cmd>'. The working directory is already correct; run the command with an absolute path, or cd in a separate Bash call."
-elif [[ "$CMD" =~ $LOOP_RE ]] && [[ "$CMD" =~ $LOOP_DONE_RE ]]; then
+elif [[ "$CMD_BARE" =~ $LOOP_RE ]] && [[ "$CMD_BARE" =~ $LOOP_DONE_RE ]]; then
   REASON="Don't use for/while loops in Bash. Enumerate items with Glob/Grep/Read, then make one Bash call per item. (Polling with 'until cond; do sleep N; done' is allowed.)"
-elif [[ "$CMD" =~ $HEAD_RE ]]; then
+elif [[ "$CMD_BARE" =~ $HEAD_RE ]]; then
   REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
-elif [[ "$CMD" =~ $SED_READ_RE ]]; then
+elif [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then
   REASON="Don't use 'sed -n' to read a slice of a file; use the Read tool with offset/limit. The Read tool returns line-numbered output, which is what subsequent Edit calls need anyway. Piping into sed ('cmd | sed -n 5p') is allowed."
-elif [[ "$CMD" =~ $EXIT_STATUS_RE ]]; then
+elif [[ "$CMD_BARE" =~ $EXIT_STATUS_RE ]]; then
   REASON="Don't use \$? in Bash commands. The previous command's exit status is already in the tool result; read it there, and make the follow-up check a separate Bash call."
 fi
 
