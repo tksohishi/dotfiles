@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Wrapper around agent-browser that rejects real Chrome profiles.
+#
+# A real Chrome profile (~/Library/Application Support/Google/Chrome/<name>)
+# carries Gmail sessions, crypto wallets, and every logged-in site. Letting
+# an agent drive a browser there is unsafe. This wrapper inspects --profile
+# values regardless of position and refuses dangerous ones.
+#
+# Allowed: project-local paths (e.g. './.agent-browser', '~/.myapp').
+# Blocked: 'Default', 'Profile <N>', any path under .../Google/Chrome/.
+#
+# Bypass intentionally: invoke the real binary directly, e.g.
+#   /opt/homebrew/bin/agent-browser --profile Default open ...
+
+set -euo pipefail
+
+REAL=/opt/homebrew/bin/agent-browser
+
+is_dangerous_profile() {
+    case "$1" in
+        Default) return 0 ;;
+        "Profile "[0-9]*) return 0 ;;
+        *Google/Chrome/*) return 0 ;;
+    esac
+    return 1
+}
+
+reject() {
+    cat >&2 <<EOF
+agent-browser wrapper: refused --profile '$1'
+
+This points at a real Chrome profile (Gmail, wallets, logged-in sites).
+Use a project-local profile dir instead, e.g. './.agent-browser', or run
+'/agent-browser-init' to scaffold one.
+EOF
+    exit 1
+}
+
+if [ -n "${AGENT_BROWSER_PROFILE:-}" ] && is_dangerous_profile "$AGENT_BROWSER_PROFILE"; then
+    reject "$AGENT_BROWSER_PROFILE"
+fi
+
+i=1
+while [ $i -le $# ]; do
+    arg="${!i}"
+    case "$arg" in
+        --profile)
+            j=$((i + 1))
+            if [ $j -le $# ]; then
+                val="${!j}"
+                if is_dangerous_profile "$val"; then
+                    reject "$val"
+                fi
+            fi
+            ;;
+        --profile=*)
+            val="${arg#--profile=}"
+            if is_dangerous_profile "$val"; then
+                reject "$val"
+            fi
+            ;;
+    esac
+    i=$((i + 1))
+done
+
+exec "$REAL" "$@"

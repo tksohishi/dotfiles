@@ -72,6 +72,24 @@ for f in "${files[@]}"; do
     echo "Linked $f"
 done
 
+# ── Personal binaries (bin/* -> ~/.local/bin/) ────────────────
+if [ -d "$DOTFILES_DIR/bin" ]; then
+    mkdir -p "$HOME/.local/bin"
+    for src in "$DOTFILES_DIR"/bin/*; do
+        [ -e "$src" ] || continue
+        name="$(basename "$src")"
+        target="$HOME/.local/bin/$name"
+        if [ -L "$target" ]; then
+            rm "$target"
+        elif [ -f "$target" ]; then
+            echo "Backing up $target to $target.bak"
+            mv "$target" "$target.bak"
+        fi
+        ln -s "$src" "$target"
+        echo "Linked bin/$name -> ~/.local/bin/$name"
+    done
+fi
+
 # ── dnsmasq ───────────────────────────────────────────────────
 if [ -d /opt/homebrew/etc/dnsmasq.d ]; then
     target="/opt/homebrew/etc/dnsmasq.d/test.conf"
