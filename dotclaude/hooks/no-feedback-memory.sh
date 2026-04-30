@@ -24,7 +24,7 @@ if ! echo "$CONTENT" | head -20 | grep -qE '^type:[[:space:]]*feedback[[:space:]
   exit 0
 fi
 
-REASON="Feedback-type memory blocked per Enforcement Hierarchy level 3. Surface to the user: this attempt may indicate ~/.dotfiles/dotagents/AGENTS.md needs a rule update to cover this case."
+REASON="Feedback-type memory blocked per Enforcement Hierarchy level 3. Surface to the user: this attempt may indicate AGENTS.md (project-local for project-scoped feedback, global at ~/.dotfiles/dotagents/AGENTS.md for cross-project rules) needs a rule update to cover this case."
 
 jq -nc --arg reason "$REASON" '{
   hookSpecificOutput: {
