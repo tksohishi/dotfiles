@@ -108,6 +108,7 @@
       "Bash(bun outdated*)",
       "Bash(bun pm *)",
       "Bash(bun why *)",
+      "Bash(bun ~/.claude/skills/*)",
       "Bash(bc *)",
       "Bash(brctl *)",
       "Bash(brew *)",
