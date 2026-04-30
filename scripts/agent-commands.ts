@@ -10,7 +10,6 @@ const scriptDir = path.dirname(scriptFile);
 const rootDir = path.resolve(scriptDir, "..");
 
 const sourceDir = path.join(rootDir, "dotclaude", "commands");
-const geminiDir = path.join(rootDir, "dotgemini", "commands");
 const codexSkillsDir = path.join(rootDir, "dotcodex", "skills", ".dotfiles");
 const claudeSettingsPath = path.join(rootDir, "dotclaude", "settings.json");
 const codexRulesPath = path.join(rootDir, "dotcodex", "rules", "default.rules");
@@ -27,7 +26,6 @@ Source of truth:
   dotclaude/commands/*.md
 
 Generated targets:
-  dotgemini/commands/*.toml
   dotcodex/skills/.dotfiles/*/SKILL.md
   dotcodex/rules/default.rules`);
 }
@@ -37,12 +35,6 @@ function validateName(name: string): void {
   if (!pattern.test(name)) {
     throw new Error(`Invalid command name: ${name}\nAllowed pattern: ^[a-z0-9][a-z0-9._-]*$`);
   }
-}
-
-function escapeTomlBasic(value: string): string {
-  return value
-    .replaceAll("\\", "\\\\")
-    .replaceAll('"', '\\"');
 }
 
 function escapeYamlDouble(value: string): string {
@@ -117,22 +109,6 @@ function resolveDescription(name: string, parsed: ParsedMarkdown): string {
   return `Command: /${name}`;
 }
 
-async function generateGeminiCommand(name: string, description: string, bodyLines: string[]): Promise<void> {
-  const outputPath = path.join(geminiDir, `${name}.toml`);
-  const lines: string[] = [];
-
-  lines.push(`description = "${escapeTomlBasic(description)}"`);
-  lines.push('prompt = """');
-
-  for (const line of bodyLines) {
-    lines.push(escapeTomlBasic(line));
-  }
-
-  lines.push('"""');
-
-  await writeFile(outputPath, `${lines.join("\n")}\n`, "utf8");
-}
-
 async function generateCodexSkill(name: string, description: string, bodyLines: string[]): Promise<void> {
   const skillDir = path.join(codexSkillsDir, name);
   const outputPath = path.join(skillDir, "SKILL.md");
@@ -153,14 +129,7 @@ async function generateCodexSkill(name: string, description: string, bodyLines: 
 }
 
 async function removeGeneratedFiles(): Promise<void> {
-  await mkdir(geminiDir, { recursive: true });
   await mkdir(codexSkillsDir, { recursive: true });
-
-  for (const entry of await readdir(geminiDir, { withFileTypes: true })) {
-    if (entry.isFile() && entry.name.endsWith(".toml")) {
-      await rm(path.join(geminiDir, entry.name));
-    }
-  }
 
   for (const entry of await readdir(codexSkillsDir, { withFileTypes: true })) {
     if (entry.isDirectory()) {
@@ -281,7 +250,6 @@ async function syncCommands(): Promise<void> {
     const bodyLines = trimTrailingBlankLines(parsed.bodyLines);
     const description = resolveDescription(name, parsed);
 
-    await generateGeminiCommand(name, description, bodyLines);
     await generateCodexSkill(name, description, bodyLines);
   }
 }

@@ -45,16 +45,16 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `bin/` — personal scripts and CLI wrappers; each file is symlinked to `~/.local/bin/<name>` by `install.sh`. Wrappers placed here shadow Homebrew-installed binaries via PATH order. Example: `bin/agent-browser` rejects `--profile <real-Chrome>` invocations to keep agents away from logged-in Chrome state.
 - `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`
-- `dotclaude/commands/` — global agent command source (symlinked as `~/.claude/commands/`, compiled to Gemini and Codex formats)
+- `dotclaude/commands/` — global agent command source (symlinked as `~/.claude/commands/`, compiled to Codex format)
 - `dotclaude/skills/` — global Claude Code skills (symlinked as `~/.claude/skills/`). Each skill is a directory containing a `SKILL.md` with `name` + `description` frontmatter. Skills are the preferred format for new Claude-only capabilities; only the description loads into context until invoked.
-- `dotgemini/commands/` — global Gemini CLI commands (symlinked as `~/.gemini/commands/`)
+- `dotgemini/commands/` — Gemini CLI commands (symlinked as `~/.gemini/commands/`); maintained manually, no longer auto-synced from `dotclaude/commands/`
 - `dotgemini/policies/` — global Gemini CLI Policy Engine rules (TOML, symlinked as `~/.gemini/policies/`); used for deny/allow/ask_user decisions, replaces deprecated `tools.exclude`
 - `dotcodex/skills/.dotfiles/` — global Codex command-equivalent skills (symlinked as `~/.codex/skills/.dotfiles/`)
 - `.claude/skills/<name>/SKILL.md` — project-local Claude Code skills, e.g. `/discover-apps`
 - `dotclaude/keybindings.json` — Claude Code keybindings (e.g. Ctrl+Shift+B for background tasks)
 - `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
 - `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
-- `scripts/agent-commands.ts` — create/sync/delete global commands across Claude, Gemini, and Codex
+- `scripts/agent-commands.ts` — create/sync/delete global commands across Claude and Codex
 - `scripts/sync-gemini-settings.sh` — merge `dotgemini/settings.json` tools into `~/.gemini/settings.json`
 - `scripts/setup-gog.sh` — one-time Google Cloud project + gog CLI auth setup
 
@@ -72,7 +72,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - Changes to `.alias` affect the zsh shell
 - Changes to `.zshrc` affect zsh directly
 - The `files` array in `install.sh` must be updated when adding new dotfiles
-- `dotclaude/commands/*.md` is the source of truth for global agent commands (sync across all agents via `bun scripts/agent-commands.ts sync`). Use this when a capability should be available in Claude, Codex, and Gemini.
+- `dotclaude/commands/*.md` is the source of truth for global agent commands (sync via `bun scripts/agent-commands.ts sync`). Use this when a capability should be available in Claude and Codex. Gemini commands are not auto-synced; edit `dotgemini/commands/` directly when needed.
 - `dotclaude/skills/<name>/SKILL.md` is the source for Claude-only skills. Skills are preferred over commands for Claude because only the description loads into context until invoked. Use this when the capability is Claude-specific or when you want to bundle helper scripts/assets alongside. No sync step required; the directory is symlinked directly.
 - To add or remove packages/apps, use the `/install-app` and `/uninstall-app` skills
 - `/install-app` also handles MCP servers: it adds them to both Claude Code and Codex, and tracks configs in dotfiles
