@@ -27,7 +27,7 @@ if (!values.to || !values.subject || !values["body-file"]) {
   process.exit(1);
 }
 
-const html = readFileSync(values["body-file"], "utf-8");
+const html = `<div dir="ltr">${readFileSync(values["body-file"], "utf-8").trim()}</div>`;
 
 const args = [
   "gmail", "draft", "create",
