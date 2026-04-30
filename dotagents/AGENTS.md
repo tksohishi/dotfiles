@@ -80,6 +80,9 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 
 
+## Secrets
+- Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), or `.dev.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
+
 ## Gmail and Calendar
 - Use `gog` CLI for Gmail and Calendar operations, not MCP Gmail/Calendar tools
 - `gog gmail draft create` for drafting emails; `gog gmail search` for searching
