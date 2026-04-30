@@ -25,6 +25,16 @@
 #                                   `--json <fields>` instead. Real custom-
 #                                   endpoint cases get surfaced to the user
 #                                   for approval rather than passing through.
+#   7. `<reader> ... .env*`       — text-reading tools touching .env or
+#                                   .dev.vars files. Use .env.example for
+#                                   schema; redaction scripts for values.
+#                                   Does not block .env.example (template).
+#                                   Variants matched: .env, .env.local,
+#                                   .env.production, .env.staging,
+#                                   .env.development, .env.test, .env.prod,
+#                                   .env.stage, .env.dev, .dev.vars.
+#                                   Doesn't cover bare `env`/`printenv`/`set`
+#                                   (different vector; deferred).
 #
 # Known limitations / future considerations:
 #
@@ -65,6 +75,8 @@ HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
 SED_READ_RE='(^|;|&&|\|\|)[[:space:]]*sed[[:space:]]+-n[[:space:]]'
 EXIT_STATUS_RE='\$\?'
 GH_API_RE='(^|;|&&|\|\||\|)[[:space:]]*gh[[:space:]]+api([[:space:]]|$)'
+SECRET_READER_RE='(^|;|&&|\|\||\|)[[:space:]]*(rg|grep|cat|sed|head|tail|awk|less|more|strings|bat|xxd|od|nl|tac)[[:space:]]'
+SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|development|test|prod|stage|dev)([^a-zA-Z0-9]|$)|\.dev\.vars([^a-zA-Z0-9]|$)'
 
 REASON=""
 
@@ -80,6 +92,8 @@ elif [[ "$CMD_BARE" =~ $EXIT_STATUS_RE ]]; then
   REASON="Don't use \$? in Bash commands. The previous command's exit status is already in the tool result; read it there, and make the follow-up check a separate Bash call."
 elif [[ "$CMD_BARE" =~ $GH_API_RE ]]; then
   REASON="\`gh api\` is blocked. Use \`gh <resource> <subcommand>\` (e.g., \`gh pr view\`, \`gh issue list\`, \`gh release list\`) with \`--json <fields>\` for structured output. Run \`gh <resource> --help\` to find the right subcommand. If you've researched and no subcommand covers this endpoint, surface the specific endpoint to the user for approval before retrying."
+elif [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE ]]; then
+  REASON="Reading .env / .dev.vars files is blocked — they contain secrets (API keys, tokens). For schema, read .env.example. To inspect a value, use an approved redaction script (e.g., scripts/check-env.ts, scripts/redact-env.ts) or surface the specific need to the user. Once secrets are read, treat them as compromised and rotate."
 fi
 
 if [ -z "$REASON" ]; then
