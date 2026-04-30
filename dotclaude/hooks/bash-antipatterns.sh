@@ -19,6 +19,12 @@
 #                                   hook fires first and gives the agent an
 #                                   instructive "use Read tool" message
 #                                   instead of a generic permission denial.
+#   5. `$?` in commands           — exit status is already in the tool result;
+#                                   make the follow-up check a separate call.
+#   6. `gh api`                   — use `gh <resource> <subcommand>` with
+#                                   `--json <fields>` instead. Real custom-
+#                                   endpoint cases get surfaced to the user
+#                                   for approval rather than passing through.
 #
 # Known limitations / future considerations:
 #
@@ -58,6 +64,7 @@ LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
 HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
 SED_READ_RE='(^|;|&&|\|\|)[[:space:]]*sed[[:space:]]+-n[[:space:]]'
 EXIT_STATUS_RE='\$\?'
+GH_API_RE='(^|;|&&|\|\||\|)[[:space:]]*gh[[:space:]]+api([[:space:]]|$)'
 
 REASON=""
 
@@ -71,6 +78,8 @@ elif [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then
   REASON="Don't use 'sed -n' to read a slice of a file; use the Read tool with offset/limit. The Read tool returns line-numbered output, which is what subsequent Edit calls need anyway. Piping into sed ('cmd | sed -n 5p') is allowed."
 elif [[ "$CMD_BARE" =~ $EXIT_STATUS_RE ]]; then
   REASON="Don't use \$? in Bash commands. The previous command's exit status is already in the tool result; read it there, and make the follow-up check a separate Bash call."
+elif [[ "$CMD_BARE" =~ $GH_API_RE ]]; then
+  REASON="\`gh api\` is blocked. Use \`gh <resource> <subcommand>\` (e.g., \`gh pr view\`, \`gh issue list\`, \`gh release list\`) with \`--json <fields>\` for structured output. Run \`gh <resource> --help\` to find the right subcommand. If you've researched and no subcommand covers this endpoint, surface the specific endpoint to the user for approval before retrying."
 fi
 
 if [ -z "$REASON" ]; then
