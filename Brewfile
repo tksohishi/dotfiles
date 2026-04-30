@@ -63,6 +63,7 @@ cask "libreoffice"
 cask "logi-options+"
 cask "notion-calendar"
 cask "obsidian"
+cask "openusage"
 cask "orbstack"
 cask "simple-comic"
 cask "slack"
@@ -84,5 +85,4 @@ mas "The Unarchiver", id: 425424353
 # Manual install: Claude Code (claude install)
 cask "codex-app"
 # Manual install: Kanary (scripts/install-kanary.sh)
-# Manual install: OpenUsage (scripts/install-openusage.sh)
 mas "Xcode", id: 497799835
