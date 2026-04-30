@@ -31,5 +31,10 @@ status_line = [
   "model-with-reasoning",
 ]
 
+[tui.keymap.editor]
+# 0.128.0's new keymap dropped alt-enter from insert_newline defaults.
+# Ghostty translates Shift+Enter to ESC+CR (Alt+Enter), so re-bind it here.
+insert_newline = ["alt-enter", "shift-enter", "ctrl-j", "ctrl-m"]
+
 [sandbox_workspace_write]
 network_access = true
