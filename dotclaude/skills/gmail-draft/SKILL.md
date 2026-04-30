@@ -35,10 +35,11 @@ bun ~/.claude/skills/gmail-draft/draft.ts \
 
 ## HTML conventions
 
-- Wrap body in a single outer `<div>...</div>`.
-- Paragraph break: `<div><br></div>` to match Gmail compose output. `<p>` works for simple bodies but has shown rendering issues in reply/quote contexts; safer to default to `<div>`.
-- Bullets: `-` prefix in text. Avoid `<ul>`/`<li>` unless intentional.
-- Bold: `<b>...</b>`. Avoid inline styles and `<style>` blocks.
+- Wrapper auto-wraps the body file in `<div dir="ltr">...</div>` (matches Gmail native compose, so iOS continuations inherit consistent font/size). Don't add the outer wrapper yourself.
+- **Each top-level block must be `<div class="gmail_default" style="font-size:small">...</div>`.** This class is the marker Gmail's web editor uses to treat the content as native compose. Without it, imported drafts go into a "foreign content" mode where Ctrl-H, Delete, and Ctrl-F (forward-char) misbehave when the user reviews/edits the draft.
+- Don't insert `<div><br></div>` spacer rows between paragraphs. Bare divs without `gmail_default` confuse the editor — Ctrl-F across one inserts an unexpected line break. Paragraph spacing comes from the class's CSS; consecutive `gmail_default` divs render with normal spacing.
+- Bullets: wrap `<ul><li>...</li></ul>` inside a `gmail_default` div, e.g. `<div class="gmail_default" style="font-size:small"><ul><li>One</li><li>Two</li></ul></div>`. Avoid `-` text prefixes — they read as plain dashes, not bullets.
+- Bold: `<b>...</b>`. Avoid inline styles and `<style>` blocks beyond the required `style="font-size:small"` on `gmail_default` divs.
 - Quotes inside body: prefer `&quot;` for safety.
 
 ## Common gotchas
