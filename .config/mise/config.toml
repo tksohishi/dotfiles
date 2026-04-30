@@ -6,3 +6,4 @@ node = { version = "24.13", postinstall = "corepack enable pnpm" }
 "aqua:openai/codex" = "latest"
 bun = "latest"
 deno = "latest"
+gemini = "latest"
