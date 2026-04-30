@@ -117,6 +117,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
 - After `gh repo create`, always configure repo defaults: `gh repo edit --enable-wiki=false --enable-projects=false --delete-branch-on-merge --enable-squash-merge`
+- For other repos (clones in `tmp/`, external paths), `cd <repo>` as a separate Bash call, then run git commands directly. `git -C` is denied by config; wd persists across Bash calls. After investigation, `cd` back to the project root.
 
 ## Commits
 - Never add the AI agent as a commit author or co-author
