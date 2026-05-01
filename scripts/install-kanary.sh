@@ -41,7 +41,6 @@ fi
 
 echo "Installing Kanary.app to /Applications..."
 ditto "$app_path" "$target"
-xattr -r -w com.apple.quarantine "0081;00000000;Codex;https://kanary.download/ja/download" "$target"
 
 echo "Installed Kanary.app."
 echo "Open it once from /Applications and grant the requested keyboard/accessibility permissions."
