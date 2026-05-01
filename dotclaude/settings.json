@@ -112,6 +112,7 @@
       "Bash(bc *)",
       "Bash(brctl *)",
       "Bash(brew *)",
+      "Bash(caddy *)",
       "Bash(cd *)",
       "Bash(cp -an *)",
       "Bash(cp -n *)",
@@ -474,6 +475,10 @@
     "ask": [
       "Bash(brew install*)",
       "Bash(brew uninstall*)",
+      "Bash(caddy add-package*)",
+      "Bash(caddy remove-package*)",
+      "Bash(caddy stop*)",
+      "Bash(caddy upgrade*)",
       "Bash(qpdf *--replace-input*)"
     ],
     "defaultMode": "acceptEdits",
