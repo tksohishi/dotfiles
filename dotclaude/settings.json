@@ -246,6 +246,7 @@
       "Bash(pmset -g*)",
       "Bash(sysctl -n *)",
       "Bash(sysctl -a*)",
+      "Bash(scutil *)",
       "Bash(top -l *)",
       "Bash(iostat*)",
       "Bash(netstat *)",
