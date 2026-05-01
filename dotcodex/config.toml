@@ -38,3 +38,4 @@ insert_newline = ["alt-enter", "shift-enter", "ctrl-j", "ctrl-m"]
 
 [sandbox_workspace_write]
 network_access = true
+writable_roots = ["~/.cache/uv"]
