@@ -61,3 +61,54 @@ bash_input() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+@test "denies cp -r without -n" {
+  run "$HOOK" <<< "$(bash_input 'cp -r src dst')"
+  [[ "$output" == *deny* ]]
+  [[ "$output" == *"cp -an"* ]]
+}
+
+@test "denies cp -R without -n" {
+  run "$HOOK" <<< "$(bash_input 'cp -R src dst')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies cp -a without -n" {
+  run "$HOOK" <<< "$(bash_input 'cp -a src dst')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies cp -rf without -n" {
+  run "$HOOK" <<< "$(bash_input 'cp -rf src dst')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "allows cp -an" {
+  run "$HOOK" <<< "$(bash_input 'cp -an src/ dst/')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows cp -na" {
+  run "$HOOK" <<< "$(bash_input 'cp -na src/ dst/')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows cp -rn" {
+  run "$HOOK" <<< "$(bash_input 'cp -rn src/ dst/')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows cp without recursive flag" {
+  run "$HOOK" <<< "$(bash_input 'cp foo bar')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows cp -n single file" {
+  run "$HOOK" <<< "$(bash_input 'cp -n foo bar')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
