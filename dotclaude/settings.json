@@ -247,6 +247,7 @@
       "Bash(df *)",
       "Bash(du *)",
       "Bash(fd *)",
+      "Bash(ffprobe *)",
       "Bash(file *)",
       "Bash(fc-list*)",
       "Bash(seats *)",
