@@ -40,6 +40,14 @@
 #                                   (archive + no-clobber) or `cp -n` for
 #                                   non-recursive. -n in any flag combo
 #                                   (e.g. -na, -rn) is accepted.
+#   9. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
+#      is in node_modules/.bin     node_modules/.bin, so `bun <bin>` runs
+#                                   the same thing. The typical project-trust
+#                                   allow rule is `Bash(bun *)`, while
+#                                   `bunx *` would prompt every time.
+#                                   Hook fires only when the binary exists
+#                                   locally; ad-hoc `bunx some-package` for
+#                                   packages not in deps still passes through.
 #
 # Known limitations / future considerations:
 #
@@ -84,6 +92,7 @@ SECRET_READER_RE='(^|;|&&|\|\||\|)[[:space:]]*(rg|grep|cat|sed|head|tail|awk|les
 SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|development|test|prod|stage|dev)([^a-zA-Z0-9]|$)|\.dev\.vars([^a-zA-Z0-9]|$)'
 CP_RECURSIVE_RE='(^|;|&&|\|\||\|)[[:space:]]*cp[[:space:]]+(-[a-zA-Z]*[rRa])'
 CP_NOCLOBBER_RE='cp[[:space:]]+([^|;&]*[[:space:]])?-[a-zA-Z]*n'
+BUNX_RE='(^|;|&&|\|\||\|)[[:space:]]*bunx[[:space:]]+([^[:space:]]+)'
 
 REASON=""
 
@@ -103,6 +112,11 @@ elif [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE
   REASON="Reading .env / .dev.vars files is blocked — they contain secrets (API keys, tokens). For schema, read .env.example. To inspect a value, use an approved redaction script (e.g., scripts/check-env.ts, scripts/redact-env.ts) or surface the specific need to the user. Once secrets are read, treat them as compromised and rotate."
 elif [[ "$CMD_BARE" =~ $CP_RECURSIVE_RE ]] && ! [[ "$CMD_BARE" =~ $CP_NOCLOBBER_RE ]]; then
   REASON="Don't use 'cp -r/-R/-a' without -n. Recursive/archive cp silently overwrites existing files. Use 'cp -an <src> <dst>' for archive-mode copy (preserves attrs, no overwrite) or 'cp -n <src> <dst>' for non-recursive non-overwrite. The -n flag can appear in any combo, e.g. 'cp -an', 'cp -na', 'cp -rn'."
+elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
+  bunx_arg="${BASH_REMATCH[2]}"
+  if [[ "$bunx_arg" != -* ]] && [[ -f "node_modules/.bin/$bunx_arg" ]]; then
+    REASON="\`bunx $bunx_arg\` blocked: \`$bunx_arg\` is in node_modules/.bin, so \`bun $bunx_arg\` runs the same binary. Use \`bun $bunx_arg\` so the call matches the typical \`Bash(bun *)\` project-trust allow rule (\`bunx *\` prompts every time). Reserve \`bunx\` for one-off execution of packages not installed locally."
+  fi
 fi
 
 if [ -z "$REASON" ]; then
