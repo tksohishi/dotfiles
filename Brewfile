@@ -1,6 +1,5 @@
 tap "tksohishi/tap"
 brew "agent-browser"
-brew "act"
 brew "awscli"
 brew "bats-core"
 brew "caddy"
