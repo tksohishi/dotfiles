@@ -437,6 +437,7 @@
       "Bash(wrangler pages deployment list *)",
       "Bash(wrangler pages deployment get *)",
       "Bash(wrangler pages download *)",
+      "Bash(zsh -n *)",
       "Skill(clipboard *)",
       "Skill(github-release *)",
       "Skill(init-agents)",
