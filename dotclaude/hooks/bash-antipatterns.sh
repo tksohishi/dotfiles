@@ -4,28 +4,21 @@
 # Blocks:
 #   1. `cd <dir> && <cmd>`        — working dir is already correct; use absolute
 #                                   paths or a separate Bash call.
-#   2. `for/while ... do`         — enumerate with Glob/Grep/Read, then one
-#                                   Bash call per item. `until` is exempt:
-#                                   it is almost always a polling primitive
-#                                   (`until <check>; do sleep N; done`),
-#                                   not iteration over a collection, so the
-#                                   per-operation allowlist concern that
-#                                   motivates the loop ban does not apply.
-#   3. `head <file>` (not piped)  — use the Read tool with offset/limit.
-#   4. `sed -n <range> <file>`    — same; the most common reflex for reading
+#   2. `head <file>` (not piped)  — use the Read tool with offset/limit.
+#   3. `sed -n <range> <file>`    — same; the most common reflex for reading
 #                                   a slice of a file. Piping into sed is
 #                                   left alone. Bash(sed *) is also in
 #                                   permissions.deny as a fallback, but the
 #                                   hook fires first and gives the agent an
 #                                   instructive "use Read tool" message
 #                                   instead of a generic permission denial.
-#   5. `$?` in commands           — exit status is already in the tool result;
+#   4. `$?` in commands           — exit status is already in the tool result;
 #                                   make the follow-up check a separate call.
-#   6. `gh api`                   — use `gh <resource> <subcommand>` with
+#   5. `gh api`                   — use `gh <resource> <subcommand>` with
 #                                   `--json <fields>` instead. Real custom-
 #                                   endpoint cases get surfaced to the user
 #                                   for approval rather than passing through.
-#   7. `<reader> ... .env*`       — text-reading tools touching .env or
+#   6. `<reader> ... .env*`       — text-reading tools touching .env or
 #                                   .dev.vars files. Use .env.example for
 #                                   schema; redaction scripts for values.
 #                                   Does not block .env.example (template).
@@ -35,12 +28,12 @@
 #                                   .env.stage, .env.dev, .dev.vars.
 #                                   Doesn't cover bare `env`/`printenv`/`set`
 #                                   (different vector; deferred).
-#   8. `cp -r/-R/-a` without -n   — recursive/archive cp silently overwrites
+#   7. `cp -r/-R/-a` without -n   — recursive/archive cp silently overwrites
 #                                   existing files. Redirect to `cp -an`
 #                                   (archive + no-clobber) or `cp -n` for
 #                                   non-recursive. -n in any flag combo
 #                                   (e.g. -na, -rn) is accepted.
-#   9. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
+#   8. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
 #      is in node_modules/.bin     node_modules/.bin, so `bun <bin>` runs
 #                                   the same thing. The typical project-trust
 #                                   allow rule is `Bash(bun *)`, while
@@ -61,8 +54,7 @@
 #   (and aren't checked at all — those bytes run on a remote shell where
 #   our conventions don't apply). Naive stripping doesn't handle escaped
 #   quotes (`\"` inside `"..."`) or nested quoting; both are practically
-#   non-issues in agent-issued commands. A `bash -c "for ...; do ...; done"`
-#   wrapper is now intentionally invisible — same reasoning.
+#   non-issues in agent-issued commands.
 # - Global scope. Lives in ~/.claude/hooks/, fires in every project. If a
 #   project needs different behavior, scope down via that project's
 #   .claude/settings.json.
@@ -87,8 +79,6 @@ CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 CMD_BARE=$(echo "$CMD" | sed -e "s/'[^']*'//g" -e 's/"[^"]*"//g')
 
 CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
-LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
-LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
 HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
 SED_READ_RE='(^|;|&&|\|\|)[[:space:]]*sed[[:space:]]+-n[[:space:]]'
 EXIT_STATUS_RE='\$\?'
@@ -103,8 +93,6 @@ REASON=""
 
 if [[ "$CMD_BARE" =~ $CD_CHAIN_RE ]]; then
   REASON="Don't chain 'cd <dir> && <cmd>'. The working directory is already correct; run the command with an absolute path, or cd in a separate Bash call."
-elif [[ "$CMD_BARE" =~ $LOOP_RE ]] && [[ "$CMD_BARE" =~ $LOOP_DONE_RE ]]; then
-  REASON="Don't use for/while loops in Bash. Enumerate items with Glob/Grep/Read, then make one Bash call per item. (Polling with 'until cond; do sleep N; done' is allowed.)"
 elif [[ "$CMD_BARE" =~ $HEAD_RE ]]; then
   REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
 elif [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then

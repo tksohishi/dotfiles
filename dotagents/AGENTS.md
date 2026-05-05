@@ -17,7 +17,7 @@ When the user asks to prevent, enforce, or change a behavior, consider options i
 2. **Skill or command edit** — for behaviors tied to a specific invocation (e.g. how `/update-apps` reports output).
 3. **Memory or AGENTS.md** — soft guidance; use only when the behavior requires judgment or has no detectable signature.
 
-Memory is the reflex because it is cheap to write, but it is a soft reminder the agent can still violate. Most "prevent X" requests have a detectable signature (command shape, file content, settings value) that a hook or rule can catch. Past rules that drifted into hooks (cd-chain, loops, bare `head`, `$?`, backslash-whitespace) all started as memory that failed to stick.
+Memory is the reflex because it is cheap to write, but it is a soft reminder the agent can still violate. Most "prevent X" requests have a detectable signature (command shape, file content, settings value) that a hook or rule can catch. Past rules that drifted into hooks (cd-chain, bare `head`, `$?`, backslash-whitespace) all started as memory that failed to stick.
 
 When proposing a fix, name the deterministic option first, note the tradeoffs (false-positive risk, maintenance cost), and mention memory only as fallback.
 
@@ -68,7 +68,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Quote paths with spaces in double quotes (`~/"Library/Application Support/..."`) instead of backslash-escaped whitespace; the backslash form triggers a permission prompt.
 - When running commands in a different directory, `cd` first as a separate command, then run the actual command. Never chain with `&&`.
 - Within the current project, prefer relative paths — for git (`git add foo.ts`), scripts (`bun scripts/foo.ts`, `python scripts/foo.py`, `./bin/foo`), and file ops (`ls src/`, `cat config.toml`). Use absolute paths only for files outside the project or when wd is genuinely ambiguous.
-- Never use `for` or `while` loops in Bash commands. If you need to iterate, enumerate items first (Grep, Read, Glob, `ls`), then make separate tool calls per item. `until <check>; do sleep N; done` is allowed for polling (one-shot wait via Bash run_in_background).
+- `for`/`while` loops in Bash are allowed when every command inside the loop is on the allowlist. If the loop body would prompt for permission per iteration, enumerate first (Grep, Read, Glob, `ls`) and make one Bash call per item instead. `until <check>; do sleep N; done` is the standard polling form (one-shot wait via Bash run_in_background).
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
 - When calling `http`/`https` (httpie), always specify the method explicitly and put flags AFTER the URL. Canonical form: `http METHOD <URL> [flags...]` (method required, not optional; otherwise httpie's auto-method promotes commands with `key=value` data fields to implicit POST and bypasses the destructive-method gate). A PreToolUse hook blocks flag-first invocations.
 - Use Glob or `fd` for file search, scoped to the project directory. Ask before searching outside the project.
