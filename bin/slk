@@ -172,6 +172,23 @@ async function loadChannelList(opts: { all?: boolean } = {}): Promise<{ id: stri
   return r.channels;
 }
 
+type CountsChannel = { id: string; latest?: string; has_unreads?: boolean; mention_count?: number };
+async function loadCounts(): Promise<Map<string, CountsChannel>> {
+  const r = await slack<{ channels: CountsChannel[] }>("client.counts", {});
+  return new Map(r.channels.map((c) => [c.id, c]));
+}
+
+function relTime(ts: string): string {
+  const t = parseFloat(ts);
+  if (!t) return "—";
+  const sec = Math.floor(Date.now() / 1000 - t);
+  if (sec < 60) return `${sec}s ago`;
+  if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+  if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
+  if (sec < 86400 * 30) return `${Math.floor(sec / 86400)}d ago`;
+  return new Date(t * 1000).toISOString().slice(0, 10);
+}
+
 async function resolveChannelId(arg: string): Promise<string> {
   const stripped = arg.startsWith("#") ? arg.slice(1) : arg;
   if (/^[CGD][A-Z0-9]+$/.test(stripped)) return stripped;
@@ -247,13 +264,23 @@ async function cmdThread(args: string[]): Promise<void> {
 
 async function cmdChannels(args: string[]): Promise<void> {
   const { flags } = parseFlags(args);
-  const list = await loadChannelList({ all: flags.all === true });
-  const limited = typeof flags.limit === "string" ? list.slice(0, parseInt(flags.limit)) : list;
+  const all = flags.all === true;
+  const list = await loadChannelList({ all });
+  const counts = all ? new Map<string, CountsChannel>() : await loadCounts();
+  const sinceTs = typeof flags.since === "string" ? parseFloat(parseSince(flags.since)) : 0;
+  let enriched = list.map((c) => ({ ...c, latest: counts.get(c.id)?.latest ?? "0", has_unreads: counts.get(c.id)?.has_unreads ?? false }));
+  if (!all) enriched = enriched.sort((a, b) => parseFloat(b.latest) - parseFloat(a.latest));
+  if (sinceTs) enriched = enriched.filter((c) => parseFloat(c.latest) >= sinceTs);
+  if (typeof flags.limit === "string") enriched = enriched.slice(0, parseInt(flags.limit));
   if (flags.json) {
-    console.log(JSON.stringify(limited, null, 2));
+    console.log(JSON.stringify(enriched, null, 2));
     return;
   }
-  for (const c of limited) console.log(`${c.id}  #${c.name}`);
+  for (const c of enriched) {
+    const time = all ? "" : `${relTime(c.latest).padEnd(10)}  `;
+    const unread = c.has_unreads ? " *" : "";
+    console.log(`${time}${c.id}  #${c.name}${unread}`);
+  }
 }
 
 async function cmdDoctor(): Promise<void> {
@@ -322,7 +349,7 @@ Usage:
   slk messages <channel> [--limit N] [--since 4h|YYYY-MM-DD] [--json]
   slk thread   <channel> <ts> [--json]
   slk thread   <slack-archive-url> [--json]
-  slk channels [--all] [--limit N] [--json]
+  slk channels [--all] [--since 4h|YYYY-MM-DD] [--limit N] [--json]
   slk doctor
 
 Auth (per repo, in .env):
@@ -330,8 +357,9 @@ Auth (per repo, in .env):
 
 Notes:
   - Channel arg accepts #name or Cxxxx/Gxxxx ID.
-  - \`slk channels\` lists channels you're a member of; \`--all\` returns the whole workspace.
-  - Channel-name resolution checks your joined channels first, then falls back to all.
+  - \`slk channels\` lists joined channels sorted by latest activity; \`*\` marks unreads.
+  - \`--since 4h\` filters to channels with activity newer than the threshold.
+  - \`--all\` falls back to the full workspace list (no activity sort).
   - xoxc + d cookie auth is unofficial; personal read-only use only.`);
 }
 
