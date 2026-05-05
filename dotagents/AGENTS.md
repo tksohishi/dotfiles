@@ -107,7 +107,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ### Headed mode (for Cloudflare, sign-in, cookie capture)
 - Use `--headed` for flows that need a visible browser.
 - Pass `--headed` on every call that should stay attached to a headed daemon. If the launch options don't match the daemon's current config, the daemon can respawn Chrome and lose page state.
-- The warning `--args, --headed ignored: daemon already running` is harmless when flags match the daemon; suppress with `-q` if it interferes with output parsing.
+- The warning `<flags> ignored: daemon already running` fires whenever any launch-time flag (`--headed`, `--profile`, `--args`, etc.) is re-passed against a running daemon, regardless of whether the value matches; it's cosmetic (nothing breaks). Suppress with `-q` or `--json`.
 - Verify headed mode is active: `pgrep -lf "Google Chrome for Testing" | grep -v crashpad | grep -v Helper` — output must NOT contain `--headless=new`.
 - Cloudflare challenges auto-clear within 2-3s in truly-headed mode; they never clear in headless.
 
