@@ -43,7 +43,7 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 - `.config/mise/config.toml` — node and python runtime versions
 - `macos.sh` — macOS defaults (Dock, Finder, keyboard, trackpad, etc.)
 - `bin/` — personal scripts and CLI wrappers; each file is symlinked to `~/.local/bin/<name>` by `install.sh`. Wrappers placed here shadow Homebrew-installed binaries via PATH order. Example: `bin/agent-browser` rejects `--profile <real-Chrome>` invocations to keep agents away from logged-in Chrome state.
-- `bin/slk` — tiny Bun/TS CLI for reading Slack messages from a per-repo workspace. Reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env`. Subcommands: `messages`, `thread`, `channels`, `doctor`. Used by the `slack-context` skill for on-demand context injection.
+- `bin/slk` — tiny Bun/TS CLI for reading Slack messages from a per-repo workspace. Reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env.local` (creds belong there since `.env` is reserved for non-secret app config; Bun auto-loads both). Subcommands: `messages`, `thread`, `channels`, `doctor`. Used by the `slack-context` skill for on-demand context injection.
 - `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
 - `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`
 - `dotclaude/commands/` — global agent command source (symlinked as `~/.claude/commands/`, compiled to Codex format)

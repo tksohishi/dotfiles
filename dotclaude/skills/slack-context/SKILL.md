@@ -1,6 +1,6 @@
 ---
 name: slack-context
-description: Read recent Slack messages from the current repo's workspace via `slk` to inject team discussion context into the session. Use when the user references a Slack thread, channel discussion, or asks what the team said about a topic — only when the repo's `.env` has SLACK_XOXC_TOKEN and SLACK_COOKIE_D. Read-only; does not post.
+description: Read recent Slack messages from the current repo's workspace via `slk` to inject team discussion context into the session. Use when the user references a Slack thread, channel discussion, or asks what the team said about a topic — only when the repo's `.env.local` has SLACK_XOXC_TOKEN and SLACK_COOKIE_D. Read-only; does not post.
 ---
 
 ## Usage
@@ -12,12 +12,12 @@ description: Read recent Slack messages from the current repo's workspace via `s
 
 ## Auth setup (manual, per workspace)
 
-The repo's `.env` must contain two values, extracted from a logged-in browser session:
+The repo's `.env.local` must contain two values, extracted from a logged-in browser session (`.env` is reserved for non-secret app config; Bun loads both, but creds go in `.env.local` so the secret/non-secret split stays clean):
 
 - `SLACK_XOXC_TOKEN` — DevTools → Network on `app.slack.com` → click any channel → find a `slack.com/api/*` request → form-data field `token=xoxc-…`.
 - `SLACK_COOKIE_D` — DevTools → Application → Cookies → `https://app.slack.com` → row where Name = `d` → copy Value.
 
-Both files are covered by the user's global gitignore. Run `slk doctor` to validate; if it returns `invalid_auth`, the cookie or token has rotated (every few weeks) — ask the user to re-extract both.
+`.env.local` is covered by the user's global gitignore (`*.local`). Run `slk doctor` to validate; if it returns `invalid_auth`, the cookie or token has rotated (every few weeks) — ask the user to re-extract both.
 
 ## Caveats
 

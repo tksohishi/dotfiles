@@ -32,8 +32,8 @@ class SlkError extends Error {
 }
 
 function requireAuth(): { xoxc: string; cookieD: string } {
-  if (!xoxc) die(`slk: missing SLACK_XOXC_TOKEN in ${process.cwd()}/.env\n  Run \`slk doctor\` for setup help.`);
-  if (!cookieD) die(`slk: missing SLACK_COOKIE_D in ${process.cwd()}/.env\n  Run \`slk doctor\` for setup help.`);
+  if (!xoxc) die(`slk: missing SLACK_XOXC_TOKEN in ${process.cwd()}/.env.local\n  Run \`slk doctor\` for setup help.`);
+  if (!cookieD) die(`slk: missing SLACK_COOKIE_D in ${process.cwd()}/.env.local\n  Run \`slk doctor\` for setup help.`);
   return { xoxc, cookieD };
 }
 
@@ -285,7 +285,7 @@ async function cmdChannels(args: string[]): Promise<void> {
 
 async function cmdDoctor(): Promise<void> {
   if (!xoxc || !cookieD) {
-    console.error(`slk doctor: missing credentials in ${process.cwd()}/.env\n`);
+    console.error(`slk doctor: missing credentials in ${process.cwd()}/.env.local\n`);
     console.error(`  SLACK_XOXC_TOKEN: ${xoxc ? "set" : "MISSING"}`);
     console.error(`  SLACK_COOKIE_D:   ${cookieD ? "set" : "MISSING"}\n`);
     console.error("Extract from a logged-in browser session (per workspace):");
@@ -293,16 +293,16 @@ async function cmdDoctor(): Promise<void> {
     console.error("                     any slack.com/api/* request → form data `token=xoxc-…`");
     console.error("  SLACK_COOKIE_D   — DevTools → Application → Cookies → https://app.slack.com →");
     console.error("                     row Name=`d`, copy Value");
-    console.error("\nAdd both to the repo's .env (already covered by .gitignore_global).");
+    console.error("\nAdd both to the repo's .env.local (already covered by .gitignore_global).");
     process.exit(1);
   }
   try {
     const r = await slack<{ team: string; user: string; team_id: string; user_id: string }>("auth.test");
     console.log(`OK  team=${r.team} (${r.team_id})  user=${r.user} (${r.user_id})`);
-    console.log(`    creds from ${process.cwd()}/.env`);
+    console.log(`    creds from ${process.cwd()}/.env.local`);
   } catch (e) {
     if (!(e instanceof SlkError) || !e.slackError) throw e;
-    console.error(`slk doctor: Slack rejected credentials in ${process.cwd()}/.env`);
+    console.error(`slk doctor: Slack rejected credentials in ${process.cwd()}/.env.local`);
     console.error(`  error: ${e.slackError}\n`);
     const guidance: Record<string, string[]> = {
       invalid_auth: [
@@ -352,7 +352,7 @@ Usage:
   slk channels [--all] [--since 4h|YYYY-MM-DD] [--limit N] [--json]
   slk doctor
 
-Auth (per repo, in .env):
+Auth (per repo, in .env.local):
   SLACK_XOXC_TOKEN, SLACK_COOKIE_D — see \`slk doctor\` for extraction steps.
 
 Notes:
