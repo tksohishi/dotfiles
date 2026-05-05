@@ -48,6 +48,11 @@
 #                                   Hook fires only when the binary exists
 #                                   locally; ad-hoc `bunx some-package` for
 #                                   packages not in deps still passes through.
+#                                   `bunx tsc` is exempted — the global
+#                                   allow rule `Bash(bunx tsc *)` covers
+#                                   one-off type-checks against ad-hoc
+#                                   `@types/*` installs that the local
+#                                   `bun tsc` form can't satisfy.
 #
 # Known limitations / future considerations:
 #
@@ -114,7 +119,7 @@ elif [[ "$CMD_BARE" =~ $CP_RECURSIVE_RE ]] && ! [[ "$CMD_BARE" =~ $CP_NOCLOBBER_
   REASON="Don't use 'cp -r/-R/-a' without -n. Recursive/archive cp silently overwrites existing files. Use 'cp -an <src> <dst>' for archive-mode copy (preserves attrs, no overwrite) or 'cp -n <src> <dst>' for non-recursive non-overwrite. The -n flag can appear in any combo, e.g. 'cp -an', 'cp -na', 'cp -rn'."
 elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
   bunx_arg="${BASH_REMATCH[2]}"
-  if [[ "$bunx_arg" != -* ]] && [[ -f "node_modules/.bin/$bunx_arg" ]]; then
+  if [[ "$bunx_arg" != "tsc" ]] && [[ "$bunx_arg" != -* ]] && [[ -f "node_modules/.bin/$bunx_arg" ]]; then
     REASON="\`bunx $bunx_arg\` blocked: \`$bunx_arg\` is in node_modules/.bin, so \`bun $bunx_arg\` runs the same binary. Use \`bun $bunx_arg\` so the call matches the typical \`Bash(bun *)\` project-trust allow rule (\`bunx *\` prompts every time). Reserve \`bunx\` for one-off execution of packages not installed locally."
   fi
 fi
