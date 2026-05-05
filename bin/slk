@@ -159,14 +159,15 @@ function parseSince(s: string): string {
   return String(Math.floor(t / 1000));
 }
 
-async function loadChannelList(): Promise<{ id: string; name: string }[]> {
-  if (channelListCache) return channelListCache;
-  const r = await slack<{ channels: { id: string; name: string }[] }>("conversations.list", {
+async function loadChannelList(opts: { all?: boolean } = {}): Promise<{ id: string; name: string }[]> {
+  if (!opts.all && channelListCache) return channelListCache;
+  const method = opts.all ? "conversations.list" : "users.conversations";
+  const r = await slack<{ channels: { id: string; name: string }[] }>(method, {
     types: "public_channel,private_channel",
     limit: "1000",
     exclude_archived: "true",
   });
-  channelListCache = r.channels;
+  if (!opts.all) channelListCache = r.channels;
   for (const c of r.channels) channelCache.set(c.id, c.name);
   return r.channels;
 }
@@ -174,9 +175,12 @@ async function loadChannelList(): Promise<{ id: string; name: string }[]> {
 async function resolveChannelId(arg: string): Promise<string> {
   const stripped = arg.startsWith("#") ? arg.slice(1) : arg;
   if (/^[CGD][A-Z0-9]+$/.test(stripped)) return stripped;
-  const list = await loadChannelList();
-  const hit = list.find((c) => c.name === stripped);
-  if (!hit) die(`slk: channel "${arg}" not found in first 1000 channels — pass the ID instead (use \`slk channels\` to list)`);
+  const joined = await loadChannelList();
+  const joinedHit = joined.find((c) => c.name === stripped);
+  if (joinedHit) return joinedHit.id;
+  const all = await loadChannelList({ all: true });
+  const hit = all.find((c) => c.name === stripped);
+  if (!hit) die(`slk: channel "${arg}" not found in first 1000 channels — pass the ID instead (use \`slk channels --all\` to list)`);
   return hit.id;
 }
 
@@ -243,7 +247,7 @@ async function cmdThread(args: string[]): Promise<void> {
 
 async function cmdChannels(args: string[]): Promise<void> {
   const { flags } = parseFlags(args);
-  const list = await loadChannelList();
+  const list = await loadChannelList({ all: flags.all === true });
   const limited = typeof flags.limit === "string" ? list.slice(0, parseInt(flags.limit)) : list;
   if (flags.json) {
     console.log(JSON.stringify(limited, null, 2));
@@ -318,7 +322,7 @@ Usage:
   slk messages <channel> [--limit N] [--since 4h|YYYY-MM-DD] [--json]
   slk thread   <channel> <ts> [--json]
   slk thread   <slack-archive-url> [--json]
-  slk channels [--limit N] [--json]
+  slk channels [--all] [--limit N] [--json]
   slk doctor
 
 Auth (per repo, in .env):
@@ -326,7 +330,8 @@ Auth (per repo, in .env):
 
 Notes:
   - Channel arg accepts #name or Cxxxx/Gxxxx ID.
-  - First 1000 channels are matched by name; pass the ID for anything beyond that.
+  - \`slk channels\` lists channels you're a member of; \`--all\` returns the whole workspace.
+  - Channel-name resolution checks your joined channels first, then falls back to all.
   - xoxc + d cookie auth is unofficial; personal read-only use only.`);
 }
 

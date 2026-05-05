@@ -5,7 +5,7 @@ description: Read recent Slack messages from the current repo's workspace via `s
 
 ## Usage
 
-- `slk channels` — list channel IDs (run once per workspace; pass results back to user if they need to pick).
+- `slk channels` — list channels the user is a member of (the relevant subset for context). Add `--all` only when looking for a channel they may not have joined.
 - `slk messages <#name|Cxxxx> [--limit N] [--since 4h|YYYY-MM-DD]` — recent top-level messages. Default limit 50.
 - When a parent message shows `(N replies, ts=…)`, follow up with `slk thread <channel> <ts>` to read the full discussion. Slack archive URLs also work: `slk thread https://workspace.slack.com/archives/Cxxxx/p1714817640123456`.
 - Output is plain text and can be quoted directly back to the user. Add `--json` for programmatic use.
