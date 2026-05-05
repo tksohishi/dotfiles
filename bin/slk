@@ -1,0 +1,304 @@
+#!/usr/bin/env bun
+
+const API = "https://slack.com/api";
+
+const xoxc = Bun.env.SLACK_XOXC_TOKEN ?? "";
+const cookieD = Bun.env.SLACK_COOKIE_D ?? "";
+
+type Json = Record<string, unknown>;
+type Msg = {
+  ts: string;
+  user?: string;
+  bot_id?: string;
+  username?: string;
+  text?: string;
+  thread_ts?: string;
+  reply_count?: number;
+};
+
+const userCache = new Map<string, string>();
+const channelCache = new Map<string, string>();
+let channelListCache: { id: string; name: string }[] | null = null;
+
+function die(msg: string, code = 1): never {
+  console.error(msg);
+  process.exit(code);
+}
+
+function requireAuth(): { xoxc: string; cookieD: string } {
+  if (!xoxc) die(`slk: missing SLACK_XOXC_TOKEN in ${process.cwd()}/.env\n  Run \`slk doctor\` for setup help.`);
+  if (!cookieD) die(`slk: missing SLACK_COOKIE_D in ${process.cwd()}/.env\n  Run \`slk doctor\` for setup help.`);
+  return { xoxc, cookieD };
+}
+
+// xoxc tokens require BOTH the Authorization header and the `d` cookie —
+// the cookie is what re-authenticates the browser session server-side.
+async function slack<T extends Json>(method: string, params: Record<string, string> = {}): Promise<T> {
+  const { xoxc, cookieD } = requireAuth();
+  const body = new URLSearchParams(params);
+  const res = await fetch(`${API}/${method}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+      Authorization: `Bearer ${xoxc}`,
+      Cookie: `d=${encodeURIComponent(cookieD)}`,
+      "User-Agent": "Mozilla/5.0 slk/0.1",
+    },
+    body,
+  });
+  if (res.status === 429) {
+    const retry = res.headers.get("retry-after") ?? "?";
+    die(`slk: rate limited by Slack, retry in ${retry}s`);
+  }
+  if (!res.ok) die(`slk: ${method} HTTP ${res.status}`);
+  const data = (await res.json()) as Json & { ok: boolean; error?: string };
+  if (!data.ok) die(`slk: ${method} failed: ${data.error ?? "unknown error"}`);
+  return data as T;
+}
+
+async function resolveUser(id: string): Promise<string> {
+  const hit = userCache.get(id);
+  if (hit) return hit;
+  try {
+    const r = await slack<{ user: { name: string; profile?: { display_name?: string; real_name?: string } } }>("users.info", { user: id });
+    const name = r.user.profile?.display_name || r.user.profile?.real_name || r.user.name || id;
+    userCache.set(id, name);
+    return name;
+  } catch {
+    userCache.set(id, id);
+    return id;
+  }
+}
+
+async function resolveChannelName(id: string): Promise<string> {
+  const hit = channelCache.get(id);
+  if (hit) return hit;
+  try {
+    const r = await slack<{ channel: { name?: string } }>("conversations.info", { channel: id });
+    const name = r.channel.name ?? id;
+    channelCache.set(id, name);
+    return name;
+  } catch {
+    channelCache.set(id, id);
+    return id;
+  }
+}
+
+async function expandMentions(text: string): Promise<string> {
+  const re = /<([@#])([UWCDG][A-Z0-9]+)(?:\|([^>]+))?>/g;
+  let last = 0;
+  let out = "";
+  for (const m of text.matchAll(re)) {
+    out += text.slice(last, m.index);
+    last = (m.index ?? 0) + m[0]!.length;
+    const sigil = m[1]!;
+    const id = m[2]!;
+    const label = m[3];
+    if (label) {
+      out += sigil === "#" ? `#${label}` : `@${label}`;
+    } else if (sigil === "@") {
+      out += `@${await resolveUser(id)}`;
+    } else {
+      out += `#${await resolveChannelName(id)}`;
+    }
+  }
+  out += text.slice(last);
+  return out;
+}
+
+function fmtTs(ts: string): string {
+  return new Date(parseFloat(ts) * 1000).toISOString().slice(0, 16).replace("T", " ");
+}
+
+async function fmtMsg(m: Msg, opts: { showReplies: boolean }): Promise<string> {
+  const time = fmtTs(m.ts);
+  const who = m.user ? `@${await resolveUser(m.user)}` : m.username ? `@${m.username}` : m.bot_id ? `bot:${m.bot_id}` : "?";
+  const text = await expandMentions((m.text ?? "").replace(/\s+/g, " ").trim());
+  const replyTag = opts.showReplies && (m.reply_count ?? 0) > 0 ? `  (${m.reply_count} replies, ts=${m.ts})` : "";
+  return `${time}  ${who.padEnd(16)} ${text}${replyTag}`;
+}
+
+function parseFlags(args: string[]): { positional: string[]; flags: Record<string, string | boolean> } {
+  const positional: string[] = [];
+  const flags: Record<string, string | boolean> = {};
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i]!;
+    if (a.startsWith("--")) {
+      const name = a.slice(2);
+      const next = args[i + 1];
+      if (next !== undefined && !next.startsWith("--")) {
+        flags[name] = next;
+        i++;
+      } else {
+        flags[name] = true;
+      }
+    } else {
+      positional.push(a);
+    }
+  }
+  return { positional, flags };
+}
+
+function parseSince(s: string): string {
+  const rel = s.match(/^(\d+)([hmd])$/);
+  if (rel) {
+    const n = parseInt(rel[1]!);
+    const mult = rel[2]! === "h" ? 3600 : rel[2]! === "m" ? 60 : 86400;
+    return String(Math.floor(Date.now() / 1000 - n * mult));
+  }
+  const t = Date.parse(s);
+  if (Number.isNaN(t)) die(`slk: bad --since value: ${s} (use 4h, 30m, 2d, or YYYY-MM-DD)`);
+  return String(Math.floor(t / 1000));
+}
+
+async function loadChannelList(): Promise<{ id: string; name: string }[]> {
+  if (channelListCache) return channelListCache;
+  const r = await slack<{ channels: { id: string; name: string }[] }>("conversations.list", {
+    types: "public_channel,private_channel",
+    limit: "1000",
+    exclude_archived: "true",
+  });
+  channelListCache = r.channels;
+  for (const c of r.channels) channelCache.set(c.id, c.name);
+  return r.channels;
+}
+
+async function resolveChannelId(arg: string): Promise<string> {
+  const stripped = arg.startsWith("#") ? arg.slice(1) : arg;
+  if (/^[CGD][A-Z0-9]+$/.test(stripped)) return stripped;
+  const list = await loadChannelList();
+  const hit = list.find((c) => c.name === stripped);
+  if (!hit) die(`slk: channel "${arg}" not found in first 1000 channels — pass the ID instead (use \`slk channels\` to list)`);
+  return hit.id;
+}
+
+async function cmdMessages(args: string[]): Promise<void> {
+  const { positional, flags } = parseFlags(args);
+  if (!positional[0]) die("slk: usage: slk messages <channel> [--limit N] [--since 4h|YYYY-MM-DD] [--json]");
+  const channel = await resolveChannelId(positional[0]);
+  const params: Record<string, string> = { channel, limit: String(flags.limit ?? 50) };
+  if (typeof flags.since === "string") params.oldest = parseSince(flags.since);
+  const r = await slack<{ messages: Msg[] }>("conversations.history", params);
+  const messages = r.messages.slice().reverse();
+  if (flags.json) {
+    const expanded = await Promise.all(
+      messages.map(async (m) => ({
+        ...m,
+        user_name: m.user ? await resolveUser(m.user) : undefined,
+        text: await expandMentions(m.text ?? ""),
+      })),
+    );
+    console.log(JSON.stringify(expanded, null, 2));
+    return;
+  }
+  for (const m of messages) console.log(await fmtMsg(m, { showReplies: true }));
+}
+
+function parseSlackUrl(url: string): { channel: string; ts: string } | null {
+  const m = url.match(/\/archives\/([CGD][A-Z0-9]+)\/p(\d{16,})/);
+  if (!m) return null;
+  const digits = m[2]!;
+  const ts = digits.slice(0, 10) + "." + digits.slice(10);
+  return { channel: m[1]!, ts };
+}
+
+async function cmdThread(args: string[]): Promise<void> {
+  const { positional, flags } = parseFlags(args);
+  const [first, second] = positional;
+  let channel: string;
+  let ts: string;
+  if (first !== undefined && second === undefined && first.startsWith("https://")) {
+    const parsed = parseSlackUrl(first);
+    if (!parsed) die(`slk: could not parse Slack URL: ${first}`);
+    channel = parsed.channel;
+    ts = parsed.ts;
+  } else if (first !== undefined && second !== undefined) {
+    channel = await resolveChannelId(first);
+    ts = second;
+  } else {
+    die("slk: usage: slk thread <channel> <ts> | slk thread <slack-archive-url> [--json]");
+  }
+  const r = await slack<{ messages: Msg[] }>("conversations.replies", { channel, ts, limit: "200" });
+  if (flags.json) {
+    const expanded = await Promise.all(
+      r.messages.map(async (m) => ({
+        ...m,
+        user_name: m.user ? await resolveUser(m.user) : undefined,
+        text: await expandMentions(m.text ?? ""),
+      })),
+    );
+    console.log(JSON.stringify(expanded, null, 2));
+    return;
+  }
+  for (const m of r.messages) console.log(await fmtMsg(m, { showReplies: false }));
+}
+
+async function cmdChannels(args: string[]): Promise<void> {
+  const { flags } = parseFlags(args);
+  const list = await loadChannelList();
+  const limited = typeof flags.limit === "string" ? list.slice(0, parseInt(flags.limit)) : list;
+  if (flags.json) {
+    console.log(JSON.stringify(limited, null, 2));
+    return;
+  }
+  for (const c of limited) console.log(`${c.id}  #${c.name}`);
+}
+
+async function cmdDoctor(): Promise<void> {
+  if (!xoxc || !cookieD) {
+    console.error("slk doctor: missing credentials in CWD .env\n");
+    console.error("Required (per workspace, extracted from a logged-in browser):");
+    console.error("  SLACK_XOXC_TOKEN  — DevTools → Network on app.slack.com → click any channel →");
+    console.error("                       any slack.com/api/* request → form data `token=xoxc-…`");
+    console.error("  SLACK_COOKIE_D    — DevTools → Application → Cookies → https://app.slack.com →");
+    console.error("                       row Name=`d`, copy Value");
+    console.error("\nAdd both to the repo's .env (already covered by .gitignore_global).");
+    process.exit(1);
+  }
+  const r = await slack<{ team: string; user: string; team_id: string; user_id: string }>("auth.test");
+  console.log(`team=${r.team} (${r.team_id})  user=${r.user} (${r.user_id})`);
+}
+
+function usage(): void {
+  console.log(`slk — read-only Slack CLI for per-repo context injection
+
+Usage:
+  slk messages <channel> [--limit N] [--since 4h|YYYY-MM-DD] [--json]
+  slk thread   <channel> <ts> [--json]
+  slk thread   <slack-archive-url> [--json]
+  slk channels [--limit N] [--json]
+  slk doctor
+
+Auth (per repo, in .env):
+  SLACK_XOXC_TOKEN, SLACK_COOKIE_D — see \`slk doctor\` for extraction steps.
+
+Notes:
+  - Channel arg accepts #name or Cxxxx/Gxxxx ID.
+  - First 1000 channels are matched by name; pass the ID for anything beyond that.
+  - xoxc + d cookie auth is unofficial; personal read-only use only.`);
+}
+
+const [, , cmd, ...rest] = Bun.argv;
+switch (cmd) {
+  case "messages":
+    await cmdMessages(rest);
+    break;
+  case "thread":
+    await cmdThread(rest);
+    break;
+  case "channels":
+    await cmdChannels(rest);
+    break;
+  case "doctor":
+    await cmdDoctor();
+    break;
+  case undefined:
+  case "-h":
+  case "--help":
+    usage();
+    break;
+  default:
+    console.error(`slk: unknown command: ${cmd}`);
+    usage();
+    process.exit(2);
+}
