@@ -64,6 +64,10 @@ let &statusline .= '%4P'
 syntax enable
 filetype plugin indent on
 
+" Treat .env.local (and other .env.* variants) like .env — vim's default
+" rule only matches .env / .envrc, not .env.local.
+autocmd BufNewFile,BufRead .env.* setfiletype sh
+
 " Move cursor by display line
 noremap j gj
 noremap k gk
