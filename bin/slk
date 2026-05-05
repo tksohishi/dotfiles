@@ -25,34 +25,42 @@ function die(msg: string, code = 1): never {
   process.exit(code);
 }
 
+class SlkError extends Error {
+  constructor(message: string, public slackError?: string, public data?: unknown) {
+    super(message);
+  }
+}
+
 function requireAuth(): { xoxc: string; cookieD: string } {
   if (!xoxc) die(`slk: missing SLACK_XOXC_TOKEN in ${process.cwd()}/.env\n  Run \`slk doctor\` for setup help.`);
   if (!cookieD) die(`slk: missing SLACK_COOKIE_D in ${process.cwd()}/.env\n  Run \`slk doctor\` for setup help.`);
   return { xoxc, cookieD };
 }
 
-// xoxc tokens require BOTH the Authorization header and the `d` cookie —
-// the cookie is what re-authenticates the browser session server-side.
+// xoxc tokens go in the form body as `token=`; the `d` cookie re-authenticates
+// the browser session server-side. Both are required.
 async function slack<T extends Json>(method: string, params: Record<string, string> = {}): Promise<T> {
   const { xoxc, cookieD } = requireAuth();
-  const body = new URLSearchParams(params);
+  const body = new URLSearchParams({ ...params, token: xoxc });
   const res = await fetch(`${API}/${method}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-      Authorization: `Bearer ${xoxc}`,
-      Cookie: `d=${encodeURIComponent(cookieD)}`,
-      "User-Agent": "Mozilla/5.0 slk/0.1",
+      Cookie: `d=${cookieD}`,
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     },
     body,
   });
   if (res.status === 429) {
     const retry = res.headers.get("retry-after") ?? "?";
-    die(`slk: rate limited by Slack, retry in ${retry}s`);
+    throw new SlkError(`rate limited by Slack, retry in ${retry}s`);
   }
-  if (!res.ok) die(`slk: ${method} HTTP ${res.status}`);
+  if (!res.ok) throw new SlkError(`${method} HTTP ${res.status}`);
   const data = (await res.json()) as Json & { ok: boolean; error?: string };
-  if (!data.ok) die(`slk: ${method} failed: ${data.error ?? "unknown error"}`);
+  if (!data.ok) {
+    if (Bun.env.SLACK_DEBUG) console.error("slk debug:", JSON.stringify(data, null, 2));
+    throw new SlkError(`${method} failed: ${data.error ?? "unknown error"}`, data.error, data);
+  }
   return data as T;
 }
 
@@ -246,17 +254,61 @@ async function cmdChannels(args: string[]): Promise<void> {
 
 async function cmdDoctor(): Promise<void> {
   if (!xoxc || !cookieD) {
-    console.error("slk doctor: missing credentials in CWD .env\n");
-    console.error("Required (per workspace, extracted from a logged-in browser):");
-    console.error("  SLACK_XOXC_TOKEN  — DevTools → Network on app.slack.com → click any channel →");
-    console.error("                       any slack.com/api/* request → form data `token=xoxc-…`");
-    console.error("  SLACK_COOKIE_D    — DevTools → Application → Cookies → https://app.slack.com →");
-    console.error("                       row Name=`d`, copy Value");
+    console.error(`slk doctor: missing credentials in ${process.cwd()}/.env\n`);
+    console.error(`  SLACK_XOXC_TOKEN: ${xoxc ? "set" : "MISSING"}`);
+    console.error(`  SLACK_COOKIE_D:   ${cookieD ? "set" : "MISSING"}\n`);
+    console.error("Extract from a logged-in browser session (per workspace):");
+    console.error("  SLACK_XOXC_TOKEN — DevTools → Network on app.slack.com → click any channel →");
+    console.error("                     any slack.com/api/* request → form data `token=xoxc-…`");
+    console.error("  SLACK_COOKIE_D   — DevTools → Application → Cookies → https://app.slack.com →");
+    console.error("                     row Name=`d`, copy Value");
     console.error("\nAdd both to the repo's .env (already covered by .gitignore_global).");
     process.exit(1);
   }
-  const r = await slack<{ team: string; user: string; team_id: string; user_id: string }>("auth.test");
-  console.log(`team=${r.team} (${r.team_id})  user=${r.user} (${r.user_id})`);
+  try {
+    const r = await slack<{ team: string; user: string; team_id: string; user_id: string }>("auth.test");
+    console.log(`OK  team=${r.team} (${r.team_id})  user=${r.user} (${r.user_id})`);
+    console.log(`    creds from ${process.cwd()}/.env`);
+  } catch (e) {
+    if (!(e instanceof SlkError) || !e.slackError) throw e;
+    console.error(`slk doctor: Slack rejected credentials in ${process.cwd()}/.env`);
+    console.error(`  error: ${e.slackError}\n`);
+    const guidance: Record<string, string[]> = {
+      invalid_auth: [
+        "Most common causes (in order):",
+        "  1. Cookie rotated — re-extract SLACK_COOKIE_D from DevTools → Application → Cookies → app.slack.com → row `d`. Cookies typically rotate every few weeks.",
+        "  2. Token + cookie are from different workspaces — they must come from the same logged-in browser session at the same time.",
+        "  3. Truncated copy-paste — the `d` cookie is long; verify no characters were cut off.",
+      ],
+      not_authed: [
+        "The token was accepted but the session cookie was not. Check:",
+        "  1. SLACK_COOKIE_D contains the *raw* value from DevTools' Cookies panel (URL-encoded form, not decoded).",
+        "  2. You're not on Enterprise Grid — Grid sessions also need a `d-s` cookie (not yet supported; tell me if this is your case).",
+      ],
+      token_revoked: [
+        "Token was revoked, likely by signing out of Slack in the browser. Re-extract both values from a fresh login.",
+      ],
+      token_expired: [
+        "Token expired. Re-extract SLACK_XOXC_TOKEN from a fresh request in DevTools.",
+      ],
+      account_inactive: [
+        "Your Slack account is inactive (deactivated or removed) in this workspace. Contact a workspace admin.",
+      ],
+      missing_scope: [
+        `Token lacks required scopes: ${(e.data as { needed?: string }).needed ?? "(unknown)"}`,
+        "  xoxc tokens normally have full user scope — this is unusual. Try re-extracting from a different api/* request.",
+      ],
+    };
+    const lines = guidance[e.slackError] ?? [
+      "No specific guidance for this error code. Common debugging steps:",
+      "  1. Re-extract both SLACK_XOXC_TOKEN and SLACK_COOKIE_D for the same workspace.",
+      "  2. Verify you're not on Enterprise Grid (which needs additional cookies).",
+    ];
+    for (const line of lines) console.error(line);
+    console.error("\nFor Slack's full response, retry with:");
+    console.error("  SLACK_DEBUG=1 slk doctor");
+    process.exit(1);
+  }
 }
 
 function usage(): void {
@@ -279,26 +331,31 @@ Notes:
 }
 
 const [, , cmd, ...rest] = Bun.argv;
-switch (cmd) {
-  case "messages":
-    await cmdMessages(rest);
-    break;
-  case "thread":
-    await cmdThread(rest);
-    break;
-  case "channels":
-    await cmdChannels(rest);
-    break;
-  case "doctor":
-    await cmdDoctor();
-    break;
-  case undefined:
-  case "-h":
-  case "--help":
-    usage();
-    break;
-  default:
-    console.error(`slk: unknown command: ${cmd}`);
-    usage();
-    process.exit(2);
+try {
+  switch (cmd) {
+    case "messages":
+      await cmdMessages(rest);
+      break;
+    case "thread":
+      await cmdThread(rest);
+      break;
+    case "channels":
+      await cmdChannels(rest);
+      break;
+    case "doctor":
+      await cmdDoctor();
+      break;
+    case undefined:
+    case "-h":
+    case "--help":
+      usage();
+      break;
+    default:
+      console.error(`slk: unknown command: ${cmd}`);
+      usage();
+      process.exit(2);
+  }
+} catch (e) {
+  if (e instanceof SlkError) die(`slk: ${e.message} — run \`slk doctor\` for help`);
+  throw e;
 }
