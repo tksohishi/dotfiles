@@ -1,6 +1,6 @@
 ---
 name: agent-browser-init
-description: Initialize agent-browser in the current project with an isolated session and a gitignored profile directory
+description: Initialize agent-browser in the current project with an isolated session and profile directory
 ---
 
 ## What this does
@@ -46,7 +46,7 @@ Pinning `profile` to a project-local `.agent-browser/` directory gives each proj
 
     The leading `./` is **required**. agent-browser's `--profile <name|path>` heuristic treats bare strings without a path separator as Chrome profile names and fails with `Chrome profile ".agent-browser" not found`. Any string containing `/` is treated as a directory path. `./.agent-browser` is the minimal portable form; an absolute path also works but makes the config non-portable.
 
-5. **Add `.agent-browser/` to `.gitignore`** (create the file if missing). Skip if already present. Do not add `agent-browser.json` itself — that's checked in so collaborators get the same config.
+5. **Gitignore.** Both `agent-browser.json` and `.agent-browser/` are covered by the user's global gitignore (`~/.gitignore_global`), so no per-repo `.gitignore` change is needed. If a specific repo *should* track `agent-browser.json` (e.g. shared with collaborators who also use agent-browser), add `!agent-browser.json` to that repo's `.gitignore`.
 
 6. **Report to the user:**
     - Session name chosen
