@@ -60,6 +60,11 @@ defaults write com.apple.WindowManager HideDesktop -bool true
 # Tap to click
 defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
 
+# ── Amphetamine ──────────────────────────────────────────────
+# Let the display follow macOS's normal displaysleep timer (e.g. 5 min)
+# even during an Amphetamine session — system stays awake, display doesn't.
+defaults write com.if.Amphetamine "Allow Display Sleep" -bool true
+
 # ── Restart affected apps ────────────────────────────────────
 echo "Restarting Dock and Finder to apply changes..."
 killall Dock
