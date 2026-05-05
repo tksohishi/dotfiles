@@ -321,6 +321,7 @@
       "Bash(codesign *)",
       "Bash(mise *)",
       "Bash(mkdir *)",
+      "Bash(mlr *)",
       "Bash(uv sync*)",
       "Bash(uv lock*)",
       "Bash(uv remove *)",
