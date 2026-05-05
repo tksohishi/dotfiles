@@ -205,6 +205,8 @@
       "Bash(ls *)",
       "Bash(pwd)",
       "Bash(qpdf *)",
+      "Bash(wait)",
+      "Bash(wait *)",
       "Bash(which *)",
       "Bash(wc *)",
       "Bash(tree *)",
