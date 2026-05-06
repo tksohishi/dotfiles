@@ -50,8 +50,8 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Preserve technical terms, code, and quoted strings exactly
 
 ## Slack Formatting
-- Headings: `##` only. Never `#`, and don't use `*bold*` as a header.
-- Use `*bold*` sparingly, only for genuine emphasis. Don't bold for structure or decoration.
+- Headings: `*Title*` on its own line. Slack's mrkdwn doesn't support `#` or `##` — they render literally.
+- Outside headings, use `*bold*` sparingly for genuine emphasis only. Don't bold for decoration.
 - Fenced code blocks (```) for multi-line code or shell ops; inline backticks for filenames, env vars, single commands, and short snippets.
 - Bullets: `-` or `*`. Arrows: literal `→`.
 
