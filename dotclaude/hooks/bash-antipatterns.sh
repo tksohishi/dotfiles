@@ -92,7 +92,7 @@ BUNX_RE='(^|;|&&|\|\||\|)[[:space:]]*bunx[[:space:]]+([^[:space:]]+)'
 REASON=""
 
 if [[ "$CMD_BARE" =~ $CD_CHAIN_RE ]]; then
-  REASON="Don't chain 'cd <dir> && <cmd>'. The working directory is already correct; run the command with an absolute path, or cd in a separate Bash call."
+  REASON="Don't chain 'cd <dir> && <cmd>' — the chained command bypasses the allowlist and triggers a permission prompt. If you need to be in another directory, run 'cd <dir>' as a separate Bash call first (working directory persists across calls), then the command. If you're already in the right place, drop the cd and run the command directly (or with an absolute path)."
 elif [[ "$CMD_BARE" =~ $HEAD_RE ]]; then
   REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
 elif [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then
