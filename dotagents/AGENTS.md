@@ -49,6 +49,12 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Fragments OK when meaning is clear; use full sentences for ambiguous cases, security warnings, and destructive action confirmations
 - Preserve technical terms, code, and quoted strings exactly
 
+## Slack Formatting
+- Headings: `##` only. Never `#`, and don't use `*bold*` as a header.
+- Use `*bold*` sparingly, only for genuine emphasis. Don't bold for structure or decoration.
+- Fenced code blocks (```) for multi-line code or shell ops; inline backticks for filenames, env vars, single commands, and short snippets.
+- Bullets: `-` or `*`. Arrows: literal `→`.
+
 ## Code Style
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
 - No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
