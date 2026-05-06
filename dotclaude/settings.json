@@ -541,6 +541,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/no-emdash.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
