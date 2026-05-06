@@ -1,11 +1,18 @@
 ---
 name: cross-review
-description: Shell out to OpenAI Codex CLI for an adversarial second-opinion review of work the current Claude session has produced. The prompt is composed fresh per invocation — project context, the user's actual goal, what was produced, and risk categories specific to this project's domain. Use when the user says "/cross-review", "/codex-review", "cross review", "コーデックスでチェック", "別の LLM で review", or before committing/publishing work where errors are costly (financial claims, security-sensitive code, API contracts, public-facing copy, anything irreversible). The reviewer's job is to catch errors from first principles, not rubber-stamp "done".
+description: Shell out to the OTHER LLM agent for an adversarial second-opinion review of work the current session has produced. From Claude → invoke OpenAI Codex (`codex exec`); from Codex → invoke Claude (`claude -p`). The prompt is composed fresh per invocation — project context, the user's actual goal, what was produced, and risk categories specific to this project's domain. Use when the user says "/cross-review", "/codex-review", "/claude-review", "cross review", "コーデックスでチェック", "クロードでチェック", "別の LLM で review", or before committing/publishing work where errors are costly (financial claims, security-sensitive code, API contracts, public-facing copy, anything irreversible). The reviewer's job is to catch errors from first principles, not rubber-stamp "done".
 ---
 
 # Cross Review
 
-Shell out to **OpenAI Codex** (`codex exec`) so an independent model audits the current session's recent work. The Codex side reads the repo fresh — no memory of what Claude verified, no anchoring on Claude's framing. That is the point: adversarial second-pair-of-eyes, not a peer reviewer who already trusts the author.
+Shell out to **the other LLM agent** so an independent model audits the current session's recent work. The reviewer reads the repo fresh — no memory of what the current session verified, no anchoring on its framing. That is the point: adversarial second-pair-of-eyes, not a peer reviewer who already trusts the author.
+
+The skill is symmetric:
+
+- **You are Claude Code** → invoke **OpenAI Codex** via `codex exec`.
+- **You are OpenAI Codex CLI** → invoke **Claude** via `claude -p`.
+
+You (the agent reading this skill) know which side you are. Pick the matching branch in [Run](#run) below. Everything outside Run — when to use, prompt construction, output format, reporting — is identical for both branches.
 
 ## When to use
 
@@ -27,10 +34,10 @@ The whole point of this generalized skill: **the prompt is composed fresh per in
 
 Read whichever of these exist at the project root, in order, before drafting the prompt:
 
-- `AGENTS.md` / `CLAUDE.md` (often symlinked together)
+- `AGENTS.md` / `CLAUDE.md` (often symlinked together so both tools share context)
 - `README.md` / `README`
 - `DESIGN.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md` if present
-- The user's `~/.claude/personal.md` is already loaded into context — no need to re-read
+- Your global personal instructions are already loaded into your context — no need to re-read
 
 The reviewer will not see this conversation. It must rediscover the project from files. List the **exact paths** the reviewer should read in the prompt (Step 4) so it does not have to guess.
 
@@ -76,7 +83,7 @@ If the project has known historical failure modes (past incidents, recurring bug
 Use this skeleton. Substitute the bracketed sections with what you found in Steps 1-3. Keep the whole prompt under ~2KB; long prompts dilute the reviewer's focus.
 
 ```
-You are auditing work produced by Claude (current session) for the {PROJECT_NAME} project.
+You are auditing work produced by another AI assistant ({CURRENT_ASSISTANT}) for the {PROJECT_NAME} project.
 
 Before reviewing, READ the following for context:
 {LIST OF ABSOLUTE OR REPO-RELATIVE PATHS — AGENTS.md, README, DESIGN.md, the
@@ -87,7 +94,7 @@ files under review, etc.}
 inferred underlying intent. The reviewer needs both — what they literally
 asked AND what success looks like.}
 
-## What Claude produced
+## What {CURRENT_ASSISTANT} produced
 {One paragraph. List the files / commits / artifacts under review. For drafts,
 give the path and tell the reviewer to Read it. For diffs, mention the
 range (`HEAD~3..HEAD` or `git diff main`).}
@@ -132,20 +139,37 @@ Be blunt. A false positive costs a minute; a false negative costs
 
 ## Run
 
-Codex is normally on PATH; if not, prefix with `mise exec --`. The skill assumes a non-interactive call from an agent context.
+Pick the branch that matches your identity. Both binaries are normally on PATH; prefix with `mise exec --` if not. Both calls assume a non-interactive agent context.
+
+### Branch A — you are Claude Code, invoke Codex
 
 ```bash
 mise exec -- codex exec "$(cat <<'PROMPT'
-<your composed prompt from Step 4>
+<your composed prompt from Step 4 — substitute {CURRENT_ASSISTANT} = "Claude">
 PROMPT
 )" < /dev/null
 ```
 
-**Critical: always `< /dev/null`.** Codex `exec` reads stdin and appends it as a `<stdin>` block when stdin is piped. From a non-TTY context (every agent invocation), EOF is never sent and codex hangs forever waiting for input. The `< /dev/null` redirect sends immediate EOF so codex uses only the prompt argument. Symptom when forgotten: `Reading additional input from stdin...` and nothing else.
+**Don't combine `codex exec review --uncommitted` with a custom prompt.** As of codex 0.x, those flags are mutually exclusive (`error: the argument '--uncommitted' cannot be used with '[PROMPT]'`). Use plain `codex exec` with a custom prompt — the project-specific adversarial framing is the value-add. The built-in `review` mode is fine for generic code review but skips everything Steps 1-3 composed.
+
+### Branch B — you are OpenAI Codex CLI, invoke Claude
+
+```bash
+mise exec -- claude -p "$(cat <<'PROMPT'
+<your composed prompt from Step 4 — substitute {CURRENT_ASSISTANT} = "Codex">
+PROMPT
+)" < /dev/null
+```
+
+`claude -p <prompt>` runs once and prints to stdout, then exits — analogous to `codex exec`. Pass the prompt as an argument, not via stdin (stdin would be treated as input data, not the task).
+
+If `claude` is not on PATH after `mise exec`, fall back to `mise which claude` to locate the binary.
+
+### Branch-agnostic guardrails (apply to both)
+
+**Critical: always `< /dev/null`.** Both `codex exec` and `claude -p` read stdin when piped and append it to the prompt; from a non-TTY context (every agent invocation), EOF is never sent and the call hangs forever. The `< /dev/null` redirect sends immediate EOF so only the argument prompt is used. Symptom when forgotten: `Reading additional input from stdin...` (codex) or silent hang (claude), indefinitely.
 
 **Run in the background.** Reviews take 1-5 minutes. Use `run_in_background: true` on the Bash tool call and continue with other work; you'll be notified on completion. Don't poll, don't sleep.
-
-**Don't combine `codex exec review --uncommitted` with a custom prompt.** As of codex 0.x, those flags are mutually exclusive. For this skill always use plain `codex exec` with a custom prompt — the project-specific adversarial framing is the whole value-add. The built-in `review` mode is fine for generic code review but skips everything Steps 1-3 just composed.
 
 ## Reporting back to the user
 
@@ -163,4 +187,4 @@ When the reviewer returns:
 
 - The reviewer sees the repo fresh from disk. Uncommitted work that isn't even saved to disk won't be visible — write the file first.
 - AGENTS.md being symlinked to CLAUDE.md (common pattern) means both tools share project context with no extra wiring.
-- For projects with a CCM-style domain-heavy review (financial fact-checking, FTC compliance, language quality), prefer keeping a project-local `cross-review` skill at `.claude/skills/cross-review/SKILL.md` with the project-specific prompt baked in. This global skill is the fallback for projects without one.
+- For projects with a domain-heavy review (financial fact-checking, FTC compliance, language quality, etc.), prefer a project-local `cross-review` skill with the project-specific prompt baked in — `.claude/skills/cross-review/SKILL.md` for the Claude side, the equivalent location for the other agent. This global skill is the fallback for projects that don't have one.
