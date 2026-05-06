@@ -15,49 +15,20 @@ Personal dotfiles repository for macOS. Manages shell configs, editor settings, 
 - **uninstall-app**: Uninstall an app via Homebrew and remove it from the Brewfile. Full instructions: `.claude/skills/uninstall-app/SKILL.md`
 - **update-apps**: Update all Homebrew packages, casks, and Mac App Store apps. Full instructions: `.claude/skills/update-apps/SKILL.md`
 
-## Setup and Deployment
-
-The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to install all packages from the `Brewfile`, then symlinks dotfiles to `$HOME`. The dotfile list is defined in the script itself. It backs up existing files (appends `.bak`) before creating symlinks. Run `./install.sh` and confirm with "y" to deploy.
-
 ## Architecture
 
-**Single shell config:** `.zshrc` is the only shell config, loaded directly by zsh (no oh-my-zsh). It handles environment, history, completion, keybindings, PATH, tool initialization (mise, zoxide, starship), and sources `.alias`.
+- Machine-specific overrides live in `.local`/`.override` suffix files (`.zshrc.local`, `.alias.local`, `.gitconfig.local`); not tracked in git.
+- `_archive/` preserves retired configs intentionally — don't "clean up".
 
-**Local override pattern:** Machine-specific overrides via `.local` suffix files (`.zshrc.local`, `.alias.local`, `.gitconfig.local`). These are not tracked in git.
+## Non-obvious file behavior
 
-**Aliases:** `.alias` contains shared aliases sourced by `.zshrc`.
+Most files are self-explanatory. These have *why* worth knowing:
 
-**Archived configs:** Legacy configs are preserved in `_archive/` but no longer active.
-
-## Active Config Files
-
-- `Brewfile` — all Homebrew packages, casks, Mac App Store apps, and manual install reminders
-- `.zshrc` — shell environment, history, completion, keybindings, PATH, tool init
-- `.alias` — shared shell aliases
-- `.vimrc` — vim settings, key mappings, status line
-- `.gitconfig` — user, color, core settings, local include
-- `.gitignore_global` — OS/editor/secrets ignore patterns
-- `.tmux.conf` — terminal type, mouse, status bar, vi copy mode
-- `.config/starship.toml` — prompt with git, python, node, cmd_duration
-- `.config/ghostty/config` — font, opacity, window size, tab behavior
-- `.config/mise/config.toml` — node and python runtime versions
-- `macos.sh` — macOS defaults (Dock, Finder, keyboard, trackpad, etc.)
-- `bin/` — personal scripts and CLI wrappers; each file is symlinked to `~/.local/bin/<name>` by `install.sh`. Wrappers placed here shadow Homebrew-installed binaries via PATH order. Example: `bin/agent-browser` rejects `--profile <real-Chrome>` invocations to keep agents away from logged-in Chrome state.
-- `bin/slk` — tiny Bun/TS CLI for reading Slack messages from a per-repo workspace. Reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env.local` (creds belong there since `.env` is reserved for non-secret app config; Bun auto-loads both). Subcommands: `messages`, `thread`, `channels`, `doctor`. Used by the `slack-context` skill for on-demand context injection.
-- `hooks/pre-commit` — blocks personal info (emails, API keys, tokens) from public files
-- `dotagents/AGENTS.md` — global agent instructions, symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`
-- `dotclaude/commands/` — global agent command source (symlinked as `~/.claude/commands/`, compiled to Codex format)
-- `dotclaude/skills/` — global Claude Code skills (symlinked as `~/.claude/skills/`). Each skill is a directory containing a `SKILL.md` with `name` + `description` frontmatter. Skills are the preferred format for new Claude-only capabilities; only the description loads into context until invoked.
-- `dotgemini/commands/` — Gemini CLI commands (symlinked as `~/.gemini/commands/`); maintained manually, no longer auto-synced from `dotclaude/commands/`
-- `dotgemini/policies/` — global Gemini CLI Policy Engine rules (TOML, symlinked as `~/.gemini/policies/`); used for deny/allow/ask_user decisions, replaces deprecated `tools.exclude`
-- `dotcodex/skills/.dotfiles/` — global Codex command-equivalent skills (symlinked as `~/.codex/skills/.dotfiles/`)
-- `.claude/skills/<name>/SKILL.md` — project-local Claude Code skills, e.g. `/discover-apps`
-- `dotclaude/keybindings.json` — Claude Code keybindings (e.g. Ctrl+Shift+B for background tasks)
-- `dotclaude/settings.json` — Claude Code global settings, symlinked to `~/.claude/settings.json`
-- `dotcodex/config.toml` — OpenAI Codex global settings, merged into `~/.codex/config.toml`
-- `scripts/agent-commands.ts` — create/sync/delete global commands across Claude and Codex
-- `scripts/sync-gemini-settings.sh` — merge `dotgemini/settings.json` tools into `~/.gemini/settings.json`
-- `scripts/setup-gog.sh` — one-time Google Cloud project + gog CLI auth setup
+- `bin/agent-browser` — wrapper that rejects `--profile <real-Chrome>` invocations to keep agents away from logged-in Chrome state. Bypass by calling `/opt/homebrew/bin/agent-browser` directly.
+- `bin/slk` — reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env.local`. `.env` is reserved for non-secret app config; Bun auto-loads both, but creds go in `.env.local` so the secret/non-secret split stays clean.
+- `dotcodex/config.toml` — **merged**, not symlinked, into `~/.codex/config.toml` (Codex overwrites symlinks).
+- `dotclaude/skills/<name>/SKILL.md` — only the `description` frontmatter loads into context until invoked. Skills are preferred over commands for Claude-only capabilities.
+- `dotcodex/skills/.dotfiles/` — Codex skill location uses a `.dotfiles/` subdirectory by convention.
 
 ## Key Conventions
 
@@ -70,22 +41,12 @@ The `install.sh` script installs Homebrew (if missing), runs `brew bundle` to in
 
 ## When Editing
 
-- Changes to `.alias` affect the zsh shell
-- Changes to `.zshrc` affect zsh directly
 - The `files` array in `install.sh` must be updated when adding new dotfiles
 - `dotclaude/commands/*.md` is the source of truth for global agent commands (sync via `bun scripts/agent-commands.ts sync`). Use this when a capability should be available in Claude and Codex. Gemini commands are not auto-synced; edit `dotgemini/commands/` directly when needed.
-- `dotclaude/skills/<name>/SKILL.md` is the source for Claude-only skills. Skills are preferred over commands for Claude because only the description loads into context until invoked. Use this when the capability is Claude-specific or when you want to bundle helper scripts/assets alongside. No sync step required; the directory is symlinked directly.
-- To add or remove packages/apps, use the `/install-app` and `/uninstall-app` skills
-- `/install-app` also handles MCP servers: it adds them to both Claude Code and Codex, and tracks configs in dotfiles
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
 - This is a public repo. Never commit personal information (API keys, tokens, personal URLs, email addresses, domain allowlists, etc.) to `dotagents/`, `dotclaude/`, or `dotcodex/`. Use `.local`/`.override` files for machine-specific or private settings.
 - Claude Code allowlist patterns: `Bash(cmd *)` does NOT match bare `cmd`. Use `Bash(cmd*)` (no space) for multi-word commands where collision is impossible (e.g. `gh release list*`). Keep the space form (`Bash(cmd *)`) for broad prefixes where collisions matter (e.g. `ls *` vs `lsof`).
 - Use `summarize <url>` to research YouTube links; direct access to YouTube is blocked for agents
-
-## Terminology
-
-- "AGENTS" or "AGENTS.md" = this file (`AGENTS.md` at the repo root, symlinked as `CLAUDE.md`)
-- "the global AGENTS" = `dotagents/AGENTS.md` (symlinked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.gemini/GEMINI.md`)
 
 ## Workflow
 

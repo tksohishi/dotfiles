@@ -21,6 +21,11 @@ Memory is the reflex because it is cheap to write, but it is a soft reminder the
 
 When proposing a fix, name the deterministic option first, note the tradeoffs (false-positive risk, maintenance cost), and mention memory only as fallback.
 
+## AGENTS.md hygiene
+- AGENTS.md is a constraint system, not documentation. Strip anything the agent can derive by reading code or running `--help`.
+- Keep: domain knowledge the agent can't infer (lookup tables, fare rules, exclusion rationale with *why*), silent-bug gotchas, "never do" boundaries.
+- Cut: file layouts, full CLI flag listings, file-by-file descriptions, deterministic setup steps (move to scripts or template headers). Target ~150 lines.
+
 ## Writing Style
 - Avoid using emdashes in writing
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
