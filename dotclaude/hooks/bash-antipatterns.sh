@@ -4,21 +4,34 @@
 # Blocks:
 #   1. `cd <dir> && <cmd>`        — working dir is already correct; use absolute
 #                                   paths or a separate Bash call.
-#   2. `head <file>` (not piped)  — use the Read tool with offset/limit.
-#   3. `sed -n <range> <file>`    — same; the most common reflex for reading
+#   2. `for/while ... do`         — even when the body command is allowlisted,
+#                                   any `$var` expansion in the body trips
+#                                   Claude Code's expansion gate and prompts
+#                                   anyway. Practical iteration always uses
+#                                   the iter var, so practical loops always
+#                                   prompt. Block them upfront and force the
+#                                   enumerate-then-per-item pattern, which
+#                                   yields literal commands that match
+#                                   allowlist rules silently.
+#                                   `until` is exempt: it is almost always a
+#                                   polling primitive (`until <check>;
+#                                   do sleep N; done`), not iteration over a
+#                                   collection.
+#   3. `head <file>` (not piped)  — use the Read tool with offset/limit.
+#   4. `sed -n <range> <file>`    — same; the most common reflex for reading
 #                                   a slice of a file. Piping into sed is
 #                                   left alone. Bash(sed *) is also in
 #                                   permissions.deny as a fallback, but the
 #                                   hook fires first and gives the agent an
 #                                   instructive "use Read tool" message
 #                                   instead of a generic permission denial.
-#   4. `$?` in commands           — exit status is already in the tool result;
+#   5. `$?` in commands           — exit status is already in the tool result;
 #                                   make the follow-up check a separate call.
-#   5. `gh api`                   — use `gh <resource> <subcommand>` with
+#   6. `gh api`                   — use `gh <resource> <subcommand>` with
 #                                   `--json <fields>` instead. Real custom-
 #                                   endpoint cases get surfaced to the user
 #                                   for approval rather than passing through.
-#   6. `<reader> ... .env*`       — text-reading tools touching .env or
+#   7. `<reader> ... .env*`       — text-reading tools touching .env or
 #                                   .dev.vars files. Use .env.example for
 #                                   schema; redaction scripts for values.
 #                                   Does not block .env.example (template).
@@ -28,12 +41,12 @@
 #                                   .env.stage, .env.dev, .dev.vars.
 #                                   Doesn't cover bare `env`/`printenv`/`set`
 #                                   (different vector; deferred).
-#   7. `cp -r/-R/-a` without -n   — recursive/archive cp silently overwrites
+#   8. `cp -r/-R/-a` without -n   — recursive/archive cp silently overwrites
 #                                   existing files. Redirect to `cp -an`
 #                                   (archive + no-clobber) or `cp -n` for
 #                                   non-recursive. -n in any flag combo
 #                                   (e.g. -na, -rn) is accepted.
-#   8. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
+#   9. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
 #      is in node_modules/.bin     node_modules/.bin, so `bun <bin>` runs
 #                                   the same thing. The typical project-trust
 #                                   allow rule is `Bash(bun *)`, while
@@ -79,6 +92,8 @@ CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 CMD_BARE=$(echo "$CMD" | sed -e "s/'[^']*'//g" -e 's/"[^"]*"//g')
 
 CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
+LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
+LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
 HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
 SED_READ_RE='(^|;|&&|\|\|)[[:space:]]*sed[[:space:]]+-n[[:space:]]'
 EXIT_STATUS_RE='\$\?'
@@ -93,6 +108,8 @@ REASON=""
 
 if [[ "$CMD_BARE" =~ $CD_CHAIN_RE ]]; then
   REASON="Don't chain 'cd <dir> && <cmd>' — the chained command bypasses the allowlist and triggers a permission prompt. If you need to be in another directory, run 'cd <dir>' as a separate Bash call first (working directory persists across calls), then the command. If you're already in the right place, drop the cd and run the command directly (or with an absolute path)."
+elif [[ "$CMD_BARE" =~ $LOOP_RE ]] && [[ "$CMD_BARE" =~ $LOOP_DONE_RE ]]; then
+  REASON="Don't use for/while loops in Bash. Even if the body command is allowlisted, any \$var expansion in the body trips Claude Code's expansion gate and prompts anyway — and practical iteration always uses the iter var. Enumerate items first with Glob/Grep/Read, then make one Bash call per item with literal arguments (no \$var) so the calls match allowlist rules silently. Polling with 'until <check>; do sleep N; done' is allowed."
 elif [[ "$CMD_BARE" =~ $HEAD_RE ]]; then
   REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
 elif [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then
