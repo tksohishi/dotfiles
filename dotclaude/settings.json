@@ -28,7 +28,6 @@
       "Bash(git merge *)",
       "Bash(git mv *)",
       "Bash(git pull*)",
-      "Bash(git push*)",
       "Bash(git rebase *)",
       "Bash(git reflog*)",
       "Bash(git remote *)",
