@@ -49,8 +49,12 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Fragments OK when meaning is clear; use full sentences for ambiguous cases, security warnings, and destructive action confirmations
 - Preserve technical terms, code, and quoted strings exactly
 
+## Markdown Formatting
+- Headings: prefer `###` for topic titles in general content. Reserve `#`/`##` for top-level document structure where genuinely needed.
+- Bold (`**text**`): reserve for genuinely important claims only. Don't bold for routine emphasis or to highlight every key term.
+
 ## Slack Formatting
-- Headings: `*Title*` on its own line. Slack's mrkdwn doesn't support `#` or `##` — they render literally.
+- Headings: `*Title*` on its own line. Slack's mrkdwn doesn't support `#` or `##` (they render literally).
 - Outside headings, use `*bold*` sparingly for genuine emphasis only. Don't bold for decoration.
 - Fenced code blocks (```) for multi-line code or shell ops; inline backticks for filenames, env vars, single commands, and short snippets.
 - Bullets: `-` or `*`. Arrows: literal `→`.
