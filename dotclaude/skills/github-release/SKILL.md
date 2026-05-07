@@ -1,12 +1,11 @@
 ---
-name: "github-release"
-description: "Release version $ARGUMENTS"
+name: github-release
+description: Release a new version of the current project — bump version files, push, then create a GitHub release with grouped notes (Breaking / Features / Fixes / Changes / Docs) derived from commits since the previous tag. Use when the user runs /github-release [version], says "cut a release", or asks to publish a new version. Detects project type (Swift / Python / Node / Go) and bumps the right manifest. Defers to a project-local /github-release if one exists.
 ---
 
-Use this skill when the user asks to run `/github-release`.
+# github-release
 
-
-Release a new version of the current project. If a project-local `/github-release` command exists (`.claude/commands/github-release.md`), defer to it instead.
+Release a new version of the current project. If a project-local `/github-release` skill or command exists, defer to it instead.
 
 ## Step 1: Determine version
 

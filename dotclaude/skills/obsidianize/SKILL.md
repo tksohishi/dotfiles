@@ -1,12 +1,9 @@
 ---
-name: "obsidianize"
-description: "Initialize an Obsidian vault in the current project for browsing markdown files"
+name: obsidianize
+description: Initialize an Obsidian vault in the current project for read-only browsing of markdown files (preview view by default, dark theme, sync disabled, opens the vault). Use when the user runs /obsidianize or asks to set up Obsidian for browsing this project.
 ---
 
-Use this skill when the user asks to run `/obsidianize`.
-
-
-# /obsidianize: Set up Obsidian vault
+# obsidianize
 
 Initialize a `.obsidian/` directory in the current project with default settings optimized for read-only browsing of markdown files.
 
@@ -28,5 +25,5 @@ Initialize a `.obsidian/` directory in the current project with default settings
    ```
    This list enables only useful read-only plugins. Sync is excluded (disabled by omission).
 4. Add `.obsidian/` to the project's `.gitignore` if not already present
-4. Open the vault: `open "obsidian://open?path=<absolute-path-to-current-directory>"`
-5. Report what was created
+5. Open the vault: `open "obsidian://open?path=<absolute-path-to-current-directory>"`
+6. Report what was created

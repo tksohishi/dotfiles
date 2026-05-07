@@ -151,13 +151,12 @@ echo "Configured git hooks from hooks/"
 echo ""
 echo "Installing AI agent tool configs..."
 
-# Generate Gemini/Codex command artifacts from dotclaude/commands
-if [ -f "$DOTFILES_DIR/scripts/agent-commands.ts" ]; then
+# Sync Claude Code allowlist into Codex prefix rules
+if [ -f "$DOTFILES_DIR/scripts/sync-allowlist.ts" ]; then
     if command -v bun &>/dev/null; then
-        bun "$DOTFILES_DIR/scripts/agent-commands.ts" sync
-        bun "$DOTFILES_DIR/scripts/agent-commands.ts" sync-allowlist
+        bun "$DOTFILES_DIR/scripts/sync-allowlist.ts"
     else
-        echo "Skipping command and allowlist sync (bun not found)"
+        echo "Skipping allowlist sync (bun not found)"
     fi
 fi
 
@@ -211,18 +210,6 @@ elif [ -f "$target" ]; then
 fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
-
-# Claude Code custom commands (directory symlink)
-target="$HOME/.claude/commands"
-source="$DOTFILES_DIR/dotclaude/commands"
-if [ -L "$target" ]; then
-    rm "$target"
-elif [ -d "$target" ]; then
-    echo "Backing up $target to $target.bak"
-    mv "$target" "$target.bak"
-fi
-ln -s "$source" "$target"
-echo "Linked dotclaude/commands/ -> ~/.claude/commands/"
 
 # Claude Code custom skills (directory symlink)
 target="$HOME/.claude/skills"

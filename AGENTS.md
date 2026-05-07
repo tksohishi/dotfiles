@@ -27,8 +27,8 @@ Most files are self-explanatory. These have *why* worth knowing:
 - `bin/agent-browser` — wrapper that rejects `--profile <real-Chrome>` invocations to keep agents away from logged-in Chrome state. Bypass by calling `/opt/homebrew/bin/agent-browser` directly.
 - `bin/slk` — reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env.local`. `.env` is reserved for non-secret app config; Bun auto-loads both, but creds go in `.env.local` so the secret/non-secret split stays clean.
 - `dotcodex/config.toml` — **merged**, not symlinked, into `~/.codex/config.toml` (Codex overwrites symlinks).
-- `dotclaude/skills/<name>/SKILL.md` — only the `description` frontmatter loads into context until invoked. Skills are preferred over commands for Claude-only capabilities.
-- `dotcodex/skills/.dotfiles/` — Codex skill location uses a `.dotfiles/` subdirectory by convention.
+- `dotclaude/skills/<name>/SKILL.md` — single source of truth for agent capabilities. Only the `description` frontmatter loads into context until invoked.
+- `dotcodex/skills/.dotfiles/<name>` — symlinks to the matching `dotclaude/skills/<name>/`. Codex picks up the same skill via this path; no separate file to maintain.
 
 ## Key Conventions
 
@@ -42,7 +42,7 @@ Most files are self-explanatory. These have *why* worth knowing:
 ## When Editing
 
 - The `files` array in `install.sh` must be updated when adding new dotfiles
-- `dotclaude/commands/*.md` is the source of truth for global agent commands (sync via `bun scripts/agent-commands.ts sync`). Use this when a capability should be available in Claude and Codex. Gemini commands are not auto-synced; edit `dotgemini/commands/` directly when needed.
+- New cross-agent capabilities go in `dotclaude/skills/<name>/SKILL.md`. For Codex visibility, add a symlink at `dotcodex/skills/.dotfiles/<name>` pointing to `../../../dotclaude/skills/<name>`. Gemini commands are independent; hand-maintain `dotgemini/commands/<name>.toml` when a Gemini equivalent is wanted.
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
 - This is a public repo. Never commit personal information (API keys, tokens, personal URLs, email addresses, domain allowlists, etc.) to `dotagents/`, `dotclaude/`, or `dotcodex/`. Use `.local`/`.override` files for machine-specific or private settings.
 - Claude Code allowlist patterns: `Bash(cmd *)` does NOT match bare `cmd`. Use `Bash(cmd*)` (no space) for multi-word commands where collision is impossible (e.g. `gh release list*`). Keep the space form (`Bash(cmd *)`) for broad prefixes where collisions matter (e.g. `ls *` vs `lsof`).

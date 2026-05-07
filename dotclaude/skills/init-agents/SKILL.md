@@ -1,11 +1,9 @@
 ---
-name: "init-agents"
-description: "/init-agents: Initialize a new project with AGENTS.md"
+name: init-agents
+description: Initialize a new project with AGENTS.md. Use when the user runs /init-agents or asks to bootstrap a project's agent instructions file from scratch (templates for both empty projects and existing codebases, plus the CLAUDE.md symlink and initial commit).
 ---
 
-Use this skill when the user asks to run `/init-agents`.
-
-# /init-agents: Initialize a new project with AGENTS.md
+# init-agents
 
 You are initializing a new project with an AGENTS.md-based setup. Follow these steps in order.
 
