@@ -12,10 +12,11 @@
 #      config, and structured data are exempt; U+2014 there is usually
 #      intentional (comments, error messages) and the rule was about
 #      written prose, not symbols in code.
-#   2. AGENTS.md / CLAUDE.md / GEMINI.md are exempt by basename. They use
-#      emdash stylistically in lead-in lines and the user accepts that.
-#      Add more basenames to SKIP_BASENAMES below if other files need
-#      exemption.
+#   2. Files targeted at AI agents (AGENTS.md / CLAUDE.md / GEMINI.md /
+#      SKILL.md) are exempt by basename. The rule is for prose written for
+#      human readers; agent-targeted files often use emdash stylistically
+#      in lead-in lines and the user accepts that. Add more basenames to
+#      SKIP_BASENAMES below if other agent-targeted files surface.
 #   3. U+2014 only. Does NOT enforce "hyphens or dashes as conjunctions":
 #      too many false positives (compound nouns, ranges, ASCII hyphens used
 #      correctly). Leave that as soft guidance.
@@ -52,7 +53,7 @@ case "$FILE_PATH" in
 esac
 
 # Skip files where U+2014 is accepted stylistically.
-SKIP_BASENAMES=( AGENTS.md CLAUDE.md GEMINI.md )
+SKIP_BASENAMES=( AGENTS.md CLAUDE.md GEMINI.md SKILL.md )
 BASENAME=$(basename "$FILE_PATH")
 for skip in "${SKIP_BASENAMES[@]}"; do
   if [ "$BASENAME" = "$skip" ]; then
