@@ -46,7 +46,22 @@
 #                                   (archive + no-clobber) or `cp -n` for
 #                                   non-recursive. -n in any flag combo
 #                                   (e.g. -na, -rn) is accepted.
-#   9. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
+#   9. `$(...)` command           — command substitution prompts every time,
+#      substitution                  because expansion happens on the local
+#                                    shell before the allowlist sees the
+#                                    literal command. Run the inner command
+#                                    as a separate Bash call (output is in
+#                                    the tool result) or use the Read tool
+#                                    for file content. Backticks and heredocs
+#                                    have the same problem but are added
+#                                    only if they recur.
+#                                    `$(` inside single quotes
+#                                    (e.g. `awk '{print $(NF)}'`) is
+#                                    preserved by stripping single-quoted
+#                                    regions before matching. Double-quoted
+#                                    `"$(...)"` still expands locally and is
+#                                    blocked.
+#  10. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
 #      is in node_modules/.bin     node_modules/.bin, so `bun <bin>` runs
 #                                   the same thing. The typical project-trust
 #                                   allow rule is `Bash(bun *)`, while
@@ -91,12 +106,19 @@ CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 # isn't subject to the local-conventions checks below.
 CMD_BARE=$(echo "$CMD" | sed -e "s/'[^']*'//g" -e 's/"[^"]*"//g')
 
+# Same idea but strips ONLY single-quoted regions. Used for the $(...) check:
+# command substitution expands on the local shell even inside double quotes,
+# so we can't strip those, but single quotes do prevent expansion and let
+# legitimate uses like awk '{print $(NF)}' through.
+CMD_NO_SQ=$(echo "$CMD" | sed "s/'[^']*'//g")
+
 CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
 LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
 LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
 HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
 SED_READ_RE='(^|;|&&|\|\|)[[:space:]]*sed[[:space:]]+-n[[:space:]]'
 EXIT_STATUS_RE='\$\?'
+CMD_SUBST_RE='\$\('
 GH_API_RE='(^|;|&&|\|\||\|)[[:space:]]*gh[[:space:]]+api([[:space:]]|$)'
 SECRET_READER_RE='(^|;|&&|\|\||\|)[[:space:]]*(rg|grep|cat|sed|head|tail|awk|less|more|strings|bat|xxd|od|nl|tac)[[:space:]]'
 SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|development|test|prod|stage|dev)([^a-zA-Z0-9]|$)|\.dev\.vars([^a-zA-Z0-9]|$)'
@@ -116,6 +138,8 @@ elif [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then
   REASON="Don't use 'sed -n' to read a slice of a file; use the Read tool with offset/limit. The Read tool returns line-numbered output, which is what subsequent Edit calls need anyway. Piping into sed ('cmd | sed -n 5p') is allowed."
 elif [[ "$CMD_BARE" =~ $EXIT_STATUS_RE ]]; then
   REASON="Don't use \$? in Bash commands. The previous command's exit status is already in the tool result; read it there, and make the follow-up check a separate Bash call."
+elif [[ "$CMD_NO_SQ" =~ $CMD_SUBST_RE ]]; then
+  REASON="Don't use \$(...) command substitution in Bash. It triggers a permission prompt every time, regardless of whether the inner command is allowed, because expansion happens on the local shell before the allowlist sees the literal command. Run the inner command as a separate Bash call (its output is in the tool result), or use the Read tool when reading file content. \$( inside single quotes (e.g. awk '{print \$(NF)}') is unaffected."
 elif [[ "$CMD_BARE" =~ $GH_API_RE ]]; then
   REASON="\`gh api\` is blocked. Use \`gh <resource> <subcommand>\` (e.g., \`gh pr view\`, \`gh issue list\`, \`gh release list\`) with \`--json <fields>\` for structured output. Run \`gh <resource> --help\` to find the right subcommand. If you've researched and no subcommand covers this endpoint, surface the specific endpoint to the user for approval before retrying."
 elif [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE ]]; then
