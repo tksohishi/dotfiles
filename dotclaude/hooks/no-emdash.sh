@@ -53,7 +53,7 @@ case "$FILE_PATH" in
 esac
 
 # Skip files where U+2014 is accepted stylistically.
-SKIP_BASENAMES=( AGENTS.md CLAUDE.md GEMINI.md SKILL.md )
+SKIP_BASENAMES=( AGENTS.md CLAUDE.md GEMINI.md SKILL.md MEMORY.md )
 BASENAME=$(basename "$FILE_PATH")
 for skip in "${SKIP_BASENAMES[@]}"; do
   if [ "$BASENAME" = "$skip" ]; then
