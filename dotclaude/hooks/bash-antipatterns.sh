@@ -64,12 +64,13 @@
 #  10. `sqlite3` without          — read-only queries should add -readonly so
 #       -readonly                   the database is opened RO at the engine
 #                                   level (Bash(sqlite3 -readonly *) is the
-#                                   only sqlite3 allow rule). Without it,
-#                                   every invocation prompts. For mutations
-#                                   (UPDATE / DELETE / DROP / INSERT / CREATE
-#                                   / ALTER), surface to the user before
-#                                   running — sqlite3 writes are not in any
-#                                   allow rule by design.
+#                                   only sqlite3 allow rule). This case
+#                                   returns "ask" rather than "deny" so the
+#                                   user can approve a one-off mutation in
+#                                   the prompt; reads still auto-approve via
+#                                   the allow rule, and the message nudges
+#                                   the agent to add -readonly so future
+#                                   read calls skip the prompt.
 #  11. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
 #      is in node_modules/.bin     node_modules/.bin, so `bun <bin>` runs
 #                                   the same thing. The typical project-trust
@@ -138,6 +139,7 @@ SQLITE3_RE='(^|;|&&|\|\||\|)[[:space:]]*sqlite3([[:space:]]|$)'
 SQLITE3_READONLY_RE='[[:space:]]-readonly([[:space:]]|$)'
 
 REASON=""
+DECISION="deny"
 
 if [[ "$CMD_BARE" =~ $CD_CHAIN_RE ]]; then
   REASON="Don't chain 'cd <dir> && <cmd>' — the chained command bypasses the allowlist and triggers a permission prompt. If you need to be in another directory, run 'cd <dir>' as a separate Bash call first (working directory persists across calls), then the command. If you're already in the right place, drop the cd and run the command directly (or with an absolute path)."
@@ -158,7 +160,8 @@ elif [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE
 elif [[ "$CMD_BARE" =~ $CP_RECURSIVE_RE ]] && ! [[ "$CMD_BARE" =~ $CP_NOCLOBBER_RE ]]; then
   REASON="Don't use 'cp -r/-R/-a' without -n. Recursive/archive cp silently overwrites existing files. Use 'cp -an <src> <dst>' for archive-mode copy (preserves attrs, no overwrite) or 'cp -n <src> <dst>' for non-recursive non-overwrite. The -n flag can appear in any combo, e.g. 'cp -an', 'cp -na', 'cp -rn'."
 elif [[ "$CMD_BARE" =~ $SQLITE3_RE ]] && ! [[ "$CMD_BARE" =~ $SQLITE3_READONLY_RE ]]; then
-  REASON="Run sqlite3 with -readonly for read queries. The allow rule \`Bash(sqlite3 -readonly *)\` auto-approves \`sqlite3 -readonly db.db 'SELECT ...'\` and friends (PRAGMA, .schema, .tables, .dump). Without -readonly every invocation prompts. For mutations (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), surface to the user before running — sqlite3 writes are not in any allow rule by design."
+  DECISION="ask"
+  REASON="sqlite3 without -readonly. If this is a read query (SELECT, PRAGMA, .schema, .tables, .dump), cancel and retry with -readonly to skip future prompts (the allow rule \`Bash(sqlite3 -readonly *)\` auto-approves that form). If this is a mutation (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), approve to proceed."
 elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
   bunx_arg="${BASH_REMATCH[2]}"
   if [[ "$bunx_arg" != "tsc" ]] && [[ "$bunx_arg" != -* ]] && [[ -f "node_modules/.bin/$bunx_arg" ]]; then
@@ -170,10 +173,10 @@ if [ -z "$REASON" ]; then
   exit 0
 fi
 
-jq -nc --arg reason "$REASON" '{
+jq -nc --arg reason "$REASON" --arg decision "$DECISION" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
-    permissionDecision: "deny",
+    permissionDecision: $decision,
     permissionDecisionReason: $reason
   }
 }'
