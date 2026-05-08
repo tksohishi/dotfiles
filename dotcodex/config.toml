@@ -25,6 +25,7 @@ enabled = false
 [tui]
 status_line = [
   "git-branch",
+  "branch-changes",
   "context-remaining",
   "five-hour-limit",
   "weekly-limit",
