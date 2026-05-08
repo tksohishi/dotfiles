@@ -61,7 +61,16 @@
 #                                    regions before matching. Double-quoted
 #                                    `"$(...)"` still expands locally and is
 #                                    blocked.
-#  10. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
+#  10. `sqlite3` without          — read-only queries should add -readonly so
+#       -readonly                   the database is opened RO at the engine
+#                                   level (Bash(sqlite3 -readonly *) is the
+#                                   only sqlite3 allow rule). Without it,
+#                                   every invocation prompts. For mutations
+#                                   (UPDATE / DELETE / DROP / INSERT / CREATE
+#                                   / ALTER), surface to the user before
+#                                   running — sqlite3 writes are not in any
+#                                   allow rule by design.
+#  11. `bunx <bin>` when <bin>    — Bun auto-resolves binaries from
 #      is in node_modules/.bin     node_modules/.bin, so `bun <bin>` runs
 #                                   the same thing. The typical project-trust
 #                                   allow rule is `Bash(bun *)`, while
@@ -125,6 +134,8 @@ SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|developm
 CP_RECURSIVE_RE='(^|;|&&|\|\||\|)[[:space:]]*cp[[:space:]]+(-[a-zA-Z]*[rRa])'
 CP_NOCLOBBER_RE='cp[[:space:]]+([^|;&]*[[:space:]])?-[a-zA-Z]*n'
 BUNX_RE='(^|;|&&|\|\||\|)[[:space:]]*bunx[[:space:]]+([^[:space:]]+)'
+SQLITE3_RE='(^|;|&&|\|\||\|)[[:space:]]*sqlite3([[:space:]]|$)'
+SQLITE3_READONLY_RE='[[:space:]]-readonly([[:space:]]|$)'
 
 REASON=""
 
@@ -146,6 +157,8 @@ elif [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE
   REASON="Reading .env / .dev.vars files is blocked — they contain secrets (API keys, tokens). For schema, read .env.example. To inspect a value, use an approved redaction script (e.g., scripts/check-env.ts, scripts/redact-env.ts) or surface the specific need to the user. Once secrets are read, treat them as compromised and rotate."
 elif [[ "$CMD_BARE" =~ $CP_RECURSIVE_RE ]] && ! [[ "$CMD_BARE" =~ $CP_NOCLOBBER_RE ]]; then
   REASON="Don't use 'cp -r/-R/-a' without -n. Recursive/archive cp silently overwrites existing files. Use 'cp -an <src> <dst>' for archive-mode copy (preserves attrs, no overwrite) or 'cp -n <src> <dst>' for non-recursive non-overwrite. The -n flag can appear in any combo, e.g. 'cp -an', 'cp -na', 'cp -rn'."
+elif [[ "$CMD_BARE" =~ $SQLITE3_RE ]] && ! [[ "$CMD_BARE" =~ $SQLITE3_READONLY_RE ]]; then
+  REASON="Run sqlite3 with -readonly for read queries. The allow rule \`Bash(sqlite3 -readonly *)\` auto-approves \`sqlite3 -readonly db.db 'SELECT ...'\` and friends (PRAGMA, .schema, .tables, .dump). Without -readonly every invocation prompts. For mutations (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), surface to the user before running — sqlite3 writes are not in any allow rule by design."
 elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
   bunx_arg="${BASH_REMATCH[2]}"
   if [[ "$bunx_arg" != "tsc" ]] && [[ "$bunx_arg" != -* ]] && [[ -f "node_modules/.bin/$bunx_arg" ]]; then

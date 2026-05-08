@@ -294,6 +294,7 @@
       "Bash(slk channels *)",
       "Bash(slk doctor)",
       "Bash(sort *)",
+      "Bash(sqlite3 -readonly *)",
       "Bash(stat *)",
       "Bash(strings *)",
       "Bash(summarize *)",
