@@ -563,7 +563,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/no-emdash.sh",
+            "command": "$HOME/.claude/hooks/no-prose-symbols.sh",
             "timeout": 5
           }
         ]
