@@ -93,6 +93,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - For intermediate files (pdftotext output, downloaded HTML, etc.), use project-local `tmp/` (globally gitignored), not `/tmp`. Keeps operations in the project directory and avoids `cd`-chain patterns.
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
+- For `sqlite3`, always pass `-readonly` for read queries (SELECT, PRAGMA, .schema, .tables, .dump). The allow rule covers that form; without `-readonly` the call prompts every time. Omit `-readonly` only for mutations (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), which prompt for one-off approval by design.
 
 
 ## Secrets
