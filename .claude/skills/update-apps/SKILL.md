@@ -16,6 +16,12 @@ Run steps 1-6 directly. If step 6 shows available updates, tell the user to run 
 
 After `brew upgrade --formula`, run `agent-browser install` to update its browser binaries.
 
+After `agent-browser install`, prune stale Playwright caches in `~/Library/Caches/ms-playwright/`. Playwright accumulates browser versions on upgrade rather than replacing them. List the directory, then delete:
+- Older `chromium-<n>`, `chromium_headless_shell-<n>`, `firefox-<n>` directories — keep only the highest-numbered of each
+- Older SHA-suffixed `mcp-chrome-<sha>`, `mcp-firefox-<sha>`, `mcp-webkit-<sha>` directories — keep only the most recently modified of each browser
+
+Don't touch `ffmpeg-*`, `mcp-chrome-profile`, or unsuffixed entries like `mcp-chrome`. Report total bytes reclaimed.
+
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
 Report what was upgraded, but only packages listed in the Brewfile. Transitive dependencies should be omitted entirely unless they had a **major version bump**, in which case surface them as informational. Also report any Brewfile entries that were newly installed because they were missing locally. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output. For any Brewfile package with a **major version bump**, fetch its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`) and summarize breaking changes, new features, and deprecations.
