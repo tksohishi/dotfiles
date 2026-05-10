@@ -20,11 +20,17 @@
 #   3. `head <file>` (not piped)  — use the Read tool with offset/limit.
 #   4. `sed -n <range> <file>`    — same; the most common reflex for reading
 #                                   a slice of a file. Piping into sed is
-#                                   left alone. Bash(sed *) is also in
-#                                   permissions.deny as a fallback, but the
-#                                   hook fires first and gives the agent an
-#                                   instructive "use Read tool" message
-#                                   instead of a generic permission denial.
+#                                   left alone. `Bash(sed *)` is in
+#                                   permissions.allow now (was deny) so
+#                                   pipe-form sed passes through silently;
+#                                   this hook is the sole arbiter for the
+#                                   file-read form and gives the "use Read
+#                                   tool" hint.
+#   4b.`sed -i ...`               — in-place file edit bypasses the Edit
+#                                   tool's change tracking and the file
+#                                   allowlist. Use Edit for substitutions;
+#                                   surface to the user for complex regex
+#                                   that Edit can't easily express.
 #   5. `$?` in commands           — exit status is already in the tool result;
 #                                   make the follow-up check a separate call.
 #   6. `gh api`                   — use `gh <resource> <subcommand>` with
@@ -127,6 +133,7 @@ LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([
 LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
 HEAD_RE='(^|;|&&|\|\|)[[:space:]]*head[[:space:]]'
 SED_READ_RE='(^|;|&&|\|\|)[[:space:]]*sed[[:space:]]+-n[[:space:]]'
+SED_INPLACE_RE='(^|;|&&|\|\||\|)[[:space:]]*sed[[:space:]]+(-i|--in-place)'
 EXIT_STATUS_RE='\$\?'
 CMD_SUBST_RE='\$\('
 GH_API_RE='(^|;|&&|\|\||\|)[[:space:]]*gh[[:space:]]+api([[:space:]]|$)'
@@ -149,6 +156,8 @@ elif [[ "$CMD_BARE" =~ $HEAD_RE ]]; then
   REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
 elif [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then
   REASON="Don't use 'sed -n' to read a slice of a file; use the Read tool with offset/limit. The Read tool returns line-numbered output, which is what subsequent Edit calls need anyway. Piping into sed ('cmd | sed -n 5p') is allowed."
+elif [[ "$CMD_BARE" =~ $SED_INPLACE_RE ]]; then
+  REASON="Don't use 'sed -i' (in-place file edit). Use the Edit tool instead — it tracks changes and integrates with file allowlists; sed -i bypasses both. For complex regex replacements that the Edit tool can't easily express, surface to the user before running."
 elif [[ "$CMD_BARE" =~ $EXIT_STATUS_RE ]]; then
   REASON="Don't use \$? in Bash commands. The previous command's exit status is already in the tool result; read it there, and make the follow-up check a separate Bash call."
 elif [[ "$CMD_NO_SQ" =~ $CMD_SUBST_RE ]]; then
