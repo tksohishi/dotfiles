@@ -16,11 +16,16 @@ Run steps 1-6 directly. If step 6 shows available updates, tell the user to run 
 
 After `brew upgrade --formula`, run `agent-browser install` to update its browser binaries.
 
-After `agent-browser install`, prune stale Playwright caches in `~/Library/Caches/ms-playwright/`. Playwright accumulates browser versions on upgrade rather than replacing them. List the directory, then delete:
-- Older `chromium-<n>`, `chromium_headless_shell-<n>`, `firefox-<n>` directories — keep only the highest-numbered of each
-- Older SHA-suffixed `mcp-chrome-<sha>`, `mcp-firefox-<sha>`, `mcp-webkit-<sha>` directories — keep only the most recently modified of each browser
+After `agent-browser install`, prune stale browser caches across the three locations below. Each tool accumulates versions on upgrade rather than replacing them, and none have built-in cleanup.
 
-Don't touch `ffmpeg-*`, `mcp-chrome-profile`, or unsuffixed entries like `mcp-chrome`. Report total bytes reclaimed.
+For each cache root, list its versioned subdirectories, then delete all but the newest of each group. Group by the directory name prefix; rank by the version segment (numeric/semver where present, mtime otherwise).
+
+- `~/.agent-browser/browsers/chrome-<semver>/` — keep highest semver
+- `~/.cache/puppeteer/chrome/<arch>-<semver>/` and `~/.cache/puppeteer/chrome-headless-shell/<arch>-<semver>/` — keep highest semver per arch prefix (`mac_arm`, `mac`, `linux`, ...)
+- `~/Library/Caches/ms-playwright/chromium-<n>/`, `chromium_headless_shell-<n>/`, `firefox-<n>/` — keep highest-numbered of each prefix
+- `~/Library/Caches/ms-playwright/mcp-chrome-<sha>/`, `mcp-firefox-<sha>/`, `mcp-webkit-<sha>/` — keep most recently modified per browser
+
+Don't touch `ffmpeg-*`, `mcp-chrome-profile`, or unsuffixed entries like `mcp-chrome`. Report total bytes reclaimed across all locations.
 
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
