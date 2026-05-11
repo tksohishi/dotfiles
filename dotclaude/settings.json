@@ -230,7 +230,6 @@
       "Bash(https HEAD *)",
       "Bash(grep *)",
       "Bash(head *)",
-      "Bash(sed *)",
       "Bash(tail *)",
       "Bash(tee *)",
       "Bash(tg *)",
@@ -487,6 +486,8 @@
       "Bash(awk)",
       "Bash(find *)",
       "Bash(find)",
+      "Bash(sed *)",
+      "Bash(sed)",
       "Bash(sudo *)",
       "Bash(shutdown*)",
       "Bash(reboot*)",
@@ -507,7 +508,11 @@
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
-      "/tmp"
+      "/Applications",
+      "/opt/homebrew",
+      "/tmp",
+      "~/.cache",
+      "~/Library/Caches"
     ]
   },
   "hooks": {
@@ -590,5 +595,6 @@
     "swift-lsp@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true
-  }
+  },
+  "skipAutoPermissionPrompt": true
 }
