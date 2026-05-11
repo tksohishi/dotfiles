@@ -511,6 +511,7 @@
       "/Applications",
       "/opt/homebrew",
       "/tmp",
+      "~/.agent-browser",
       "~/.cache",
       "~/Library/Caches"
     ]
