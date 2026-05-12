@@ -5,6 +5,15 @@ const API = "https://slack.com/api";
 const xoxc = Bun.env.SLACK_XOXC_TOKEN ?? "";
 const cookieD = Bun.env.SLACK_COOKIE_D ?? "";
 
+const DEBUG = (() => {
+  const i = Bun.argv.indexOf("--debug");
+  if (i >= 0) {
+    Bun.argv.splice(i, 1);
+    return true;
+  }
+  return !!Bun.env.SLACK_DEBUG;
+})();
+
 type Json = Record<string, unknown>;
 type Msg = {
   ts: string;
@@ -58,7 +67,7 @@ async function slack<T extends Json>(method: string, params: Record<string, stri
   if (!res.ok) throw new SlkError(`${method} HTTP ${res.status}`);
   const data = (await res.json()) as Json & { ok: boolean; error?: string };
   if (!data.ok) {
-    if (Bun.env.SLACK_DEBUG) console.error("slk debug:", JSON.stringify(data, null, 2));
+    if (DEBUG) console.error("slk debug:", JSON.stringify(data, null, 2));
     throw new SlkError(`${method} failed: ${data.error ?? "unknown error"}`, data.error, data);
   }
   return data as T;
@@ -308,7 +317,7 @@ function formatBytes(n: number): string {
 }
 
 async function cmdDownload(args: string[]): Promise<void> {
-  const trace = (msg: string) => Bun.env.SLACK_DEBUG && console.error(`[slk download] ${msg}`);
+  const trace = (msg: string) => DEBUG && console.error(`[slk download] ${msg}`);
   trace(`entry argv=${JSON.stringify(args)}`);
 
   const { positional, flags } = parseFlags(args);
@@ -363,7 +372,7 @@ async function cmdDownload(args: string[]): Promise<void> {
     signal: AbortSignal.timeout(30_000),
   }).catch((e) => {
     if (e?.name === "TimeoutError" || e?.name === "AbortError") {
-      die(`slk: download timed out after 30s for ${downloadUrl}\n  Run with SLACK_DEBUG=1 to see the request flow.`);
+      die(`slk: download timed out after 30s for ${downloadUrl}\n  Re-run with --debug to see the request flow.`);
     }
     throw e;
   });
@@ -434,7 +443,7 @@ async function cmdDoctor(): Promise<void> {
     ];
     for (const line of lines) console.error(line);
     console.error("\nFor Slack's full response, retry with:");
-    console.error("  SLACK_DEBUG=1 slk doctor");
+    console.error("  slk --debug doctor");
     process.exit(1);
   }
 }
@@ -443,12 +452,15 @@ function usage(): void {
   console.log(`slk — read-only Slack CLI for per-repo context injection
 
 Usage:
-  slk messages <channel> [--limit N] [--since 4h|YYYY-MM-DD] [--json]
-  slk thread   <channel> <ts> [--json]
-  slk thread   <slack-archive-url> [--json]
-  slk channels [--all] [--since 4h|YYYY-MM-DD] [--limit N] [--json]
-  slk download <file-url> [--out <path>]
-  slk doctor
+  slk [--debug] messages <channel> [--limit N] [--since 4h|YYYY-MM-DD] [--json]
+  slk [--debug] thread   <channel> <ts> [--json]
+  slk [--debug] thread   <slack-archive-url> [--json]
+  slk [--debug] channels [--all] [--since 4h|YYYY-MM-DD] [--limit N] [--json]
+  slk [--debug] download <file-url> [--out <path>]
+  slk [--debug] doctor
+
+Global flags:
+  --debug   Trace API calls and per-step progress to stderr (equivalent to SLACK_DEBUG=1).
 
 Auth (per repo, in .env.local):
   SLACK_XOXC_TOKEN, SLACK_COOKIE_D — see \`slk doctor\` for extraction steps.
