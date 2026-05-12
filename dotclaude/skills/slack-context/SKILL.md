@@ -12,9 +12,9 @@ description: Read recent Slack messages from the current repo's workspace via `s
 
 ## Auth setup (manual, per workspace)
 
-The repo's `.env.local` must contain two values, extracted from a logged-in browser session (`.env` is reserved for non-secret app config; Bun loads both, but creds go in `.env.local` so the secret/non-secret split stays clean):
+The repo's `.env.local` must contain two values, extracted from a logged-in browser session (`slk` is a personal CLI and these creds are per-user, so `.env.local` is the right home — this is not a general rule that secrets go in `.env.local`):
 
-- `SLACK_XOXC_TOKEN` — DevTools → Network on `app.slack.com` → click any channel → find a `slack.com/api/*` request → form-data field `token=xoxc-…`.
+- `SLACK_XOXC_TOKEN` — DevTools → Network on `app.slack.com` → click any channel → click any `slack.com/api/*` request → **Payload** tab → Form Data → `token=xoxc-…`.
 - `SLACK_COOKIE_D` — DevTools → Application → Cookies → `https://app.slack.com` → row where Name = `d` → copy Value.
 
 `.env.local` is covered by the user's global gitignore (`*.local`). Run `slk doctor` to validate; if it returns `invalid_auth`, the cookie or token has rotated (every few weeks) — ask the user to re-extract both.

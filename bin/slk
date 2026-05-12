@@ -290,7 +290,8 @@ async function cmdDoctor(): Promise<void> {
     console.error(`  SLACK_COOKIE_D:   ${cookieD ? "set" : "MISSING"}\n`);
     console.error("Extract from a logged-in browser session (per workspace):");
     console.error("  SLACK_XOXC_TOKEN — DevTools → Network on app.slack.com → click any channel →");
-    console.error("                     any slack.com/api/* request → form data `token=xoxc-…`");
+    console.error("                     click any slack.com/api/* request → Payload tab →");
+    console.error("                     Form Data → `token=xoxc-…`");
     console.error("  SLACK_COOKIE_D   — DevTools → Application → Cookies → https://app.slack.com →");
     console.error("                     row Name=`d`, copy Value");
     console.error("\nAdd both to the repo's .env.local (already covered by .gitignore_global).");
