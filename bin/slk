@@ -283,6 +283,58 @@ async function cmdChannels(args: string[]): Promise<void> {
   }
 }
 
+function parseFileUrl(url: string): string | null {
+  const clean = url.split("?")[0] ?? "";
+  const m1 = clean.match(/\/files\/[^/]+\/(F[A-Z0-9]+)(?:\/|$)/);
+  if (m1) return m1[1]!;
+  const m2 = clean.match(/\/files-pri\/[^/]+-(F[A-Z0-9]+)\//);
+  if (m2) return m2[1]!;
+  return null;
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n}B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)}KB`;
+  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)}MB`;
+  return `${(n / 1024 / 1024 / 1024).toFixed(2)}GB`;
+}
+
+async function cmdDownload(args: string[]): Promise<void> {
+  const { positional, flags } = parseFlags(args);
+  if (!positional[0]) die("slk: usage: slk download <file-url> [--out <path>]");
+  const url = positional[0]!;
+  const fileId = parseFileUrl(url);
+  if (!fileId) {
+    die(
+      `slk: not a recognized Slack file URL: ${url}\n` +
+        "  expected https://<workspace>.slack.com/files/.../F.../name\n" +
+        "        or https://files.slack.com/files-pri/T...-F.../name",
+    );
+  }
+  const info = await slack<{ file: { name: string; url_private: string; size?: number } }>("files.info", { file: fileId });
+  const filename = info.file.name;
+  const downloadUrl = info.file.url_private;
+
+  let outPath = filename;
+  if (typeof flags.out === "string") {
+    const { stat } = await import("node:fs/promises");
+    const s = await stat(flags.out).catch(() => null);
+    outPath = s?.isDirectory() ? `${flags.out.replace(/\/$/, "")}/${filename}` : flags.out;
+  }
+
+  const { xoxc: tok, cookieD: ck } = requireAuth();
+  const res = await fetch(downloadUrl, {
+    headers: {
+      Authorization: `Bearer ${tok}`,
+      Cookie: `d=${ck}`,
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    },
+  });
+  if (!res.ok) die(`slk: download failed (HTTP ${res.status}) for file ${fileId}`);
+  const bytes = await Bun.write(outPath, res);
+  console.log(`${outPath}  ${formatBytes(bytes)}`);
+}
+
 async function cmdDoctor(): Promise<void> {
   if (!xoxc || !cookieD) {
     console.error(`slk doctor: missing credentials in ${process.cwd()}/.env.local\n`);
@@ -351,6 +403,7 @@ Usage:
   slk thread   <channel> <ts> [--json]
   slk thread   <slack-archive-url> [--json]
   slk channels [--all] [--since 4h|YYYY-MM-DD] [--limit N] [--json]
+  slk download <file-url> [--out <path>]
   slk doctor
 
 Auth (per repo, in .env.local):
@@ -375,6 +428,9 @@ try {
       break;
     case "channels":
       await cmdChannels(rest);
+      break;
+    case "download":
+      await cmdDownload(rest);
       break;
     case "doctor":
       await cmdDoctor();
