@@ -283,12 +283,20 @@ async function cmdChannels(args: string[]): Promise<void> {
   }
 }
 
-function parseFileUrl(url: string): string | null {
+type ParsedFileUrl =
+  | { kind: "direct"; downloadUrl: string; filename: string }
+  | { kind: "indirect"; fileId: string };
+
+function parseSlackFileUrl(url: string): ParsedFileUrl | null {
   const clean = url.split("?")[0] ?? "";
-  const m1 = clean.match(/\/files\/[^/]+\/(F[A-Z0-9]+)(?:\/|$)/);
-  if (m1) return m1[1]!;
-  const m2 = clean.match(/\/files-pri\/[^/]+-(F[A-Z0-9]+)\//);
-  if (m2) return m2[1]!;
+  const direct = clean.match(/^https?:\/\/files\.slack\.com\/files-(?:pri|tmb)\/[^/]+-(?:F[A-Z0-9]+)\/(?:download\/)?(.+)$/);
+  if (direct) {
+    return { kind: "direct", downloadUrl: url, filename: decodeURIComponent(direct[1]!) };
+  }
+  const indirect = clean.match(/\/files\/[^/]+\/(F[A-Z0-9]+)(?:\/|$)/);
+  if (indirect) {
+    return { kind: "indirect", fileId: indirect[1]! };
+  }
   return null;
 }
 
@@ -303,17 +311,26 @@ async function cmdDownload(args: string[]): Promise<void> {
   const { positional, flags } = parseFlags(args);
   if (!positional[0]) die("slk: usage: slk download <file-url> [--out <path>]");
   const url = positional[0]!;
-  const fileId = parseFileUrl(url);
-  if (!fileId) {
+  const parsed = parseSlackFileUrl(url);
+  if (!parsed) {
     die(
       `slk: not a recognized Slack file URL: ${url}\n` +
         "  expected https://<workspace>.slack.com/files/.../F.../name\n" +
         "        or https://files.slack.com/files-pri/T...-F.../name",
     );
   }
-  const info = await slack<{ file: { name: string; url_private: string; size?: number } }>("files.info", { file: fileId });
-  const filename = info.file.name;
-  const downloadUrl = info.file.url_private;
+
+  let downloadUrl: string;
+  let filename: string;
+  if (parsed.kind === "direct") {
+    downloadUrl = parsed.downloadUrl;
+    filename = parsed.filename;
+  } else {
+    if (Bun.env.SLACK_DEBUG) console.error(`slk debug: looking up file ${parsed.fileId} via files.info`);
+    const info = await slack<{ file: { name: string; url_private: string } }>("files.info", { file: parsed.fileId });
+    downloadUrl = info.file.url_private;
+    filename = info.file.name;
+  }
 
   let outPath = filename;
   if (typeof flags.out === "string") {
@@ -322,15 +339,22 @@ async function cmdDownload(args: string[]): Promise<void> {
     outPath = s?.isDirectory() ? `${flags.out.replace(/\/$/, "")}/${filename}` : flags.out;
   }
 
-  const { xoxc: tok, cookieD: ck } = requireAuth();
+  const { cookieD: ck } = requireAuth();
+  if (Bun.env.SLACK_DEBUG) console.error(`slk debug: GET ${downloadUrl} → ${outPath}`);
   const res = await fetch(downloadUrl, {
     headers: {
-      Authorization: `Bearer ${tok}`,
       Cookie: `d=${ck}`,
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     },
   });
-  if (!res.ok) die(`slk: download failed (HTTP ${res.status}) for file ${fileId}`);
+  if (Bun.env.SLACK_DEBUG) {
+    console.error(`slk debug: response status=${res.status} url=${res.url} content-type=${res.headers.get("content-type") ?? "(none)"} content-length=${res.headers.get("content-length") ?? "(none)"}`);
+  }
+  if (!res.ok) die(`slk: download failed (HTTP ${res.status})${res.url !== downloadUrl ? `\n  redirected to: ${res.url}` : ""}`);
+  const ctype = res.headers.get("content-type") ?? "";
+  if (ctype.startsWith("text/html")) {
+    die(`slk: download returned HTML (likely a Slack login/error page, not the file)\n  Slack may have rotated your cookie — run \`slk doctor\` and re-extract SLACK_COOKIE_D if needed.`);
+  }
   const bytes = await Bun.write(outPath, res);
   console.log(`${outPath}  ${formatBytes(bytes)}`);
 }
