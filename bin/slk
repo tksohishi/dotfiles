@@ -308,10 +308,17 @@ function formatBytes(n: number): string {
 }
 
 async function cmdDownload(args: string[]): Promise<void> {
+  const trace = (msg: string) => Bun.env.SLACK_DEBUG && console.error(`[slk download] ${msg}`);
+  trace(`entry argv=${JSON.stringify(args)}`);
+
   const { positional, flags } = parseFlags(args);
+  trace(`parsed flags positional=${JSON.stringify(positional)} flags=${JSON.stringify(flags)}`);
   if (!positional[0]) die("slk: usage: slk download <file-url> [--out <path>]");
   const url = positional[0]!;
+
+  trace(`calling parseSlackFileUrl`);
   const parsed = parseSlackFileUrl(url);
+  trace(`parseSlackFileUrl returned ${JSON.stringify(parsed)}`);
   if (!parsed) {
     die(
       `slk: not a recognized Slack file URL: ${url}\n` +
@@ -326,36 +333,49 @@ async function cmdDownload(args: string[]): Promise<void> {
     downloadUrl = parsed.downloadUrl;
     filename = parsed.filename;
   } else {
-    if (Bun.env.SLACK_DEBUG) console.error(`slk debug: looking up file ${parsed.fileId} via files.info`);
+    trace(`looking up file ${parsed.fileId} via files.info`);
     const info = await slack<{ file: { name: string; url_private: string } }>("files.info", { file: parsed.fileId });
+    trace(`files.info returned name=${info.file.name} url=${info.file.url_private}`);
     downloadUrl = info.file.url_private;
     filename = info.file.name;
   }
 
   let outPath = filename;
   if (typeof flags.out === "string") {
+    trace(`stat(${flags.out})`);
     const { stat } = await import("node:fs/promises");
-    const s = await stat(flags.out).catch(() => null);
+    const s = await stat(flags.out).catch((e) => {
+      trace(`stat threw ${e?.code ?? e}`);
+      return null;
+    });
+    trace(`stat returned ${s ? (s.isDirectory() ? "directory" : "file") : "null"}`);
     outPath = s?.isDirectory() ? `${flags.out.replace(/\/$/, "")}/${filename}` : flags.out;
   }
 
+  trace(`requireAuth`);
   const { cookieD: ck } = requireAuth();
-  if (Bun.env.SLACK_DEBUG) console.error(`slk debug: GET ${downloadUrl} → ${outPath}`);
+  trace(`about to fetch ${downloadUrl} → ${outPath}`);
   const res = await fetch(downloadUrl, {
     headers: {
       Cookie: `d=${ck}`,
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     },
+    signal: AbortSignal.timeout(30_000),
+  }).catch((e) => {
+    if (e?.name === "TimeoutError" || e?.name === "AbortError") {
+      die(`slk: download timed out after 30s for ${downloadUrl}\n  Run with SLACK_DEBUG=1 to see the request flow.`);
+    }
+    throw e;
   });
-  if (Bun.env.SLACK_DEBUG) {
-    console.error(`slk debug: response status=${res.status} url=${res.url} content-type=${res.headers.get("content-type") ?? "(none)"} content-length=${res.headers.get("content-length") ?? "(none)"}`);
-  }
+  trace(`fetch returned status=${res.status} url=${res.url} content-type=${res.headers.get("content-type") ?? "(none)"} content-length=${res.headers.get("content-length") ?? "(none)"}`);
   if (!res.ok) die(`slk: download failed (HTTP ${res.status})${res.url !== downloadUrl ? `\n  redirected to: ${res.url}` : ""}`);
   const ctype = res.headers.get("content-type") ?? "";
   if (ctype.startsWith("text/html")) {
     die(`slk: download returned HTML (likely a Slack login/error page, not the file)\n  Slack may have rotated your cookie — run \`slk doctor\` and re-extract SLACK_COOKIE_D if needed.`);
   }
+  trace(`writing to ${outPath}`);
   const bytes = await Bun.write(outPath, res);
+  trace(`wrote ${bytes} bytes`);
   console.log(`${outPath}  ${formatBytes(bytes)}`);
 }
 
