@@ -97,6 +97,15 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - For `sqlite3`, always pass `-readonly` for read queries (SELECT, PRAGMA, .schema, .tables, .dump). The allow rule covers that form; without `-readonly` the call prompts every time. Omit `-readonly` only for mutations (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), which prompt for one-off approval by design.
 
 
+## Env Files
+- `.env` for values the app needs to run, including secrets. Typically gitignored; `.env.example` is the committed schema.
+- `.env.local` is ONLY for per-user overrides (personal preferences, machine-specific tweaks). Don't default here just because the var looks sensitive or because Bun auto-loads it.
+- When suggesting where a new var goes, default to `.env`. Use `.env.local` only when the value is genuinely per-user.
+
+## Symlinked Configs
+- Most files under `~/.claude/`, `~/.codex/`, `~/.gemini/` symlink into `~/.dotfiles/`. Edit/Write refuses to write through symlinks.
+- When wd is `~/.dotfiles/`, edit the source files directly (e.g. `dotagents/AGENTS.md`, `dotclaude/settings.json`) instead of the `~/.<tool>/` paths.
+
 ## Secrets
 - Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), or `.dev.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
 

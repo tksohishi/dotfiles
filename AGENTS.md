@@ -25,7 +25,7 @@ Personal dotfiles repository for macOS. Manages shell configs, editor settings, 
 Most files are self-explanatory. These have *why* worth knowing:
 
 - `bin/agent-browser` — wrapper that rejects `--profile <real-Chrome>` invocations to keep agents away from logged-in Chrome state. Bypass by calling `/opt/homebrew/bin/agent-browser` directly.
-- `bin/slk` — reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env.local`. `.env` is reserved for non-secret app config; Bun auto-loads both, but creds go in `.env.local` so the secret/non-secret split stays clean.
+- `bin/slk` — personal CLI; reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env.local` because the creds are per-user (each developer has their own Slack session). Bun auto-loads both `.env` and `.env.local`. Not a general rule that secrets go in `.env.local` — app secrets normally belong in `.env`.
 - `dotcodex/config.toml` — **merged**, not symlinked, into `~/.codex/config.toml` (Codex overwrites symlinks).
 - `dotclaude/skills/<name>/SKILL.md` — single source of truth for agent capabilities. Only the `description` frontmatter loads into context until invoked.
 - `dotcodex/skills/.dotfiles/<name>` — symlinks to the matching `dotclaude/skills/<name>/`. Codex picks up the same skill via this path; no separate file to maintain.
