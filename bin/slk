@@ -382,8 +382,10 @@ async function cmdDownload(args: string[]): Promise<void> {
   if (ctype.startsWith("text/html")) {
     die(`slk: download returned HTML (likely a Slack login/error page, not the file)\n  Slack may have rotated your cookie — run \`slk doctor\` and re-extract SLACK_COOKIE_D if needed.`);
   }
-  trace(`writing to ${outPath}`);
-  const bytes = await Bun.write(outPath, res);
+  trace(`reading body into memory`);
+  const buf = await res.arrayBuffer();
+  trace(`body read: ${buf.byteLength} bytes; writing to ${outPath}`);
+  const bytes = await Bun.write(outPath, buf);
   trace(`wrote ${bytes} bytes`);
   console.log(`${outPath}  ${formatBytes(bytes)}`);
 }
