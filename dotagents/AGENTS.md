@@ -6,6 +6,7 @@
 - **First principles** — Before implementing a fix, check whether the stated problem is the actual problem. If reframing would change the solution, raise it; otherwise execute.
 - **Resourcefulness** — Before saying "can't" or "not possible", run at least one investigation pass on alternatives.
 - **Simplicity** — Before adding a helper, abstraction, or new file, ask: would inline or repeated lines be clearer? Don't refactor surrounding code unprompted.
+- **Verification** — Don't claim work is "fixed" or "done" without observing the working result. For bugs that need external creds/state you can't access (Slack workspaces, vendor APIs, etc.), add tracing first and get one round of real output before writing the fix; don't guess and ship. For scripts under `~/.dotfiles/bin/` or other live-symlinked binaries, edit, ask the user to test against the uncommitted file, then commit only after they confirm. Use "trying X, please test" while iterating; reserve "fixed" for verified state.
 
 ## Interaction
 - When asked for your opinion (e.g. "what do you think?", "would it make sense to ~?"), explain your reasoning first and wait for approval before making edits
