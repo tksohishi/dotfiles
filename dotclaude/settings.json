@@ -453,6 +453,7 @@
       "Bash(cast estimate *)",
       "Bash(cast 4byte *)",
       "Bash(wayfinder *)",
+      "Bash(whisper-cli *)",
       "Bash(wrangler whoami*)",
       "Bash(wrangler pages project list*)",
       "Bash(wrangler pages project get *)",
