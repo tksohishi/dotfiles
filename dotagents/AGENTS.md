@@ -73,7 +73,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Global CLI tools: prefer `brew install` over `npm install -g`, `pip install`, or `go install`. Homebrew tracks everything in the Brewfile.
 
 ## Context Efficiency
-- Request targeted output: Read with `limit`/`offset` for large files; Grep with `head_limit` or `files_with_matches` first; `| head -N` for verbose shell output
+- Request targeted output: Read with `limit`/`offset` for large files; `rg` with `-m N` or `--files-with-matches` first; `| head -N` for verbose shell output
 - Delegate heavy research to subagents (where available) and request bounded summaries ("under 300 words") so raw output stays out of main context
 - When delegating to a subagent, apply a cost threshold: spawn only for multi-source synthesis (10+ URLs or cross-source comparison). For 1-3 page lookups, use WebFetch directly. Subagent overhead runs ~10x the tokens of a direct fetch for simple factual questions.
 - When spawning a subagent, pass `model: "sonnet"` explicitly for bulk fetch-and-summarize; pass `model: "opus"` when the task needs judgment on source credibility or contrarian conclusions (Sonnet hedges toward consensus). Don't rely on inheritance.
@@ -85,13 +85,13 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Quote paths with spaces in double quotes (`~/"Library/Application Support/..."`) instead of backslash-escaped whitespace; the backslash form triggers a permission prompt.
 - When running commands in a different directory, `cd` first as a separate command, then run the actual command. Never chain with `&&`.
 - Within the current project, prefer relative paths — for git (`git add foo.ts`), scripts (`bun scripts/foo.ts`, `python scripts/foo.py`, `./bin/foo`), and file ops (`ls src/`, `cat config.toml`). Use absolute paths only for files outside the project or when wd is genuinely ambiguous.
-- Never use `for` or `while` loops in Bash. Even when the body command is allowlisted, any `$var` expansion in the body trips Claude Code's expansion gate and prompts anyway — and practical iteration always uses the iter var. Enumerate items first (Grep, Read, Glob, `ls`), then make one Bash call per item with literal arguments (no `$var`). `until <check>; do sleep N; done` is allowed for polling (one-shot wait via Bash run_in_background).
+- Never use `for` or `while` loops in Bash. Even when the body command is allowlisted, any `$var` expansion in the body trips Claude Code's expansion gate and prompts anyway — and practical iteration always uses the iter var. Enumerate items first (`rg`, Read, `fd`, `ls`), then make one Bash call per item with literal arguments (no `$var`). `until <check>; do sleep N; done` is allowed for polling (one-shot wait via Bash run_in_background).
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
 - When calling `http`/`https` (httpie), always specify the method explicitly and put flags AFTER the URL. Canonical form: `http METHOD <URL> [flags...]` (method required, not optional; otherwise httpie's auto-method promotes commands with `key=value` data fields to implicit POST and bypasses the destructive-method gate). A PreToolUse hook blocks flag-first invocations.
-- Use Glob or `fd` for file search, scoped to the project directory. Ask before searching outside the project.
+- Use `fd` for file search, scoped to the project directory. Ask before searching outside the project.
 - **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists. Fall back to `gh api` only when no subcommand covers the operation, and research the endpoint first.
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
-- Prefer dedicated tools (Grep, Read, Glob, Edit) over Bash `grep`/`cat`. For JSON use `jq`. Never use `grep` for simple pattern search — that's the Grep tool's job.
+- Prefer Read for file content (not `cat`) and Edit for changes (not `sed`). For search, use `rg` and `fd` via Bash (Claude Code's macOS native build dropped the Grep/Glob tools). For JSON use `jq`.
 - For intermediate files (pdftotext output, downloaded HTML, etc.), use project-local `tmp/` (globally gitignored), not `/tmp`. Keeps operations in the project directory and avoids `cd`-chain patterns.
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
