@@ -62,6 +62,7 @@
       "Bash(gh release list*)",
       "Bash(gh release view *)",
       "Bash(gh label list*)",
+      "Bash(gh org list*)",
       "Bash(gh workflow list*)",
       "Bash(gh workflow view *)",
       "Bash(gh run watch *)",
