@@ -16,3 +16,4 @@ node_modules/
 playwright-mcp/
 agent-browser.json
 .agent-browser/
+.wrangler/
