@@ -47,11 +47,6 @@
 #                                   .env.stage, .env.dev, .dev.vars.
 #                                   Doesn't cover bare `env`/`printenv`/`set`
 #                                   (different vector; deferred).
-#   8. `cp -r/-R/-a` without -n   — recursive/archive cp silently overwrites
-#                                   existing files. Redirect to `cp -an`
-#                                   (archive + no-clobber) or `cp -n` for
-#                                   non-recursive. -n in any flag combo
-#                                   (e.g. -na, -rn) is accepted.
 #   9. `$(...)` command           — command substitution prompts every time,
 #      substitution                  because expansion happens on the local
 #                                    shell before the allowlist sees the
@@ -153,8 +148,6 @@ CMD_SUBST_RE='\$\('
 GH_API_RE='(^|;|&&|\|\||\|)[[:space:]]*gh[[:space:]]+api([[:space:]]|$)'
 SECRET_READER_RE='(^|;|&&|\|\||\|)[[:space:]]*(rg|grep|cat|sed|head|tail|awk|less|more|strings|bat|xxd|od|nl|tac)[[:space:]]'
 SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|development|test|prod|stage|dev)([^a-zA-Z0-9]|$)|\.dev\.vars([^a-zA-Z0-9]|$)'
-CP_RECURSIVE_RE='(^|;|&&|\|\||\|)[[:space:]]*cp[[:space:]]+(-[a-zA-Z]*[rRa])'
-CP_NOCLOBBER_RE='cp[[:space:]]+([^|;&]*[[:space:]])?-[a-zA-Z]*n'
 BUNX_RE='(^|;|&&|\|\||\|)[[:space:]]*bunx[[:space:]]+([^[:space:]]+)'
 SQLITE3_RE='(^|;|&&|\|\||\|)[[:space:]]*sqlite3([[:space:]]|$)'
 SQLITE3_READONLY_RE='[[:space:]]-readonly([[:space:]]|$)'
@@ -181,8 +174,6 @@ elif [[ "$CMD_BARE" =~ $GH_API_RE ]]; then
   REASON="\`gh api\` is blocked. Use \`gh <resource> <subcommand>\` (e.g., \`gh pr view\`, \`gh issue list\`, \`gh release list\`) with \`--json <fields>\` for structured output. Run \`gh <resource> --help\` to find the right subcommand. If you've researched and no subcommand covers this endpoint, surface the specific endpoint to the user for approval before retrying."
 elif [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE ]]; then
   REASON="Reading .env / .dev.vars files is blocked — they contain secrets (API keys, tokens). For schema, read .env.example. To inspect a value, use an approved redaction script (e.g., scripts/check-env.ts, scripts/redact-env.ts) or surface the specific need to the user. Once secrets are read, treat them as compromised and rotate."
-elif [[ "$CMD_BARE" =~ $CP_RECURSIVE_RE ]] && ! [[ "$CMD_BARE" =~ $CP_NOCLOBBER_RE ]]; then
-  REASON="Don't use 'cp -r/-R/-a' without -n. Recursive/archive cp silently overwrites existing files. Use 'cp -an <src> <dst>' for archive-mode copy (preserves attrs, no overwrite) or 'cp -n <src> <dst>' for non-recursive non-overwrite. The -n flag can appear in any combo, e.g. 'cp -an', 'cp -na', 'cp -rn'."
 elif [[ "$CMD_BARE" =~ $SQLITE3_RE ]] && ! [[ "$CMD_BARE" =~ $SQLITE3_READONLY_RE ]]; then
   DECISION="ask"
   REASON="sqlite3 without -readonly. If this is a read query (SELECT, PRAGMA, .schema, .tables, .dump), cancel and retry with -readonly to skip future prompts (the allow rule \`Bash(sqlite3 -readonly *)\` auto-approves that form). If this is a mutation (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), approve to proceed."
