@@ -1,11 +1,31 @@
 # Files where stylistic-symbol prose hooks (no-emdash, no-section-sign)
-# should skip. One basename per line. Lines starting with # are comments.
-# Blank lines are ignored. Match is exact-basename.
+# should skip. Lines starting with # are comments; blank lines ignored.
 #
-# Add files written for AI agent consumption (not human readers).
+# Two line formats:
+#   - No slash → exact basename match (e.g. AGENTS.md, TODO.md)
+#   - Contains slash → path substring match (e.g. /memory/, /.claude/,
+#     /dotclaude/). Anchor with leading + trailing slashes to bind to
+#     directory boundaries.
+#
+# Add entries for files / locations written for AI agent consumption or
+# personal tracking (not for human prose readers).
 
+# Agent-instruction files (by basename)
 AGENTS.md
 CLAUDE.md
 GEMINI.md
 SKILL.md
 MEMORY.md
+
+# Agent-internal directories (by path segment)
+/.claude/
+/.codex/
+/.gemini/
+/dotclaude/
+/dotagents/
+/dotcodex/
+/dotgemini/
+/memory/
+/skills/
+/plans/
+/hooks/

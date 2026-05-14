@@ -16,8 +16,12 @@
 #   2. Files targeted at AI agents (AGENTS.md, SKILL.md, etc.) are exempt
 #      by basename. The rule is for prose written for human readers;
 #      agent-targeted files often use these symbols stylistically and the
-#      user accepts that. The basename list lives in
-#      prose-skip-basenames.txt next to this script.
+#      user accepts that. The skip list lives in prose-skip-basenames.txt
+#      next to this script. Two line formats are supported:
+#        - No `/` → exact basename match (e.g. AGENTS.md, TODO.md)
+#        - Contains `/` → path substring match (e.g. /memory/, /.claude/,
+#          /dotclaude/). Anchor with leading and trailing slashes to bind
+#          to directory boundaries.
 #   3. Single-codepoint symbols only. Does NOT enforce broader typographic
 #      preferences ("hyphens as conjunctions", etc.) — too many false
 #      positives. Leave those as soft guidance.
@@ -65,7 +69,11 @@ if [ -f "$SKIP_FILE" ]; then
     skip=$(echo "$skip" | xargs)
     [ -z "$skip" ] && continue
     [[ "$skip" = \#* ]] && continue
-    if [ "$BASENAME" = "$skip" ]; then
+    if [[ "$skip" = */* ]]; then
+      case "$FILE_PATH" in
+        *"$skip"*) exit 0 ;;
+      esac
+    elif [ "$BASENAME" = "$skip" ]; then
       exit 0
     fi
   done < "$SKIP_FILE"
