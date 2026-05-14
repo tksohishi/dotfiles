@@ -17,6 +17,33 @@ GEMINI.md
 SKILL.md
 MEMORY.md
 
+# Personal tracking files (by basename, uppercase only)
+TODO.md
+TODOS.md
+NOTES.md
+WATCHLIST.md
+WISHLIST.md
+BACKLOG.md
+TASKS.md
+JOURNAL.md
+DIARY.md
+IDEAS.md
+SCRATCH.md
+INBOX.md
+QUEUE.md
+WORKLOG.md
+LOG.md
+DRAFT.md
+DRAFTS.md
+DONE.md
+READING.md
+READINGLIST.md
+DAILY.md
+WEEKLY.md
+TRACKER.md
+KANBAN.md
+PROGRESS.md
+
 # Agent-internal directories (by path segment)
 /.claude/
 /.codex/
