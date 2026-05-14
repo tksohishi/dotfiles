@@ -90,6 +90,18 @@
 #                                   one-off type-checks against ad-hoc
 #                                   `@types/*` installs that the local
 #                                   `bun tsc` form can't satisfy.
+#  12. `git X && git Y`          — chained git calls. Each git command
+#                                   should be a separate Bash tool call so
+#                                   each result stays visible and a failure
+#                                   mid-chain doesn't obscure context.
+#                                   Common offender: `git add ... && git
+#                                   commit ... && git push`. Matches &&,
+#                                   ;, ||. Narrow scope: only git-then-git
+#                                   chains; `git X && <non-git>` is left
+#                                   alone (rare in practice, mostly echo
+#                                   separators in skill output).
+#                                   `cd <dir> && git ...` is caught by #1
+#                                   first.
 #
 # Known limitations / future considerations:
 #
@@ -120,13 +132,15 @@ CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 # Strip quoted regions before pattern matching. Anything inside '...' or "..."
 # is bound for a remote shell (ssh --command, docker exec sh -c, etc.) and
 # isn't subject to the local-conventions checks below.
-CMD_BARE=$(echo "$CMD" | sed -e "s/'[^']*'//g" -e 's/"[^"]*"//g')
+# tr to a sentinel byte first so BSD sed treats the whole command as one line
+# (multi-line `-m "..."` commit messages would otherwise leak through).
+CMD_BARE=$(printf '%s' "$CMD" | tr '\n' '\1' | sed -e "s/'[^']*'//g" -e 's/"[^"]*"//g' | tr '\1' '\n')
 
 # Same idea but strips ONLY single-quoted regions. Used for the $(...) check:
 # command substitution expands on the local shell even inside double quotes,
 # so we can't strip those, but single quotes do prevent expansion and let
 # legitimate uses like awk '{print $(NF)}' through.
-CMD_NO_SQ=$(echo "$CMD" | sed "s/'[^']*'//g")
+CMD_NO_SQ=$(printf '%s' "$CMD" | tr '\n' '\1' | sed "s/'[^']*'//g" | tr '\1' '\n')
 
 CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
 LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
@@ -144,6 +158,7 @@ CP_NOCLOBBER_RE='cp[[:space:]]+([^|;&]*[[:space:]])?-[a-zA-Z]*n'
 BUNX_RE='(^|;|&&|\|\||\|)[[:space:]]*bunx[[:space:]]+([^[:space:]]+)'
 SQLITE3_RE='(^|;|&&|\|\||\|)[[:space:]]*sqlite3([[:space:]]|$)'
 SQLITE3_READONLY_RE='[[:space:]]-readonly([[:space:]]|$)'
+GIT_CHAIN_RE='(^|[^[:alnum:]_])git[[:space:]]+[^|;&]*(&&|;|\|\|)[[:space:]]*git[[:space:]]'
 
 REASON=""
 DECISION="deny"
@@ -176,6 +191,8 @@ elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
   if [[ "$bunx_arg" != "tsc" ]] && [[ "$bunx_arg" != -* ]] && [[ -f "node_modules/.bin/$bunx_arg" ]]; then
     REASON="\`bunx $bunx_arg\` blocked: \`$bunx_arg\` is in node_modules/.bin, so \`bun $bunx_arg\` runs the same binary. Use \`bun $bunx_arg\` so the call matches the typical \`Bash(bun *)\` project-trust allow rule (\`bunx *\` prompts every time). Reserve \`bunx\` for one-off execution of packages not installed locally."
   fi
+elif [[ "$CMD_BARE" =~ $GIT_CHAIN_RE ]]; then
+  REASON="Don't chain git commands with && / ; / ||. Run each git as a separate Bash tool call so each result stays visible and a failure mid-chain doesn't obscure context. Working directory persists across calls, so \`git add foo && git commit -m bar && git push\` becomes three calls."
 fi
 
 if [ -z "$REASON" ]; then
