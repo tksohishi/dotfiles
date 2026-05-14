@@ -20,7 +20,7 @@ if [[ ! "$FILE_PATH" =~ /memory/.*\.md$ ]]; then
   exit 0
 fi
 
-if ! echo "$CONTENT" | head -20 | grep -qE '^type:[[:space:]]*feedback[[:space:]]*$'; then
+if ! echo "$CONTENT" | head -20 | grep -qE '^[[:space:]]*type:[[:space:]]*feedback[[:space:]]*$'; then
   exit 0
 fi
 
