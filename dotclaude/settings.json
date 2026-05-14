@@ -252,6 +252,7 @@
       "Bash(rclone tree *)",
       "Bash(rclone version*)",
       "Bash(rg *)",
+      "Bash(rsync *)",
       "Bash(date*)",
       "Bash(defaults domains*)",
       "Bash(defaults export *)",
@@ -503,7 +504,8 @@
       "Bash(caddy remove-package*)",
       "Bash(caddy stop*)",
       "Bash(caddy upgrade*)",
-      "Bash(qpdf *--replace-input*)"
+      "Bash(qpdf *--replace-input*)",
+      "Bash(rsync * --delete*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
