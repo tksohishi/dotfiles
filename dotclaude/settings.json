@@ -228,7 +228,6 @@
       "Bash(tail *)",
       "Bash(tee *)",
       "Bash(tg *)",
-      "Bash(timeout *)",
       "Bash(pgrep *)",
       "Bash(ps *)",
       "Bash(rclone about *)",
@@ -491,8 +490,11 @@
       "Bash(caddy stop*)",
       "Bash(caddy upgrade*)",
       "Bash(claude plugin install *)",
+      "Bash(mise exec*)",
+      "Bash(mise x *)",
       "Bash(qpdf *--replace-input*)",
-      "Bash(rsync * --delete*)"
+      "Bash(rsync * --delete*)",
+      "Bash(timeout *)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
