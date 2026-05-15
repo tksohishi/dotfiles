@@ -228,6 +228,7 @@
       "Bash(tail *)",
       "Bash(tee *)",
       "Bash(tg *)",
+      "Bash(timeout *)",
       "Bash(pgrep *)",
       "Bash(ps *)",
       "Bash(rclone about *)",
