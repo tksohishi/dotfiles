@@ -211,17 +211,26 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
 
-# Claude Code custom skills (directory symlink)
-target="$HOME/.claude/skills"
-source="$DOTFILES_DIR/dotclaude/skills"
-if [ -L "$target" ]; then
-    rm "$target"
-elif [ -d "$target" ]; then
-    echo "Backing up $target to $target.bak"
-    mv "$target" "$target.bak"
+# Claude Code custom skills (symlink each skill individually so
+# bunx skills-installed entries can coexist in ~/.claude/skills/)
+mkdir -p "$HOME/.claude/skills"
+# Handle prior whole-directory symlink left over from earlier installs
+if [ -L "$HOME/.claude/skills" ]; then
+    rm "$HOME/.claude/skills"
+    mkdir "$HOME/.claude/skills"
 fi
-ln -s "$source" "$target"
-echo "Linked dotclaude/skills/ -> ~/.claude/skills/"
+for skill_dir in "$DOTFILES_DIR"/dotclaude/skills/*/; do
+    skill_name="$(basename "$skill_dir")"
+    target="$HOME/.claude/skills/$skill_name"
+    if [ -L "$target" ]; then
+        rm "$target"
+    elif [ -d "$target" ]; then
+        echo "Backing up $target to $target.bak"
+        mv "$target" "$target.bak"
+    fi
+    ln -s "$skill_dir" "$target"
+    echo "Linked Claude skill: $skill_name"
+done
 
 # Claude Code hooks (directory symlink)
 target="$HOME/.claude/hooks"
