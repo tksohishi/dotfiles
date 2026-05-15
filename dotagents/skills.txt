@@ -6,4 +6,7 @@
 #   <owner>/<repo>:<skill>   install specific skill from repo
 # Blank lines and lines starting with # are ignored.
 
+anthropics/skills:docx
 anthropics/skills:frontend-design
+anthropics/skills:pdf
+vercel-labs/skills:find-skills
