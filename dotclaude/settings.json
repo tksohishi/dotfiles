@@ -451,11 +451,8 @@
       "Bash(wayfinder *)",
       "Bash(whisper-cli *)",
       "Bash(zsh -n *)",
-      "Skill(clipboard *)",
-      "Skill(github-release *)",
-      "Skill(init-agents)",
-      "Skill(obsidianize)",
-      "Skill(update-config)",
+      "Skill(*)",
+      "Skill(* *)",
       "WebSearch",
       "WebFetch"
     ],
