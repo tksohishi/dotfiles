@@ -371,6 +371,30 @@ if [ -f "$codex_rules_src" ]; then
     fi
 fi
 
+# ── Agent skills (skills.sh) ──────────────────────────────────
+# Source of truth: dotagents/skills.txt
+# One entry per line. Format:
+#   <owner>/<repo>           install all skills from repo
+#   <owner>/<repo>:<skill>   install one skill from repo
+skills_list="$DOTFILES_DIR/dotagents/skills.txt"
+if [ -f "$skills_list" ] && command -v bunx &>/dev/null; then
+    echo ""
+    echo "Installing skills.sh skills from skills.txt..."
+    while IFS= read -r line; do
+        [ -z "${line// /}" ] && continue
+        case "$line" in
+            \#*) continue ;;
+        esac
+        if [[ "$line" == *:* ]]; then
+            pkg="${line%%:*}"
+            skill="${line##*:}"
+            bunx skills add -g "$pkg" --skill "$skill" || echo "  Failed: $line"
+        else
+            bunx skills add -g "$line" || echo "  Failed: $line"
+        fi
+    done < "$skills_list"
+fi
+
 # ── MCP servers ───────────────────────────────────────────────
 # Source of truth: [mcp_servers.*] in dotcodex/config.toml
 # Codex gets them via the merge above. Claude Code needs explicit `claude mcp add`.

@@ -1,0 +1,9 @@
+# Agent skills installed via `bunx skills add -g` from skills.sh.
+# Replayed by install.sh on new machines.
+#
+# Format:
+#   <owner>/<repo>           install all skills from repo
+#   <owner>/<repo>:<skill>   install specific skill from repo
+# Blank lines and lines starting with # are ignored.
+
+anthropics/skills:frontend-design
