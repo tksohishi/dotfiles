@@ -54,6 +54,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Markdown Formatting
 - Headings: prefer `###` for topic titles in general content. Reserve `#`/`##` for top-level document structure where genuinely needed.
 - Bold (`**text**`): reserve for genuinely important claims only. Don't bold for routine emphasis or to highlight every key term.
+- Clickable file paths: when citing a file the user is meant to open (smoke artifacts, screenshots, generated reports, log dumps), render as `[name](file:///absolute/path)` so it's one click to inspect. Plain backticked paths aren't clickable in the Claude Code UI. Skip for source-code citations like `app.py:123` where the user reads in an editor, not opens via the OS.
 
 ## Slack Formatting
 - Headings: `*Title*` on its own line. Slack's mrkdwn doesn't support `#` or `##` (they render literally).
