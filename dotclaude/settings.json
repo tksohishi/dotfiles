@@ -126,7 +126,6 @@
       "Bash(claude mcp *)",
       "Bash(claude plugin disable *)",
       "Bash(claude plugin enable *)",
-      "Bash(claude plugin install *)",
       "Bash(claude plugin list*)",
       "Bash(claude plugin marketplace *)",
       "Bash(claude plugin update *)",
@@ -490,6 +489,7 @@
       "Bash(caddy remove-package*)",
       "Bash(caddy stop*)",
       "Bash(caddy upgrade*)",
+      "Bash(claude plugin install *)",
       "Bash(qpdf *--replace-input*)",
       "Bash(rsync * --delete*)"
     ],

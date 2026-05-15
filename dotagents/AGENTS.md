@@ -71,6 +71,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Python: uv, not pip
 - Bun auto-loads `.env` (and `.env.local`, `.env.{NODE_ENV}`) from the working directory. Just run `bun script.ts`; don't add `--env-file=.env` redundantly. Use the flag only for non-default filenames (e.g. `--env-file=.env.staging`).
 - Global CLI tools: prefer `brew install` over `npm install -g`, `pip install`, or `go install`. Homebrew tracks everything in the Brewfile.
+- Agent skills/capabilities: prefer `npx skills add <owner>/<repo>` (skills.sh) over `claude plugin install`. skills.sh is agent-neutral (Claude / Cursor / Codex / Copilot / Gemini all read the same `~/.agents/skills/<name>/` via per-agent symlinks); plugins are Claude-only and lock you in. Legitimate exception: capability ships only as a plugin (LSP servers, etc.) and not on skills.sh.
 
 ## Context Efficiency
 - Request targeted output: Read with `limit`/`offset` for large files; `rg` with `-m N` or `--files-with-matches` first; `| head -N` for verbose shell output
