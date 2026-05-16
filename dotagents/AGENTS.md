@@ -110,6 +110,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Symlinked Configs
 - Most files under `~/.claude/`, `~/.codex/`, `~/.gemini/` symlink into `~/.dotfiles/`. Edit/Write refuses to write through symlinks.
 - When wd is `~/.dotfiles/`, edit the source files directly (e.g. `dotagents/AGENTS.md`, `dotclaude/settings.json`) instead of the `~/.<tool>/` paths.
+- In any project, `CLAUDE.md` is conventionally a symlink to `AGENTS.md` (the canonical instructions file). When editing project instructions, go to `AGENTS.md` directly — don't write through `CLAUDE.md`, skip the `readlink` round trip. Same for `GEMINI.md`/`.cursorrules` → `AGENTS.md` if present.
 
 ## Secrets
 - Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), or `.dev.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
