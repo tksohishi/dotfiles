@@ -112,6 +112,17 @@
 #                                   separators in skill output).
 #                                   `cd <dir> && git ...` is caught by #1
 #                                   first.
+#  14. backslash-escaped         — paths with spaces escaped as `\ ` trigger
+#      whitespace                  Claude Code's permission prompt every time
+#                                  (the prompt-form parser doesn't normalize
+#                                  the escape). The fix is double quotes:
+#                                  `"/Applications/Google Chrome.app"` or
+#                                  `~/"Library/Application Support/foo"`.
+#                                  Checked against CMD_BARE so backslash-
+#                                  space inside quoted regions passes (those
+#                                  are remote-shell bytes anyway and
+#                                  irrelevant to local allowlist matching).
+#
 #  13. multi-line commands       — multiple commands crammed into one Bash
 #                                   call separated by newlines. The Bash
 #                                   tool description already says "DO NOT
@@ -191,6 +202,7 @@ BUNX_RE='(^|;|&&|\|\||\|)[[:space:]]*bunx[[:space:]]+([^[:space:]]+)'
 SQLITE3_RE='(^|;|&&|\|\||\|)[[:space:]]*sqlite3([[:space:]]|$)'
 SQLITE3_READONLY_RE='[[:space:]]-readonly([[:space:]]|$)'
 GIT_CHAIN_RE='(^|[^[:alnum:]_])git[[:space:]]+[^|;&]*(&&|;|\|\|)[[:space:]]*git[[:space:]]'
+BACKSLASH_WS_RE='\\[[:space:]]'
 
 REASON=""
 DECISION="deny"
@@ -227,6 +239,8 @@ elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
   fi
 elif [[ "$CMD_BARE" =~ $GIT_CHAIN_RE ]]; then
   REASON="Don't chain git commands with && / ; / ||. Run each git as a separate Bash tool call so each result stays visible and a failure mid-chain doesn't obscure context. Working directory persists across calls, so \`git add foo && git commit -m bar && git push\` becomes three calls."
+elif [[ "$CMD_BARE" =~ $BACKSLASH_WS_RE ]]; then
+  REASON="Don't backslash-escape whitespace in paths. Claude Code's prompt parser doesn't normalize \`\\\\ \` so the call prompts every time. Use double quotes instead: \"/Applications/Google Chrome.app\" or ~/\"Library/Application Support/foo\". The shell handles the space inside the quotes; no escape needed."
 fi
 
 if [ -z "$REASON" ]; then
