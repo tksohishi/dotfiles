@@ -56,3 +56,4 @@ PROGRESS.md
 /skills/
 /plans/
 /hooks/
+/tmp/

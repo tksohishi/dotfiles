@@ -82,7 +82,7 @@ If the project has known historical failure modes (past incidents, recurring bug
 
 Use this skeleton. Substitute the bracketed sections with what you found in Steps 1-3. Keep the whole prompt under ~2KB; long prompts dilute the reviewer's focus.
 
-Write the final prompt to `tmp/cross-review-prompt.md` using the Write tool. The Run section reads the file via stdin redirection — keeping the prompt out of the Bash command line avoids command-substitution / heredoc patterns that the agent harness blocks.
+Write the final prompt to `tmp/CROSS_REVIEW_PROMPT.md` using the Write tool. The Run section reads the file via stdin redirection — keeping the prompt out of the Bash command line avoids command-substitution / heredoc patterns that the agent harness blocks.
 
 ```
 You are auditing work produced by another AI assistant ({CURRENT_ASSISTANT}) for the {PROJECT_NAME} project.
@@ -141,12 +141,12 @@ Be blunt. A false positive costs a minute; a false negative costs
 
 ## Run
 
-Pick the branch that matches your identity. Both binaries are normally on PATH; prefix with `mise exec --` if not. Both branches assume the prompt has already been written to `tmp/cross-review-prompt.md` per Step 4.
+Pick the branch that matches your identity. Both binaries are on PATH via shell inheritance — call them directly, no `mise exec --` wrapper. Both branches assume the prompt has already been written to `tmp/CROSS_REVIEW_PROMPT.md` per Step 4.
 
 ### Branch A — you are Claude Code, invoke Codex
 
 ```bash
-mise exec -- codex exec - < tmp/cross-review-prompt.md
+codex exec - < tmp/CROSS_REVIEW_PROMPT.md
 ```
 
 The `-` arg tells `codex exec` to read the prompt from stdin (per `codex exec --help`: "If not provided as an argument (or if `-` is used), instructions are read from stdin"). Stdin is redirected from the prompt file, so EOF arrives at end-of-file and the call doesn't hang.
@@ -156,16 +156,14 @@ The `-` arg tells `codex exec` to read the prompt from stdin (per `codex exec --
 ### Branch B — you are OpenAI Codex CLI, invoke Claude
 
 ```bash
-mise exec -- claude -p < tmp/cross-review-prompt.md
+claude -p < tmp/CROSS_REVIEW_PROMPT.md
 ```
 
 `claude -p` reads from stdin when no positional prompt is given, so the file content becomes the prompt. Runs once and prints to stdout, then exits — analogous to `codex exec`.
 
-If `claude` is not on PATH after `mise exec`, fall back to `mise which claude` to locate the binary.
-
 ### Branch-agnostic guardrails (apply to both)
 
-**Why a temp file, not heredoc / `$()`.** Embedding the prompt via `"$(cat <<'PROMPT' ... PROMPT)"` triggers the agent harness's command-substitution gate (`$()` and heredocs are blocked because they break allowlist matching and prompt every time). File-stdin is a clean separation: the command line stays static, the prompt lives in `tmp/cross-review-prompt.md`. The project-local `tmp/` is globally gitignored, so leftover files don't pollute the repo.
+**Why a temp file, not heredoc / `$()`.** Embedding the prompt via `"$(cat <<'PROMPT' ... PROMPT)"` triggers the agent harness's command-substitution gate (`$()` and heredocs are blocked because they break allowlist matching and prompt every time). File-stdin is a clean separation: the command line stays static, the prompt lives in `tmp/CROSS_REVIEW_PROMPT.md`. The project-local `tmp/` is globally gitignored, so leftover files don't pollute the repo.
 
 **Run in the background.** Reviews take 1-5 minutes. Use `run_in_background: true` on the Bash tool call and continue with other work; you'll be notified on completion. Don't poll, don't sleep.
 
