@@ -100,6 +100,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 - For `sqlite3`, always pass `-readonly` for read queries (SELECT, PRAGMA, .schema, .tables, .dump). The allow rule covers that form; without `-readonly` the call prompts every time. Omit `-readonly` only for mutations (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), which prompt for one-off approval by design.
+- macOS 15+ silently drops LAN unicast (ping/SSH return "No route to host" with ARP populated and gateway reachable) when the host app lacks Local Network permission in System Settings → Privacy & Security → Local Network. Resets on major OS updates.
 
 
 ## Env Files
