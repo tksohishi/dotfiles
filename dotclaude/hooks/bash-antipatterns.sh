@@ -112,6 +112,24 @@
 #                                   separators in skill output).
 #                                   `cd <dir> && git ...` is caught by #1
 #                                   first.
+#  13. multi-line commands       — multiple commands crammed into one Bash
+#                                   call separated by newlines. The Bash
+#                                   tool description already says "DO NOT
+#                                   use newlines to separate commands"
+#                                   but soft guidance drifts. Each command
+#                                   should be its own tool call: results
+#                                   stay visible per-command, allowlist
+#                                   matching works on the literal command,
+#                                   and failures don't obscure later
+#                                   output. Detection runs on CMD_BARE
+#                                   (quoted regions stripped), so legit
+#                                   multi-line quoted strings like commit
+#                                   message bodies aren't false-positive.
+#                                   Counts non-empty lines after stripping
+#                                   quotes; >1 fires. Placed first in the
+#                                   chain so the agent fixes structure
+#                                   before any per-line pattern is
+#                                   evaluated.
 #
 # Known limitations / future considerations:
 #
@@ -152,6 +170,10 @@ CMD_BARE=$(printf '%s' "$CMD" | tr '\n' '\1' | sed -e "s/'[^']*'//g" -e 's/"[^"]
 # legitimate uses like awk '{print $(NF)}' through.
 CMD_NO_SQ=$(printf '%s' "$CMD" | tr '\n' '\1' | sed "s/'[^']*'//g" | tr '\1' '\n')
 
+# Count non-empty lines in CMD_BARE. >1 means multiple commands crammed
+# into one Bash call (newlines inside quoted strings were stripped above).
+MULTILINE_COUNT=$(printf '%s\n' "$CMD_BARE" | awk 'NF>0' | wc -l | tr -d ' ')
+
 CD_CHAIN_RE='(^|[^[:alnum:]_])cd[[:space:]]+[^[:space:]]+[[:space:]]*&&'
 LOOP_RE='(^|;|&&|\|\||\|)[[:space:]]*(for|while)[[:space:]].+(;|[[:space:]])do([[:space:]]|;|$)'
 LOOP_DONE_RE='(^|[[:space:];])done([[:space:];]|$|\))'
@@ -173,7 +195,9 @@ GIT_CHAIN_RE='(^|[^[:alnum:]_])git[[:space:]]+[^|;&]*(&&|;|\|\|)[[:space:]]*git[
 REASON=""
 DECISION="deny"
 
-if [[ "$CMD_BARE" =~ $CD_CHAIN_RE ]]; then
+if [ "$MULTILINE_COUNT" -gt 1 ]; then
+  REASON="Don't cram multiple commands into one Bash call separated by newlines. Each command should be a separate Bash tool call so results stay visible per-command, allowlist matching works on the literal command, and a failure mid-sequence doesn't obscure later output. Working directory and shell state persist across calls, so there's no setup cost to splitting."
+elif [[ "$CMD_BARE" =~ $CD_CHAIN_RE ]]; then
   REASON="Don't chain 'cd <dir> && <cmd>' — the chained command bypasses the allowlist and triggers a permission prompt. If you need to be in another directory, run 'cd <dir>' as a separate Bash call first (working directory persists across calls), then the command. If you're already in the right place, drop the cd and run the command directly (or with an absolute path)."
 elif [[ "$CMD_BARE" =~ $LOOP_RE ]] && [[ "$CMD_BARE" =~ $LOOP_DONE_RE ]]; then
   REASON="Don't use for/while loops in Bash. Even if the body command is allowlisted, any \$var expansion in the body trips Claude Code's expansion gate and prompts anyway — and practical iteration always uses the iter var. Enumerate items first with Glob/Grep/Read, then make one Bash call per item with literal arguments (no \$var) so the calls match allowlist rules silently. Polling with 'until <check>; do sleep N; done' is allowed."
