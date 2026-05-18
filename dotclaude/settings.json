@@ -367,6 +367,7 @@
       "Bash(orbctl version*)",
       "Bash(pandoc *)",
       "Bash(pbcopy *)",
+      "Bash(pbpaste*)",
       "Bash(pdfattach *)",
       "Bash(pdfdetach *)",
       "Bash(pdffonts *)",
