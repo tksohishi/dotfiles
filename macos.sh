@@ -65,9 +65,21 @@ defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
 # even during an Amphetamine session — system stays awake, display doesn't.
 defaults write com.if.Amphetamine "Allow Display Sleep" -bool true
 
+# ── Text cursor input source indicator ───────────────────────
+# Disable the floating "あ/A" badge that appears next to the cursor when
+# switching input source (added in macOS 14 Sonoma, still present in Tahoe).
+# No System Settings toggle exists; this modifies an undocumented internal
+# feature flag. Apple may rename the key in a future release.
+# Source: https://discussions.apple.com/thread/255161844
+# Requires a reboot to take effect.
+sudo mkdir -p /Library/Preferences/FeatureFlags/Domain
+sudo defaults write /Library/Preferences/FeatureFlags/Domain/UIKit.plist \
+    redesigned_text_cursor -dict-add Enabled -bool NO
+
 # ── Restart affected apps ────────────────────────────────────
 echo "Restarting Dock and Finder to apply changes..."
 killall Dock
 killall Finder
 
 echo "Done. Some changes (keyboard, trackpad) may require a logout to take effect."
+echo "Cursor input-source indicator disable requires a reboot."
