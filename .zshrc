@@ -58,8 +58,12 @@ if [ -f ~/.ssh/id_ed25519 ]; then
     fi
 fi
 
-# Tab title: show current directory name
-precmd() { print -Pn "\e]0;%1~\a" }
+# Tab title: show current directory name, prefixed with [host] when SSH'd in
+if [ -n "$SSH_TTY" ]; then
+    precmd() { print -Pn "\e]0;[${HOST%%.*}] %1~\a" }
+else
+    precmd() { print -Pn "\e]0;%1~\a" }
+fi
 
 # Tool initialization
 command -v direnv >/dev/null && eval "$(direnv hook zsh)"
