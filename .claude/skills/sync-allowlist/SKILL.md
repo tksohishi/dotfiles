@@ -7,7 +7,7 @@ Sync command allowlist from `~/.dotfiles/dotclaude/settings.json` into Codex.
 
 Follow these steps:
 
-1. Run `bun scripts/agent-commands.ts sync-allowlist`
+1. Run `bun scripts/sync-allowlist.ts`
 2. Run `scripts/sync-codex-config.sh`
 3. Copy `~/.dotfiles/dotcodex/rules/default.rules` to `~/.codex/rules/default.rules`
 4. Validate generated files:
