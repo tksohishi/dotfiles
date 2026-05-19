@@ -464,6 +464,7 @@
       "Bash(cast 4byte *)",
       "Bash(wayfinder *)",
       "Bash(whisper-cli *)",
+      "Bash(yt-dlp *)",
       "Bash(zsh -n *)",
       "Skill(*)",
       "Skill(* *)",
@@ -513,7 +514,8 @@
       "Bash(mise x *)",
       "Bash(qpdf *--replace-input*)",
       "Bash(rsync * --delete*)",
-      "Bash(timeout *)"
+      "Bash(timeout *)",
+      "Bash(yt-dlp *--exec*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
