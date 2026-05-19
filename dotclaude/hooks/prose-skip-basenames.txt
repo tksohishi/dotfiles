@@ -58,3 +58,4 @@ POSTED.md
 /plans/
 /hooks/
 /tmp/
+/research/
