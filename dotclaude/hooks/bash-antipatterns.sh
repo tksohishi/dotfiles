@@ -100,18 +100,6 @@
 #                                   one-off type-checks against ad-hoc
 #                                   `@types/*` installs that the local
 #                                   `bun tsc` form can't satisfy.
-#  12. `git X && git Y`          — chained git calls. Each git command
-#                                   should be a separate Bash tool call so
-#                                   each result stays visible and a failure
-#                                   mid-chain doesn't obscure context.
-#                                   Common offender: `git add ... && git
-#                                   commit ... && git push`. Matches &&,
-#                                   ;, ||. Narrow scope: only git-then-git
-#                                   chains; `git X && <non-git>` is left
-#                                   alone (rare in practice, mostly echo
-#                                   separators in skill output).
-#                                   `cd <dir> && git ...` is caught by #1
-#                                   first.
 #  14. backslash-escaped         — paths with spaces escaped as `\ ` trigger
 #      whitespace                  Claude Code's permission prompt every time
 #                                  (the prompt-form parser doesn't normalize
@@ -201,7 +189,6 @@ CP_NOCLOBBER_RE='cp[[:space:]]+([^|;&]*[[:space:]])?-[a-zA-Z]*n'
 BUNX_RE='(^|;|&&|\|\||\|)[[:space:]]*bunx[[:space:]]+([^[:space:]]+)'
 SQLITE3_RE='(^|;|&&|\|\||\|)[[:space:]]*sqlite3([[:space:]]|$)'
 SQLITE3_READONLY_RE='[[:space:]]-readonly([[:space:]]|$)'
-GIT_CHAIN_RE='(^|[^[:alnum:]_])git[[:space:]]+[^|;&]*(&&|;|\|\|)[[:space:]]*git[[:space:]]'
 BACKSLASH_WS_RE='\\[[:space:]]'
 
 REASON=""
@@ -237,8 +224,6 @@ elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
   if [[ "$bunx_arg" != "tsc" ]] && [[ "$bunx_arg" != -* ]] && [[ -f "node_modules/.bin/$bunx_arg" ]]; then
     REASON="\`bunx $bunx_arg\` blocked: \`$bunx_arg\` is in node_modules/.bin, so \`bun $bunx_arg\` runs the same binary. Use \`bun $bunx_arg\` so the call matches the typical \`Bash(bun *)\` project-trust allow rule (\`bunx *\` prompts every time). Reserve \`bunx\` for one-off execution of packages not installed locally."
   fi
-elif [[ "$CMD_BARE" =~ $GIT_CHAIN_RE ]]; then
-  REASON="Don't chain git commands with && / ; / ||. Run each git as a separate Bash tool call so each result stays visible and a failure mid-chain doesn't obscure context. Working directory persists across calls, so \`git add foo && git commit -m bar && git push\` becomes three calls."
 elif [[ "$CMD_BARE" =~ $BACKSLASH_WS_RE ]]; then
   REASON="Don't backslash-escape whitespace in paths. Claude Code's prompt parser doesn't normalize \`\\\\ \` so the call prompts every time. Use double quotes instead: \"/Applications/Google Chrome.app\" or ~/\"Library/Application Support/foo\". The shell handles the space inside the quotes; no escape needed."
 fi
