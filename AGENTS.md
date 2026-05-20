@@ -9,6 +9,7 @@ Personal dotfiles repository for macOS. Manages shell configs, editor settings, 
 ## Project Skills
 - **audit-apps**: Audit installed apps against the Brewfile and suggest changes. Full instructions: `.claude/skills/audit-apps/SKILL.md`
 - **command-permissions**: Manage Claude Code Bash permissions (allow, ask, deny) for a given command. Full instructions: `.claude/skills/command-permissions/SKILL.md`
+- **create-hook**: Create an agent hook (PreToolUse / PostToolUse / etc.) and wire it correctly for Claude Code, Codex, or both. Full instructions: `.claude/skills/create-hook/SKILL.md`
 - **discover-apps**: Find new Mac tools worth installing. Full instructions: `.claude/skills/discover-apps/SKILL.md`
 - **install-app**: Install an app via Homebrew and add it to the Brewfile. Full instructions: `.claude/skills/install-app/SKILL.md`
 - **install-skill**: Discover and install an agent skill via bunx skills add -g, then track it in dotagents/skills.txt for new-machine reproducibility. Full instructions: `.claude/skills/install-skill/SKILL.md`
