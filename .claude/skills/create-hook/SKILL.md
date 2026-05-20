@@ -120,6 +120,7 @@ command = "$HOME/.codex/hooks/<name>.sh"
 ## Constraints worth knowing
 
 - **`permissionDecision: "ask"` is Claude-only.** Codex rejects it as schema-invalid. Always downgrade for Codex.
+- **`permissionDecision: "allow"` + `permissionDecisionReason` is Claude-only.** Codex only accepts `"allow"` paired with `updatedInput` (the rewrite form). For cross-agent context injection without gating, emit `additionalContext` alone (no `permissionDecision` key) — both agents accept that shape, and the call falls through to the normal allowlist for approval.
 - **Codex matcher is regex on `tool_name`.** `'^Bash$'` anchors; `'^Bash'` would also match a future `BashLite`. Anchor unless you have a reason not to.
 - **Hook script runs via `$SHELL -lc <command>`** in Codex, which means env vars and `~` / `$HOME` expand naturally in the `command` field.
 - **First Codex run after wiring a new hook prompts trust** via the `/hooks` TUI. Use `--dangerously-bypass-hook-trust` for headless automation only.

@@ -20,11 +20,10 @@ if [[ -n "$CWD" && ! -f "$CWD/agent-browser.json" ]]; then
   REMINDERS="$REMINDERS Project has no agent-browser.json; consider \`/agent-browser-init\` to isolate this project's browser state and enable parallel use with other projects."
 fi
 
-jq -nc --arg reason "$REMINDERS" '{
+jq -nc --arg ctx "$REMINDERS" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
-    permissionDecision: "allow",
-    permissionDecisionReason: $reason
+    additionalContext: $ctx
   }
 }'
 
