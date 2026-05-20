@@ -156,12 +156,14 @@
 TOOL_INPUT=$(cat)
 CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 
-# Codex's PreToolUse hook accepts only allow/deny, not ask. Detect by the
-# presence of `permission_mode` in the input JSON (Codex sets it; Claude
-# Code doesn't). When false, downgrade any "ask" decision to "deny" so the
-# JSON output validates on Codex's stricter schema.
+# Codex's PreToolUse hook accepts only allow/deny, not ask. The Codex config
+# (dotcodex/config.toml) sets CODEX_HOOK=1 on every hook command so we can
+# detect the runtime deterministically (both agents include `permission_mode`
+# in the input JSON, so schema-sniffing isn't reliable). When CODEX_HOOK is
+# set, downgrade any "ask" decision to "deny" so the JSON output validates
+# on Codex's stricter schema.
 SUPPORTS_ASK=true
-if echo "$TOOL_INPUT" | jq -e 'has("permission_mode")' >/dev/null 2>&1; then
+if [ -n "$CODEX_HOOK" ]; then
   SUPPORTS_ASK=false
 fi
 

@@ -50,23 +50,23 @@ matcher = '^Bash$'
 
 [[hooks.PreToolUse.hooks]]
 type = "command"
-command = "$HOME/.codex/hooks/agent-browser-context.sh"
+command = "CODEX_HOOK=1 $HOME/.codex/hooks/agent-browser-context.sh"
 
 [[hooks.PreToolUse.hooks]]
 type = "command"
-command = "$HOME/.codex/hooks/bash-antipatterns.sh"
+command = "CODEX_HOOK=1 $HOME/.codex/hooks/bash-antipatterns.sh"
 
 [[hooks.PreToolUse.hooks]]
 type = "command"
-command = "$HOME/.codex/hooks/git-commit-subject.sh"
+command = "CODEX_HOOK=1 $HOME/.codex/hooks/git-commit-subject.sh"
 
 [[hooks.PreToolUse.hooks]]
 type = "command"
-command = "$HOME/.codex/hooks/httpie-flag-order.sh"
+command = "CODEX_HOOK=1 $HOME/.codex/hooks/httpie-flag-order.sh"
 
 [[hooks.PostToolUse]]
 matcher = '^Bash$'
 
 [[hooks.PostToolUse.hooks]]
 type = "command"
-command = "$HOME/.codex/hooks/bash-verify-reminder.sh"
+command = "CODEX_HOOK=1 $HOME/.codex/hooks/bash-verify-reminder.sh"
