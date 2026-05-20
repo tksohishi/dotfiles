@@ -72,7 +72,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Python: uv, not pip
 - Bun auto-loads `.env` (and `.env.local`, `.env.{NODE_ENV}`) from the working directory. Just run `bun script.ts`; don't add `--env-file=.env` redundantly. Use the flag only for non-default filenames (e.g. `--env-file=.env.staging`).
 - Global CLI tools: prefer `brew install` over `npm install -g`, `pip install`, or `go install`. Homebrew tracks everything in the Brewfile.
-- Agent skills/capabilities: prefer `bunx skills add -g <owner>/<repo>` (skills.sh) over `claude plugin install`. skills.sh is agent-neutral (Claude / Cursor / Codex / Copilot / Gemini all read the same `~/.agents/skills/<name>/` via per-agent symlinks); plugins are Claude-only and lock you in. From within the dotfiles repo use `/install-skill` which handles discovery (via find-skills), install, and skills.txt tracking in one step. Legitimate exception: capability ships only as a plugin (LSP servers, etc.) and not on skills.sh.
+- Agent skills/capabilities: prefer `bunx skills add -g <owner>/<repo>` (skills.sh) over `claude plugin install`. skills.sh is agent-neutral (Claude / Cursor / Codex / Copilot all read the same `~/.agents/skills/<name>/` via per-agent symlinks); plugins are Claude-only and lock you in. From within the dotfiles repo use `/install-skill` which handles discovery (via find-skills), install, and skills.txt tracking in one step. Legitimate exception: capability ships only as a plugin (LSP servers, etc.) and not on skills.sh.
 
 ## Context Efficiency
 - Request targeted output: Read with `limit`/`offset` for large files; `rg` with `-m N` or `--files-with-matches` first; `| head -N` for verbose shell output
@@ -86,7 +86,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - **Never use command substitution (`$()`, backticks) or heredocs in commands.** They break allowlist matching and trigger permission prompts. Simple pipes (`|`) and redirections (`<`, `>`) are fine.
 - Quote paths with spaces in double quotes (`~/"Library/Application Support/..."`) instead of backslash-escaped whitespace; the backslash form triggers a permission prompt.
 - When running commands in a different directory, `cd` first as a separate command, then run the actual command. Never chain with `&&`.
-- mise-installed tools (`codex`, `bun`, `node`, `gemini`, `deno`, etc.) are on PATH via shell inheritance from the activated zsh that launched the agent. Call them directly. Don't wrap with `mise exec --` (gated by ask) or `zsh -lc` (wrapper-bypass; gated). If a tool isn't on PATH, the launch context wasn't activated; investigate before reaching for a wrapper.
+- mise-installed tools (`codex`, `bun`, `node`, `deno`, etc.) are on PATH via shell inheritance from the activated zsh that launched the agent. Call them directly. Don't wrap with `mise exec --` (gated by ask) or `zsh -lc` (wrapper-bypass; gated). If a tool isn't on PATH, the launch context wasn't activated; investigate before reaching for a wrapper.
 - Within the current project, prefer relative paths — for git (`git add foo.ts`), scripts (`bun scripts/foo.ts`, `python scripts/foo.py`, `./bin/foo`), and file ops (`ls src/`, `cat config.toml`). Use absolute paths only for files outside the project or when wd is genuinely ambiguous.
 - Never use `for` or `while` loops in Bash. Even when the body command is allowlisted, any `$var` expansion in the body trips Claude Code's expansion gate and prompts anyway — and practical iteration always uses the iter var. Enumerate items first (`rg`, Read, `fd`, `ls`), then make one Bash call per item with literal arguments (no `$var`). `until <check>; do sleep N; done` is allowed for polling (one-shot wait via Bash run_in_background).
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
@@ -109,9 +109,9 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - When suggesting where a new var goes, default to `.env`. Use `.env.local` only when the value is genuinely per-user.
 
 ## Symlinked Configs
-- Most files under `~/.claude/`, `~/.codex/`, `~/.gemini/` symlink into `~/.dotfiles/`. Edit/Write refuses to write through symlinks.
+- Most files under `~/.claude/` and `~/.codex/` symlink into `~/.dotfiles/`. Edit/Write refuses to write through symlinks.
 - When wd is `~/.dotfiles/`, edit the source files directly (e.g. `dotagents/AGENTS.md`, `dotclaude/settings.json`) instead of the `~/.<tool>/` paths.
-- In any project, `CLAUDE.md` is conventionally a symlink to `AGENTS.md` (the canonical instructions file). When editing project instructions, go to `AGENTS.md` directly — don't write through `CLAUDE.md`, skip the `readlink` round trip. Same for `GEMINI.md`/`.cursorrules` → `AGENTS.md` if present.
+- In any project, `CLAUDE.md` is conventionally a symlink to `AGENTS.md` (the canonical instructions file). When editing project instructions, go to `AGENTS.md` directly — don't write through `CLAUDE.md`, skip the `readlink` round trip. Same for `.cursorrules` → `AGENTS.md` if present.
 
 ## Secrets
 - Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), or `.dev.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.

@@ -45,4 +45,4 @@ Ask for any not provided:
 
 ## Why the AGENTS.md reference
 
-Codex has no project-local skill discovery (no `<project>/.codex/skills/`). AGENTS.md is read on every Codex session, so an inline reference makes the skill visible. When Codex needs the full body, it `Read`s the SKILL.md path. Inline (not @-import) — Codex's @-import support is unconfirmed; inline works in all three agents (Claude, Codex, Gemini).
+Codex has no project-local skill discovery (no `<project>/.codex/skills/`). AGENTS.md is read on every Codex session, so an inline reference makes the skill visible. When Codex needs the full body, it `Read`s the SKILL.md path. Inline (not @-import) — Codex's @-import support is unconfirmed; inline works in both Claude and Codex.

@@ -160,9 +160,9 @@ if [ -f "$DOTFILES_DIR/scripts/sync-allowlist.ts" ]; then
     fi
 fi
 
-# Shared agent instructions -> ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md, ~/.gemini/GEMINI.md
-mkdir -p "$HOME/.claude" "$HOME/.codex" "$HOME/.gemini"
-for pair in ".claude/CLAUDE.md" ".codex/AGENTS.md" ".gemini/GEMINI.md"; do
+# Shared agent instructions -> ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md
+mkdir -p "$HOME/.claude" "$HOME/.codex"
+for pair in ".claude/CLAUDE.md" ".codex/AGENTS.md"; do
     target="$HOME/$pair"
     source="$DOTFILES_DIR/dotagents/AGENTS.md"
     if [ -L "$target" ]; then
@@ -243,62 +243,6 @@ elif [ -d "$target" ]; then
 fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/hooks/ -> ~/.claude/hooks/"
-
-# Gemini custom commands (directory symlink)
-target="$HOME/.gemini/commands"
-source="$DOTFILES_DIR/dotgemini/commands"
-if [ -L "$target" ]; then
-    rm "$target"
-elif [ -d "$target" ]; then
-    echo "Backing up $target to $target.bak"
-    mv "$target" "$target.bak"
-fi
-ln -s "$source" "$target"
-echo "Linked dotgemini/commands/ -> ~/.gemini/commands/"
-
-# Gemini Policy Engine rules (directory symlink)
-target="$HOME/.gemini/policies"
-source="$DOTFILES_DIR/dotgemini/policies"
-if [ -L "$target" ]; then
-    rm "$target"
-elif [ -d "$target" ]; then
-    echo "Backing up $target to $target.bak"
-    mv "$target" "$target.bak"
-fi
-ln -s "$source" "$target"
-echo "Linked dotgemini/policies/ -> ~/.gemini/policies/"
-
-# Gemini settings (merge tools only, keep runtime config)
-gemini_src="$DOTFILES_DIR/dotgemini/settings.json"
-gemini_dst="$HOME/.gemini/settings.json"
-if [ -f "$gemini_src" ]; then
-    mkdir -p "$HOME/.gemini"
-    if [ -f "$gemini_dst" ] && command -v jq &>/dev/null; then
-        gemini_tmp="$(mktemp)"
-        if jq -s '.[0] + {tools: (.[1].tools // {})}' "$gemini_dst" "$gemini_src" > "$gemini_tmp"; then
-            if [ -f "$gemini_dst" ] && diff -q "$gemini_tmp" "$gemini_dst" >/dev/null 2>&1; then
-                echo "Skipped dotgemini/settings.json (unchanged)"
-            else
-                if [ -f "$gemini_dst" ] && [ ! -L "$gemini_dst" ]; then
-                    cp "$gemini_dst" "${gemini_dst}.bak"
-                    echo "Backing up $gemini_dst to ${gemini_dst}.bak"
-                fi
-                cp "$gemini_tmp" "$gemini_dst"
-                echo "Merged dotgemini/settings.json tools -> ~/.gemini/settings.json"
-            fi
-        else
-            echo "Skipping Gemini settings merge (invalid JSON)"
-        fi
-        rm -f "$gemini_tmp"
-    else
-        if [ -f "$gemini_dst" ] && [ ! -L "$gemini_dst" ]; then
-            cp "$gemini_dst" "${gemini_dst}.bak"
-            echo "Backing up $gemini_dst to ${gemini_dst}.bak"
-        fi
-        cp "$gemini_src" "$gemini_dst"
-        echo "Copied dotgemini/settings.json -> ~/.gemini/settings.json"
-    fi
-fi
 
 # Suggest installing enabled Claude Code plugins
 plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$DOTFILES_DIR/dotclaude/settings.json" 2>/dev/null)

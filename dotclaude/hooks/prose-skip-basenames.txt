@@ -13,7 +13,6 @@
 # Agent-instruction files (by basename)
 AGENTS.md
 CLAUDE.md
-GEMINI.md
 SKILL.md
 MEMORY.md
 
@@ -48,11 +47,9 @@ POSTED.md
 # Agent-internal directories (by path segment)
 /.claude/
 /.codex/
-/.gemini/
 /dotclaude/
 /dotagents/
 /dotcodex/
-/dotgemini/
 /memory/
 /skills/
 /plans/
