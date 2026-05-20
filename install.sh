@@ -232,17 +232,19 @@ for skill_dir in "$DOTFILES_DIR"/dotclaude/skills/*/; do
     echo "Linked Claude skill: $skill_name"
 done
 
-# Claude Code hooks (directory symlink)
-target="$HOME/.claude/hooks"
-source="$DOTFILES_DIR/dotclaude/hooks"
-if [ -L "$target" ]; then
-    rm "$target"
-elif [ -d "$target" ]; then
-    echo "Backing up $target to $target.bak"
-    mv "$target" "$target.bak"
-fi
-ln -s "$source" "$target"
-echo "Linked dotclaude/hooks/ -> ~/.claude/hooks/"
+# Shared agent hooks (Claude Code and Codex share dotagents/hooks/)
+hooks_source="$DOTFILES_DIR/dotagents/hooks"
+for pair in ".claude/hooks" ".codex/hooks"; do
+    target="$HOME/$pair"
+    if [ -L "$target" ]; then
+        rm "$target"
+    elif [ -d "$target" ]; then
+        echo "Backing up $target to $target.bak"
+        mv "$target" "$target.bak"
+    fi
+    ln -s "$hooks_source" "$target"
+    echo "Linked dotagents/hooks/ -> ~/$pair"
+done
 
 # Suggest installing enabled Claude Code plugins
 plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$DOTFILES_DIR/dotclaude/settings.json" 2>/dev/null)

@@ -156,6 +156,15 @@
 TOOL_INPUT=$(cat)
 CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 
+# Codex's PreToolUse hook accepts only allow/deny, not ask. Detect by the
+# presence of `permission_mode` in the input JSON (Codex sets it; Claude
+# Code doesn't). When false, downgrade any "ask" decision to "deny" so the
+# JSON output validates on Codex's stricter schema.
+SUPPORTS_ASK=true
+if echo "$TOOL_INPUT" | jq -e 'has("permission_mode")' >/dev/null 2>&1; then
+  SUPPORTS_ASK=false
+fi
+
 # Strip quoted regions before pattern matching. Anything inside '...' or "..."
 # is bound for a remote shell (ssh --command, docker exec sh -c, etc.) and
 # isn't subject to the local-conventions checks below.
@@ -217,7 +226,9 @@ elif [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE
 elif [[ "$CMD_BARE" =~ $CP_RECURSIVE_RE ]] && ! [[ "$CMD_BARE" =~ $CP_NOCLOBBER_RE ]]; then
   REASON="Don't use 'cp -r/-R/-a' without -n — recursive cp silently overwrites existing files. Note: 'cp -an' still prompts via Claude Code's built-in path-safety for cp with flags (the allow rule does NOT bypass it). Use 'rsync -a --ignore-existing src/ dst/' instead: same no-clobber semantics, auto-approved via the Bash(rsync *) allow rule because rsync isn't on the path-safety list. Trailing slashes on both src and dst copy contents into dst (matches cp -an directory behavior)."
 elif [[ "$CMD_BARE" =~ $SQLITE3_RE ]] && ! [[ "$CMD_BARE" =~ $SQLITE3_READONLY_RE ]]; then
-  DECISION="ask"
+  if $SUPPORTS_ASK; then
+    DECISION="ask"
+  fi
   REASON="sqlite3 without -readonly. If this is a read query (SELECT, PRAGMA, .schema, .tables, .dump), cancel and retry with -readonly to skip future prompts (the allow rule \`Bash(sqlite3 -readonly *)\` auto-approves that form). If this is a mutation (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), approve to proceed."
 elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
   bunx_arg="${BASH_REMATCH[2]}"

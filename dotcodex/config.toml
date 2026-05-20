@@ -39,3 +39,34 @@ insert_newline = ["alt-enter", "shift-enter", "ctrl-j", "ctrl-m"]
 [sandbox_workspace_write]
 network_access = true
 writable_roots = ["~/.cache/uv"]
+
+# Hook scripts live in dotagents/hooks/ (shared with Claude Code via
+# ~/.claude/hooks symlink set up by install.sh). When changing the hook
+# wiring here, mirror the change in dotclaude/settings.json.
+[hooks]
+
+[[hooks.PreToolUse]]
+matcher = '^Bash$'
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "$HOME/.codex/hooks/agent-browser-context.sh"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "$HOME/.codex/hooks/bash-antipatterns.sh"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "$HOME/.codex/hooks/git-commit-subject.sh"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "$HOME/.codex/hooks/httpie-flag-order.sh"
+
+[[hooks.PostToolUse]]
+matcher = '^Bash$'
+
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "$HOME/.codex/hooks/bash-verify-reminder.sh"
