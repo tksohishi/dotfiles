@@ -138,12 +138,18 @@
 #   our conventions don't apply). Naive stripping doesn't handle escaped
 #   quotes (`\"` inside `"..."`) or nested quoting; both are practically
 #   non-issues in agent-issued commands.
-# - Global scope. Lives in ~/.claude/hooks/, fires in every project. If a
-#   project needs different behavior, scope down via that project's
-#   .claude/settings.json.
-# - Schema drift. `permissionDecision: "deny"` is the current Claude Code hook
-#   contract. If the schema changes, this hook silently fails open or closed.
-#   Same risk as the other Bash hooks.
+# - Global scope. Lives in dotagents/hooks/ (shared script library) and is
+#   wired into both ~/.claude/hooks/ and ~/.codex/hooks/ via install.sh.
+#   Fires in every project. If a project needs different behavior, scope
+#   down via that project's .claude/settings.json (Claude) or local Codex
+#   config override.
+# - Agent split. Most rules are Claude-specific (Read/Edit tools, expansion
+#   gate, prompt parser, allowlist). Only multiline, cd-chain, $?, gh api,
+#   and .env-reader are agent-neutral. Codex-shape input (has `model` at
+#   top level) skips the Claude-only rules. See the comment above IS_CODEX.
+# - Schema drift. `permissionDecision: "deny"` (and `"ask"` for Claude) are
+#   the current contracts. If either agent's schema changes, this hook
+#   silently fails open or closed. Same risk as the other Bash hooks.
 # - Scope creep. Resist hookifying every MEMORY.md rule. This hook covers
 #   three specific reflexes the user tripped in one session; a similar
 #   pattern-of-three threshold should gate future additions.
@@ -156,15 +162,17 @@
 TOOL_INPUT=$(cat)
 CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 
-# Codex's PreToolUse hook accepts only allow/deny, not ask. Detect Codex by
-# the presence of the top-level `model` field in the input JSON — per the
-# Codex hooks spec it's a common field on every event, while Claude Code's
-# input doesn't include it (`permission_mode` is set by both, so that field
-# isn't a reliable discriminator). When Codex, downgrade any "ask" decision
-# to "deny" so the JSON output validates on Codex's stricter schema.
-SUPPORTS_ASK=true
+# Codex detection. Most rules below are Claude-specific (they reference
+# Claude's Read/Edit tools, expansion gate, prompt parser, or allowlist
+# rules) and don't apply under Codex. Agent-neutral rules (multiline,
+# cd-chain, $?, gh api, secrets on .env) run for both; Claude-only rules
+# are guarded with `! $IS_CODEX`. Detect Codex by the presence of the
+# top-level `model` field — per the Codex hooks spec it's a common field
+# on every event, while Claude doesn't populate it (`permission_mode` is
+# set by both, so it's not a reliable discriminator).
+IS_CODEX=false
 if echo "$TOOL_INPUT" | jq -e 'has("model")' >/dev/null 2>&1; then
-  SUPPORTS_ASK=false
+  IS_CODEX=true
 fi
 
 # Strip quoted regions before pattern matching. Anything inside '...' or "..."
@@ -205,39 +213,40 @@ BACKSLASH_WS_RE='\\[[:space:]]'
 REASON=""
 DECISION="deny"
 
+# --- Agent-neutral rules (apply to both Claude and Codex) ---
 if [ "$MULTILINE_COUNT" -gt 1 ]; then
   REASON="Don't cram multiple commands into one Bash call separated by newlines. Each command should be a separate Bash tool call so results stay visible per-command, allowlist matching works on the literal command, and a failure mid-sequence doesn't obscure later output. Working directory and shell state persist across calls, so there's no setup cost to splitting."
 elif [[ "$CMD_BARE" =~ $CD_CHAIN_RE ]]; then
   REASON="Don't chain 'cd <dir> && <cmd>' — the chained command bypasses the allowlist and triggers a permission prompt. If you need to be in another directory, run 'cd <dir>' as a separate Bash call first (working directory persists across calls), then the command. If you're already in the right place, drop the cd and run the command directly (or with an absolute path)."
-elif [[ "$CMD_BARE" =~ $LOOP_RE ]] && [[ "$CMD_BARE" =~ $LOOP_DONE_RE ]]; then
-  REASON="Don't use for/while loops in Bash. Even if the body command is allowlisted, any \$var expansion in the body trips Claude Code's expansion gate and prompts anyway — and practical iteration always uses the iter var. Enumerate items first with Glob/Grep/Read, then make one Bash call per item with literal arguments (no \$var) so the calls match allowlist rules silently. Polling with 'until <check>; do sleep N; done' is allowed."
-elif [[ "$CMD_BARE" =~ $HEAD_RE ]]; then
-  REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
-elif [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then
-  REASON="Don't use 'sed -n' to read a slice of a file; use the Read tool with offset/limit. The Read tool returns line-numbered output, which is what subsequent Edit calls need anyway. Piping into sed ('cmd | sed -n 5p') is allowed."
-elif [[ "$CMD_BARE" =~ $SED_INPLACE_RE ]]; then
-  REASON="Don't use 'sed -i' (in-place file edit). Use the Edit tool instead — it tracks changes and integrates with file allowlists; sed -i bypasses both. For complex regex replacements that the Edit tool can't easily express, surface to the user before running."
 elif [[ "$CMD_NO_SQ" =~ $EXIT_STATUS_RE ]]; then
   REASON="Don't use \$? in Bash commands. The previous command's exit status is already in the tool result; read it there, and make the follow-up check a separate Bash call."
-elif [[ "$CMD_NO_SQ" =~ $CMD_SUBST_RE ]]; then
-  REASON="Don't use \$(...) command substitution in Bash. It triggers a permission prompt every time, regardless of whether the inner command is allowed, because expansion happens on the local shell before the allowlist sees the literal command. Run the inner command as a separate Bash call (its output is in the tool result), or use the Read tool when reading file content. \$( inside single quotes (e.g. awk '{print \$(NF)}') is unaffected."
 elif [[ "$CMD_BARE" =~ $GH_API_RE ]]; then
   REASON="\`gh api\` is blocked. Use \`gh <resource> <subcommand>\` (e.g., \`gh pr view\`, \`gh issue list\`, \`gh release list\`) with \`--json <fields>\` for structured output. Run \`gh <resource> --help\` to find the right subcommand. If you've researched and no subcommand covers this endpoint, surface the specific endpoint to the user for approval before retrying."
 elif [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE ]]; then
   REASON="Reading .env / .dev.vars files is blocked — they contain secrets (API keys, tokens). For schema, read .env.example. To inspect a value, use an approved redaction script (e.g., scripts/check-env.ts, scripts/redact-env.ts) or surface the specific need to the user. Once secrets are read, treat them as compromised and rotate."
-elif [[ "$CMD_BARE" =~ $CP_RECURSIVE_RE ]] && ! [[ "$CMD_BARE" =~ $CP_NOCLOBBER_RE ]]; then
+
+# --- Claude-only rules (skipped under Codex; reference Read/Edit tools, expansion gate, or Claude allowlist) ---
+elif ! $IS_CODEX && [[ "$CMD_BARE" =~ $LOOP_RE ]] && [[ "$CMD_BARE" =~ $LOOP_DONE_RE ]]; then
+  REASON="Don't use for/while loops in Bash. Even if the body command is allowlisted, any \$var expansion in the body trips Claude Code's expansion gate and prompts anyway — and practical iteration always uses the iter var. Enumerate items first with Glob/Grep/Read, then make one Bash call per item with literal arguments (no \$var) so the calls match allowlist rules silently. Polling with 'until <check>; do sleep N; done' is allowed."
+elif ! $IS_CODEX && [[ "$CMD_BARE" =~ $HEAD_RE ]]; then
+  REASON="Don't use 'head' to read a file; use the Read tool with offset/limit. Piping into head ('cmd | head -N') is fine; starting a segment with head is blocked."
+elif ! $IS_CODEX && [[ "$CMD_BARE" =~ $SED_READ_RE ]]; then
+  REASON="Don't use 'sed -n' to read a slice of a file; use the Read tool with offset/limit. The Read tool returns line-numbered output, which is what subsequent Edit calls need anyway. Piping into sed ('cmd | sed -n 5p') is allowed."
+elif ! $IS_CODEX && [[ "$CMD_BARE" =~ $SED_INPLACE_RE ]]; then
+  REASON="Don't use 'sed -i' (in-place file edit). Use the Edit tool instead — it tracks changes and integrates with file allowlists; sed -i bypasses both. For complex regex replacements that the Edit tool can't easily express, surface to the user before running."
+elif ! $IS_CODEX && [[ "$CMD_NO_SQ" =~ $CMD_SUBST_RE ]]; then
+  REASON="Don't use \$(...) command substitution in Bash. It triggers a permission prompt every time, regardless of whether the inner command is allowed, because expansion happens on the local shell before the allowlist sees the literal command. Run the inner command as a separate Bash call (its output is in the tool result), or use the Read tool when reading file content. \$( inside single quotes (e.g. awk '{print \$(NF)}') is unaffected."
+elif ! $IS_CODEX && [[ "$CMD_BARE" =~ $CP_RECURSIVE_RE ]] && ! [[ "$CMD_BARE" =~ $CP_NOCLOBBER_RE ]]; then
   REASON="Don't use 'cp -r/-R/-a' without -n — recursive cp silently overwrites existing files. Note: 'cp -an' still prompts via Claude Code's built-in path-safety for cp with flags (the allow rule does NOT bypass it). Use 'rsync -a --ignore-existing src/ dst/' instead: same no-clobber semantics, auto-approved via the Bash(rsync *) allow rule because rsync isn't on the path-safety list. Trailing slashes on both src and dst copy contents into dst (matches cp -an directory behavior)."
-elif [[ "$CMD_BARE" =~ $SQLITE3_RE ]] && ! [[ "$CMD_BARE" =~ $SQLITE3_READONLY_RE ]]; then
-  if $SUPPORTS_ASK; then
-    DECISION="ask"
-  fi
+elif ! $IS_CODEX && [[ "$CMD_BARE" =~ $SQLITE3_RE ]] && ! [[ "$CMD_BARE" =~ $SQLITE3_READONLY_RE ]]; then
+  DECISION="ask"
   REASON="sqlite3 without -readonly. If this is a read query (SELECT, PRAGMA, .schema, .tables, .dump), cancel and retry with -readonly to skip future prompts (the allow rule \`Bash(sqlite3 -readonly *)\` auto-approves that form). If this is a mutation (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), approve to proceed."
-elif [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
+elif ! $IS_CODEX && [[ "$CMD_BARE" =~ $BUNX_RE ]]; then
   bunx_arg="${BASH_REMATCH[2]}"
   if [[ "$bunx_arg" != "tsc" ]] && [[ "$bunx_arg" != -* ]] && [[ -f "node_modules/.bin/$bunx_arg" ]]; then
     REASON="\`bunx $bunx_arg\` blocked: \`$bunx_arg\` is in node_modules/.bin, so \`bun $bunx_arg\` runs the same binary. Use \`bun $bunx_arg\` so the call matches the typical \`Bash(bun *)\` project-trust allow rule (\`bunx *\` prompts every time). Reserve \`bunx\` for one-off execution of packages not installed locally."
   fi
-elif [[ "$CMD_BARE" =~ $BACKSLASH_WS_RE ]]; then
+elif ! $IS_CODEX && [[ "$CMD_BARE" =~ $BACKSLASH_WS_RE ]]; then
   REASON="Don't backslash-escape whitespace in paths. Claude Code's prompt parser doesn't normalize \`\\\\ \` so the call prompts every time. Use double quotes instead: \"/Applications/Google Chrome.app\" or ~/\"Library/Application Support/foo\". The shell handles the space inside the quotes; no escape needed."
 fi
 

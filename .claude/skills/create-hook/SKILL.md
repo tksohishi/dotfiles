@@ -26,15 +26,22 @@ If the hook concept applies to both file-edit tools, you need two wirings: `Writ
 
 ### 3. Does it need agent-specific behavior?
 
-If the hook uses `permissionDecision: "ask"`, you must downgrade to `"deny"` under Codex (Codex's PreToolUse only honors allow/deny). Detect Codex via:
+Detect Codex via the input JSON:
 
 ```bash
+IS_CODEX=false
 if echo "$TOOL_INPUT" | jq -e 'has("model")' >/dev/null 2>&1; then
   IS_CODEX=true
 fi
 ```
 
 `model` is in Codex's input but not Claude's. **Do not use `permission_mode`** — both agents populate it.
+
+Two patterns where you'll need `$IS_CODEX`:
+
+1. **`ask` decision** — Codex's PreToolUse only honors `allow`/`deny`. If a rule uses `"ask"`, gate the entire rule behind `! $IS_CODEX` (drop it on Codex) rather than downgrading to `deny` — `deny`-on-Codex usually has the wrong rationale (the original `ask` reason references Claude-specific machinery).
+
+2. **Per-rule agent skip** — a shared hook can mix agent-neutral rules with Claude-only rules. Guard each Claude-only branch with `! $IS_CODEX &&`. See `bash-antipatterns.sh` for the pattern: agent-neutral rules (multiline, cd-chain, $?, gh api, .env reader) fire on both; Claude-only rules (Read/Edit tool replacements, expansion-gate workarounds, allowlist references) fire only on Claude. A rule is Claude-only when its reason text says "use the Read tool" / "use the Edit tool" / "Claude Code's expansion gate" / references a `Bash(...)` allow rule — the advice doesn't translate to Codex.
 
 ## Script skeleton
 
