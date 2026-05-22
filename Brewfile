@@ -58,6 +58,7 @@ cask "font-sf-mono-nerd-font-ligaturized"
 cask "font-sf-pro"
 cask "ghostty"
 cask "google-chrome"
+cask "google-chrome@canary"
 cask "gcloud-cli"
 cask "google-japanese-ime" # Password prompt: input method
 cask "granola"
