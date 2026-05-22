@@ -28,8 +28,57 @@ Don't touch `ffmpeg-*`, `mcp-chrome-profile`, or unsuffixed entries like `mcp-ch
 
 After upgrades complete, run `brew cleanup` to remove old versions and free disk space.
 
-Report what was upgraded, but only packages listed in the Brewfile. Transitive dependencies should be omitted entirely unless they had a **major version bump**, in which case surface them as informational. Also report any Brewfile entries that were newly installed because they were missing locally. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) if visible from the upgrade output. For any Brewfile package with a **major version bump**, fetch its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`) and summarize breaking changes, new features, and deprecations.
+## What to report
 
-Always fetch the Claude Code changelog from `https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md` and summarize the current installed version's entry plus any newer-than-last-run entries you can find. Claude Code auto-updates between sessions, so checking only when `claude update` upgrades misses the case where the version moved silently — this step fires every run regardless of what `claude update` reports. Cover new features, breaking changes, settings/hooks schema changes, and notable bug fixes. Skip trivial entries (typo fixes, internal refactors).
+Brewfile packages only. Transitive deps are omitted unless they had a **major version bump**, in which case surface them as informational. Also report Brewfile entries that were newly installed because they were missing locally. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) visible from the upgrade output. For any Brewfile package with a major version bump, fetch its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`) and summarize breaking changes, new features, and deprecations.
 
-After upgrades, check for interesting new formulae and casks. The `brew update` output from step 1 lists new additions under "==> New Formulae" and "==> New Casks". Review those and highlight any that look relevant to the user's setup (developer tools, terminal utilities, productivity apps, etc.). If any look worth checking out, suggest them briefly with a one-line description. Don't overwhelm; only surface genuinely interesting additions.
+**Filter explicitly before reporting**: `brew upgrade --formula` upgrades transitive deps alongside Brewfile entries. Before listing in the Brewfile section, cross-check each name with `rg -nw '<name1>|<name2>|...' Brewfile` and drop any that don't appear. Easy to miss because the upgrade output looks identical for both. Past slip: deno appeared in the report as a Brewfile upgrade when it's actually a transitive dep of summarize and yt-dlp.
+
+Always fetch the Claude Code changelog from `https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md` and summarize the current installed version's entry plus any newer-than-last-run entries. Claude Code auto-updates between sessions, so checking only when `claude update` upgrades misses the case where the version moved silently — this step fires every run regardless of what `claude update` reports. Cover new features, breaking changes, settings/hooks schema changes, and notable bug fixes. Skip trivial entries (typo fixes, internal refactors).
+
+Check for interesting new formulae and casks from step 1's `==> New Formulae` / `==> New Casks` output. Highlight any relevant to the user's setup (developer tools, terminal utilities, productivity apps) with a one-line description. Don't overwhelm; surface only genuinely interesting additions.
+
+## Report format
+
+Structure the report as sections with the emojis below. Section headers are organizational only (no severity meaning). Inside sections, prefix individual items with a severity emoji ONLY when they need attention; routine items stay unprefixed.
+
+### Section headers (use exactly these)
+
+- `### 📦 Brewfile formulae` — formula upgrades
+- `### ⚙️ mise tools` — mise-managed tool upgrades
+- `### 🤖 Claude Code` — include current version in the header, e.g. `### 🤖 Claude Code (2.1.148)`
+- `### 🍎 Mac App Store` — mas outdated results
+- `### 🧹 Cleanup` — cache pruning and `brew cleanup` results
+- `### ✨ New & noteworthy` — interesting new formulae/casks
+
+Omit empty sections (e.g. if nothing was upgraded in mise, drop the section).
+
+### Per-item severity
+
+Use these inline at the start of a bullet, and only when the item is not routine:
+
+- 🔴 **Action required** — the user must do something (run a manual command requiring sudo/password, resolve a config conflict, etc.). Examples: `mas upgrade` needs the password, a breaking-change setting needs migration, a hook misconfiguration surfaced during update.
+- 🟡 **Worth attention** — informational but the user may want to know. Examples: major version bumps in Brewfile packages, Claude Code schema/hook changes that could affect existing config, new interesting tools worth trying, deprecations.
+- (no emoji) — routine. Patch/minor bumps with no breaking changes, "up to date" results, cache stats, bug fixes the user doesn't need to act on.
+
+Do NOT use green/✅ for routine items — absence of emoji means routine. Reserve emojis for signal.
+
+### Example
+
+```
+### 📦 Brewfile formulae
+- awscli 2.34.51 → 2.34.52 (patch)
+- 🟡 deno 2.7.14 → 3.0.0 (major) — breaking changes to Deno.serve API
+- summarize 0.15.2 → 0.16.1 (minor)
+
+### 🤖 Claude Code (2.1.148)
+- 🔴 /simplify renamed to /code-review — update any scripts referencing /simplify
+- Bug fix: Bash tool exit code 127 regression resolved
+
+### 🍎 Mac App Store
+- 🔴 Tailscale 1.96.5 → 1.98.2 — run `mas upgrade` yourself (needs password)
+
+### 🧹 Cleanup
+- Pruned chrome-148.0.7778.178 → 341 MB reclaimed
+- brew cleanup → 21.6 MB freed
+```
