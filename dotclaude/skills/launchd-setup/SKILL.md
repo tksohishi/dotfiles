@@ -203,12 +203,25 @@ Step 3 is the truly informative test: if it works there but not in step 1's envi
 
 ## Claude Code interaction (when the wrapper calls `claude -p`)
 
-Headless `claude -p` silently errors on permission prompts; there's no interactive user to approve. Mitigations:
+Headless `claude -p` exits with a clear error naming the denied tool when it hits an unallowed Bash command; there's no human to approve. Build the allowlist **empirically** — do NOT speculate.
 
-1. **Pre-allow needed Bash patterns** in either `.claude/settings.json` (committed, team-shared) or `.claude/settings.local.json` (per-machine, gitignored). Identify what to allow by running the wrapper interactively first and noting which prompts fire.
-2. **Verify slash commands work** by running the same prompt once interactively — confirms argument parsing, plugin/skill availability, etc.
-3. **`HOME` from `EnvironmentVariables`** is what makes `~/.claude/` credentials and settings discoverable. Without it, `claude -p` can't find auth.
-4. **Cost / token budget** — headless invocations bill normally. For frequent jobs, use a constrained prompt and limit output (`--max-turns`, etc.).
+**Procedure (mandatory order):**
+
+1. Write the wrapper with bare `claude -p <command>` — NO `--dangerously-skip-permissions`, NO speculative `Bash(...)` allows.
+2. Run the wrapper once (`./scripts/<wrapper>.sh` or `launchctl start <label>`).
+3. Read the log. If it errored on a denied tool, add the narrowest matching allow to `.claude/settings.json` (committed) or `.claude/settings.local.json` (per-machine), re-run.
+4. Repeat until success.
+
+**Do NOT:**
+
+- Add `--dangerously-skip-permissions` as a "safe default". It's a blast-radius escalation, not a workaround for not having tested. Reach for it only if a real run proves the job genuinely needs broad surface area you can't enumerate.
+- Infer Bash allows from skill doc strings. If a skill mentions `ls brief/*.json | tail -1` as an example of finding the latest file, **do not** preemptively add `Bash(ls *)` + `Bash(tail *)`. Skill docs often show shell commands as *illustrations*; Claude typically satisfies them with built-in tools (LS, Read, Glob) that need zero permission. Find out which by running, not by reading.
+
+**Other gotchas:**
+
+- **Verify slash commands interactively first.** Confirms argument parsing, plugin/skill availability, etc.
+- **`HOME` from `EnvironmentVariables`** is what makes `~/.claude/` credentials and settings discoverable. Without it, `claude -p` can't find auth.
+- **Cost / token budget** — headless invocations bill normally. For frequent jobs, use a constrained prompt and limit output (`--max-turns`, etc.).
 
 ## Removal
 
