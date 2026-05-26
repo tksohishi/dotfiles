@@ -50,10 +50,6 @@ matcher = '^Bash$'
 
 [[hooks.PreToolUse.hooks]]
 type = "command"
-command = "$HOME/.codex/hooks/agent-browser-context.sh"
-
-[[hooks.PreToolUse.hooks]]
-type = "command"
 command = "$HOME/.codex/hooks/bash-antipatterns.sh"
 
 [[hooks.PreToolUse.hooks]]

@@ -553,11 +553,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/agent-browser-context.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "$HOME/.claude/hooks/bash-antipatterns.sh",
             "timeout": 5
           },
