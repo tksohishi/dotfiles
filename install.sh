@@ -3,10 +3,12 @@ set -e
 
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKIP_BREW=false
+SKIP_MACOS=false
 
 for arg in "$@"; do
     case "$arg" in
         --skip-brew) SKIP_BREW=true ;;
+        --skip-macos) SKIP_MACOS=true ;;
     esac
 done
 
@@ -139,9 +141,11 @@ if command -v caddy &>/dev/null; then
 fi
 
 # ── macOS defaults ────────────────────────────────────────────
-echo ""
-echo "Applying macOS defaults..."
-bash "$DOTFILES_DIR/macos.sh"
+if [ "$SKIP_MACOS" = false ]; then
+    echo ""
+    echo "Applying macOS defaults..."
+    bash "$DOTFILES_DIR/macos.sh"
+fi
 
 # ── Git hooks ─────────────────────────────────────────────────
 git -C "$DOTFILES_DIR" config core.hooksPath hooks
