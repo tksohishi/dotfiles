@@ -43,6 +43,7 @@ TRACKER.md
 KANBAN.md
 PROGRESS.md
 POSTED.md
+ARCHIVE.md
 
 # Agent-internal directories (by path segment)
 /.claude/
