@@ -17,7 +17,8 @@ Ask for any not provided:
 ## Steps
 
 1. Verify cwd is a project root (a git repo or has AGENTS.md / CLAUDE.md / package config).
-2. Create the canonical skill at `.agents/skills/<name>/SKILL.md` with this exact format:
+2. Check for old-convention skills: scan `.claude/skills/` for entries that are *real directories* (not symlinks into `.agents/`). If any exist, notify the user up front — these predate the `.agents/` canonical layout and aren't visible to Codex. Recommend running `sync-project-skills` to migrate them. Don't auto-migrate; just surface the list and continue.
+3. Create the canonical skill at `.agents/skills/<name>/SKILL.md` with this exact format:
 
    ```markdown
    ---
@@ -27,14 +28,14 @@ Ask for any not provided:
    <body>
    ```
 
-3. Symlink it into `.claude/skills/` so Claude Code discovers it. Use a **relative** target so the link survives the repo being cloned or moved:
+4. Symlink it into `.claude/skills/` so Claude Code discovers it. Use a **relative** target so the link survives the repo being cloned or moved:
 
    ```
    mkdir -p .claude/skills
    ln -s ../../.agents/skills/<name> .claude/skills/<name>
    ```
 
-4. Report:
+5. Report:
    - Canonical path created (`.agents/skills/<name>/SKILL.md`) and the symlink created (`.claude/skills/<name>`).
    - That Codex discovers `.agents/skills/` natively (scans cwd up to repo root) and Claude Code discovers the skill via the `.claude/skills/` symlink.
 
