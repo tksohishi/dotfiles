@@ -22,17 +22,19 @@ Bring a project's skills to the canonical layout below. Companion to `create-pro
    - **Real dir in BOTH** → conflict; show both and ask which is canonical. Don't auto-merge or auto-delete.
    - **`.claude/skills/<name>` is a symlink whose target is missing** → flag for user review.
 3. Always use the relative symlink target `../../.agents/skills/<name>` so links survive clone/move.
-4. Report:
+4. Prune the dead AGENTS.md bridge: for each migrated/canonical skill, remove its bullet from the `## Project Skills` section (lines pointing at `.claude/skills/<name>/SKILL.md` or the skill `name`). If the section is left empty, remove the heading too. This bridge existed only because Codex couldn't discover project skills; Codex now reads `.agents/skills/` natively, so the bullets are redundant. Only remove bullets that correspond to skills you migrated/confirmed this run — leave unrelated content untouched.
+5. Report:
    - **Migrated** — moved from `.claude/` to `.agents/` and symlinked.
    - **Symlinked** — only needed the `.claude/` bridge added.
    - **Already-canonical** — count skipped.
+   - **Pruned** — AGENTS.md bullets/section removed.
    - **Conflicts / broken** — flagged for user review; not auto-fixed.
 
 ## Edge cases
 
 - Neither `.claude/skills/` nor `.agents/skills/` exists → no work; report.
 - Not a git repo → use `mv` instead of `git mv`.
-- A leftover AGENTS.md "Project Skills" inline reference (the old Codex bridge) → no longer needed for discovery; leave it as human-facing documentation unless the user asks to prune it.
+- A skill listed in AGENTS.md but not present in `.claude/`/`.agents/` (dangling bridge bullet) → flag it; don't prune, since it may point at a skill that lives elsewhere (e.g. a Claude-only global skill exposed to Codex only via this listing).
 
 ## Why
 
