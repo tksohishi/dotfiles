@@ -29,8 +29,7 @@ Most files are self-explanatory. These have *why* worth knowing:
 - `bin/agent-browser` — wrapper that rejects `--profile <real-Chrome>` invocations to keep agents away from logged-in Chrome state. Bypass by calling `/opt/homebrew/bin/agent-browser` directly.
 - `bin/slk` — personal CLI; reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env.local` because the creds are per-user (each developer has their own Slack session). Bun auto-loads both `.env` and `.env.local`. Not a general rule that secrets go in `.env.local` — app secrets normally belong in `.env`.
 - `dotcodex/config.toml` — **merged**, not symlinked, into `~/.codex/config.toml` (Codex overwrites symlinks).
-- `dotclaude/skills/<name>/SKILL.md` — single source of truth for agent capabilities. Only the `description` frontmatter loads into context until invoked.
-- `dotcodex/skills/.dotfiles/<name>` — symlinks to the matching `dotclaude/skills/<name>/`. Codex picks up the same skill via this path; no separate file to maintain.
+- `dotagents/skills/<name>/SKILL.md` — single source of truth for agent capabilities. Only the `description` frontmatter loads into context until invoked. `install.sh` symlinks each into both `~/.claude/skills/` (Claude scans here) and `~/.agents/skills/` (Codex scans here natively); no per-agent copy to maintain.
 
 ## Key Conventions
 
@@ -44,7 +43,7 @@ Most files are self-explanatory. These have *why* worth knowing:
 ## When Editing
 
 - The `files` array in `install.sh` must be updated when adding new dotfiles
-- New cross-agent capabilities go in `dotclaude/skills/<name>/SKILL.md`. For Codex visibility, add a symlink at `dotcodex/skills/.dotfiles/<name>` pointing to `../../../dotclaude/skills/<name>`.
+- New cross-agent capabilities go in `dotagents/skills/<name>/SKILL.md`. `install.sh` symlinks them into both `~/.claude/skills/` and `~/.agents/skills/` automatically; no separate Codex wiring needed (Codex scans `~/.agents/skills/` natively, Claude scans `~/.claude/skills/`).
 - Agent hooks live in `dotagents/hooks/` (shared, symlinked to both `~/.claude/hooks/` and `~/.codex/hooks/`). When changing the hook wiring (which hook fires on which event/matcher), update BOTH `dotclaude/settings.json` and the `[hooks]` section in `dotcodex/config.toml`. Hook scripts themselves only need editing once. Codex's `PreToolUse` accepts only `allow`/`deny` (not `ask`); `bash-antipatterns.sh` detects Codex via `has("model")` on the input JSON (Codex includes `model` as a common field; Claude doesn't) and downgrades `ask`→`deny`. Don't use `permission_mode` as the detector — both agents populate it.
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
 - This is a public repo. Never commit personal information (API keys, tokens, personal URLs, email addresses, domain allowlists, etc.) to `dotagents/`, `dotclaude/`, or `dotcodex/`. Use `.local`/`.override` files for machine-specific or private settings.

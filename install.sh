@@ -215,25 +215,31 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
 
-# Claude Code custom skills (symlink each skill individually so
-# bunx skills-installed entries can coexist in ~/.claude/skills/)
-mkdir -p "$HOME/.claude/skills"
-# Handle prior whole-directory symlink left over from earlier installs
-if [ -L "$HOME/.claude/skills" ]; then
-    rm "$HOME/.claude/skills"
-    mkdir "$HOME/.claude/skills"
-fi
-for skill_dir in "$DOTFILES_DIR"/dotclaude/skills/*/; do
-    skill_name="$(basename "$skill_dir")"
-    target="$HOME/.claude/skills/$skill_name"
-    if [ -L "$target" ]; then
-        rm "$target"
-    elif [ -d "$target" ]; then
-        echo "Backing up $target to $target.bak"
-        mv "$target" "$target.bak"
+# Cross-agent custom skills: canonical in dotagents/skills/, symlinked into
+# both ~/.claude/skills/ (Claude scans here) and ~/.agents/skills/ (Codex
+# scans here natively). Per-skill symlinks so bunx skills-installed entries
+# coexist in the same directories.
+for agent_skills in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+    mkdir -p "$agent_skills"
+    # Handle prior whole-directory symlink left over from earlier installs
+    if [ -L "$agent_skills" ]; then
+        rm "$agent_skills"
+        mkdir "$agent_skills"
     fi
-    ln -s "$skill_dir" "$target"
-    echo "Linked Claude skill: $skill_name"
+done
+for skill_dir in "$DOTFILES_DIR"/dotagents/skills/*/; do
+    skill_name="$(basename "$skill_dir")"
+    for agent_skills in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+        target="$agent_skills/$skill_name"
+        if [ -L "$target" ]; then
+            rm "$target"
+        elif [ -d "$target" ]; then
+            echo "Backing up $target to $target.bak"
+            mv "$target" "$target.bak"
+        fi
+        ln -s "$skill_dir" "$target"
+    done
+    echo "Linked skill: $skill_name (Claude + agents)"
 done
 
 # Shared agent hooks (Claude Code and Codex share dotagents/hooks/)
@@ -288,21 +294,6 @@ else
     echo "Merged dotcodex/config.toml -> ~/.codex/config.toml"
 fi
 rm -f "$codex_tmp"
-
-# Codex custom command skills (symlink each skill individually)
-mkdir -p "$HOME/.codex/skills"
-for skill_dir in "$DOTFILES_DIR"/dotcodex/skills/.dotfiles/*/; do
-    skill_name="$(basename "$skill_dir")"
-    target="$HOME/.codex/skills/$skill_name"
-    if [ -L "$target" ]; then
-        rm "$target"
-    elif [ -d "$target" ]; then
-        echo "Backing up $target to $target.bak"
-        mv "$target" "$target.bak"
-    fi
-    ln -s "$skill_dir" "$target"
-    echo "Linked Codex skill: $skill_name"
-done
 
 # Codex allowlist rules (copy, not symlink)
 codex_rules_src="$DOTFILES_DIR/dotcodex/rules/default.rules"
