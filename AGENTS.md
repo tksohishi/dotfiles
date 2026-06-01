@@ -6,17 +6,6 @@ This file provides guidance to AI coding agents working with code in this reposi
 
 Personal dotfiles repository for macOS. Manages shell configs, editor settings, git config, tool preferences, and all installed applications (Homebrew packages, casks, and Mac App Store apps) via symlinks and a Brewfile.
 
-## Project Skills
-- **audit-apps**: Audit installed apps against the Brewfile and suggest changes. Full instructions: `.claude/skills/audit-apps/SKILL.md`
-- **command-permissions**: Manage Claude Code Bash permissions (allow, ask, deny) for a given command. Full instructions: `.claude/skills/command-permissions/SKILL.md`
-- **create-hook**: Create an agent hook (PreToolUse / PostToolUse / etc.) and wire it correctly for Claude Code, Codex, or both. Full instructions: `.claude/skills/create-hook/SKILL.md`
-- **discover-apps**: Find new Mac tools worth installing. Full instructions: `.claude/skills/discover-apps/SKILL.md`
-- **install-app**: Install an app via Homebrew and add it to the Brewfile. Full instructions: `.claude/skills/install-app/SKILL.md`
-- **install-skill**: Discover and install an agent skill via bunx skills add -g, then track it in dotagents/skills.txt for new-machine reproducibility. Full instructions: `.claude/skills/install-skill/SKILL.md`
-- **sync-allowlist**: Sync command allowlist from Claude Code into Codex. Full instructions: `.claude/skills/sync-allowlist/SKILL.md`
-- **uninstall-app**: Uninstall an app via Homebrew and remove it from the Brewfile. Full instructions: `.claude/skills/uninstall-app/SKILL.md`
-- **update-apps**: Update all Homebrew packages, casks, and Mac App Store apps. Full instructions: `.claude/skills/update-apps/SKILL.md`
-
 ## Architecture
 
 - Machine-specific overrides live in `.local`/`.override` suffix files (`.zshrc.local`, `.alias.local`, `.gitconfig.local`); not tracked in git.
