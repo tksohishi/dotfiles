@@ -38,6 +38,8 @@ Always fetch the Claude Code changelog from `https://github.com/anthropics/claud
 
 Check for interesting new formulae and casks from step 1's `==> New Formulae` / `==> New Casks` output. Highlight any relevant to the user's setup (developer tools, terminal utilities, productivity apps) with a one-line description. Don't overwhelm; surface only genuinely interesting additions.
 
+Link each tool name so the user can research it: render the name as a markdown link, e.g. `[pitchfork](https://github.com/jdx/pitchfork)`. Get the homepage URL from `brew info <name>` (the first URL line, above the `From:` Homebrew-formula line). Prefer the project's GitHub repo when the homepage is a GitHub URL or you can readily identify the repo; otherwise link the homepage `brew info` reports. Don't guess a GitHub URL you haven't confirmed — fall back to the homepage.
+
 ## Report format
 
 Structure the report as sections with the emojis below. Section headers are organizational only (no severity meaning). Inside sections, prefix individual items with a severity emoji ONLY when they need attention; routine items stay unprefixed.
