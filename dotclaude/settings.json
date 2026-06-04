@@ -606,5 +606,6 @@
     "command": "bash \"$HOME/.claude/statusline.sh\""
   },
   "enabledPlugins": {},
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "tui": "fullscreen"
 }
