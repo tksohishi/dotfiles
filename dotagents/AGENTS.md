@@ -18,7 +18,7 @@ When the user asks to prevent, enforce, or change a behavior, consider options i
 2. **Skill or command edit** — for behaviors tied to a specific invocation (e.g. how `/update-apps` reports output).
 3. **Memory or AGENTS.md** — soft guidance; use only when the behavior requires judgment or has no detectable signature.
 
-Memory is the reflex because it is cheap to write, but it is a soft reminder the agent can still violate. Most "prevent X" requests have a detectable signature (command shape, file content, settings value) that a hook or rule can catch. Past rules that drifted into hooks (cd-chain, loops, bare `head`, `$?`, backslash-whitespace) all started as memory that failed to stick.
+Memory is the reflex because it is cheap to write, but it is a soft reminder the agent can still violate. Most "prevent X" requests have a detectable signature (command shape, file content, settings value) that a hook or rule can catch. Past rules that drifted into hooks all started as memory that failed to stick.
 
 When proposing a fix, name the deterministic option first, note the tradeoffs (false-positive risk, maintenance cost), and mention memory only as fallback.
 
