@@ -84,12 +84,8 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 
 ## Shell Commands
 - When looking up technical documentation (CLI, library, SDK, platform, service, framework), default to `ctx7` first (`ctx7 library <name>` then `ctx7 docs <id> "<query>"`) before WebFetch/WebSearch. For CLI tools, also run `--help`. Fall back to WebFetch only when ctx7 has no hit or the specific info is missing from the indexed content.
-- **Never use command substitution (`$()`, backticks) or heredocs in commands.** They break allowlist matching and trigger permission prompts. Simple pipes (`|`) and redirections (`<`, `>`) are fine.
-- Quote paths with spaces in double quotes (`~/"Library/Application Support/..."`) instead of backslash-escaped whitespace; the backslash form triggers a permission prompt.
-- When running commands in a different directory, `cd` first as a separate command, then run the actual command. Never chain with `&&`.
 - mise-installed tools (`codex`, `bun`, `node`, `deno`, etc.) are on PATH via shell inheritance from the activated zsh that launched the agent. Call them directly. Don't wrap with `mise exec --` (gated by ask) or `zsh -lc` (wrapper-bypass; gated). If a tool isn't on PATH, the launch context wasn't activated; investigate before reaching for a wrapper.
 - Within the current project, prefer relative paths — for git (`git add foo.ts`), scripts (`bun scripts/foo.ts`, `python scripts/foo.py`, `./bin/foo`), and file ops (`ls src/`, `cat config.toml`). Use absolute paths only for files outside the project or when wd is genuinely ambiguous.
-- Never use `for` or `while` loops in Bash. Even when the body command is allowlisted, any `$var` expansion in the body trips Claude Code's expansion gate and prompts anyway — and practical iteration always uses the iter var. Enumerate items first (`rg`, Read, `fd`, `ls`), then make one Bash call per item with literal arguments (no `$var`). `until <check>; do sleep N; done` is allowed for polling (one-shot wait via Bash run_in_background).
 - Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
 - When calling `http`/`https` (httpie), always specify the method explicitly and put flags AFTER the URL. Canonical form: `http METHOD <URL> [flags...]` (method required, not optional; otherwise httpie's auto-method promotes commands with `key=value` data fields to implicit POST and bypasses the destructive-method gate). A PreToolUse hook blocks flag-first invocations.
 - Use `fd` for file search, scoped to the project directory. Ask before searching outside the project.
@@ -100,7 +96,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - `cp`, `mv`, `rm` with flags trigger a Claude Code built-in path-safety check that prompts even when the command is in `permissions.allow`. Bare single-file `cp src dst` is fine. For recursive / no-clobber copy use `rsync -a --ignore-existing src/ dst/` (trailing slashes copy contents into dst) — rsync isn't subject to the path-safety check and its allow rule works. The earlier `cp -an` recommendation was wrong: the allow rule never bypassed the prompt.
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
-- For `sqlite3`, always pass `-readonly` for read queries (SELECT, PRAGMA, .schema, .tables, .dump). The allow rule covers that form; without `-readonly` the call prompts every time. Omit `-readonly` only for mutations (UPDATE / DELETE / DROP / INSERT / CREATE / ALTER), which prompt for one-off approval by design.
+- For `sqlite3`, pass `-readonly` for read queries (SELECT, PRAGMA, .schema, .tables, .dump) so the database is opened read-only at the engine level. Omit it only for intentional mutations.
 - macOS 15+ silently drops LAN unicast (ping/SSH return "No route to host" with ARP populated and gateway reachable) when the host app lacks Local Network permission in System Settings → Privacy & Security → Local Network. Resets on major OS updates.
 
 
@@ -155,7 +151,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Git
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
 - After `gh repo create`, always configure repo defaults: `gh repo edit --enable-wiki=false --enable-projects=false --delete-branch-on-merge --enable-squash-merge`
-- For other repos (clones in `tmp/`, external paths), `cd <repo>` as a separate Bash call, then run git commands directly. `git -C` is denied by config; wd persists across Bash calls. After investigation, `cd` back to the project root.
+- For other repos (clones in `tmp/`, external paths), use `git -C <repo> <cmd>` or `cd <repo>` first (wd persists across Bash calls). If you `cd`, return to the project root after.
 
 ## Commits
 - Never add the AI agent as a commit author or co-author
