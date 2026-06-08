@@ -32,8 +32,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Avoid using the section sign `§` in writing meant for humans; it reads as an AI artifact. Use the word "Section", "see", or drop the marker.
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
 - Markdown bold across Japanese punctuation: `**…。**続き` won't render because `。` + CJK breaks CommonMark right-flanking rules. Move the period outside (`**…**。続き`) or split into separate sentences.
-- 日本語のアウトプットの際の一人称は「私」で統一
-- 日本語のアウトプットの際の二人称（you）は「あなた」で統一
+- 日本語のアウトプットの際の人称は一人称「私」、二人称（you）「あなた」で統一
 
 ## Documentation Style
 - Be concise; engineers scan, they don't read novels
