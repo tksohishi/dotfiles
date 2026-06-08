@@ -526,8 +526,6 @@
     ],
     "defaultMode": "auto",
     "additionalDirectories": [
-      "/Applications",
-      "/opt/homebrew",
       "/tmp",
       "~/.agent-browser",
       "~/.cache",
