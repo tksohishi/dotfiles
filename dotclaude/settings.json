@@ -521,7 +521,6 @@
       "Bash(mise x *)",
       "Bash(qpdf *--replace-input*)",
       "Bash(rsync * --delete*)",
-      "Bash(timeout *)",
       "Bash(yt-dlp *--exec*)"
     ],
     "defaultMode": "auto",
