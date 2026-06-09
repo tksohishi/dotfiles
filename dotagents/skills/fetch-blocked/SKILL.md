@@ -7,6 +7,22 @@ description: Access content on bot-blocked sites (Reddit, X/Twitter, Cloudflare-
 
 Strategy map for sites that block plain HTTP fetchers. Escalate in order: URL rewrite → public endpoint → agent-browser. Don't start with the browser when a rewrite works.
 
+General heuristic when WebFetch fails on a domain not listed below:
+
+- Media/content sites (news, forums, docs, shops): `http GET <url>` via httpie; if that 403s/500s, retry with a browser User-Agent header. Much of the "blocking" is specific to WebFetch's fetcher, and plain httpie from this residential IP gets through.
+- Social or account-required sites (login walls, JS shells): `agent-browser --headed` with login, and only if the content is really needed; don't burn time escalating for low-value pages.
+
+## Other verified sites (2026-06)
+
+| Site | WebFetch | What works |
+|---|---|---|
+| stackoverflow.com | refused client-side | plain httpie; Stack Exchange API (`api.stackexchange.com/2.3/questions/<id>?site=stackoverflow&filter=withbody`) for structured JSON |
+| nytimes.com | refused client-side | plain httpie (paywall still applies to full articles) |
+| amazon.com / amazon.co.jp | 500 bot block | httpie with browser UA |
+| 5ch.net | 403 | plain httpie |
+| quora.com, glassdoor.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
+| facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
+
 ## Reddit
 
 WebFetch refuses every reddit domain client-side ("unable to fetch"). Use httpie against `old.reddit.com`:

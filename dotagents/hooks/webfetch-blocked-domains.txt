@@ -6,3 +6,9 @@ x.com|Single post: use the anonymous syndication endpoint (invoke the fetch-bloc
 twitter.com|Single post: use the anonymous syndication endpoint (invoke the fetch-blocked skill). Search: /x-search. Profiles/threads: agent-browser --headed.
 instagram.com|Instagram requires login. Use agent-browser --headed.
 reddit.com|WebFetch cannot reach reddit at all. Use httpie against old.reddit.com: HTML works anonymously, or append .rss for structured Atom (.json is 403). See the fetch-blocked skill.
+stackoverflow.com|WebFetch cannot reach Stack Overflow. Plain httpie works (http GET <url>), or use the Stack Exchange API for structured JSON. See the fetch-blocked skill.
+nytimes.com|WebFetch cannot reach nytimes.com. Plain httpie works (paywall still applies to full articles).
+amazon.com|WebFetch gets a 500 bot block. Use httpie with a browser User-Agent header.
+amazon.co.jp|WebFetch gets a 500 bot block. Use httpie with a browser User-Agent header.
+quora.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.
+glassdoor.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.
