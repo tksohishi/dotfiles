@@ -1,4 +1,8 @@
-linkedin.com
-x.com
-twitter.com
-instagram.com
+# Domains where WebFetch is known to fail. Format: domain[|guidance].
+# Subdomains match. !domain = exception, must come before the block it carves out.
+# Full strategy map: fetch-blocked skill (dotagents/skills/fetch-blocked/SKILL.md).
+linkedin.com|LinkedIn requires login. Use agent-browser --headed (see LinkedIn section in global instructions).
+x.com|Single post: use the anonymous syndication endpoint (invoke the fetch-blocked skill). Search: /x-search. Profiles/threads: agent-browser --headed.
+twitter.com|Single post: use the anonymous syndication endpoint (invoke the fetch-blocked skill). Search: /x-search. Profiles/threads: agent-browser --headed.
+instagram.com|Instagram requires login. Use agent-browser --headed.
+reddit.com|WebFetch cannot reach reddit at all. Use httpie against old.reddit.com: HTML works anonymously, or append .rss for structured Atom (.json is 403). See the fetch-blocked skill.
