@@ -520,6 +520,7 @@
       "Bash(mise exec*)",
       "Bash(mise x *)",
       "Bash(qpdf *--replace-input*)",
+      "Bash(rsync --delete*)",
       "Bash(rsync * --delete*)",
       "Bash(yt-dlp *--exec*)"
     ],
