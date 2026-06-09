@@ -1,0 +1,424 @@
+#!/usr/bin/env bun
+
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+
+const API = "https://discord.com/api/v10";
+const ENV_FILE = ".env.local";
+const USER_AGENT = "DiscordBot (https://github.com/tksohishi/dotfiles, 0.1)";
+
+type Json = Record<string, unknown>;
+type Env = Record<string, string>;
+type DiscordUser = {
+  id: string;
+  username?: string;
+  global_name?: string | null;
+  bot?: boolean;
+};
+type DiscordChannel = {
+  id: string;
+  type: number;
+  name?: string;
+  parent_id?: string | null;
+  position?: number;
+};
+type DiscordMessage = {
+  id: string;
+  timestamp: string;
+  content?: string;
+  author?: DiscordUser;
+};
+
+const env = loadEnvLocal();
+const debugIndex = Bun.argv.indexOf("--debug");
+if (debugIndex >= 0) {
+  Bun.argv.splice(debugIndex, 1);
+  env.DISCORD_DEBUG = "1";
+}
+const DEBUG = truthy(env.DISCORD_DEBUG);
+
+function die(msg: string, code = 1): never {
+  console.error(msg);
+  process.exit(code);
+}
+
+class DiscoError extends Error {
+  constructor(
+    message: string,
+    public discordCode?: number,
+    public data?: unknown,
+  ) {
+    super(message);
+  }
+}
+
+function truthy(value: string | undefined): boolean {
+  return value === "1" || value === "true" || value === "yes";
+}
+
+function parseEnvValue(raw: string): string {
+  const value = raw.trimStart();
+  const quote = value[0];
+  if (quote === '"' || quote === "'") {
+    let out = "";
+    for (let i = 1; i < value.length; i++) {
+      const ch = value[i]!;
+      if (ch === quote) return out;
+      if (quote === '"' && ch === "\\" && i + 1 < value.length) {
+        i++;
+        out += value[i]!;
+        continue;
+      }
+      out += ch;
+    }
+    return out;
+  }
+  return value.trimEnd().replace(/\s+#.*$/, "");
+}
+
+function loadEnvLocal(): Env {
+  const envPath = path.join(process.cwd(), ENV_FILE);
+  if (!existsSync(envPath)) return {};
+
+  const out: Env = {};
+  const raw = readFileSync(envPath, "utf8");
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const match = trimmed.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!match) continue;
+
+    const key = match[1]!;
+    out[key] = parseEnvValue(match[2]!);
+  }
+  return out;
+}
+
+function requireToken(): string {
+  const token = env.DISCORD_BOT_TOKEN ?? "";
+  const envPath = path.join(process.cwd(), ENV_FILE);
+  if (!token) die(`disco: missing DISCORD_BOT_TOKEN in ${envPath}\n  Run \`disco doctor\` for setup help.`);
+  return token;
+}
+
+function requireGuildId(): string {
+  const guildId = env.DISCORD_GUILD_ID ?? "";
+  const envPath = path.join(process.cwd(), ENV_FILE);
+  if (!guildId) die(`disco: missing DISCORD_GUILD_ID in ${envPath}\n  Run \`disco doctor\` for setup help.`);
+  return mustBeSnowflake(guildId, "DISCORD_GUILD_ID");
+}
+
+function parseFlags(args: string[], booleanFlags = new Set<string>(["json"])): { positional: string[]; flags: Record<string, string | boolean> } {
+  const positional: string[] = [];
+  const flags: Record<string, string | boolean> = {};
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]!;
+    if (!arg.startsWith("--")) {
+      positional.push(arg);
+      continue;
+    }
+
+    const name = arg.slice(2);
+    if (booleanFlags.has(name)) {
+      flags[name] = true;
+      continue;
+    }
+
+    const next = args[i + 1];
+    if (next !== undefined && !next.startsWith("--")) {
+      flags[name] = next;
+      i++;
+    } else {
+      flags[name] = true;
+    }
+  }
+  return { positional, flags };
+}
+
+function clampLimit(value: string | boolean | undefined, fallback: number): number {
+  if (value === true) die("disco: --limit requires a value");
+  if (typeof value !== "string") return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) die(`disco: bad --limit value: ${value}`);
+  return Math.min(100, Math.max(1, parsed));
+}
+
+function stringFlag(flags: Record<string, string | boolean>, name: string): string | undefined {
+  const value = flags[name];
+  if (value === true) die(`disco: --${name} requires a value`);
+  return value;
+}
+
+function mustBeSnowflake(value: string, label: string): string {
+  if (!/^\d{17,20}$/.test(value)) die(`disco: bad ${label}: ${value} (expected Discord snowflake ID)`);
+  return value;
+}
+
+async function discord(endpoint: string, params: Record<string, string> = {}, retried = false): Promise<unknown> {
+  const token = requireToken();
+  const url = new URL(`${API}${endpoint}`);
+  for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+
+  if (DEBUG) console.error(`disco debug: GET ${url.pathname}${url.search}`);
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bot ${token}`,
+      "User-Agent": USER_AGENT,
+    },
+  });
+
+  const text = await res.text();
+  let data: Json = {};
+  if (text) {
+    try {
+      data = JSON.parse(text) as Json;
+    } catch {
+      data = { message: text.slice(0, 300) };
+    }
+  }
+
+  if (res.status === 429) {
+    const retryAfter = typeof data.retry_after === "number"
+      ? String(data.retry_after)
+      : res.headers.get("retry-after") ?? "1";
+    if (!retried) {
+      const ms = Math.max(0, Number.parseFloat(retryAfter)) * 1000;
+      await Bun.sleep(Number.isFinite(ms) ? ms : 1000);
+      return discord(endpoint, params, true);
+    }
+    const scope = data.global === true ? "global " : "";
+    throw new DiscoError(`${scope}rate limited by Discord, retry after ${retryAfter}s`);
+  }
+
+  if (!res.ok) {
+    if (DEBUG) console.error("disco debug:", JSON.stringify(data, null, 2));
+    const message = typeof data.message === "string" ? data.message : `HTTP ${res.status}`;
+    const code = typeof data.code === "number" ? data.code : undefined;
+    throw new DiscoError(`Discord API failed (${res.status}${code ? `, code ${code}` : ""}): ${message}`, code, data);
+  }
+
+  return data;
+}
+
+function expectRecord(value: unknown, label: string): Json {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new DiscoError(`${label} returned an unexpected response shape`);
+  }
+  return value as Json;
+}
+
+function expectArray<T>(value: unknown, label: string): T[] {
+  if (!Array.isArray(value)) {
+    throw new DiscoError(`${label} returned an unexpected response shape`);
+  }
+  return value as T[];
+}
+
+function channelTypeLabel(type: number): string {
+  const labels: Record<number, string> = {
+    0: "text",
+    2: "voice",
+    4: "category",
+    5: "announcement",
+    10: "announcement-thread",
+    11: "public-thread",
+    12: "private-thread",
+    13: "stage",
+    14: "directory",
+    15: "forum",
+    16: "media",
+  };
+  return labels[type] ?? `type-${type}`;
+}
+
+function formatTimestamp(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) return value;
+  return `${date.toISOString().slice(0, 16).replace("T", " ")} UTC`;
+}
+
+function authorName(author: DiscordUser | undefined): string {
+  if (!author) return "?";
+  return author.global_name || author.username || author.id;
+}
+
+async function cmdDoctor(): Promise<void> {
+  const envPath = path.join(process.cwd(), ENV_FILE);
+  const token = env.DISCORD_BOT_TOKEN ?? "";
+  const guildId = env.DISCORD_GUILD_ID ?? "";
+  if (!token || !guildId) {
+    console.error(`disco doctor: missing credentials in ${envPath}\n`);
+    console.error(`  DISCORD_BOT_TOKEN: ${token ? "set" : "MISSING"}`);
+    console.error(`  DISCORD_GUILD_ID:   ${guildId ? "set" : "MISSING"}\n`);
+    console.error("Add both to the current directory's .env.local:");
+    console.error("  DISCORD_BOT_TOKEN=...");
+    console.error("  DISCORD_GUILD_ID=...");
+    console.error("\nDiscord setup:");
+    console.error("  1. Create an app and bot at https://discord.com/developers/applications");
+    console.error("  2. Enable Message Content Intent on the Bot page if you need message text.");
+    console.error("  3. Invite the bot with View Channel and Read Message History permissions.");
+    process.exit(1);
+  }
+
+  try {
+    const user = expectRecord(await discord("/users/@me"), "/users/@me") as DiscordUser;
+    const channels = expectArray<DiscordChannel>(
+      await discord(`/guilds/${mustBeSnowflake(guildId, "DISCORD_GUILD_ID")}/channels`),
+      "guild channels",
+    );
+    console.log(`OK  bot=${authorName(user)} (${user.id})`);
+    console.log(`    guild=${guildId}`);
+    console.log(`    channels=${channels.length}`);
+    console.log(`    creds from ${envPath}`);
+    const probeChannel = channels.find((c) => c.type === 0 || c.type === 5 || c.type === 15 || c.type === 16);
+    if (!probeChannel) {
+      console.log("    message probe: skipped, no text/forum/media channels were returned.");
+    } else {
+      await probeMessages(probeChannel);
+    }
+  } catch (e) {
+    if (e instanceof DiscoError) die(`disco doctor: ${e.message}`);
+    throw e;
+  }
+}
+
+async function probeMessages(channel: DiscordChannel): Promise<void> {
+  try {
+    const messages = expectArray<DiscordMessage>(
+      await discord(`/channels/${mustBeSnowflake(channel.id, "channel-id")}/messages`, { limit: "1" }),
+      "channel messages",
+    );
+    if (messages.length === 0) {
+      console.log(`    message probe: #${channel.name ?? channel.id} returned no recent messages.`);
+      console.log("    message text still requires Message Content Intent plus channel permissions.");
+      return;
+    }
+
+    const hasContent = messages.some((m) => (m.content ?? "").trim().length > 0);
+    console.log(
+      hasContent
+        ? `    message probe: #${channel.name ?? channel.id} returned readable message content.`
+        : `    message probe: #${channel.name ?? channel.id} returned messages, but content was empty.`,
+    );
+    if (!hasContent) {
+      console.log("    empty content can mean Message Content Intent, permissions, embeds-only/stickers, or Discord API flakiness.");
+    }
+  } catch (e) {
+    if (e instanceof DiscoError) {
+      console.log(`    message probe: failed for #${channel.name ?? channel.id}: ${e.message}`);
+      console.log("    check Read Message History, channel visibility, and Message Content Intent.");
+      return;
+    }
+    throw e;
+  }
+}
+
+async function cmdChannels(args: string[]): Promise<void> {
+  const { flags } = parseFlags(args);
+  const guildId = requireGuildId();
+  const limitValue = stringFlag(flags, "limit");
+  const limit = limitValue ? clampLimit(limitValue, 100) : undefined;
+  let channels = expectArray<DiscordChannel>(await discord(`/guilds/${guildId}/channels`), "guild channels");
+  channels = channels.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  if (limit !== undefined) channels = channels.slice(0, limit);
+
+  if (flags.json) {
+    console.log(JSON.stringify(channels, null, 2));
+    return;
+  }
+
+  for (const channel of channels) {
+    const name = channel.name ? `#${channel.name}` : "(unnamed)";
+    const parent = channel.parent_id ? `  parent=${channel.parent_id}` : "";
+    console.log(`${channel.id}  ${channelTypeLabel(channel.type).padEnd(19)} ${name}${parent}`);
+  }
+}
+
+async function cmdMessages(args: string[]): Promise<void> {
+  const { positional, flags } = parseFlags(args);
+  if (!positional[0]) {
+    die("disco: usage: disco messages <channel-id> [--limit N] [--before <id>] [--after <id>] [--around <id>] [--json]");
+  }
+
+  const pagination = ["before", "after", "around"]
+    .flatMap((key) => {
+      const value = stringFlag(flags, key);
+      return value === undefined ? [] : [{ key, value }];
+    });
+  if (pagination.length > 1) die("disco: pass only one of --before, --after, or --around");
+
+  const params: Record<string, string> = { limit: String(clampLimit(flags.limit, 50)) };
+  for (const { key, value } of pagination) params[key] = mustBeSnowflake(value, `--${key}`);
+
+  const channelId = mustBeSnowflake(positional[0], "channel-id");
+  const messages = expectArray<DiscordMessage>(await discord(`/channels/${channelId}/messages`, params), "channel messages");
+  const ordered = messages.slice().reverse();
+
+  if (flags.json) {
+    console.log(JSON.stringify(ordered, null, 2));
+    return;
+  }
+
+  if (ordered.length === 0) {
+    console.error("disco: no messages returned; the channel/range may be empty or the bot may lack Read Message History.");
+    return;
+  }
+
+  let emptyContent = false;
+  for (const message of ordered) {
+    const content = (message.content ?? "").replace(/\s+/g, " ").trim();
+    if (!content) emptyContent = true;
+    console.log(`${formatTimestamp(message.timestamp)}  ${authorName(message.author).padEnd(20)} ${message.id}  ${content}`);
+  }
+
+  if (emptyContent) {
+    console.error("disco: some messages had empty content; possible causes: Message Content Intent, permissions, embeds-only/sticker messages, or Discord API flakiness.");
+  }
+}
+
+function usage(): void {
+  console.log(`disco - read-only Discord CLI for one CWD .env.local guild
+
+Usage:
+  disco [--debug] channels [--limit N] [--json]
+  disco [--debug] messages <channel-id> [--limit N] [--before <id>] [--after <id>] [--around <id>] [--json]
+  disco [--debug] doctor
+
+Auth (current working directory only):
+  ${ENV_FILE} with DISCORD_BOT_TOKEN and DISCORD_GUILD_ID.
+
+Notes:
+  - Channel and message IDs are Discord snowflakes.
+  - \`disco channels\` lists guild channels, not active threads.
+  - \`disco messages <thread-id>\` works because threads are channels.
+  - Message text requires Message Content Intent plus channel permissions.`);
+}
+
+const [, , cmd, ...rest] = Bun.argv;
+try {
+  switch (cmd) {
+    case "channels":
+      await cmdChannels(rest);
+      break;
+    case "messages":
+      await cmdMessages(rest);
+      break;
+    case "doctor":
+      await cmdDoctor();
+      break;
+    case undefined:
+    case "-h":
+    case "--help":
+      usage();
+      break;
+    default:
+      console.error(`disco: unknown command: ${cmd}`);
+      usage();
+      process.exit(2);
+  }
+} catch (e) {
+  if (e instanceof DiscoError) die(`disco: ${e.message} - run \`disco doctor\` for help`);
+  throw e;
+}
