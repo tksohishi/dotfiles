@@ -1,0 +1,62 @@
+#!/usr/bin/env -S uv run --script --quiet
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["yfinance"]
+# ///
+"""Minimal stock quote + fundamentals lookup via Yahoo Finance.
+
+usage: fin [-j] SYMBOL...
+"""
+import json
+import sys
+
+import yfinance as yf
+
+FIELDS = [
+    "currentPrice", "regularMarketPrice", "regularMarketChangePercent",
+    "marketCap", "trailingPE", "forwardPE", "trailingEps", "dividendYield",
+    "fiftyTwoWeekLow", "fiftyTwoWeekHigh", "longName",
+]
+
+
+def fmt_cap(v):
+    if not v:
+        return "-"
+    for unit, div in (("T", 1e12), ("B", 1e9), ("M", 1e6)):
+        if v >= div:
+            return f"{v / div:.2f}{unit}"
+    return str(v)
+
+
+def fmt(v, suffix="", digits=2):
+    return f"{v:.{digits}f}{suffix}" if isinstance(v, (int, float)) else "-"
+
+
+def main():
+    symbols = [a.upper() for a in sys.argv[1:] if not a.startswith("-")]
+    as_json = any(a in ("-j", "--json") for a in sys.argv[1:])
+    if not symbols:
+        print(__doc__.strip(), file=sys.stderr)
+        sys.exit(1)
+
+    for sym in symbols:
+        info = yf.Ticker(sym).info
+        if as_json:
+            print(json.dumps({k: info.get(k) for k in FIELDS} | {"symbol": sym}))
+            continue
+        price = info.get("currentPrice") or info.get("regularMarketPrice")
+        if price is None:
+            print(f"{sym}: no data (bad symbol?)", file=sys.stderr)
+            continue
+        print(
+            f"{sym}  {fmt(price)} {fmt(info.get('regularMarketChangePercent'), '%')}"
+            f"  P/E {fmt(info.get('trailingPE'))} (fwd {fmt(info.get('forwardPE'))})"
+            f"  EPS {fmt(info.get('trailingEps'))}"
+            f"  Yield {fmt(info.get('dividendYield'), '%')}"
+            f"  MktCap {fmt_cap(info.get('marketCap'))}"
+            f"  52w {fmt(info.get('fiftyTwoWeekLow'))}-{fmt(info.get('fiftyTwoWeekHigh'))}"
+        )
+
+
+if __name__ == "__main__":
+    main()
