@@ -1,15 +1,15 @@
 ---
 name: fetch-blocked
-description: Access content on bot-blocked sites (Reddit, X/Twitter, Cloudflare-walled pages) anonymously, without login, via URL rewrites, public endpoints, agent-browser, or a reader proxy. Use when WebFetch is denied by the blocked-domains hook, returns 403/429 or a challenge page, or the user asks to read a Reddit thread, a tweet/post URL, or any bot-walled page.
+description: Access content on bot-blocked sites (Reddit, X/Twitter, Cloudflare-walled pages) anonymously, without login, via URL rewrites, public endpoints, or agent-browser. Use when WebFetch is denied by the blocked-domains hook, returns 403/429 or a challenge page, or the user asks to read a Reddit thread, a tweet/post URL, or any bot-walled page.
 ---
 
 # Fetch Blocked Sites
 
-Strategy map for sites that block plain HTTP fetchers. Escalate in order: URL rewrite → public endpoint → agent-browser → reader proxy. Don't start with the browser when a rewrite works.
+Strategy map for sites that block plain HTTP fetchers. Escalate in order: URL rewrite → public endpoint → agent-browser. Don't start with the browser when a rewrite works.
 
 ## Reddit
 
-WebFetch refuses every reddit domain client-side ("unable to fetch"), and r.jina.ai is 403-blocked by Reddit upstream. Use httpie against `old.reddit.com`:
+WebFetch refuses every reddit domain client-side ("unable to fetch"). Use httpie against `old.reddit.com`:
 
 - HTML (works anonymously): `http GET 'https://old.reddit.com/r/<sub>/top/?t=week'` — server-rendered, pipe through `rg`/`head` to trim.
 - Structured: append `.rss` (Atom XML), e.g. `https://old.reddit.com/r/<sub>/top/.rss?t=week` or `https://old.reddit.com/r/<sub>/comments/<id>/.rss` for a thread.
@@ -39,10 +39,6 @@ Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section
 ## Cloudflare-challenged pages ("Just a moment...", 403 with cf headers)
 
 `agent-browser --headed` — the challenge auto-clears in 2-3s headed, never headless.
-
-## Last resort: reader proxy
-
-`WebFetch https://r.jina.ai/<full-url>` returns the page as markdown, anonymously (rate-limited tier). This sends the URL to a third party; use for public pages only, never for URLs with tokens or private params. Some sites (Reddit among them) block jina's fetcher upstream — a 200 from jina can still wrap the origin's 403 page, so check the content.
 
 ## Maintenance
 
