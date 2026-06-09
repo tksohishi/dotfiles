@@ -18,7 +18,7 @@ After `brew upgrade --formula`, run `agent-browser install` to update its browse
 
 After `agent-browser install`, prune stale browser caches across the two locations below. Each tool accumulates versions on upgrade rather than replacing them, and none have built-in cleanup.
 
-For each cache root, list its versioned subdirectories, then delete all but the newest of each group. Group by the directory name prefix; rank by the version segment (numeric/semver where present, mtime otherwise).
+For each cache root, list its versioned subdirectories, then delete all but the newest of each group. Group by the directory name prefix; rank by the version segment (numeric/semver where present, mtime otherwise). Delete with `trash <dirs...>` (macOS built-in, reversible), not `rm -rf` — the auto-mode classifier blocks recursive force-deletes of home paths, and `trash` keeps the prune recoverable from the Trash.
 
 - `~/.agent-browser/browsers/chrome-<semver>/` — keep highest semver
 - `~/Library/Caches/ms-playwright/chromium-<n>/`, `chromium_headless_shell-<n>/`, `firefox-<n>/` — keep highest-numbered of each prefix
