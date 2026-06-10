@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Wrapper around gog: injects per-project GOG_ACCOUNT from the CWD's
+# .env.local so each project routes to its own Google account. gog is a
+# native binary and never loads .env.local itself; GOG_ACCOUNT is its
+# env binding for -a/--account. Same pattern as bin/ntn.
+#
+# Precedence: GOG_ACCOUNT already set in the environment (or an explicit
+# -a/--account flag) wins. Bypass intentionally: /opt/homebrew/bin/gog
+
+set -euo pipefail
+
+REAL=/opt/homebrew/bin/gog
+
+if [ -z "${GOG_ACCOUNT:-}" ] && [ -f .env.local ]; then
+    line=$(grep -m1 '^GOG_ACCOUNT=' .env.local || true)
+    if [ -n "$line" ]; then
+        value=${line#GOG_ACCOUNT=}
+        value=${value%$'\r'}
+        value=${value#\"}; value=${value%\"}
+        value=${value#\'}; value=${value%\'}
+        [ -n "$value" ] && export GOG_ACCOUNT="$value"
+    fi
+fi
+
+exec "$REAL" "$@"

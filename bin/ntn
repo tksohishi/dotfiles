@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Wrapper around ntn (Notion CLI): injects per-project NOTION_WORKSPACE_ID
+# from the CWD's .env.local. ntn only has a single global default workspace;
+# this routes each project to its own workspace (work vs personal account),
+# same pattern as slk. ntn is a native binary, so unlike bun scripts it
+# never loads .env.local itself.
+#
+# Precedence: NOTION_WORKSPACE_ID already set in the environment wins.
+# Bypass intentionally: /opt/homebrew/bin/ntn
+
+set -euo pipefail
+
+REAL=/opt/homebrew/bin/ntn
+
+if [ -z "${NOTION_WORKSPACE_ID:-}" ] && [ -f .env.local ]; then
+    line=$(grep -m1 '^NOTION_WORKSPACE_ID=' .env.local || true)
+    if [ -n "$line" ]; then
+        value=${line#NOTION_WORKSPACE_ID=}
+        value=${value%$'\r'}
+        value=${value#\"}; value=${value%\"}
+        value=${value#\'}; value=${value%\'}
+        [ -n "$value" ] && export NOTION_WORKSPACE_ID="$value"
+    fi
+fi
+
+exec "$REAL" "$@"
