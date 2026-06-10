@@ -37,6 +37,7 @@ Most files are self-explanatory. These have *why* worth knowing:
 - For apps with no Homebrew cask or MAS listing, add a `# Manual install: AppName (URL)` comment to the Brewfile. These are shown as reminders at the end of `install.sh`.
 - This is a public repo. Never commit personal information (API keys, tokens, personal URLs, email addresses, domain allowlists, etc.) to `dotagents/`, `dotclaude/`, or `dotcodex/`. Use `.local`/`.override` files for machine-specific or private settings.
 - Claude Code allowlist patterns: `Bash(cmd *)` does NOT match bare `cmd`. Use `Bash(cmd*)` (no space) for multi-word commands where collision is impossible (e.g. `gh release list*`). Keep the space form (`Bash(cmd *)`) for broad prefixes where collisions matter (e.g. `ls *` vs `lsof`).
+- Permission rules under auto mode: only `deny` and `ask` rules are actively maintained. Don't proactively suggest `allow` rules for new CLIs; add one only reactively when a safe command demonstrably keeps prompting. Do suggest `ask` rules for destructive subcommands the classifier might approve.
 - Use `summarize <url>` to research YouTube links; direct access to YouTube is blocked for agents
 
 ## Workflow
