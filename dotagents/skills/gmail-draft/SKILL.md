@@ -15,7 +15,7 @@ This skill ships a wrapper (`draft.ts`) that reads an HTML file and passes its c
 
 ## Workflow
 
-1. Write the email body as HTML to a project-local `tmp/<name>.html` (or `/tmp/` if the project has no `tmp/`). Project `tmp/` is covered by the global gitignore, so files won't be committed accidentally.
+1. Write the email body as HTML to a project-local `tmp/drafts/<name>.html` (or `/tmp/drafts/` if the project has no `tmp/`). The `drafts/` segment is what triggers the publish-bound prose hook (no emdash/§ check), and project `tmp/` is covered by the global gitignore so files won't be committed accidentally.
 2. Run:
 
 ```bash

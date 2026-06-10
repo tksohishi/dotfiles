@@ -1,0 +1,27 @@
+# Publish-bound locations where the stylistic-symbol prose hook
+# (no-prose-symbols.sh) DOES fire. Everything not listed here is skipped.
+# Lines starting with # are comments; blank lines ignored.
+#
+# Two line formats:
+#   - Contains slash → path substring match (e.g. /drafts/, /posts/).
+#     Anchor with leading + trailing slashes to bind to directory
+#     boundaries. Matches anywhere in the path, so tmp/drafts/ counts.
+#   - No slash → basename glob match (e.g. DRAFT*, *.draft.md)
+#
+# Register a location here when its contents are written to be published
+# (blog posts, emails, public docs). Drafting skills should write their
+# output under a drafts/ segment so the check applies.
+
+# Draft output convention (skills write here)
+/drafts/
+
+# Published-content trees
+/posts/
+/blog/
+/content/
+/newsletter/
+
+# Loose draft files
+DRAFT*
+*.draft.md
+*.draft.txt
