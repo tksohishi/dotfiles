@@ -16,11 +16,13 @@
 #   grew without bound), while publish locations are enumerable. Register a
 #   new publish location once instead of exempting every personal file.
 #
-#   Two line formats in prose-publish-paths.txt:
+#   Line formats in prose-publish-paths.txt:
 #     - Contains `/` → path substring match (e.g. /drafts/, /posts/).
 #       Anchor with leading and trailing slashes to bind to directory
 #       boundaries.
 #     - No `/` → basename glob match (e.g. DRAFT*, *.draft.md)
+#     - Leading `!` → basename-glob exclusion; wins over any match
+#       (tracking files like RETRO.md living inside publish trees).
 #
 #   Extension gate: .md, .markdown, .txt, .rst, .html (html for email
 #   bodies composed by drafting skills).
@@ -62,10 +64,20 @@ PUBLISH_FILE="$SCRIPT_DIR/prose-publish-paths.txt"
 BASENAME=$(basename "$FILE_PATH")
 MATCHED=""
 if [ -f "$PUBLISH_FILE" ]; then
+  # Pass 1: exclusions (leading `!`) win over any inclusion match.
+  while IFS= read -r pattern; do
+    pattern=$(echo "$pattern" | xargs)
+    [[ "$pattern" = !* ]] || continue
+    case "$BASENAME" in
+      ${pattern#!}) exit 0 ;;
+    esac
+  done < "$PUBLISH_FILE"
+  # Pass 2: inclusions.
   while IFS= read -r pattern; do
     pattern=$(echo "$pattern" | xargs)
     [ -z "$pattern" ] && continue
     [[ "$pattern" = \#* ]] && continue
+    [[ "$pattern" = !* ]] && continue
     if [[ "$pattern" = */* ]]; then
       case "$FILE_PATH" in
         *"$pattern"*) MATCHED=1; break ;;

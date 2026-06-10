@@ -2,11 +2,14 @@
 # (no-prose-symbols.sh) DOES fire. Everything not listed here is skipped.
 # Lines starting with # are comments; blank lines ignored.
 #
-# Two line formats:
+# Line formats:
 #   - Contains slash → path substring match (e.g. /drafts/, /posts/).
 #     Anchor with leading + trailing slashes to bind to directory
 #     boundaries. Matches anywhere in the path, so tmp/drafts/ counts.
 #   - No slash → basename glob match (e.g. DRAFT*, *.draft.md)
+#   - Leading `!` → exclusion by basename glob; wins over any match.
+#     For tracking files that live inside publish trees but are not
+#     themselves published (e.g. RETRO.md next to a published post).
 #
 # Register a location here when its contents are written to be published
 # (blog posts, emails, public docs). Drafting skills should write their
@@ -25,3 +28,11 @@
 DRAFT*
 *.draft.md
 *.draft.txt
+
+# Tracking files inside publish trees (not published themselves)
+!RETRO.md
+!NOTES.md
+!TODO.md
+!TODOS.md
+!WORKLOG.md
+!CHECKLIST.md
