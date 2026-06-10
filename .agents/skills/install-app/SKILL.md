@@ -61,9 +61,6 @@ First, determine whether this is an **MCP server** or a **Homebrew package**:
    - For casks: run `brew install --cask <name>`
    - For Mac App Store: tell the user to run `mas install <id>` (requires sudo)
 
-5. Suggest allowlist updates for CLI tools:
-   - Skip this step for casks and Mac App Store apps (GUI apps don't need shell permissions)
-   - For formulae that provide CLI commands, check if the tool or its safe subcommands would be useful to allow in `~/.dotfiles/dotclaude/settings.json`
-   - Assess which subcommands are safe (read-only, non-destructive) vs. disruptive (executes arbitrary code, mutates remote state, deletes data)
-   - Suggest specific `Bash(<command> *)` or granular `Bash(<command> <subcommand> *)` rules as appropriate
-   - Ask the user before adding any rules
+5. Permission rules (usually none needed):
+   - Auto mode's classifier handles approval; do NOT proactively suggest `allow` rules for new CLI tools. Add an allow rule only reactively, when a safe command demonstrably keeps triggering prompts.
+   - If the tool has destructive operations the classifier might wave through (deletes data, mutates remote state), suggest an `ask` rule for those subcommands and get the user's confirmation before adding it.
