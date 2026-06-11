@@ -534,7 +534,6 @@
     ]
   },
   "model": "claude-fable-5[1m]",
-  "effortLevel": "medium",
   "hooks": {
     "PreToolUse": [
       {
@@ -606,6 +605,8 @@
     "command": "bash \"$HOME/.claude/statusline.sh\""
   },
   "enabledPlugins": {},
+  "effortLevel": "medium",
   "tui": "fullscreen",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "agentPushNotifEnabled": true
 }
