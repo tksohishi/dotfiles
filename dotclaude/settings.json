@@ -493,6 +493,7 @@
       "Bash(git clean -df*)",
       "Bash(git clean -xf*)",
       "Bash(git clean -xdf*)",
+      "Bash(gog auth tokens export*)",
       "Bash(hermes *--accept-hooks*)",
       "Bash(hermes *--ignore-rules*)",
       "Bash(hermes *--ignore-user-config*)",
