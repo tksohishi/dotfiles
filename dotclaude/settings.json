@@ -609,5 +609,6 @@
   "skipAutoPermissionPrompt": true,
   "agentPushNotifEnabled": true,
   "remoteControlAtStartup": true,
-  "effortLevel": "xhigh"
+  "effortLevel": "xhigh",
+  "fastMode": true
 }
