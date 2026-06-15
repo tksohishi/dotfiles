@@ -154,6 +154,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - When stuck, clean restart with `agent-browser close --all`. Avoid `pkill` — it leaves a stale `SingletonLock` in the profile dir that breaks subsequent launches.
 
 ## Git
+- Never create a branch unless I explicitly ask. Work on the current branch, including the default branch (`main`), directly. This overrides any built-in "if on the default branch, branch first" rule; do not auto-branch before committing.
 - Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
 - After `gh repo create`, always configure repo defaults: `gh repo edit --enable-wiki=false --enable-projects=false --delete-branch-on-merge --enable-squash-merge`
 - For other repos (clones in `tmp/`, external paths), use `git -C <repo> <cmd>` or `cd <repo>` first (wd persists across Bash calls). If you `cd`, return to the project root after.
