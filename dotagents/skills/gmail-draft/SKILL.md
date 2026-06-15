@@ -33,6 +33,23 @@ bun ~/.claude/skills/gmail-draft/draft.ts \
 
 3. Confirm the draft was created. The user reviews in Gmail before sending. Never send directly.
 
+## Replies: always reply-all
+
+When drafting a reply, emulate "reply-all" by default, not "reply to sender only". Build the recipients from the message you're replying to:
+
+- `--to`: the original sender (`From`) plus everyone in the original `To`.
+- `--cc`: everyone in the original `Cc`.
+- Always drop the user's own address (the `-a <account>` identity) from both lists so they don't email themselves. De-duplicate addresses across To/Cc.
+
+Pull the headers from the latest message in the thread:
+
+```bash
+gog gmail thread get <threadId> -a <account> --json \
+  | jq -r '.thread.messages[-1].payload.headers[] | select(.name|test("^(From|To|Cc)$";"i")) | "\(.name): \(.value)"'
+```
+
+If the user explicitly says "reply only to the sender" (or similar), fall back to sender-only.
+
 ## HTML conventions
 
 - Wrapper auto-wraps the body file in `<div dir="ltr">...</div>` (matches Gmail native compose, so iOS continuations inherit consistent font/size). Don't add the outer wrapper yourself.
@@ -47,6 +64,6 @@ bun ~/.claude/skills/gmail-draft/draft.ts \
 - **Account**: pass `-a <email>` when multiple Gmail accounts are configured for `gog`.
 - **Threading**: `--reply-to-message-id` sets In-Reply-To/References; Gmail keeps the draft in-thread.
 - **Subject**: prefix with `Re: ` for replies — `gog` does not auto-derive it.
-- **CC preservation**: when replying, look up the existing thread's CC list and re-pass it explicitly. `gog` does not auto-preserve.
+- **Reply-all recipients**: `gog` does not auto-populate To/Cc from the thread. Construct them explicitly per "Replies: always reply-all" above.
 - **Find the latest message** in a thread before reply: `gog gmail thread get <threadId> -a <account> --json | jq -r '.thread.messages[-1].id'`.
 - **Flag ordering**: flags go *after* the subcommand chain (`gog gmail draft create --to ...`), not before.
