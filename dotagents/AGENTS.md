@@ -31,7 +31,6 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Avoid using emdashes in writing
 - Avoid using the section sign `§` in writing meant for humans; it reads as an AI artifact. Use the word "Section", "see", or drop the marker.
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
-- When referring to a skill's or process's steps, don't invent decimal sub-phase numbers (e.g. "Phase 2.7", "3.5"). Skill phases are integers; refer by the integer phase and describe the step in plain words ("Phase 2's final fact check"). Decimal sub-phase notation is noise the user has flagged repeatedly.
 
 ## 日本語の注意点
 - 人称は一人称「私」、二人称（you）「あなた」で統一
