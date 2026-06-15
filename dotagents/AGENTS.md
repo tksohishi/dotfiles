@@ -35,7 +35,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## 日本語の注意点
 - 人称は一人称「私」、二人称（you）「あなた」で統一
 - 丸囲み数字（①②③）や囲み文字などの特殊文字は避ける。通常の数字（1. 2. 3.）や箇条書きを使う
-- Markdown bold across Japanese punctuation: `**…。**続き` won't render because `。` + CJK breaks CommonMark right-flanking rules. Move the period outside (`**…**。続き`) or split into separate sentences.
+- 強調（`**`）の閉じ記号の直前に句読点（。、）を置かない。句読点は必ず強調の外側に出す。`**重要**。続き` ✅ ／ `**重要。**続き` ❌（後者は `。`+CJK が CommonMark の right-flanking 規則に反し、太字にならない）
 
 ## Documentation Style
 - Be concise; engineers scan, they don't read novels
