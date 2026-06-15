@@ -59,16 +59,6 @@ If the user explicitly says "reply only to the sender" (or similar), fall back t
 - Bold: `<b>...</b>`. Avoid inline styles and `<style>` blocks beyond the required `style="font-size:small"` on `gmail_default` divs.
 - Quotes inside body: prefer `&quot;` for safety.
 
-## Line breaks for readability
-
-Use judgment to make the email scan well; these are guidelines, not a mechanical wrap.
-
-- Favor several short `gmail_default` paragraphs over one dense block. Split when the topic shifts (greeting, context, the ask, closing) so the reader gets visual breathing room.
-- Within a paragraph, add `<br>` at natural clause boundaries when a line runs long, but never hard-wrap mid-clause. Let short lines stay on one line.
-- Japanese bodies: break at 文節 boundaries (roughly every 20–35 chars) the way a hand-written business mail reads, and honor kinsoku — don't start a line with 。、 or a closing bracket. Keep particles with the word they attach to.
-- English bodies: lean on paragraph divs and let the client wrap; reach for `<br>` only for deliberate structure (address blocks, signatures, short stacked lines).
-- Goal is a clean, well-paced email, not a fixed column width. When in doubt, fewer manual breaks.
-
 ## Common gotchas
 
 - **Account**: pass `-a <email>` when multiple Gmail accounts are configured for `gog`.
