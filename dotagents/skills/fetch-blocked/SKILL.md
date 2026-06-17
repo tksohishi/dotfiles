@@ -20,7 +20,7 @@ General heuristic when WebFetch fails on a domain not listed below:
 | nytimes.com | refused client-side | plain httpie (paywall still applies to full articles) |
 | amazon.com / amazon.co.jp | 500 bot block | httpie with browser UA |
 | naver.com | refused client-side | plain httpie (server-rendered HTML; browser UA not needed) |
-| imdb.com | empty (WAF challenge) | suggestion endpoint for JSON; agent-browser --headed for full page — see IMDb section |
+| imdb.com | empty (WAF challenge) | GraphQL endpoint for star rating; suggestion endpoint for IDs — see IMDb section |
 | 5ch.net | 403 | plain httpie |
 | quora.com, glassdoor.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
 | facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
@@ -48,18 +48,26 @@ WebFetch refuses every reddit domain client-side ("unable to fetch"). Use httpie
 
 ## IMDb
 
-Title and search pages return an AWS WAF challenge (HTTP 202, `x-amzn-waf-action: challenge`, empty body); a browser User-Agent doesn't help.
+Title/search pages return an AWS WAF challenge (HTTP 202, `x-amzn-waf-action: challenge`, empty body); a browser User-Agent doesn't help. Use the JSON APIs below instead of fetching the page.
 
-- Structured data (no WAF, anonymous): the suggestion endpoint returns JSON with title, year, type, top cast, and poster — but no rating or plot.
+- Star rating (no WAF, anonymous): the public GraphQL caching endpoint returns `aggregateRating` (e.g. 9.3) and `voteCount` for any title ID, movie or TV.
 
   ```bash
-  # By title ID
-  http GET 'https://v2.sg.media-imdb.com/suggestion/t/tt0111161.json'
-  # Search by name
-  http GET 'https://v3.sg.media-imdb.com/suggestion/x/shawshank.json?includeVideos=0'
+  http POST 'https://caching.graphql.imdb.com/' Content-Type:application/json --ignore-stdin \
+    --raw='{"query":"query{title(id:\"tt0111161\"){titleText{text} ratingsSummary{aggregateRating voteCount}}}"}'
+  # → .data.title.ratingsSummary.aggregateRating
   ```
 
-- Full title page (rating, plot, full cast): `agent-browser --headed` — the WAF challenge is a JS challenge that clears headed, same as the Cloudflare case below.
+- Title ID from a name: the suggestion endpoint returns matches (id, title, year, type, top cast, poster — no rating).
+
+  ```bash
+  http GET 'https://v3.sg.media-imdb.com/suggestion/x/shawshank.json?includeVideos=0'   # search by name
+  http GET 'https://v2.sg.media-imdb.com/suggestion/t/tt0111161.json'                    # by title ID
+  ```
+
+  Chain them: suggestion to resolve name → ID, then GraphQL for the rating.
+
+- Full title page (plot, full cast): `agent-browser --headed` — the WAF challenge is a JS challenge that clears headed, same as the Cloudflare case below.
 
 ## LinkedIn / Instagram
 
