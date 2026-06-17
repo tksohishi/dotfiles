@@ -7,9 +7,11 @@ description: Access content on bot-blocked sites (Reddit, X/Twitter, Cloudflare-
 
 Strategy map for sites that block plain HTTP fetchers. Escalate in order: URL rewrite → public endpoint → agent-browser. Don't start with the browser when a rewrite works.
 
+**Every `http`/`https` (httpie) call below needs `--ignore-stdin`** (flags after the URL). Without it httpie blocks reading stdin in the Bash tool (no TTY/EOF): the command hangs, gets auto-backgrounded, then fails with exit 144 and a 0-byte body. Add `--follow` for endpoints that 302 to an empty body (e.g. Naver).
+
 General heuristic when WebFetch fails on a domain not listed below:
 
-- Media/content sites (news, forums, docs, shops): `http GET <url>` via httpie; if that 403s/500s, retry with a browser User-Agent header. Much of the "blocking" is specific to WebFetch's fetcher, and plain httpie from this residential IP gets through.
+- Media/content sites (news, forums, docs, shops): `http GET <url> --ignore-stdin` via httpie; if that 403s/500s, retry with a browser User-Agent header. Much of the "blocking" is specific to WebFetch's fetcher, and plain httpie from this residential IP gets through.
 - Social or account-required sites (login walls, JS shells): `agent-browser --headed` with login, and only if the content is really needed; don't burn time escalating for low-value pages.
 
 ## Other verified sites (2026-06)
@@ -19,7 +21,7 @@ General heuristic when WebFetch fails on a domain not listed below:
 | stackoverflow.com | refused client-side | plain httpie; Stack Exchange API (`api.stackexchange.com/2.3/questions/<id>?site=stackoverflow&filter=withbody`) for structured JSON |
 | nytimes.com | refused client-side | plain httpie (paywall still applies to full articles) |
 | amazon.com / amazon.co.jp | 500 bot block | httpie with browser UA |
-| naver.com | refused client-side | plain httpie (server-rendered HTML; browser UA not needed) |
+| naver.com | refused client-side | plain httpie + `--ignore-stdin --follow` (else 302s to an empty body); server-rendered, browser UA not needed. Only some titles expose a rating: grep ``"key":"평점"..."text":"NN/100"`` (out of 100) |
 | imdb.com | empty (WAF challenge) | GraphQL endpoint for star rating; suggestion endpoint for IDs — see IMDb section |
 | 5ch.net | 403 | plain httpie |
 | quora.com, glassdoor.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
