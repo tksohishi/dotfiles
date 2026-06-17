@@ -10,5 +10,7 @@ stackoverflow.com|WebFetch cannot reach Stack Overflow. Plain httpie works (http
 nytimes.com|WebFetch cannot reach nytimes.com. Plain httpie works (paywall still applies to full articles).
 amazon.com|WebFetch gets a 500 bot block. Use httpie with a browser User-Agent header.
 amazon.co.jp|WebFetch gets a 500 bot block. Use httpie with a browser User-Agent header.
+imdb.com|WebFetch gets an empty AWS WAF challenge. Structured JSON: suggestion endpoint (v2.sg.media-imdb.com/suggestion/t/<ttID>.json, or v3.sg.media-imdb.com/suggestion/x/<query>.json). Full page: agent-browser --headed. See the fetch-blocked skill.
+naver.com|WebFetch refuses naver client-side. Plain httpie works (http GET <url>) — server-rendered HTML, no browser UA needed.
 quora.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.
 glassdoor.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.

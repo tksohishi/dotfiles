@@ -19,6 +19,8 @@ General heuristic when WebFetch fails on a domain not listed below:
 | stackoverflow.com | refused client-side | plain httpie; Stack Exchange API (`api.stackexchange.com/2.3/questions/<id>?site=stackoverflow&filter=withbody`) for structured JSON |
 | nytimes.com | refused client-side | plain httpie (paywall still applies to full articles) |
 | amazon.com / amazon.co.jp | 500 bot block | httpie with browser UA |
+| naver.com | refused client-side | plain httpie (server-rendered HTML; browser UA not needed) |
+| imdb.com | empty (WAF challenge) | suggestion endpoint for JSON; agent-browser --headed for full page — see IMDb section |
 | 5ch.net | 403 | plain httpie |
 | quora.com, glassdoor.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
 | facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
@@ -43,6 +45,21 @@ WebFetch refuses every reddit domain client-side ("unable to fetch"). Use httpie
 
   Returns JSON: `.text`, `.user.screen_name`, `.created_at`, plus quoted tweet and media if present. As of 2026-06 the `token` param is not validated (any value or absent works); if valid IDs start returning 404, token validation may be back — the formula is `((Number(id)/1e15)*Math.PI).toString(36).replace(/(0+|\.)/g,'')` (float precision loss intentional, matches the official widget). If that also fails, escalate to agent-browser.
 - Profiles, threads, replies: `agent-browser --headed` (x.com renders nothing without JS).
+
+## IMDb
+
+Title and search pages return an AWS WAF challenge (HTTP 202, `x-amzn-waf-action: challenge`, empty body); a browser User-Agent doesn't help.
+
+- Structured data (no WAF, anonymous): the suggestion endpoint returns JSON with title, year, type, top cast, and poster — but no rating or plot.
+
+  ```bash
+  # By title ID
+  http GET 'https://v2.sg.media-imdb.com/suggestion/t/tt0111161.json'
+  # Search by name
+  http GET 'https://v3.sg.media-imdb.com/suggestion/x/shawshank.json?includeVideos=0'
+  ```
+
+- Full title page (rating, plot, full cast): `agent-browser --headed` — the WAF challenge is a JS challenge that clears headed, same as the Cloudflare case below.
 
 ## LinkedIn / Instagram
 
