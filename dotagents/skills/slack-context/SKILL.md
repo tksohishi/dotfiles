@@ -10,6 +10,7 @@ description: Read recent Slack messages from the current repo's workspace via `s
 - When a parent message shows `(N replies, ts=…)`, follow up with `slk thread <channel> <ts>` to read the full discussion. Slack archive URLs also work: `slk thread https://workspace.slack.com/archives/Cxxxx/p1714817640123456`.
 - `slk download <file-url> [--out <path>]` — save a Slack-hosted file (PDF, image, video, etc.) when the user shares a file copy-link or pastes a Slack file URL. Accepts both `https://<workspace>.slack.com/files/.../F.../name` and `https://files.slack.com/files-pri/...` forms. Defaults to CWD with the original filename; if `--out` is a directory, the file lands inside it.
 - Output is plain text and can be quoted directly back to the user. Add `--json` for programmatic use.
+- `slk` prints all timestamps in UTC (`YYYY-MM-DD HH:MM`). When quoting times back to the user, convert to local time and label the zone (e.g. ET) — run `date` once to get the machine's current offset, then adjust. Keep the UTC value alongside only if dropping it would be ambiguous.
 
 ## Auth setup (manual, per workspace)
 
