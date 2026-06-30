@@ -61,10 +61,9 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Clickable file paths: when citing a file the user is meant to open (smoke artifacts, screenshots, generated reports, log dumps), render as `[name](file:///absolute/path)` so it's one click to inspect. Plain backticked paths aren't clickable in the Claude Code UI. Skip for source-code citations like `app.py:123` where the user reads in an editor, not opens via the OS.
 
 ## Slack Formatting
-- Headings: `*Title*` on its own line. Slack's mrkdwn doesn't support `#` or `##` (they render literally).
-- Outside headings, use `*bold*` sparingly for genuine emphasis only. Don't bold for decoration.
-- Fenced code blocks (```) for multi-line code or shell ops; inline backticks for filenames, env vars, single commands, and short snippets.
-- Bullets: `-` or `*`. Arrows: literal `→`.
+- Draft Slack messages as plain text: no markdown-format modifiers. No `*bold*`, no `#`/`*` headings, no `-`/`*` bullet markers. Write plain sentences and paragraphs; separate points with blank lines.
+- Reserve backticks / fenced code blocks for literal code or shell commands only, never for emphasis or decoration.
+- Arrows: literal `→`.
 
 ## Code Style
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
