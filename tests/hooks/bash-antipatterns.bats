@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-HOOK="$BATS_TEST_DIRNAME/../../dotclaude/hooks/bash-antipatterns.sh"
+HOOK="$BATS_TEST_DIRNAME/../../dotagents/hooks/bash-antipatterns.sh"
 
 bash_input() {
   jq -n --arg cmd "$1" '{tool_input: {command: $cmd}}'

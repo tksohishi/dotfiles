@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-HOOK="$BATS_TEST_DIRNAME/../../dotclaude/hooks/webfetch-blocked-domains.sh"
+HOOK="$BATS_TEST_DIRNAME/../../dotagents/hooks/webfetch-blocked-domains.sh"
 
 webfetch_input() {
   jq -n --arg url "$1" '{tool_input: {url: $url}}'

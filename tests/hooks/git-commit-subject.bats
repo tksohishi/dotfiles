@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-HOOK="$BATS_TEST_DIRNAME/../../dotclaude/hooks/git-commit-subject.sh"
+HOOK="$BATS_TEST_DIRNAME/../../dotagents/hooks/git-commit-subject.sh"
 
 bash_input() {
   jq -n --arg cmd "$1" '{tool_input: {command: $cmd}}'
