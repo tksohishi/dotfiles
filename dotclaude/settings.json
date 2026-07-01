@@ -567,11 +567,11 @@
         ]
       },
       {
-        "matcher": "Write",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/no-feedback-memory.sh",
+            "command": "$HOME/.claude/hooks/memory-gate.sh",
             "timeout": 5
           }
         ]

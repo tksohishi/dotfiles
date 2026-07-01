@@ -112,6 +112,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Most files under `~/.claude/` and `~/.codex/` symlink into `~/.dotfiles/`. Edit/Write refuses to write through symlinks.
 - When wd is `~/.dotfiles/`, edit the source files directly (e.g. `dotagents/AGENTS.md`, `dotclaude/settings.json`) instead of the `~/.<tool>/` paths.
 - In any project, `CLAUDE.md` is conventionally a symlink to `AGENTS.md` (the canonical instructions file). When editing project instructions, go to `AGENTS.md` directly — don't write through `CLAUDE.md`, skip the `readlink` round trip. Same for `.cursorrules` → `AGENTS.md` if present.
+- Claude Code's own `model` and `effortLevel` in `dotclaude/settings.json` are self-modification: never add or change them without explicit direction. Gotchas: `model` omitted = session default (`"default"` is NOT a valid value, it errors); valid `effortLevel` values are `low`/`medium`/`high`/`xhigh`. Read the file for the current value; never memorize it.
 
 ## Secrets
 - Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), or `.dev.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
