@@ -1,7 +1,38 @@
 #!/bin/bash
-# Pre-commit hook: warn if staged changes in public agent config dirs
-# contain strings that look like personal/private information.
+# Pre-commit hook:
+#   1. Bats coverage — a changed dotagents/hooks/*.sh must have a matching
+#      tests/hooks/<name>.bats, and `bats tests/hooks/` must pass.
+#   2. Privacy — warn if staged public agent-config changes look like they
+#      contain personal/private info.
+# Escape hatch for either: git commit --no-verify.
 
+fail=0
+
+# ── 1. Bats coverage for agent hook scripts ──────────────────────────────
+changed_hooks=$(git diff --cached --name-only --diff-filter=ACM -- dotagents/hooks/ | grep '\.sh$' || true)
+changed_hook_tests=$(git diff --cached --name-only --diff-filter=ACM -- tests/hooks/ | grep '\.bats$' || true)
+
+if [ -n "$changed_hooks" ] || [ -n "$changed_hook_tests" ]; then
+    missing=""
+    for h in $changed_hooks; do
+        base=$(basename "$h" .sh)
+        [ -f "tests/hooks/$base.bats" ] || missing="$missing $base"
+    done
+    if [ -n "$missing" ]; then
+        echo "pre-commit: hook script(s) changed without tests/hooks/<name>.bats:$missing" >&2
+        echo "  Add a passing bats test for each changed hook." >&2
+        fail=1
+    fi
+    if ! command -v bats >/dev/null 2>&1; then
+        echo "pre-commit: bats not found (brew install bats-core) — cannot verify hook tests." >&2
+        fail=1
+    elif ! bats tests/hooks/ >/dev/null 2>&1; then
+        echo "pre-commit: 'bats tests/hooks/' failed. Run it and fix before committing." >&2
+        fail=1
+    fi
+fi
+
+# ── 2. Personal/private info scan in public agent-config dirs ─────────────
 SENSITIVE_DIRS="dotagents/ dotclaude/ dotcodex/"
 
 staged_files=""
@@ -11,41 +42,43 @@ for dir in $SENSITIVE_DIRS; do
 done
 staged_files=$(echo "$staged_files" | xargs)
 
-[ -z "$staged_files" ] && exit 0
+if [ -n "$staged_files" ]; then
+    # Simple fixed-string checks (no regex issues)
+    BLOCKED_STRINGS=(
+        "sk-ant-"
+        "sk-proj-"
+        "ghp_"
+        "gho_"
+        "ghs_"
+        "Bearer "
+        "AIza"
+        "xoxb-"
+        "xoxp-"
+        "allowed_domains"
+        "blocked_domains"
+    )
 
-# Simple fixed-string checks (no regex issues)
-BLOCKED_STRINGS=(
-    "sk-ant-"
-    "sk-proj-"
-    "ghp_"
-    "gho_"
-    "ghs_"
-    "Bearer "
-    "AIza"
-    "xoxb-"
-    "xoxp-"
-    "allowed_domains"
-    "blocked_domains"
-)
+    diff_content=$(git diff --cached -U0 -- $staged_files | grep '^+' | grep -v '^+++')
 
-diff_content=$(git diff --cached -U0 -- $staged_files | grep '^+' | grep -v '^+++')
-
-found=0
-for str in "${BLOCKED_STRINGS[@]}"; do
-    matches=$(echo "$diff_content" | grep -F "$str" || true)
-    if [ -n "$matches" ]; then
-        if [ "$found" -eq 0 ]; then
-            echo "WARNING: Possible personal/private info in staged changes:"
-            echo ""
+    found=0
+    for str in "${BLOCKED_STRINGS[@]}"; do
+        matches=$(echo "$diff_content" | grep -F "$str" || true)
+        if [ -n "$matches" ]; then
+            if [ "$found" -eq 0 ]; then
+                echo "WARNING: Possible personal/private info in staged changes:"
+                echo ""
+            fi
+            echo "  matched: $str"
+            found=1
         fi
-        echo "  matched: $str"
-        found=1
-    fi
-done
+    done
 
-if [ "$found" -ne 0 ]; then
-    echo ""
-    echo "Review the diff carefully. Use .local/.override files for private settings."
-    echo "To proceed anyway: git commit --no-verify"
-    exit 1
+    if [ "$found" -ne 0 ]; then
+        echo ""
+        echo "Review the diff carefully. Use .local/.override files for private settings."
+        echo "To proceed anyway: git commit --no-verify"
+        fail=1
+    fi
 fi
+
+exit $fail

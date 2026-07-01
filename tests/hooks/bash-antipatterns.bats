@@ -1,59 +1,59 @@
 #!/usr/bin/env bats
 
+# The bash-antipatterns hook is secrets-only: it denies reader tools
+# (rg/grep/cat/sed/head/tail/awk/less/more/strings/bat/xxd/od/nl/tac) that touch
+# .env / .dev.vars files, and nothing else (the old command-shaping rules were
+# removed on 2026-06-05). The hook always exits 0 and signals a block via a
+# permissionDecision:deny JSON payload, so assertions check output, not status.
+
 HOOK="$BATS_TEST_DIRNAME/../../dotagents/hooks/bash-antipatterns.sh"
 
 bash_input() {
   jq -n --arg cmd "$1" '{tool_input: {command: $cmd}}'
 }
 
-@test "denies cd-chain" {
-  run "$HOOK" <<< "$(bash_input 'cd /tmp && ls')"
-  [[ "$output" == *deny* ]]
-  [[ "$output" == *"cd <dir> && <cmd>"* ]]
+@test "denies cat .env" {
+  run "$HOOK" <<< "$(bash_input 'cat .env')"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'"permissionDecision":"deny"'* ]]
 }
 
-@test "denies for loop" {
-  run "$HOOK" <<< "$(bash_input 'for x in a b c; do echo $x; done')"
-  [[ "$output" == *deny* ]]
-}
-
-@test "denies while loop" {
-  run "$HOOK" <<< "$(bash_input 'while true; do echo hi; done')"
+@test "denies rg reading .env" {
+  run "$HOOK" <<< "$(bash_input 'rg SECRET .env')"
   [[ "$output" == *deny* ]]
 }
 
-@test "allows until polling loop" {
-  run "$HOOK" <<< "$(bash_input 'until test -f /tmp/x; do sleep 1; done')"
+@test "denies grep on .env.local" {
+  run "$HOOK" <<< "$(bash_input 'grep KEY .env.local')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies tail on .dev.vars" {
+  run "$HOOK" <<< "$(bash_input 'tail .dev.vars')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies less on .env.production" {
+  run "$HOOK" <<< "$(bash_input 'less .env.production')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "allows cat .env.example (template, not a secret)" {
+  run "$HOOK" <<< "$(bash_input 'cat .env.example')"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
 
-@test "denies bare head <file>" {
-  run "$HOOK" <<< "$(bash_input 'head /tmp/x')"
-  [[ "$output" == *deny* ]]
-  [[ "$output" == *"Read tool"* ]]
-}
-
-@test "allows piped head" {
-  run "$HOOK" <<< "$(bash_input 'cat /tmp/x | head -5')"
+@test "allows .environment (not a .env boundary match)" {
+  run "$HOOK" <<< "$(bash_input 'cat .environment')"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
 
-@test "denies sed -n range" {
-  run "$HOOK" <<< "$(bash_input 'sed -n 1,5p /tmp/x')"
-  [[ "$output" == *deny* ]]
-}
-
-@test "allows piped sed -n" {
-  run "$HOOK" <<< "$(bash_input 'cat /tmp/x | sed -n 5p')"
+@test "allows reader on a non-secret file" {
+  run "$HOOK" <<< "$(bash_input 'cat /tmp/foo.txt')"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
-}
-
-@test "denies \$? exit-status reference" {
-  run "$HOOK" <<< "$(bash_input 'echo $?')"
-  [[ "$output" == *deny* ]]
 }
 
 @test "allows benign command" {
@@ -62,53 +62,14 @@ bash_input() {
   [ -z "$output" ]
 }
 
-@test "denies cp -r without -n" {
-  run "$HOOK" <<< "$(bash_input 'cp -r src dst')"
-  [[ "$output" == *deny* ]]
-  [[ "$output" == *"cp -an"* ]]
-}
-
-@test "denies cp -R without -n" {
-  run "$HOOK" <<< "$(bash_input 'cp -R src dst')"
-  [[ "$output" == *deny* ]]
-}
-
-@test "denies cp -a without -n" {
-  run "$HOOK" <<< "$(bash_input 'cp -a src dst')"
-  [[ "$output" == *deny* ]]
-}
-
-@test "denies cp -rf without -n" {
-  run "$HOOK" <<< "$(bash_input 'cp -rf src dst')"
-  [[ "$output" == *deny* ]]
-}
-
-@test "allows cp -an" {
-  run "$HOOK" <<< "$(bash_input 'cp -an src/ dst/')"
+@test "allows .env inside a quoted remote command (quoted regions stripped)" {
+  run "$HOOK" <<< "$(bash_input 'ssh remote "cat .env"')"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
 
-@test "allows cp -na" {
-  run "$HOOK" <<< "$(bash_input 'cp -na src/ dst/')"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-}
-
-@test "allows cp -rn" {
-  run "$HOOK" <<< "$(bash_input 'cp -rn src/ dst/')"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-}
-
-@test "allows cp without recursive flag" {
-  run "$HOOK" <<< "$(bash_input 'cp foo bar')"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-}
-
-@test "allows cp -n single file" {
-  run "$HOOK" <<< "$(bash_input 'cp -n foo bar')"
+@test "allows bare env (not a covered reader; documents the known gap)" {
+  run "$HOOK" <<< "$(bash_input 'env')"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
