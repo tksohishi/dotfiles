@@ -81,7 +81,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Request targeted output: Read with `limit`/`offset` for large files; `rg` with `-m N` or `--files-with-matches` first; `| head -N` for verbose shell output
 - Delegate heavy research to subagents (where available) and request bounded summaries ("under 300 words") so raw output stays out of main context
 - When delegating to a subagent, apply a cost threshold: spawn only for multi-source synthesis (10+ URLs or cross-source comparison). For 1-3 page lookups, use WebFetch directly. Subagent overhead runs ~10x the tokens of a direct fetch for simple factual questions.
-- When spawning a subagent, pass `model: "sonnet"` explicitly for bulk fetch-and-summarize; pass `model: "opus"` when the task needs judgment on source credibility or contrarian conclusions (Sonnet hedges toward consensus). Don't rely on inheritance.
+- (Claude Code only) The main session runs Fable as the orchestrator: keep research, investigation, querying, and coding work delegated to subagents rather than doing it inline. Pass `model: "opus"` explicitly for each agentic subagent; use `model: "sonnet"` only for bulk fetch-and-summarize. Don't rely on inheritance.
 - Fetch targeted URLs (release notes, specific issue pages, doc sections), not top-level pages
 
 ## Shell Commands

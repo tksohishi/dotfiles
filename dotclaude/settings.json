@@ -534,6 +534,7 @@
       "~/Library/Caches"
     ]
   },
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -605,9 +606,9 @@
     "command": "bash \"$HOME/.claude/statusline.sh\""
   },
   "enabledPlugins": {},
+  "effortLevel": "medium",
   "tui": "fullscreen",
-  "skipAutoPermissionPrompt": true,
-  "agentPushNotifEnabled": true,
   "remoteControlAtStartup": true,
-  "effortLevel": "xhigh"
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }
