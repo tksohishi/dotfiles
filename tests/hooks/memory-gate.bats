@@ -24,22 +24,22 @@ make_edit()  { jq -nc --arg fp "$1" --arg c "$2" '{tool_input:{file_path:$fp,new
   [[ "$output" == *'"permissionDecision":"deny"'* ]]
 }
 
-@test "asks project-type non-config write (memory is opt-in)" {
+@test "passes project-type non-config write (no gating)" {
   run "$HOOK" <<< "$(make_write "$MEM/x.md" $'---\ntype: project\n---\nBacklog: migrate the widget pipeline')"
   [ "$status" -eq 0 ]
-  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+  [ -z "$output" ]
 }
 
-@test "asks MEMORY.md index edit (no type, non-config)" {
+@test "passes MEMORY.md index edit (no type, non-config)" {
   run "$HOOK" <<< "$(make_edit "$MEM/MEMORY.md" '- [Foo](foo.md) — bar')"
   [ "$status" -eq 0 ]
-  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+  [ -z "$output" ]
 }
 
-@test "config-file mention without a value assertion asks, not denies" {
+@test "config-file mention without a value assertion passes, not denies" {
   run "$HOOK" <<< "$(make_write "$MEM/x.md" $'---\ntype: project\n---\nConfig lives at .config/mise/config.toml, symlinked')"
   [ "$status" -eq 0 ]
-  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+  [ -z "$output" ]
 }
 
 @test "passes (no output) for write outside memory dir" {

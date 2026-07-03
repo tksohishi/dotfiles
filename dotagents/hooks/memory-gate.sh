@@ -1,18 +1,15 @@
 #!/bin/bash
-# Pre-hook: gate writes to the file-based memory dir (*/memory/*.md).
-#
-# Memory is opt-in by default (user direction 2026-07-01): every memory write
-# returns `ask`, so nothing lands in memory without explicit approval. Two
-# classes are denied outright:
+# Pre-hook: deny two narrow classes of writes to the file-based memory dir
+# (*/memory/*.md). All other memory writes pass through untouched (user
+# direction 2026-07-04: never gate memory writes wholesale).
 #   1. type: feedback frontmatter — behavior rules ("don't X", "always Y")
 #      belong in AGENTS.md, not memory (Enforcement Hierarchy level 3).
 #   2. Config-derivable values — content asserting a value readable live from a
 #      runtime config file (settings.json, config.toml, .zshrc, Brewfile,
 #      ghostty config). These go stale; read the file live instead.
 #
-# Override: for `ask`, approve the prompt. For denies, drop the value / change
-# the frontmatter type, or put the rule in AGENTS.md. Disable memory entirely
-# with settings.json "autoMemoryEnabled": false.
+# Override: drop the value / change the frontmatter type, or put the rule in
+# AGENTS.md.
 #
 # Claude-only (not wired in dotcodex/config.toml); Codex does not use this dir.
 # Reads .content (Write) or .new_string (Edit) so both tools are inspected.
@@ -21,7 +18,7 @@ TOOL_INPUT=$(cat)
 FILE_PATH=$(echo "$TOOL_INPUT" | jq -r '.tool_input.file_path // ""')
 CONTENT=$(echo "$TOOL_INPUT" | jq -r '.tool_input.content // .tool_input.new_string // ""')
 
-# Only gate memory-dir markdown writes (MEMORY.md index included).
+# Only inspect memory-dir markdown writes (MEMORY.md index included).
 if [[ ! "$FILE_PATH" =~ /memory/.*\.md$ ]]; then
   exit 0
 fi
@@ -49,5 +46,5 @@ if echo "$CONTENT" | grep -qE 'settings\.json|config\.toml|\.zshrc|Brewfile|ghos
   emit deny "This memory records a value readable live from a config file (settings.json, config.toml, etc.). Config-derivable facts go stale — drop the value and read the file live, or keep only non-derivable guidance."
 fi
 
-# 3. Everything else -> ask (memory is opt-in).
-emit ask "Memory is opt-in. Approve to save this memory, or cancel and rely on AGENTS.md / a live file read. Disable memory entirely with settings.json autoMemoryEnabled:false."
+# Everything else passes through to the normal permission flow.
+exit 0
