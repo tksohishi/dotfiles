@@ -88,6 +88,17 @@ rg -o '"price":"\$[0-9,]+' page.html                                          # 
 
 Body is ~300-650KB — always save to a file and `rg`, never cat. If httpie ever starts 403ing (PX tightens per-IP), escalate to a headed real-Chrome via patchright (`chromium.launch({channel: 'chrome-canary', headless: false})`) and read `body` text after ~4s; headless never works, and headed agent-browser is unverified (Press & Hold needs a real interaction, unlike Cloudflare's auto-clear).
 
+### Other rental / real-estate listing sites (verified 2026-07)
+
+| Site | WebFetch | What works |
+|---|---|---|
+| trulia.com | 403 | plain httpie (Zillow-owned, same data; ~1.4MB bodies) |
+| redfin.com | 403 | httpie with browser UA (plain httpie 403s) |
+| zumper.com, craigslist (`sfbay.craigslist.org/search/apa`) | untested | plain httpie; craigslist bodies are small (~50KB), nicest to grep |
+| apartmentlist.com | untested | plain httpie on city pages (`/ca/san-francisco`); neighborhood URL guesses often 404 |
+| apartments.com | 403 | nothing — 403 even to httpie with browser UA (quora/glassdoor class); agent-browser --headed only |
+| hotpads.com | untested | nothing anonymous — 200 but empty JS shell |
+
 ## LinkedIn / Instagram
 
 Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section in global instructions (login flow, `/details/experience/` URLs).
