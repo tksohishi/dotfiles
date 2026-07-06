@@ -24,6 +24,7 @@ General heuristic when WebFetch fails on a domain not listed below:
 | naver.com | refused client-side | plain httpie + `--ignore-stdin --follow` (else 302s to an empty body); server-rendered, browser UA not needed. Only some titles expose a rating: grep ``"key":"평점"..."text":"NN/100"`` (out of 100) |
 | imdb.com | empty (WAF challenge) | GraphQL endpoint for star rating; suggestion endpoint for IDs — see IMDb section |
 | 5ch.net | 403 | plain httpie |
+| zillow.com | 403 | plain httpie, no UA needed — see Zillow section (headless browser gets PerimeterX Press & Hold) |
 | quora.com, glassdoor.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
 | facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
 
@@ -70,6 +71,22 @@ Title/search pages return an AWS WAF challenge (HTTP 202, `x-amzn-waf-action: ch
   Chain them: suggestion to resolve name → ID, then GraphQL for the rating.
 
 - Full title page (plot, full cast): `agent-browser --headed` — the WAF challenge is a JS challenge that clears headed, same as the Cloudflare case below.
+
+## Zillow
+
+WebFetch 403s and headless browsers (agent-browser, headless Playwright) get a PerimeterX "Press & Hold" denial that never auto-clears. But plain httpie from this residential IP gets the full server-rendered page, no browser UA needed (verified 2026-07):
+
+- Property page (Zestimate, Rent Zestimate, specs): `http GET 'https://www.zillow.com/homedetails/<slug>/<zpid>_zpid/' --ignore-stdin`
+- Rental/for-sale search results (asking prices, addresses): `http GET 'https://www.zillow.com/<city-state-zip>/rentals/' --ignore-stdin`
+
+All data is JSON embedded in `__NEXT_DATA__`, but escaped (string-in-string), so quotes carry backslashes. Grep with patterns that tolerate `\"`:
+
+```bash
+rg -o '"zestimate\\?":[0-9]+|"rentZestimate\\?":[0-9]+' page.html | sort -u   # homedetails
+rg -o '"price":"\$[0-9,]+' page.html                                          # search results
+```
+
+Body is ~300-650KB — always save to a file and `rg`, never cat. If httpie ever starts 403ing (PX tightens per-IP), escalate to a headed real-Chrome via patchright (`chromium.launch({channel: 'chrome-canary', headless: false})`) and read `body` text after ~4s; headless never works, and headed agent-browser is unverified (Press & Hold needs a real interaction, unlike Cloudflare's auto-clear).
 
 ## LinkedIn / Instagram
 

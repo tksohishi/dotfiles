@@ -14,3 +14,4 @@ imdb.com|WebFetch gets an empty AWS WAF challenge. Star rating: POST to caching.
 naver.com|WebFetch refuses naver client-side. Plain httpie works (http GET <url>) — server-rendered HTML, no browser UA needed.
 quora.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.
 glassdoor.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.
+zillow.com|WebFetch gets a 403 (PerimeterX). Plain httpie works, no UA needed; Zestimate/rentZestimate embedded in escaped __NEXT_DATA__ JSON. See the Zillow section of the fetch-blocked skill.
