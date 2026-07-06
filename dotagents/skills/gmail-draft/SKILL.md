@@ -9,9 +9,9 @@ Draft a Gmail message through `gog` using HTML, avoiding the plain-text wrap-mid
 
 ## Why this skill exists
 
-`gog gmail draft create --body` and `--body-file` (both plain text) hard-wrap at ~78 chars per RFC 2822, inserting CRLFs mid-sentence. Most clients don't reflow non-`format=flowed` plain text, so the recipient sees broken lines. `gog` has `--body-html=STRING` but no `--body-html-file`, and the inline-string form is fragile when the body contains quotes or apostrophes.
+`gog gmail draft create --body` and `--body-file` (both plain text) hard-wrap at ~78 chars per RFC 2822, inserting CRLFs mid-sentence. Most clients don't reflow non-`format=flowed` plain text, so the recipient sees broken lines. Draft with `--body-html-file` instead.
 
-This skill ships a wrapper (`draft.ts`) that reads an HTML file and passes its contents to `gog` correctly.
+(Historical: a `draft.ts` wrapper in this skill predates gog's `--body-html-file` and is no longer needed. Don't use it — it silently forwards only the last `--attach`.)
 
 ## Workflow
 
@@ -19,16 +19,15 @@ This skill ships a wrapper (`draft.ts`) that reads an HTML file and passes its c
 2. Run:
 
 ```bash
-bun ~/.claude/skills/gmail-draft/draft.ts \
+gog gmail draft create -a <gmail-account> \
   --to <email> \
   --subject "..." \
-  --body-file <html-file> \
-  -a <gmail-account> \
+  --body-html-file <html-file> \
   [--cc "<emails>"] \
   [--bcc "<emails>"] \
   [--reply-to-message-id <id>] \
   [--quote] \
-  [--attach <file>]
+  [--attach <file>]   # repeatable for multiple attachments
 ```
 
 3. Confirm the draft was created. The user reviews in Gmail before sending. Never send directly.
@@ -52,12 +51,28 @@ If the user explicitly says "reply only to the sender" (or similar), fall back t
 
 ## HTML conventions
 
-- Wrapper auto-wraps the body file in `<div dir="ltr">...</div>` (matches Gmail native compose, so iOS continuations inherit consistent font/size). Don't add the outer wrapper yourself.
+- Wrap the whole body in an outer `<div dir="ltr">...</div>` (matches Gmail native compose, so iOS continuations inherit consistent font/size).
 - **Each top-level block must be `<div class="gmail_default" style="font-size:small">...</div>`.** This class is the marker Gmail's web editor uses to treat the content as native compose. Without it, imported drafts go into a "foreign content" mode where Ctrl-H, Delete, and Ctrl-F (forward-char) misbehave when the user reviews/edits the draft.
-- Don't insert `<div><br></div>` spacer rows between paragraphs. Bare divs without `gmail_default` confuse the editor — Ctrl-F across one inserts an unexpected line break. Paragraph spacing comes from the class's CSS; consecutive `gmail_default` divs render with normal spacing.
+- Blank lines between blocks: use spacer rows of the form `<div class="gmail_default" style="font-size:small"><br></div>`. Never bare `<div><br></div>` — divs without `gmail_default` confuse the editor (Ctrl-F across one inserts an unexpected line break). Consecutive content divs with no spacer render as single-spaced lines, which reads cramped between paragraphs.
 - Bullets: wrap `<ul><li>...</li></ul>` inside a `gmail_default` div, e.g. `<div class="gmail_default" style="font-size:small"><ul><li>One</li><li>Two</li></ul></div>`. Avoid `-` text prefixes — they read as plain dashes, not bullets.
 - Bold: `<b>...</b>`. Avoid inline styles and `<style>` blocks beyond the required `style="font-size:small"` on `gmail_default` divs.
 - Quotes inside body: prefer `&quot;` for safety.
+
+## Standard structure and signature
+
+Default layout for any drafted message (each line below is one `gmail_default` div; blank lines are spacer divs per the rule above):
+
+```
+Dear <name>,
+(blank)
+<body paragraph(s), spacer div between paragraphs>
+(blank)
+Best regards,
+(blank)
+<signature block>
+```
+
+The signature block is one div with `<br>` line breaks inside (name / title+company / email / phone as applicable). Signatures are account-specific: check the project's AGENTS.md for a "Signature" entry matching the `-a` account before composing; if none exists, ask the user once and suggest saving it there.
 
 ## Common gotchas
 
