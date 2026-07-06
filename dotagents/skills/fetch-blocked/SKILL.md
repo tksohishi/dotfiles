@@ -86,7 +86,7 @@ rg -o '"zestimate\\?":[0-9]+|"rentZestimate\\?":[0-9]+' page.html | sort -u   # 
 rg -o '"price":"\$[0-9,]+' page.html                                          # search results
 ```
 
-Body is ~300-650KB — always save to a file and `rg`, never cat. If httpie ever starts 403ing (PX tightens per-IP), escalate to a headed real-Chrome via patchright (`chromium.launch({channel: 'chrome-canary', headless: false})`) and read `body` text after ~4s; headless never works, and headed agent-browser is unverified (Press & Hold needs a real interaction, unlike Cloudflare's auto-clear).
+Body is ~300-650KB — always save to a file and `rg`, never cat. PX rate-limits per-IP: ~15+ fetches in one day flipped this IP to captcha-blocked mid-session (observed 2026-07; cleared within a few hours, and a headed patchright Chrome got through even while blocked). When that happens, switch to trulia.com or redfin.com first (same MLS data, see table below) before escalating to a headed real-Chrome via patchright (`chromium.launch({channel: 'chrome-canary', headless: false})`, read `body` text after ~4s); headless never works, and headed agent-browser is unverified (Press & Hold needs a real interaction, unlike Cloudflare's auto-clear).
 
 ### Other rental / real-estate listing sites (verified 2026-07)
 
