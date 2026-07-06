@@ -78,11 +78,9 @@ Common categories (pick what fits):
 
 If the project has known historical failure modes (past incidents, recurring bug classes), pull those forward into a "known traps" section.
 
-### Step 4 — Assemble the prompt and write it to a file
+### Step 4 — Assemble the prompt
 
-Use this skeleton. Substitute the bracketed sections with what you found in Steps 1-3. Keep the whole prompt under ~2KB; long prompts dilute the reviewer's focus.
-
-Write the final prompt to `tmp/CROSS_REVIEW_PROMPT.md` using the Write tool. The Run section reads the file via stdin redirection — keeping the prompt out of the Bash command line avoids command-substitution / heredoc patterns that the agent harness blocks.
+Use this skeleton. Substitute the bracketed sections with what you found in Steps 1-3. Keep the whole prompt under ~2KB; long prompts dilute the reviewer's focus. The Run section passes it to the reviewer via a quoted heredoc — no intermediate file.
 
 ```
 You are auditing work produced by another AI assistant ({CURRENT_ASSISTANT}) for the {PROJECT_NAME} project.
@@ -141,29 +139,33 @@ Be blunt. A false positive costs a minute; a false negative costs
 
 ## Run
 
-Pick the branch that matches your identity. Both binaries are on PATH via shell inheritance — call them directly, no `mise exec --` wrapper. Both branches assume the prompt has already been written to `tmp/CROSS_REVIEW_PROMPT.md` per Step 4.
+Pick the branch that matches your identity. Both binaries are on PATH via shell inheritance — call them directly, no `mise exec --` wrapper. Both branches feed the Step 4 prompt over stdin via a quoted heredoc.
 
 ### Branch A — you are Claude Code, invoke Codex
 
 ```bash
-codex exec - < tmp/CROSS_REVIEW_PROMPT.md
+codex exec - <<'PROMPT'
+{the assembled prompt from Step 4}
+PROMPT
 ```
 
-The `-` arg tells `codex exec` to read the prompt from stdin (per `codex exec --help`: "If not provided as an argument (or if `-` is used), instructions are read from stdin"). Stdin is redirected from the prompt file, so EOF arrives at end-of-file and the call doesn't hang.
+The `-` arg tells `codex exec` to read the prompt from stdin (per `codex exec --help`: "If not provided as an argument (or if `-` is used), instructions are read from stdin"). The heredoc ends at the delimiter, so EOF arrives and the call doesn't hang.
 
 **Don't combine `codex exec review --uncommitted` with a custom prompt.** As of codex 0.x, those flags are mutually exclusive (`error: the argument '--uncommitted' cannot be used with '[PROMPT]'`). Use plain `codex exec` with a custom prompt — the project-specific adversarial framing is the value-add. The built-in `review` mode is fine for generic code review but skips everything Steps 1-3 composed.
 
 ### Branch B — you are OpenAI Codex CLI, invoke Claude
 
 ```bash
-claude -p < tmp/CROSS_REVIEW_PROMPT.md
+claude -p <<'PROMPT'
+{the assembled prompt from Step 4}
+PROMPT
 ```
 
-`claude -p` reads from stdin when no positional prompt is given, so the file content becomes the prompt. Runs once and prints to stdout, then exits — analogous to `codex exec`.
+`claude -p` reads from stdin when no positional prompt is given, so the heredoc body becomes the prompt. Runs once and prints to stdout, then exits — analogous to `codex exec`.
 
 ### Branch-agnostic guardrails (apply to both)
 
-**Why a temp file, not heredoc / `$()`.** Embedding the prompt via `"$(cat <<'PROMPT' ... PROMPT)"` triggers the agent harness's command-substitution gate (`$()` and heredocs are blocked because they break allowlist matching and prompt every time). File-stdin is a clean separation: the command line stays static, the prompt lives in `tmp/CROSS_REVIEW_PROMPT.md`. The project-local `tmp/` is globally gitignored, so leftover files don't pollute the repo.
+**Heredoc hygiene.** Quote the delimiter (`<<'PROMPT'`) so nothing in the prompt body is shell-expanded, and make sure no line of the body is exactly `PROMPT`. If the prompt is unusually long or you want it inspectable/re-runnable after the fact, writing it to `tmp/CROSS_REVIEW_PROMPT.md` and redirecting (`< tmp/CROSS_REVIEW_PROMPT.md`) still works — it's just no longer required.
 
 **Run in the background.** Reviews take 1-5 minutes. Use `run_in_background: true` on the Bash tool call and continue with other work; you'll be notified on completion. Don't poll, don't sleep.
 
