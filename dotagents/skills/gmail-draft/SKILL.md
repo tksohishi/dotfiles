@@ -52,10 +52,11 @@ If the user explicitly says "reply only to the sender" (or similar), fall back t
 ## HTML conventions
 
 - Wrap the whole body in an outer `<div dir="ltr">...</div>` (matches Gmail native compose, so iOS continuations inherit consistent font/size).
-- **Each top-level block must be `<div class="gmail_default" style="font-size:small">...</div>`.** This class is the marker Gmail's web editor uses to treat the content as native compose. Without it, imported drafts go into a "foreign content" mode where Ctrl-H, Delete, and Ctrl-F (forward-char) misbehave when the user reviews/edits the draft.
-- Blank lines between blocks: use spacer rows of the form `<div class="gmail_default" style="font-size:small"><br></div>`. Never bare `<div><br></div>` — divs without `gmail_default` confuse the editor (Ctrl-F across one inserts an unexpected line break). Consecutive content divs with no spacer render as single-spaced lines, which reads cramped between paragraphs.
-- Bullets: wrap `<ul><li>...</li></ul>` inside a `gmail_default` div, e.g. `<div class="gmail_default" style="font-size:small"><ul><li>One</li><li>Two</li></ul></div>`. Avoid `-` text prefixes — they read as plain dashes, not bullets.
-- Bold: `<b>...</b>`. Avoid inline styles and `<style>` blocks beyond the required `style="font-size:small"` on `gmail_default` divs.
+- **Never set `font-size` (no `style="font-size:small"`).** The user's account has no Gmail default text style, so native browser compose emits unstyled divs and mobile Gmail renders them at its full default size. An explicit `font-size:small` pins ~13px and renders visibly smaller than the user's own messages on iOS (verified side-by-side 2026-07). No inline styles at all on content divs.
+- **Each top-level block must be `<div class="gmail_default">...</div>`.** This class is the marker Gmail's web editor uses to treat the content as native compose. Without it, imported drafts go into a "foreign content" mode where Ctrl-H, Delete, and Ctrl-F (forward-char) misbehave when the user reviews/edits the draft.
+- Blank lines between blocks: use spacer rows of the form `<div class="gmail_default"><br></div>`. Never bare `<div><br></div>` — divs without `gmail_default` confuse the editor (Ctrl-F across one inserts an unexpected line break). Consecutive content divs with no spacer render as single-spaced lines, which reads cramped between paragraphs.
+- Bullets: wrap `<ul><li>...</li></ul>` inside a `gmail_default` div, e.g. `<div class="gmail_default"><ul><li>One</li><li>Two</li></ul></div>`. Avoid `-` text prefixes — they read as plain dashes, not bullets.
+- Bold: `<b>...</b>`. Avoid inline styles and `<style>` blocks.
 - Quotes inside body: prefer `&quot;` for safety.
 
 ## Standard structure and signature
@@ -67,12 +68,11 @@ Dear <name>,
 (blank)
 <body paragraph(s), spacer div between paragraphs>
 (blank)
-Best regards,
-(blank)
-<signature block>
+Best,
+Takeshi
 ```
 
-The signature block is one div with `<br>` line breaks inside (name / title+company / email / phone as applicable). Signatures are account-specific: check the project's AGENTS.md for a "Signature" entry matching the `-a` account before composing; if none exists, ask the user once and suggest saving it there.
+The sign-off and name sit on consecutive lines with NO blank spacer between them — either two adjacent `gmail_default` divs or one div with a single `<br>` (matches the user's own sent mail; a blank line there reads as a gap the user never types). For personal mail from tks.ohishi@gmail.com the signature is just the name; for other accounts the signature block is one div with `<br>` line breaks inside (name / title+company / email / phone as applicable). Signatures are account-specific: check the project's AGENTS.md for a "Signature" entry matching the `-a` account before composing; if none exists, ask the user once and suggest saving it there.
 
 ## Common gotchas
 
