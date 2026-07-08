@@ -156,12 +156,12 @@ The `-` arg tells `codex exec` to read the prompt from stdin (per `codex exec --
 ### Branch B — you are OpenAI Codex CLI, invoke Claude
 
 ```bash
-claude -p <<'PROMPT'
+claude -p --model opus <<'PROMPT'
 {the assembled prompt from Step 4}
 PROMPT
 ```
 
-`claude -p` reads from stdin when no positional prompt is given, so the heredoc body becomes the prompt. Runs once and prints to stdout, then exits — analogous to `codex exec`.
+`claude -p` reads from stdin when no positional prompt is given, so the heredoc body becomes the prompt. Runs once and prints to stdout, then exits — analogous to `codex exec`. Always pass `--model opus`: without it, `claude -p` inherits the user's session default model, which may be a pricier tier than a review warrants.
 
 ### Branch-agnostic guardrails (apply to both)
 
