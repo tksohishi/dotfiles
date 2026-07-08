@@ -485,10 +485,8 @@
       "Bash(agent-browser *--all*)",
       "Bash(codex exec *--dangerously-bypass*)",
       "Bash(codex exec *danger-full-access*)",
-      "Bash(git commit --amend *)",
-      "Bash(git push --force *)",
-      "Bash(git push -f *)",
-      "Bash(git reset --hard *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
       "Bash(git clean -f*)",
       "Bash(git clean -df*)",
       "Bash(git clean -xf*)",
@@ -512,6 +510,8 @@
       "Read(~/.aws/**)"
     ],
     "ask": [
+      "Bash(git commit --amend*)",
+      "Bash(git reset --hard*)",
       "Bash(brew install*)",
       "Bash(brew uninstall*)",
       "Bash(caddy add-package*)",
