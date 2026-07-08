@@ -70,6 +70,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
 - No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
 - Only change what was asked for; don't refactor, annotate, or "improve" surrounding code unprompted
+- Never copy real personal data (phone numbers, emails, addresses, names from the user's DB/calendar/inbox) into test fixtures, committed code, or anything else that could be published. Anonymize first: US phone numbers from the reserved 555-01xx range, example.com emails, made-up names. Local data stores (databases, gitignored tmp/) legitimately hold real data — don't flag or scrub those.
 
 ## Package Managers
 - Node.js: pnpm, not npm
