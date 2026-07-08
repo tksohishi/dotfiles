@@ -20,7 +20,7 @@ General heuristic when WebFetch fails on a domain not listed below:
 |---|---|---|
 | stackoverflow.com | refused client-side | plain httpie; Stack Exchange API (`api.stackexchange.com/2.3/questions/<id>?site=stackoverflow&filter=withbody`) for structured JSON |
 | nytimes.com | refused client-side | plain httpie (paywall still applies to full articles) |
-| amazon.com / amazon.co.jp | 500 bot block | httpie with browser UA |
+| amazon.com / amazon.co.jp | 500 bot block | httpie with browser UA — see Amazon section (price gotchas) |
 | naver.com | refused client-side | plain httpie + `--ignore-stdin --follow` (else 302s to an empty body); server-rendered, browser UA not needed. Only some titles expose a rating: grep ``"key":"평점"..."text":"NN/100"`` (out of 100) |
 | imdb.com | empty (WAF challenge) | GraphQL endpoint for star rating; suggestion endpoint for IDs — see IMDb section |
 | 5ch.net | 403 | plain httpie |
@@ -71,6 +71,23 @@ Title/search pages return an AWS WAF challenge (HTTP 202, `x-amzn-waf-action: ch
   Chain them: suggestion to resolve name → ID, then GraphQL for the rating.
 
 - Full title page (plot, full cast): `agent-browser --headed` — the WAF challenge is a JS challenge that clears headed, same as the Cloudflare case below.
+
+## Amazon (amazon.co.jp / amazon.com)
+
+WebFetch gets a 500 bot block (hook-denied). httpie with a browser UA returns a 200 server-rendered product page (verified 2026-07):
+
+```bash
+http GET 'https://www.amazon.co.jp/dp/<ASIN>' --ignore-stdin --follow \
+  'User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36' \
+  'Accept-Language:ja-JP,ja;q=0.9' -o tmp/amz.html
+grep -oE '<title>[^<]*' tmp/amz.html   # full product name incl. feature claims — reliable
+```
+
+Gotchas:
+
+- **Titles are reliable, prices are not.** Amazon serves varying bot-degraded page variants per fetch; price markup (`a-price-whole`, `a-offscreen`) is often missing or fragmentary, and a `￥[0-9,]+` grep can hit comparison-widget / other-seller prices instead of the buybox. Treat any extracted price as approximate and say so.
+- **agent-browser headless anonymous gets the export view**: English title, USD prices (e.g. `.a-price .a-offscreen` → `USD26.29`). Fine for confirming an ASIN exists and what it is; wrong for JP prices. For an exact JP price, use `agent-browser --headed` with the user's session, or have the user check the page.
+- ASINs from search snippets are frequently hallucinated — always verify `/dp/<ASIN>` resolves to the expected product title before citing a link.
 
 ## Zillow
 
