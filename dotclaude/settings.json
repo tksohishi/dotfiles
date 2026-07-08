@@ -599,6 +599,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/idle-teammates.sh",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

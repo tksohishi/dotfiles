@@ -83,6 +83,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Delegate heavy research to subagents (where available) and request bounded summaries ("under 300 words") so raw output stays out of main context
 - When delegating to a subagent, apply a cost threshold: spawn only for multi-source synthesis (10+ URLs or cross-source comparison). For 1-3 page lookups, use WebFetch directly. Subagent overhead runs ~10x the tokens of a direct fetch for simple factual questions.
 - (Claude Code only) The main session runs Fable as the orchestrator: keep research, investigation, querying, and coding work delegated to subagents rather than doing it inline. Subagents run opus, enforced by `CLAUDE_CODE_SUBAGENT_MODEL` in settings.json; don't pass a `model` param, it's overridden anyway.
+- Named teammates (Agent with `name:`) stay resident after reporting and pile up as idle entries in the Agents panel; `TaskStop` each one as soon as its work is integrated. Prefer unnamed one-shot agents for review/research fan-outs — they exit on their own. TaskList doesn't show pre-compaction teammates; the Agents panel is the source of truth.
 - Fetch targeted URLs (release notes, specific issue pages, doc sections), not top-level pages
 
 ## Shell Commands
