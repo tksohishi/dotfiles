@@ -256,6 +256,17 @@ for pair in ".claude/hooks" ".codex/hooks"; do
     echo "Linked dotagents/hooks/ -> ~/$pair"
 done
 
+# Codex subagent definitions (per-agent model overrides)
+agents_target="$HOME/.codex/agents"
+if [ -L "$agents_target" ]; then
+    rm "$agents_target"
+elif [ -d "$agents_target" ]; then
+    echo "Backing up $agents_target to $agents_target.bak"
+    mv "$agents_target" "$agents_target.bak"
+fi
+ln -s "$DOTFILES_DIR/dotcodex/agents" "$agents_target"
+echo "Linked dotcodex/agents/ -> ~/.codex/agents"
+
 # Suggest installing enabled Claude Code plugins
 plugins=$(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$DOTFILES_DIR/dotclaude/settings.json" 2>/dev/null)
 if [ -n "$plugins" ]; then

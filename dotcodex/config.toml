@@ -13,6 +13,16 @@ personality = "pragmatic"
 web_search = "live"
 service_tier = "fast"
 
+# Subagent roles (cheaper model for spawned agents). Roles must be declared
+# here: codex 0.143.0 only scans ~/.codex/agents/*.toml via config layers,
+# which aren't active locally. Role-based model overrides don't apply yet
+# (multi_agent_v2 incomplete); declarations are forward-compatible.
+[agents.worker]
+config_file = "agents/worker.toml"
+
+[agents.explorer]
+config_file = "agents/explorer.toml"
+
 [execpolicy]
 user_rules = ["~/.codex/rules/default.rules"]
 
