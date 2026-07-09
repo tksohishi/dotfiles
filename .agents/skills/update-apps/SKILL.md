@@ -6,13 +6,14 @@ description: Update all Homebrew packages, casks, and Mac App Store apps
 Run the following update commands in order:
 
 1. `brew update` — refresh package index
-2. `brew bundle install --no-upgrade` — install any missing Brewfile entries without upgrading already-present ones (upgrades are handled by step 3 for formulae, auto-update for casks, and `mas upgrade` manually for App Store apps)
-3. `brew upgrade --formula` — upgrade all formulae (formulae only; cask apps auto-update themselves)
-4. `mise upgrade` — upgrade all mise-managed tools
-5. `claude update` — update Claude Code itself
-6. `mas outdated` — check for Mac App Store updates
+2. `brew bundle install --no-upgrade` — install any missing Brewfile entries without upgrading already-present ones (upgrades are handled by steps 3-4 for formulae/casks, auto-update for GUI casks, and `mas upgrade` manually for App Store apps)
+3. `brew upgrade --formula` — upgrade all formulae
+4. `brew upgrade --cask` — upgrades `auto_updates: false` casks (CLI casks like codex, 1password-cli, notion-cli; libreoffice) AND any self-updating GUI cask whose installed bundle version is genuinely stale (brew compares Info.plist against the tap since Homebrew/brew#21882; apps that self-updated already are left alone). Never add `--greedy` — it force-reinstalls everything regardless of staleness. Warn in the report that upgraded GUI apps may need a relaunch if they were running
+5. `mise upgrade` — upgrade all mise-managed tools
+6. `claude update` — update Claude Code itself
+7. `mas outdated` — check for Mac App Store updates
 
-Run steps 1-6 directly. If step 6 shows available updates, tell the user to run `mas upgrade` themselves (it requires a password).
+Run steps 1-7 directly. If step 7 shows available updates, tell the user to run `mas upgrade` themselves (it requires a password).
 
 After `brew upgrade --formula`, run `agent-browser install` to update its browser binaries.
 
@@ -47,6 +48,7 @@ Structure the report as sections with the emojis below. Section headers are orga
 ### Section headers (use exactly these)
 
 - `### 📦 Brewfile formulae` — formula upgrades
+- `### 🧺 Casks` — cask upgrades from `brew upgrade --cask`
 - `### ⚙️ mise tools` — mise-managed tool upgrades
 - `### 🤖 Claude Code` — include current version in the header, e.g. `### 🤖 Claude Code (2.1.148)`
 - `### 🍎 Mac App Store` — mas outdated results
