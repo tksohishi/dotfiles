@@ -15,6 +15,16 @@ Run the following update commands in order:
 
 Run steps 1-7 directly. If step 7 shows available updates, tell the user to run `mas upgrade` themselves (it requires a password).
 
+After `brew upgrade --cask`, dequarantine bundled ripgrep binaries. Cask upgrades (and app self-updates) re-apply `com.apple.quarantine` to helper binaries the apps exec later, causing Gatekeeper "rg Not Opened" popups at random-seeming times (e.g. codex's bundled `rg` fires whenever `codex exec` runs headlessly, including from /cross-review in other sessions). Sweep and clear:
+
+```
+fd -HI --type f --type l '^rg$' /opt/homebrew/Caskroom /Applications | while read -r f; do
+  xattr -p com.apple.quarantine "$f" >/dev/null 2>&1 && xattr -d com.apple.quarantine "$f" && echo "dequarantined: $f"
+done
+```
+
+Report each cleared path in the Cleanup section (routine, no emoji); report nothing if the sweep is clean.
+
 After `brew upgrade --formula`, run `agent-browser install` to update its browser binaries.
 
 After `agent-browser install`, prune stale browser caches across the two locations below. Each tool accumulates versions on upgrade rather than replacing them, and none have built-in cleanup.
