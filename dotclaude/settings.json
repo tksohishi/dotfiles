@@ -527,7 +527,6 @@
       "Bash(cua-driver call hotkey*)",
       "Bash(cua-driver call press_key*)",
       "Bash(cua-driver call type_text*)",
-      "Bash(cua-driver call scroll*)",
       "Bash(cua-driver call set_*)",
       "Bash(cua-driver call launch_app*)",
       "Bash(cua-driver call page*)",
