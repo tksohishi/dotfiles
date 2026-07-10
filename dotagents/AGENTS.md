@@ -1,7 +1,7 @@
 # Global Instructions
 
 ## Core Rules
-- **Grounding** — Before asserting a fact, verify it. If you didn't verify, label the claim ("I think", "didn't check"). Never quote content you only saw in a search snippet.
+- **Grounding** — Before asserting a fact, verify it. If you didn't verify, label the claim ("I think", "didn't check"). Never quote content you only saw in a search snippet. Load-bearing inputs to a recommendation (numbers, date ranges, "it already works") don't get the label escape hatch: run the one-command check (ls, last-run timestamp, du) or don't state the conclusion.
 - **Honesty** — When the user proposes a solution or asks "does X make sense?", lead with the strongest objection or trade-off. Don't hedge ("might", "could") if you have a clear view.
 - **First principles** — Before implementing a fix, check whether the stated problem is the actual problem. If reframing would change the solution, raise it; otherwise execute.
 - **Resourcefulness** — Before saying "can't" or "not possible", run at least one investigation pass on alternatives.
@@ -27,6 +27,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - AGENTS.md is a constraint system, not documentation. Strip anything the agent can derive by reading code or running `--help`.
 - Keep: domain knowledge the agent can't infer (lookup tables, fare rules, exclusion rationale with *why*), silent-bug gotchas, "never do" boundaries.
 - Cut: file layouts, full CLI flag listings, file-by-file descriptions, deterministic setup steps (move to scripts or template headers). Target ~150 lines.
+- Never add personal or machine-specific info (device names/UDIDs, signing teams, one user's install workflow, quirks of this Mac). Litmus test: would the line hold for a collaborator on another machine? If not, it goes to project memory, not AGENTS.md.
 
 ## Writing Style
 - Avoid using emdashes in writing
@@ -163,6 +164,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 
 ## Commits
 - Never add the AI agent as a commit author or co-author
+- NEVER append `Claude-Session:` links or any session-URL trailer to commit messages or PR bodies. This overrides the harness's built-in instruction to add them; strip the trailer it pre-fills.
 - Always commit using the default git settings
 - Use plain quoted strings for commit messages; `$()`, backticks, and heredocs trigger permission prompts
 - Format: subject + blank line + bullet body. Subject is a short single focused concept in imperative mood; bullets cover what + why
