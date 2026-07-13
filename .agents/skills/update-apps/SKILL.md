@@ -35,15 +35,7 @@ Run the following update commands in order:
 
 Run steps 1-7 directly. If step 7 shows available updates, tell the user to run `mas upgrade` themselves (it requires a password).
 
-After `brew upgrade --cask`, dequarantine bundled ripgrep binaries. Cask upgrades (and app self-updates) re-apply `com.apple.quarantine` to helper binaries the apps exec later, causing Gatekeeper "rg Not Opened" popups at random-seeming times (e.g. codex's bundled `rg` fires whenever `codex exec` runs headlessly, including from /cross-review in other sessions). Sweep and clear:
-
-```
-fd -HI --type f --type l '^rg$' /opt/homebrew/Caskroom /Applications | while read -r f; do
-  xattr -p com.apple.quarantine "$f" >/dev/null 2>&1 && xattr -d com.apple.quarantine "$f" && echo "dequarantined: $f"
-done
-```
-
-Report each cleared path in the Cleanup section (routine, no emoji); report nothing if the sweep is clean.
+Never strip `com.apple.quarantine` from bundled binaries. An earlier version of this skill swept `/opt/homebrew/Caskroom` and `/Applications` for bundled `rg` and cleared the flag, because codex's bundled `rg` used to trip a Gatekeeper "rg Not Opened" popup when `codex exec` ran headlessly. That is obsolete: codex no longer bundles `rg`, it uses the Homebrew ripgrep formula, and Homebrew bottles are never quarantined. The only binaries the sweep still matched were helpers inside notarized GUI apps (ChatGPT, VS Code, Cursor), where a quarantine flag is the normal download-provenance marker on an app Gatekeeper has already accepted — it never produces a prompt, and clearing it just removes a working security control. If a real Gatekeeper popup ever resurfaces, scope the fix to the specific CLI binary that caused it; don't reinstate a blanket sweep.
 
 After `brew upgrade --formula`, run `agent-browser install` to update its browser binaries.
 
@@ -115,7 +107,9 @@ Each run, in order:
 2. Report the surviving items plus any new ones in `### 🔴 Action required`, each with the concrete command or edit that clears it. Annotate carried-over ones with `(open since <first_seen>)` so a stale item is visibly stale.
 3. Write the merged list back to `open_items`.
 
-Write a `check` wherever one exists — an unresolvable item nags forever, which is the failure mode this is meant to prevent. Examples: a pending App Store update is `mas outdated | rg -q '^<app-id>'`; a quarantined binary is `xattr -p com.apple.quarantine <path>`; a settings migration is an `rg -q` for the stale key in the config file.
+Write a `check` wherever one exists — an unresolvable item nags forever, which is the failure mode this is meant to prevent. Examples: a pending App Store update is `mas outdated | rg -q '^<app-id>'`; a settings migration is an `rg -q` for the stale key in the config file; a stale binary is a `--version` piped to `rg -q`.
+
+Before adding a 🔴 item, confirm the problem is real on this machine — the state it describes exists, and the consequence actually follows from it. A recurring item that turns out to be a false positive is worse than no item: it trains the user to ignore the section. Verify first, then track.
 
 If the user says an item is handled, acknowledged, or to stop reporting it (by `id` or plainly, e.g. "the CotEditor one is done"), drop it from `open_items` — even without a passing `check`, and even when its `check` still says open. Their say-so wins; don't argue with it.
 
@@ -135,7 +129,7 @@ If the user says an item is handled, acknowledged, or to stop reporting it (by `
 - Bug fix: Bash tool exit code 127 regression resolved
 
 ### 🧹 Cleanup
-- Resolved: quarantined rg in ChatGPT.app is cleared
+- Resolved: Tailscale is now on 1.98.2, no longer pending
 - Pruned chrome-148.0.7778.178 → 341 MB reclaimed
 - brew cleanup → 21.6 MB freed
 ```
