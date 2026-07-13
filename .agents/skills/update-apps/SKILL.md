@@ -3,6 +3,26 @@ name: update-apps
 description: Update all Homebrew packages, casks, and Mac App Store apps
 ---
 
+## Run state
+
+State lives at `~/.cache/update-apps/state.json` (machine state, deliberately outside the public dotfiles repo). Read it before step 1; write it back after the report. Missing or unparseable file means first run — treat both fields as empty, don't error.
+
+```json
+{
+  "claude_version": "2.1.207",
+  "open_items": [
+    {
+      "id": "mas-coteditor",
+      "first_seen": "2026-07-13",
+      "text": "CotEditor 7.0.6 → 7.0.7 — run `mas upgrade` yourself (needs password)",
+      "check": "mas outdated | rg -q '^1024640650'"
+    }
+  ]
+}
+```
+
+`claude_version` is the version whose changelog was last reported. `open_items` are the 🔴 action-required items still outstanding — see "Action required" below.
+
 Run the following update commands in order:
 
 1. `brew update` — refresh package index
@@ -45,7 +65,14 @@ Brewfile packages only. Transitive deps are omitted unless they had a **major ve
 
 **Filter explicitly before reporting**: `brew upgrade --formula` upgrades transitive deps alongside Brewfile entries. Before listing in the Brewfile section, cross-check each name with `rg -nw '<name1>|<name2>|...' Brewfile` and drop any that don't appear. Easy to miss because the upgrade output looks identical for both. Past slip: deno appeared in the report as a Brewfile upgrade when it's actually a transitive dep of summarize and yt-dlp.
 
-Always fetch the Claude Code changelog from `https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md` and summarize the current installed version's entry plus any newer-than-last-run entries. Claude Code auto-updates between sessions, so checking only when `claude update` upgrades misses the case where the version moved silently — this step fires every run regardless of what `claude update` reports. Cover new features, breaking changes, settings/hooks schema changes, and notable bug fixes. Skip trivial entries (typo fixes, internal refactors).
+Always fetch the Claude Code changelog from `https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md`. Claude Code auto-updates between sessions, so checking only when `claude update` upgrades misses the case where the version moved silently — this step fires every run regardless of what `claude update` reports.
+
+Report **only entries strictly newer than `claude_version` in the run state**, then set `claude_version` to the installed version. This bound is the whole point: without it every run re-summarizes the same backlog of recent versions, which is noise the user has already read.
+
+- Installed version equals the stored one — nothing moved. Say so in one line and report no entries.
+- No stored version (first run) — report the installed version's entry only. Never walk back through history to fill a backlog.
+
+Cover new features, breaking changes, settings/hooks schema changes, and notable bug fixes. Skip trivial entries (typo fixes, internal refactors).
 
 Check for interesting new formulae and casks from step 1's `==> New Formulae` / `==> New Casks` output. Highlight any relevant to the user's setup (developer tools, terminal utilities, productivity apps) with a one-line description. Don't overwhelm; surface only genuinely interesting additions.
 
@@ -57,6 +84,7 @@ Structure the report as sections with the emojis below. Section headers are orga
 
 ### Section headers (use exactly these)
 
+- `### 🔴 Action required` — every open action item, carried-over and new (see below). Goes first. Omit when there are none
 - `### 📦 Brewfile formulae` — formula upgrades
 - `### 🧺 Casks` — cask upgrades from `brew upgrade --cask`
 - `### ⚙️ mise tools` — mise-managed tool upgrades
@@ -69,30 +97,47 @@ Omit empty sections (e.g. if nothing was upgraded in mise, drop the section).
 
 ### Per-item severity
 
-Use these inline at the start of a bullet, and only when the item is not routine:
-
-- 🔴 **Action required** — the user must do something (run a manual command requiring sudo/password, resolve a config conflict, etc.). Examples: `mas upgrade` needs the password, a breaking-change setting needs migration, a hook misconfiguration surfaced during update.
-- 🟡 **Worth attention** — informational but the user may want to know. Examples: major version bumps in Brewfile packages, Claude Code schema/hook changes that could affect existing config, new interesting tools worth trying, deprecations.
-- (no emoji) — routine. Patch/minor bumps with no breaking changes, "up to date" results, cache stats, bug fixes the user doesn't need to act on.
+- 🔴 **Action required** — the user must do something (run a manual command requiring sudo/password, resolve a config conflict, etc.). Examples: `mas upgrade` needs the password, a breaking-change setting needs migration, a hook misconfiguration surfaced during update. These do NOT go inline in the topical sections; they all collect in the `### 🔴 Action required` section, and they persist across runs — see below.
+- 🟡 **Worth attention** — inline in its topical section, informational but the user may want to know. Examples: major version bumps in Brewfile packages, Claude Code schema/hook changes that could affect existing config, new interesting tools worth trying, deprecations. Reported once, in the run that surfaces them; not carried over.
+- (no emoji) — routine, inline in its topical section. Patch/minor bumps with no breaking changes, "up to date" results, cache stats, bug fixes the user doesn't need to act on.
 
 Do NOT use green/✅ for routine items — absence of emoji means routine. Reserve emojis for signal.
+
+### Action required: persistence
+
+An action item is not done when it is reported; it is done when the user actually does it. So 🔴 items survive across runs instead of scrolling away.
+
+Each 🔴 item gets an entry in `open_items`: a stable `id` (kebab-case, reused run to run so the same item doesn't duplicate), the `first_seen` date (`date +%F`), the one-line `text` to report, and — whenever the state is machine-detectable — a `check` shell command that **exits 0 while the item is still unresolved**.
+
+Each run, in order:
+
+1. Run every stored item's `check`. Non-zero exit means the user fixed it: drop it from `open_items` and note it once, in the `🧹 Cleanup` section, as resolved (routine, no emoji). An item with no `check` can't be auto-resolved, so it stays until the user says it is done.
+2. Report the surviving items plus any new ones in `### 🔴 Action required`, each with the concrete command or edit that clears it. Annotate carried-over ones with `(open since <first_seen>)` so a stale item is visibly stale.
+3. Write the merged list back to `open_items`.
+
+Write a `check` wherever one exists — an unresolvable item nags forever, which is the failure mode this is meant to prevent. Examples: a pending App Store update is `mas outdated | rg -q '^<app-id>'`; a quarantined binary is `xattr -p com.apple.quarantine <path>`; a settings migration is an `rg -q` for the stale key in the config file.
+
+If the user says an item is handled, acknowledged, or to stop reporting it (by `id` or plainly, e.g. "the CotEditor one is done"), drop it from `open_items` — even without a passing `check`, and even when its `check` still says open. Their say-so wins; don't argue with it.
 
 ### Example
 
 ```
+### 🔴 Action required
+- Tailscale 1.96.5 → 1.98.2 — run `mas upgrade` yourself (needs password)
+- /simplify renamed to /code-review — update any scripts referencing /simplify (open since 2026-06-28)
+
 ### 📦 Brewfile formulae
 - awscli 2.34.51 → 2.34.52 (patch)
 - 🟡 deno 2.7.14 → 3.0.0 (major) — breaking changes to Deno.serve API
 - summarize 0.15.2 → 0.16.1 (minor)
 
 ### 🤖 Claude Code (2.1.148)
-- 🔴 /simplify renamed to /code-review — update any scripts referencing /simplify
 - Bug fix: Bash tool exit code 127 regression resolved
 
-### 🍎 Mac App Store
-- 🔴 Tailscale 1.96.5 → 1.98.2 — run `mas upgrade` yourself (needs password)
-
 ### 🧹 Cleanup
+- Resolved: quarantined rg in ChatGPT.app is cleared
 - Pruned chrome-148.0.7778.178 → 341 MB reclaimed
 - brew cleanup → 21.6 MB freed
 ```
+
+The 🔴 bullets carry no emoji of their own — the section header already says action required. The `/simplify` item is a carry-over: it was first reported weeks ago, has no machine check, and stays until the user says it is handled.
