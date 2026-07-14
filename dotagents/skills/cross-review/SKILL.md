@@ -144,12 +144,12 @@ Pick the branch that matches your identity. Both binaries are on PATH via shell 
 ### Branch A — you are Claude Code, invoke Codex
 
 ```bash
-codex exec - <<'PROMPT'
+codex exec -c model_reasoning_effort=xhigh - <<'PROMPT'
 {the assembled prompt from Step 4}
 PROMPT
 ```
 
-The `-` arg tells `codex exec` to read the prompt from stdin (per `codex exec --help`: "If not provided as an argument (or if `-` is used), instructions are read from stdin"). The heredoc ends at the delimiter, so EOF arrives and the call doesn't hang.
+Always pass `-c model_reasoning_effort=xhigh`: config.toml pins `high` for interactive sessions, but an adversarial review is a one-shot where depth beats latency. The `-` arg tells `codex exec` to read the prompt from stdin (per `codex exec --help`: "If not provided as an argument (or if `-` is used), instructions are read from stdin"). The heredoc ends at the delimiter, so EOF arrives and the call doesn't hang.
 
 **Don't combine `codex exec review --uncommitted` with a custom prompt.** As of codex 0.x, those flags are mutually exclusive (`error: the argument '--uncommitted' cannot be used with '[PROMPT]'`). Use plain `codex exec` with a custom prompt — the project-specific adversarial framing is the value-add. The built-in `review` mode is fine for generic code review but skips everything Steps 1-3 composed.
 
