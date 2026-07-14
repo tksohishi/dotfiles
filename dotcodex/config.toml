@@ -26,15 +26,6 @@ config_file = "agents/explorer.toml"
 [execpolicy]
 user_rules = ["~/.codex/rules/default.rules"]
 
-# ChatGPT.app's bundled browser plugins launch the real /Applications/Google
-# Chrome.app via Puppeteer, bypassing the agent-browser convention. Keep them
-# off; the app may re-enable these on update, so re-merge after Codex updates.
-[plugins."sites@openai-bundled"]
-enabled = false
-
-[plugins."browser@openai-bundled"]
-enabled = false
-
 [analytics]
 enabled = false
 
