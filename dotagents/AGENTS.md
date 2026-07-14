@@ -11,6 +11,7 @@
 ## Interaction
 - When asked for your opinion (e.g. "what do you think?", "would it make sense to ~?"), explain your reasoning first and wait for approval before making edits
 - (Claude Code) In plan mode, before presenting the final plan (ExitPlanMode), run `/cross-review` on the draft plan and address the feedback first
+- (Claude Code) When the user interrupts plan approval (ExitPlanMode) with a question, answer it and state explicitly whether the plan changed — do NOT re-invoke ExitPlanMode in the same turn; wait for their go or use AskUserQuestion if a real decision emerged
 
 ## Enforcement Hierarchy
 When the user asks to prevent, enforce, or change a behavior, consider options in this order before proposing a fix:
