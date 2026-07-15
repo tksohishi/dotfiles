@@ -130,10 +130,9 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Browser Automation
 
 ### When to use
-- Default to `agent-browser` for all browser automation (headless by default). Use WebFetch/httpie for simple HTTP requests; agent-browser only for sites that need a real browser.
+- Default to `agent-browser` for all browser automation (headless by default). Use WebFetch/httpie for simple HTTP requests; agent-browser only for sites that need a real browser. Never drive the real installed Google Chrome from scripts (e.g. Playwright `channel: "chrome"`) — it holds logged-in personal sessions; isolated browsers only.
 - Never guess subcommands. Run `agent-browser --help` if unsure.
 - Always close when done: `agent-browser close`.
-- Never drive the real installed Google Chrome (`/Applications/Google Chrome.app`) from scripts or automation (e.g. Playwright `channel: "chrome"`). It holds logged-in personal sessions. Isolated browsers only: agent-browser, or a project-managed binary.
 
 ### Workflow
 - Common flow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`.
