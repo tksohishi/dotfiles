@@ -5,7 +5,7 @@ description: Create an agent hook (PreToolUse / PostToolUse / etc.) and wire it 
 
 The user wants a hook that: $ARGUMENTS
 
-Hooks live in `dotagents/hooks/<name>.sh` (one shared script library). Wiring lives in `dotclaude/settings.json` and the `[hooks]` section of `dotcodex/config.toml`. Differentiation between Claude-only / Codex-only / shared is purely the wiring: nothing in the script marks it.
+Hooks live in `dotagents/hooks/<name>.sh` (one shared script library). Wiring lives in `dotclaude/settings.json` and `dotcodex/hooks.json`. Differentiation between Claude-only / Codex-only / shared is purely the wiring: nothing in the script marks it.
 
 ## Decision tree
 
@@ -96,17 +96,18 @@ Add to `hooks.<EventName>` array. Matcher is a string or regex matching the tool
 }
 ```
 
-### Codex (`dotcodex/config.toml`)
+### Codex (`dotcodex/hooks.json`)
 
-Add under `[hooks]`. Matcher is regex; use `'^Bash$'` to anchor:
+Add a `_dotfiles` entry under the event. Matcher is regex; use `^Bash$` to anchor:
 
-```toml
-[[hooks.PreToolUse]]
-matcher = '^Bash$'
-
-[[hooks.PreToolUse.hooks]]
-type = "command"
-command = "$HOME/.codex/hooks/<name>.sh"
+```json
+{
+  "_dotfiles": true,
+  "matcher": "^Bash$",
+  "hooks": [
+    { "type": "command", "command": "$HOME/.codex/hooks/<name>.sh" }
+  ]
+}
 ```
 
 ## Steps
@@ -114,15 +115,15 @@ command = "$HOME/.codex/hooks/<name>.sh"
 1. **Confirm scope with the user** — which tool(s), which event, and which agent(s). If shared, restate explicitly so they can correct.
 2. **Write the script** at `dotagents/hooks/<name>.sh`. Make it executable: `chmod +x dotagents/hooks/<name>.sh`.
 3. **Wire Claude** by editing `dotclaude/settings.json`. Validate JSON: `jq empty dotclaude/settings.json`.
-4. **Wire Codex** (only if shared/Codex-only) by editing `dotcodex/config.toml`.
-5. **Sync Codex live config**: `scripts/sync-codex-config.sh`. This is mandatory after step 4; `~/.codex/config.toml` is merged, not symlinked, so edits to `dotcodex/config.toml` don't propagate until synced. Skipping this is the most common failure mode.
+4. **Wire Codex** (only if shared/Codex-only) by editing `dotcodex/hooks.json`. Keep `_dotfiles: true` on the enclosing matcher entry.
+5. **Sync Codex live hooks**: `scripts/sync-codex-hooks.sh`. This is mandatory after step 4; the script replaces tracked `_dotfiles` entries while preserving app-managed entries such as Otty's `_otty` hooks.
 6. **Verify with synthetic input** (script-level, no agent):
    - Claude-shape: `echo '{"tool_input":{"command":"<trigger>"}}' | dotagents/hooks/<name>.sh`
    - Codex-shape (if shared): `echo '{"model":"gpt-5.5","tool_input":{"command":"<trigger>"}}' | dotagents/hooks/<name>.sh`
    - Confirm output JSON validates against the target schema (`permissionDecision: "ask"` for Claude, `"deny"` for Codex).
 7. **Verify live** in the current Claude Code session by issuing a Bash call that should match. For Codex, start a session and `/hooks` to trust the new entry, then trigger. If you can't drive Codex from this session, tell the user the trust-and-trigger sequence to run.
 8. **Update `AGENTS.md`** only if this introduces a new conceptual category. Don't add per-hook entries.
-9. **Commit and push** all touched files in one commit: `dotagents/hooks/<name>.sh`, `dotclaude/settings.json`, `dotcodex/config.toml` (if changed).
+9. **Commit and push** all touched files in one commit: `dotagents/hooks/<name>.sh`, `dotclaude/settings.json`, `dotcodex/hooks.json` (if changed).
 
 ## Constraints worth knowing
 
@@ -139,5 +140,5 @@ command = "$HOME/.codex/hooks/<name>.sh"
 - [ ] Script exits 0 with empty stdout for no-match cases (so the hook is a no-op).
 - [ ] Quoted regions stripped if the pattern could appear inside ssh/docker/commit-body strings.
 - [ ] If shared and uses `ask`, agent detection branch is present and tested.
-- [ ] `scripts/sync-codex-config.sh` ran (check `~/.codex/config.toml` contains the new entry).
+- [ ] `scripts/sync-codex-hooks.sh` ran (check `~/.codex/hooks.json` contains the new `_dotfiles` entry).
 - [ ] Live trigger fires in at least one agent.

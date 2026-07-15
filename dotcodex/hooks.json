@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "_dotfiles": true,
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/bash-antipatterns.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/git-commit-subject.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/httpie-flag-order.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "_dotfiles": true,
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/bash-verify-reminder.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

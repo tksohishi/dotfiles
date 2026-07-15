@@ -306,6 +306,9 @@ else
 fi
 rm -f "$codex_tmp"
 
+# Codex hooks (merge so app-managed hooks such as Otty survive)
+"$DOTFILES_DIR/scripts/sync-codex-hooks.sh"
+
 # Codex allowlist rules (copy, not symlink)
 codex_rules_src="$DOTFILES_DIR/dotcodex/rules/default.rules"
 codex_rules_dst="$HOME/.codex/rules/default.rules"
