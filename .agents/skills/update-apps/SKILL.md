@@ -5,7 +5,7 @@ description: Update all Homebrew packages, casks, and Mac App Store apps
 
 ## Run state
 
-State lives at `~/.cache/update-apps/state.json` (machine state, deliberately outside the public dotfiles repo). Read it before step 1; write it back after the report. Missing or unparseable file means first run — treat both fields as empty, don't error.
+State lives at `.cache/update-apps/state.json` under the repository root. The `.cache/` directory is gitignored because this is persistent, machine-specific state, not repository content. Read it before step 1; create the parent directory when needed, then write the state back after the report. Missing or unparseable file means first run — treat both fields as empty, don't error.
 
 ```json
 {
