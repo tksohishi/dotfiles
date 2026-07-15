@@ -4,7 +4,6 @@ font-family = Osaka
 # Hangul → D2Coding (monospace Korean, font-d2coding cask); Latin/JP unchanged
 font-codepoint-map = U+1100-U+11FF,U+3130-U+318F,U+A960-U+A97F,U+AC00-U+D7A3,U+D7B0-U+D7FF=D2Coding
 font-size = 13
-theme = TokyoNight
 confirm-close-surface = false
 maximize = true
 window-inherit-working-directory = false
