@@ -122,10 +122,10 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Secrets
 - Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), or `.dev.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
 
-## Gmail and Calendar
-- Use `gog` CLI for Gmail and Calendar operations, not MCP Gmail/Calendar tools
-- `gog gmail draft create` for drafting emails; `gog gmail search` for searching
-- `gog calendar` for calendar operations
+## Google Workspace
+- Use the `gog` CLI for all Google services (Gmail, Calendar, Drive, Docs, Sheets, ...), not the MCP Google tools. MCP is the fallback only when `gog` lacks the account or capability. Run `gog <service> --help` before concluding an operation isn't supported.
+- Never recreate a Google Doc to change its content; edit in place with `gog docs` (write, insert, insert-image with local-file upload, format). Once shared, the URL is load-bearing.
+- `gog drive upload --convert-to doc` turns a local file (e.g. .docx with embedded images) into a native Doc; `--replace <fileId>` works for binary files only, never native Docs.
 
 ## Browser Automation
 
