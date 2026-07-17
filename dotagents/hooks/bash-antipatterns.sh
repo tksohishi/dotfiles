@@ -1,5 +1,6 @@
 #!/bin/bash
-# Pre-hook: block Bash commands that read secrets out of .env / .dev.vars files.
+# Pre-hook: block Bash commands that read secrets out of .env / .dev.vars files,
+# and rg invocations using short -r ("recursive" typo; it's actually --replace).
 #
 # This is the sole surviving rule from a larger anti-pattern hook. The rest
 # (cd-chain, loops, $(...), head/sed reads, bunx, backslash-whitespace, etc.)
@@ -42,5 +43,24 @@ if [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE ]
       permissionDecisionReason: $reason
     }
   }'
+  exit 0
 fi
+
+# `rg` with short -r (alone or bundled, e.g. -rn): almost always a "recursive"
+# typo — rg is recursive by default and -r is --replace, which silently rewrites
+# the matched text in the output. Intentional replacement must use the long
+# --replace form. Scoped per pipeline segment so e.g. `rg -l x | xargs rm -r`
+# isn't caught.
+while IFS= read -r seg; do
+  if [[ "$seg" =~ ^[[:space:]]*rg[[:space:]] ]] && [[ "$seg" =~ (^|[[:space:]])-[a-zA-Z]*r[a-zA-Z]*([[:space:]]|$) ]]; then
+    jq -nc --arg reason "rg short -r detected: rg is recursive by DEFAULT; -r is --replace and silently rewrites matched text in the output. Drop the -r (recursion needs no flag). If you really mean replacement, use the explicit long form --replace." '{
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: $reason
+      }
+    }'
+    exit 0
+  fi
+done < <(printf '%s\n' "$CMD_BARE" | sed -E 's/(;|&&|\|\||\|)/\n/g')
 exit 0
