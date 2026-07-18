@@ -74,6 +74,10 @@ Takeshi
 
 The sign-off and name sit on consecutive lines with NO blank spacer between them — either two adjacent `gmail_default` divs or one div with a single `<br>` (matches the user's own sent mail; a blank line there reads as a gap the user never types). For personal mail from tks.ohishi@gmail.com the signature is just the name; for other accounts the signature block is one div with `<br>` line breaks inside (name / title+company / email / phone as applicable). Signatures are account-specific: check the project's AGENTS.md for a "Signature" entry matching the `-a` account before composing; if none exists, ask the user once and suggest saving it there.
 
+## Wording
+
+- Write like a person, not a spec. The email reads as written by the user; technical qualifiers sound machine-generated. Example the user corrected: "around 5:10 pm, Eastern Daylight Time (UTC-4)" → "around 5:10 pm Eastern Time (New York)". Before finalizing, reread for phrasing no ordinary correspondent would use (UTC offsets, RFC-style dates, over-qualified units) and simplify.
+
 ## Common gotchas
 
 - **Account**: pass `-a <email>` when multiple Gmail accounts are configured for `gog`.
