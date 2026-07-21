@@ -19,6 +19,9 @@ REAL=/Applications/CuaDriver.app/Contents/MacOS/cua-driver
 DENIED_BUNDLE_IDS=(
     com.google.Chrome
     com.1password.1password
+    com.ledger.live
+    com.brave.Browser
+    com.apple.MobileSMS
 )
 
 denied_bundle_id() {
