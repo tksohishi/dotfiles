@@ -3,13 +3,15 @@
 # (*/memory/*.md). All other memory writes pass through untouched (user
 # direction 2026-07-04: never gate memory writes wholesale).
 #   1. type: feedback frontmatter — behavior rules ("don't X", "always Y")
-#      belong in AGENTS.md, not memory (Enforcement Hierarchy level 3).
+#      belong in the relevant skill or the repo's AGENTS.md, not memory
+#      (Enforcement Hierarchy level 3). Never the global AGENTS.md, which the
+#      user curates himself.
 #   2. Config-derivable values — content asserting a value readable live from a
 #      runtime config file (settings.json, config.toml, .zshrc, Brewfile,
 #      ghostty config). These go stale; read the file live instead.
 #
 # Override: drop the value / change the frontmatter type, or put the rule in
-# AGENTS.md.
+# a skill or the repo's AGENTS.md.
 #
 # Claude-only (not wired in dotcodex/config.toml); Codex does not use this dir.
 # Reads .content (Write) or .new_string (Edit) so both tools are inspected.
@@ -36,7 +38,7 @@ emit() { # $1=decision $2=reason
 
 # 1. Feedback-type memory -> deny.
 if echo "$CONTENT" | head -20 | grep -qE '^[[:space:]]*type:[[:space:]]*feedback[[:space:]]*$'; then
-  emit deny "Feedback-type memory blocked (Enforcement Hierarchy level 3). Put the rule in AGENTS.md (project-local, or global ~/.dotfiles/dotagents/AGENTS.md), not memory."
+  emit deny "Feedback-type memory blocked (Enforcement Hierarchy level 3). Put the rule in the relevant skill (SKILL.md) or the repo's AGENTS.md, not memory. Do not target the global AGENTS.md."
 fi
 
 # 2. Config-derivable value -> deny.
