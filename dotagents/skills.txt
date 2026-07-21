@@ -10,3 +10,4 @@ anthropics/skills:docx
 anthropics/skills:frontend-design
 anthropics/skills:pdf
 vercel-labs/skills:find-skills
+blader/humanizer:humanizer

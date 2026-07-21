@@ -31,6 +31,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Never add personal or machine-specific info (device names/UDIDs, signing teams, one user's install workflow, quirks of this Mac). Litmus test: would the line hold for a collaborator on another machine? If not, it goes to project memory, not AGENTS.md.
 
 ## Writing Style
+- Before writing any prose document for humans (docs, reports, README sections, emails, announcements; not code or commit messages), load the `humanizer` skill and apply it while drafting; don't ship a first draft with AI tells (inflated openers, rule-of-three, negative parallelisms, "delve"-class vocabulary, vague attributions)
 - Avoid using emdashes in writing
 - Avoid using the section sign `§` in writing meant for humans; it reads as an AI artifact. Use the word "Section", "see", or drop the marker.
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
@@ -106,7 +107,6 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 - For `sqlite3`, pass `-readonly` for read queries (SELECT, PRAGMA, .schema, .tables, .dump) so the database is opened read-only at the engine level. Omit it only for intentional mutations.
 - macOS 15+ silently drops LAN unicast (ping/SSH return "No route to host" with ARP populated and gateway reachable) when the host app lacks Local Network permission in System Settings → Privacy & Security → Local Network. Resets on major OS updates.
-
 
 ## Env Files
 - `.env` for values the app needs to run, including secrets. Typically gitignored; `.env.example` is the committed schema.
