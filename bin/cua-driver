@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# Wrapper around cua-driver: restricts GUI automation to an allowlist of apps.
+#
+# cua-driver can drive any app on the host (click, type, screenshot,
+# read AX trees). This wrapper limits app-targeted tool calls to the
+# bundle ids below. Management subcommands and target-free reads pass
+# through; anything aimed at a non-allowlisted app is refused, as is
+# `mcp` mode (the MCP server would bypass per-call checks).
+#
+# Extend the allowlist by editing ALLOWED_BUNDLE_IDS below.
+# Bypass intentionally: invoke the real binary directly, e.g.
+#   /Applications/CuaDriver.app/Contents/MacOS/cua-driver ...
+
+set -euo pipefail
+
+REAL=/Applications/CuaDriver.app/Contents/MacOS/cua-driver
+
+ALLOWED_BUNDLE_IDS=(
+    com.google.Chrome
+    com.1password.1password
+)
+
+allowed_bundle_id() {
+    local id
+    for id in "${ALLOWED_BUNDLE_IDS[@]}"; do
+        [ "$1" = "$id" ] && return 0
+    done
+    return 1
+}
+
+reject() {
+    cat >&2 <<EOF
+cua-driver wrapper: refused $1
+
+App-targeted cua-driver calls are limited to: ${ALLOWED_BUNDLE_IDS[*]}
+To drive another app, ask the user to extend the allowlist in
+~/.dotfiles/bin/cua-driver.
+EOF
+    exit 1
+}
+
+[ $# -ge 1 ] || exec "$REAL"
+
+cmd="$1"
+json="${2:-}"
+
+case "$cmd" in
+    # Management subcommands and target-free reads: pass through.
+    serve|stop|status|list-tools|describe|recording|set_recording|\
+    list_apps|check_permissions|get_config|set_config|\
+    set_agent_cursor_enabled|set_agent_cursor_motion|\
+    help|-h|--help|version|--version)
+        exec "$REAL" "$@"
+        ;;
+    mcp)
+        reject "'mcp' mode (the MCP server bypasses the per-call app allowlist)"
+        ;;
+esac
+
+# Everything else is an app-targeted tool call; establish the target app.
+bundle_id="$(printf '%s' "$json" | jq -r '.bundle_id // empty' 2>/dev/null || true)"
+name="$(printf '%s' "$json" | jq -r '.name // empty' 2>/dev/null || true)"
+pid="$(printf '%s' "$json" | jq -r '.pid // empty' 2>/dev/null || true)"
+
+if [ -z "$bundle_id" ] && [ -n "$name" ]; then
+    bundle_id="$(osascript -e "id of app \"$name\"" 2>/dev/null || true)"
+fi
+if [ -z "$bundle_id" ] && [ -n "$pid" ]; then
+    bundle_id="$(lsappinfo info -only bundleid "$pid" 2>/dev/null \
+        | sed -n 's/.*"CFBundleIdentifier"="\([^"]*\)".*/\1/p' || true)"
+fi
+
+if [ -z "$bundle_id" ]; then
+    reject "'$cmd' (could not determine the target app from its arguments)"
+fi
+allowed_bundle_id "$bundle_id" || reject "'$cmd' targeting '$bundle_id'"
+
+exec "$REAL" "$@"
