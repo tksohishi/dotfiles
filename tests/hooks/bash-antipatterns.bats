@@ -73,3 +73,50 @@ bash_input() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+# Sandbox/config-bypass flags (ported from interior-wildcard deny rules in
+# dotclaude/settings.json that prefix_rule syncing can't express)
+
+@test "denies codex exec --dangerously-bypass-approvals-and-sandbox" {
+  run "$HOOK" <<< "$(bash_input 'codex exec --dangerously-bypass-approvals-and-sandbox "do stuff"')"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "denies codex exec -s danger-full-access" {
+  run "$HOOK" <<< "$(bash_input 'codex exec -s danger-full-access "do stuff"')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies hermes --yolo" {
+  run "$HOOK" <<< "$(bash_input 'hermes --yolo run task')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies hermes --ignore-rules mid-command" {
+  run "$HOOK" <<< "$(bash_input 'hermes run --ignore-rules task')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies agent-browser close --all" {
+  run "$HOOK" <<< "$(bash_input 'agent-browser close --all')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "allows plain codex exec" {
+  run "$HOOK" <<< "$(bash_input 'codex exec "review this diff"')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows --all under a different binary (not agent-browser)" {
+  run "$HOOK" <<< "$(bash_input 'git add --all')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows bypass flag mentioned only inside quotes" {
+  run "$HOOK" <<< "$(bash_input 'rg "danger-full-access" docs/ && echo codex ok')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}

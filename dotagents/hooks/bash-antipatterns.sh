@@ -46,6 +46,35 @@ if [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE ]
   exit 0
 fi
 
+# Sandbox/config-bypass flags: deterministic port of the interior-wildcard
+# deny rules in dotclaude/settings.json (e.g. `codex exec *--dangerously-bypass*`)
+# that scripts/sync-allowlist.ts cannot express as Codex prefix_rules. Substring
+# match on flag mirrors the `*flag*` wildcard semantics of the source rules.
+BYPASS_PAIRS=(
+  'codex|--dangerously-bypass'
+  'codex|danger-full-access'
+  'hermes|--yolo'
+  'hermes|--accept-hooks'
+  'hermes|--ignore-rules'
+  'hermes|--ignore-user-config'
+  'agent-browser|--all'
+)
+for pair in "${BYPASS_PAIRS[@]}"; do
+  bin=${pair%%|*}
+  flag=${pair#*|}
+  bin_re="(^|[[:space:];&|])$bin[[:space:]]"
+  if [[ "$CMD_BARE" =~ $bin_re ]] && [[ "$CMD_BARE" == *"$flag"* ]]; then
+    jq -nc --arg reason "'$bin' with '$flag' is blocked: it bypasses the agent's sandbox, hooks, or config gates. Run the tool without the bypass flag; if the gate itself is wrong, surface that to the user instead of bypassing it." '{
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: $reason
+      }
+    }'
+    exit 0
+  fi
+done
+
 # `rg` with short -r (alone or bundled, e.g. -rn): almost always a "recursive"
 # typo — rg is recursive by default and -r is --replace, which silently rewrites
 # the matched text in the output. Intentional replacement must use the long
