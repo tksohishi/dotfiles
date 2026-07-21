@@ -16,7 +16,7 @@ Personal dotfiles repository for macOS. Manages shell configs, editor settings, 
 Most files are self-explanatory. These have *why* worth knowing:
 
 - `bin/agent-browser` — wrapper that rejects `--profile <real-Chrome>` invocations to keep agents away from logged-in Chrome state. Bypass by calling `/opt/homebrew/bin/agent-browser` directly.
-- `bin/cua-driver` — wrapper that limits app-targeted tool calls (by bundle_id, name, or pid) to an allowlist and refuses `mcp` mode, which would bypass the per-call check. Extend the allowlist in the script; bypass by calling `/Applications/CuaDriver.app/Contents/MacOS/cua-driver` directly.
+- `bin/cua-driver` — wrapper that refuses app-targeted tool calls (resolved via bundle_id, name, or pid) aimed at denylisted sensitive apps (Chrome, 1Password), and refuses `mcp` mode, which would bypass the per-call check. Extend the denylist in the script; bypass by calling `/Applications/CuaDriver.app/Contents/MacOS/cua-driver` directly.
 - `bin/slk` — personal CLI; reads `SLACK_XOXC_TOKEN` + `SLACK_COOKIE_D` from CWD's `.env.local` because the creds are per-user (each developer has their own Slack session). Bun auto-loads both `.env` and `.env.local`. Not a general rule that secrets go in `.env.local` — app secrets normally belong in `.env`.
 - `dotcodex/config.toml` and `dotcodex/hooks.json` are **merged**, not symlinked, into `~/.codex/` (Codex and app integrations write local state there).
 - `dotagents/skills/<name>/SKILL.md` — single source of truth for agent capabilities. Only the `description` frontmatter loads into context until invoked. `install.sh` symlinks each into both `~/.claude/skills/` (Claude scans here) and `~/.agents/skills/` (Codex scans here natively); no per-agent copy to maintain.

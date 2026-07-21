@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Wrapper around cua-driver: restricts GUI automation to an allowlist of apps.
+# Wrapper around cua-driver: blocks GUI automation of sensitive apps.
 #
 # cua-driver can drive any app on the host (click, type, screenshot,
-# read AX trees). This wrapper limits app-targeted tool calls to the
-# bundle ids below. Management subcommands and target-free reads pass
-# through; anything aimed at a non-allowlisted app is refused, as is
-# `mcp` mode (the MCP server would bypass per-call checks).
+# read AX trees). This wrapper refuses app-targeted tool calls aimed at
+# the bundle ids below (logged-in browser sessions, password manager).
+# Management subcommands and target-free reads pass through; calls whose
+# target app cannot be determined are refused, as is `mcp` mode (the MCP
+# server would bypass per-call checks).
 #
-# Extend the allowlist by editing ALLOWED_BUNDLE_IDS below.
+# Extend the denylist by editing DENIED_BUNDLE_IDS below.
 # Bypass intentionally: invoke the real binary directly, e.g.
 #   /Applications/CuaDriver.app/Contents/MacOS/cua-driver ...
 
@@ -15,14 +16,14 @@ set -euo pipefail
 
 REAL=/Applications/CuaDriver.app/Contents/MacOS/cua-driver
 
-ALLOWED_BUNDLE_IDS=(
+DENIED_BUNDLE_IDS=(
     com.google.Chrome
     com.1password.1password
 )
 
-allowed_bundle_id() {
+denied_bundle_id() {
     local id
-    for id in "${ALLOWED_BUNDLE_IDS[@]}"; do
+    for id in "${DENIED_BUNDLE_IDS[@]}"; do
         [ "$1" = "$id" ] && return 0
     done
     return 1
@@ -32,9 +33,9 @@ reject() {
     cat >&2 <<EOF
 cua-driver wrapper: refused $1
 
-App-targeted cua-driver calls are limited to: ${ALLOWED_BUNDLE_IDS[*]}
-To drive another app, ask the user to extend the allowlist in
-~/.dotfiles/bin/cua-driver.
+These apps are off-limits to cua-driver: ${DENIED_BUNDLE_IDS[*]}
+They hold logged-in sessions and secrets. If this was intentional, ask
+the user to adjust the denylist in ~/.dotfiles/bin/cua-driver.
 EOF
     exit 1
 }
@@ -53,7 +54,7 @@ case "$cmd" in
         exec "$REAL" "$@"
         ;;
     mcp)
-        reject "'mcp' mode (the MCP server bypasses the per-call app allowlist)"
+        reject "'mcp' mode (the MCP server bypasses the per-call app denylist)"
         ;;
 esac
 
@@ -73,6 +74,8 @@ fi
 if [ -z "$bundle_id" ]; then
     reject "'$cmd' (could not determine the target app from its arguments)"
 fi
-allowed_bundle_id "$bundle_id" || reject "'$cmd' targeting '$bundle_id'"
+if denied_bundle_id "$bundle_id"; then
+    reject "'$cmd' targeting '$bundle_id'"
+fi
 
 exec "$REAL" "$@"
