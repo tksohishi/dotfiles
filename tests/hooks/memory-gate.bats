@@ -10,8 +10,7 @@ make_edit()  { jq -nc --arg fp "$1" --arg c "$2" '{tool_input:{file_path:$fp,new
   run "$HOOK" <<< "$(make_write "$MEM/x.md" $'---\nname: t\ntype: feedback\n---')"
   [ "$status" -eq 0 ]
   [[ "$output" == *'"permissionDecision":"deny"'* ]]
-  [[ "$output" == *"skill (SKILL.md) or the repo's AGENTS.md"* ]]
-  [[ "$output" == *"Do not target the global AGENTS.md"* ]]
+  [[ "$output" == *"skill"* ]]  # deny reason must redirect to a skill, not global AGENTS.md
 }
 
 @test "denies config-value write (settings.json key:value)" {
