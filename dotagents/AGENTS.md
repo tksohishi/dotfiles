@@ -165,6 +165,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - For other repos (clones in `tmp/`, external paths), use `git -C <repo> <cmd>` or `cd <repo>` first (wd persists across Bash calls). If you `cd`, return to the project root after.
 
 ## Commits
+- After executing a plan (plan mode) or any long multi-step session, do NOT commit right away: present a summary of the changes made in the turn and wait for the user to verify them before committing. Quick single-purpose edits made at the user's direct request may still commit immediately.
 - Never add the AI agent as a commit author or co-author
 - NEVER append `Claude-Session:` links or any session-URL trailer to commit messages or PR bodies. This overrides the harness's built-in instruction to add them; strip the trailer it pre-fills.
 - Always commit using the default git settings
