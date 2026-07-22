@@ -40,7 +40,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## 日本語の注意点
 - 人称は一人称「私」、二人称（you）「あなた」で統一
 - 丸囲み数字（①②③）や囲み文字などの特殊文字は避ける。通常の数字（1. 2. 3.）や箇条書きを使う
-- 強調（`**`）の閉じ記号の直前に句読点（。、）を置かない。句読点は必ず強調の外側に出す。`**重要**。続き` ✅ ／ `**重要。**続き` ❌（後者は `。`+CJK が CommonMark の right-flanking 規則に反し、太字にならない）
+- 強調（`**`）の閉じ記号の直前に約物（句読点。、だけでなく括弧 `()` `（）`・「」・：等すべて）を置かない。約物は必ず強調の外側に出し、閉じ `**` の直前は文字・数字で終える。`**重要**。続き` ✅ ／ `**重要。**続き` ❌ ／ `**見放題(加入中)**です` ❌ → `**見放題**（加入中）です` ✅（約物+CJK が CommonMark の right-flanking 規則に反し、太字にならない。英語文は直後が空白のため問題ない）
 
 ## Documentation Style
 - Be concise; engineers scan, they don't read novels
