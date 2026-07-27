@@ -42,18 +42,9 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - 丸囲み数字（①②③）や囲み文字などの特殊文字は避ける。通常の数字（1. 2. 3.）や箇条書きを使う
 - 強調（`**`）の閉じ記号の直前に約物（句読点。、だけでなく括弧 `()` `（）`・「」・：等すべて）を置かない。約物は必ず強調の外側に出し、閉じ `**` の直前は文字・数字で終える。`**重要**。続き` ✅ ／ `**重要。**続き` ❌ ／ `**見放題(加入中)**です` ❌ → `**見放題**（加入中）です` ✅（約物+CJK が CommonMark の right-flanking 規則に反し、太字にならない。英語文は直後が空白のため問題ない）
 
-## Documentation Style
-- Be concise; engineers scan, they don't read novels
-- Prefer examples over prose
-- Assume technical competence, skip obvious explanations
-- Front-load critical info (warnings, key concepts first)
-- Default to 1-2 sentence explanations; only expand when complexity requires it
-
 ## Response Style
 - In conversational replies, drop filler, preambles, and hedging
-  - English: "Great question", "just", "really", "basically"
   - Japanese: ご質問ありがとうございます preambles, えーと/まあ/基本的に filler, かもしれません/おそらく hedging
-- Don't narrate internal deliberation ("Let me check", "I'll think about this", "まず確認"). Act, then state results
 - Don't restate the user's question before answering
 - End-of-turn summary: 1-2 sentences max covering what changed + what's next. Don't append headers, tables, or multi-section breakdowns unless the content genuinely benefits (5+ items, side-by-side comparison, lookup reference)
 - Match structure to complexity: single-concept questions get a single-concept answer
@@ -99,7 +90,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
 - Prefer Read for file content (not `cat`) and Edit for changes (not `sed`). For search, use `rg` and `fd` via Bash (Claude Code's macOS native build dropped the Grep/Glob tools). For JSON use `jq`.
 - For intermediate files (pdftotext output, downloaded HTML, etc.), use project-local `tmp/` (globally gitignored), not `/tmp`. In code, write `path.join(process.cwd(), 'tmp')` (Node/TS) or `Path.cwd() / 'tmp'` (Python). Never reach for `os.tmpdir()`, `fs.mkdtemp`, `tempfile.gettempdir()`, `tempfile.NamedTemporaryFile()`, or bare `mktemp` — they all bypass the rule by returning a system temp path. Keeps operations in the project directory and avoids `cd`-chain patterns.
-- `cp`, `mv`, `rm` with flags trigger a Claude Code built-in path-safety check that prompts even when the command is in `permissions.allow`. Bare single-file `cp src dst` is fine. For recursive / no-clobber copy use `rsync -a --ignore-existing src/ dst/` (trailing slashes copy contents into dst) — rsync isn't subject to the path-safety check and its allow rule works. The earlier `cp -an` recommendation was wrong: the allow rule never bypassed the prompt.
+- `cp`, `mv`, `rm` with flags trigger a Claude Code built-in path-safety check that prompts even when the command is in `permissions.allow`. Bare single-file `cp src dst` is fine. For recursive / no-clobber copy use `rsync -a --ignore-existing src/ dst/` (trailing slashes copy contents into dst) — rsync isn't subject to the path-safety check and its allow rule works.
 - Prefer reversible deletion over `rm -rf` for bulk/cache/directory removal: use `trash <paths...>` (macOS built-in, recoverable from Trash). Besides being safer, `rm -rf` of home paths is denied outright by the auto-mode classifier, while `trash` passes cleanly. Reserve `rm` for cases where non-recoverable removal is actually required.
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
@@ -126,34 +117,8 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - `gog drive upload --convert-to doc` turns a local file (e.g. .docx with embedded images) into a native Doc; `--replace <fileId>` works for binary files only, never native Docs.
 
 ## Browser Automation
-
-### When to use
 - Default to `agent-browser` for all browser automation (headless by default). Use WebFetch/httpie for simple HTTP requests; agent-browser only for sites that need a real browser. Never drive the real installed Google Chrome from scripts (e.g. Playwright `channel: "chrome"`) — it holds logged-in personal sessions; isolated browsers only.
-- Never guess subcommands. Run `agent-browser --help` if unsure.
-- Always close when done: `agent-browser close`.
-
-### Workflow
-- Common flow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`.
-- To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text).
-
-### Per-project config (authoritative)
-- Each project gets `agent-browser.json` at its root (use the `/agent-browser-init` skill to generate). This is the source of truth for per-project browser behavior — do not override with `--session` / `--profile` flags.
-- The config sets `session` (unique per-project daemon, enables parallel use across projects) and `profile: .agent-browser` (project-local Chrome user-data-dir, required for parallel Chrome instances to avoid `SingletonLock` conflicts).
-- `agent-browser close` closes the current project's session; `close --all` closes every active session across projects.
-
-### Headed mode (for Cloudflare, sign-in, cookie capture)
-- Use `--headed` for flows that need a visible browser.
-- Pass `--headed` on every call that should stay attached to a headed daemon. If the launch options don't match the daemon's current config, the daemon can respawn Chrome and lose page state.
-- The warning `<flags> ignored: daemon already running` fires whenever any launch-time flag (`--headed`, `--profile`, `--args`, etc.) is re-passed against a running daemon, regardless of whether the value matches; it's cosmetic (nothing breaks). Suppress with `-q` or `--json`.
-- Verify headed mode is active: `pgrep -lf "Google Chrome for Testing" | grep -v crashpad | grep -v Helper` — output must NOT contain `--headless=new`.
-- Cloudflare challenges auto-clear within 2-3s in truly-headed mode; they never clear in headless.
-
-### LinkedIn
-- Requires login. If not logged in: `agent-browser close`, then `agent-browser --headed open "https://www.linkedin.com/login"`. After login, navigate to the target profile.
-- For profiles, go directly to `/details/experience/` or `/details/education/` URLs to skip the Activity feed and get structured career data.
-
-### Recovery
-- When stuck, clean restart with `agent-browser close --all`. Avoid `pkill` — it leaves a stale `SingletonLock` in the profile dir that breaks subsequent launches.
+- Load the `agent-browser` skill before driving one: session/profile config, the open/snapshot/get-text flow, headed mode, LinkedIn, and daemon recovery live there.
 
 ## Git
 - Never create a branch unless I explicitly ask. Work on the current branch, including the default branch (`main`), directly. This overrides any built-in "if on the default branch, branch first" rule; do not auto-branch before committing.

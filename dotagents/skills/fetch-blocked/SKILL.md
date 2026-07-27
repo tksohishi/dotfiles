@@ -121,7 +121,7 @@ Body is ~300-650KB — always save to a file and `rg`, never cat. PX rate-limits
 
 ## LinkedIn / Instagram
 
-Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section in global instructions (login flow, `/details/experience/` URLs).
+Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section in the `agent-browser` skill (login flow, `/details/experience/` URLs).
 
 ## YouTube
 
