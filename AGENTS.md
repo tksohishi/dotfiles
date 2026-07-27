@@ -44,5 +44,5 @@ Most files are self-explanatory. These have *why* worth knowing:
 
 ## Workflow
 
-- After making changes, always commit and push before moving on
+- After making changes, always commit and push before moving on. In this repo that overrides the global rule about holding a commit until the user verifies a long session; commit as you go here, and don't ask first.
 - When changing a group of related files for a single purpose, commit and push together
