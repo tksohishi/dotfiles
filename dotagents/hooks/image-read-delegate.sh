@@ -8,12 +8,14 @@
 # screenshot reads, ~$10 per PNG, independent of the image's own size. The same
 # read inside a fresh subagent (~30K context) costs cents.
 #
-# Detection is best-effort: PreToolUse is not documented to carry a subagent
-# identifier, so this checks the fields that would expose one and treats their
-# absence as "main agent". That means detection can fail closed (denying the
-# delegated subagent too), so the per-path guard below is the real loop-safety
-# mechanism: any given path is denied at most once per session. Second attempt
-# always passes, whoever makes it.
+# Subagent detection is verified working (2026-07-27): a subagent's Read of a
+# path with no prior denial passed straight through, so one of agent_id /
+# agent_type / a /subagents/ transcript_path is present on PreToolUse — even
+# though the docs only describe those fields on SubagentStart and SubagentStop.
+# Treat that as undocumented and liable to change. The per-path guard below is
+# the backstop: any given path is denied at most once per session, so if
+# detection ever stops firing, the delegated read costs one retry instead of
+# wedging the turn.
 #
 # Claude-only: Codex has no working subagent delegation to route these to, so
 # this hook is wired in dotclaude/settings.json and NOT in dotcodex/hooks.json.
