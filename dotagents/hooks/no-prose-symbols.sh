@@ -63,10 +63,18 @@ SCRIPT_DIR="$(dirname "$0")"
 PUBLISH_FILE="$SCRIPT_DIR/prose-publish-paths.txt"
 BASENAME=$(basename "$FILE_PATH")
 MATCHED=""
+# Whitespace trimming below is inline parameter expansion, not a helper and
+# not `$(echo "$pattern" | xargs)`. The old form cost one fork+exec per line
+# per pass (76 for the current registry), which was ~90% of the hook's
+# runtime and the only part that scaled with machine load: three
+# PreToolUse:Edit runs blew the 5s timeout during one busy minute on
+# 2026-07-27 while measuring 0.2s idle. A `$(trim ...)` helper would have
+# kept the fork.
 if [ -f "$PUBLISH_FILE" ]; then
   # Pass 1: exclusions (leading `!`) win over any inclusion match.
   while IFS= read -r pattern; do
-    pattern=$(echo "$pattern" | xargs)
+    pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+    pattern="${pattern%"${pattern##*[![:space:]]}"}"
     [[ "$pattern" = !* ]] || continue
     case "$BASENAME" in
       ${pattern#!}) exit 0 ;;
@@ -74,7 +82,8 @@ if [ -f "$PUBLISH_FILE" ]; then
   done < "$PUBLISH_FILE"
   # Pass 2: inclusions.
   while IFS= read -r pattern; do
-    pattern=$(echo "$pattern" | xargs)
+    pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+    pattern="${pattern%"${pattern##*[![:space:]]}"}"
     [ -z "$pattern" ] && continue
     [[ "$pattern" = \#* ]] && continue
     [[ "$pattern" = !* ]] && continue
