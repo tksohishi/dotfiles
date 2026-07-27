@@ -41,13 +41,16 @@ WebFetch refuses every reddit domain client-side ("unable to fetch"). Use httpie
 - Search → `/x-search` skill.
 - Single post (you have the status URL): anonymous syndication endpoint, no login.
 
+  Returns the post text only. A post that links to an X article gives you the `t.co` link, not the article body — see the article row below.
+
   ```bash
   # ID from https://x.com/jack/status/20
   http GET 'https://cdn.syndication.twimg.com/tweet-result?id=20&token=a'
   ```
 
   Returns JSON: `.text`, `.user.screen_name`, `.created_at`, plus quoted tweet and media if present. As of 2026-06 the `token` param is not validated (any value or absent works); if valid IDs start returning 404, token validation may be back — the formula is `((Number(id)/1e15)*Math.PI).toString(36).replace(/(0+|\.)/g,'')` (float precision loss intentional, matches the official widget). If that also fails, escalate to agent-browser.
-- Profiles, threads, replies: `agent-browser --headed` (x.com renders nothing without JS).
+- X articles (`x.com/i/article/<id>`, what a `t.co` on a long post usually expands to): login-walled. httpie returns a ~260KB JS shell with no article text, and `agent-browser --headed` redirects to `/i/jf/onboarding/web?...mode=login` — the browser profile is not signed in to X, and signing it in is not worth it. Use `/x-search` and pass the post or article URL as the query; x_search resolves it through the user's X Premium credential and returns the article body (verified 2026-07).
+- Profiles, threads, replies: `agent-browser --headed` (x.com renders nothing without JS). Profiles do render logged out — `open https://x.com/<handle>` then `get text body` gives bio plus recent posts (verified 2026-07).
 
 ## IMDb
 

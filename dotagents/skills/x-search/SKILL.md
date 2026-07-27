@@ -11,10 +11,14 @@ Shell out to `hermes -z` to invoke xAI's `x_search` tool, which routes through t
 
 User invokes via `/x-search <query>`. `$ARGUMENTS` is the raw query string — pass it through to Hermes with a formatting wrapper.
 
+`$ARGUMENTS` may also be a single X URL (`x.com/<handle>/status/<id>` or `x.com/i/article/<id>`), in which case use the lookup form below instead of the search form. That is the only anonymous way to read an X article: articles are login-walled, and `agent-browser` is not signed in.
+
 ## Run
 
+`-t` must come before `-z`. `hermes -z -t x_search "..."` fails with `argument -z/--oneshot: expected one argument`, because argparse refuses a value starting with `-`.
+
 ```bash
-hermes -z -t x_search "Use the x_search tool to search X for: $ARGUMENTS
+hermes -t x_search -z "Use the x_search tool to search X for: $ARGUMENTS
 
 Return up to 5 most-relevant recent posts. For each, output:
 - Post text in quotes (truncate to ~200 chars with '…' if longer)
@@ -25,6 +29,16 @@ Separate posts with a blank line. No commentary or summary." 2>&1
 ```
 
 `-t x_search` restricts the toolset for this invocation regardless of global `hermes tools` config — the call stays on the subscription path even if other toolsets are re-enabled later.
+
+### Single post or article lookup
+
+```bash
+hermes -t x_search -z "Use the x_search tool to look up this specific X post: $ARGUMENTS
+
+Return the post's full text verbatim, its author handle, and its date. If it is an article, return the article body. No commentary." 2>&1
+```
+
+A post that links to an X article often resolves to the article body rather than the short post text; that is usually what you wanted, but say which one you got.
 
 Output is plain text. Quote it back to the user as-is unless they ask for a different format.
 
