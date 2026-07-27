@@ -106,6 +106,7 @@ policy = '''
 ## Local Additions
 ### Secrets
 - Reading secret files (any `.env*` file other than `.env.example`, any `.dev.vars` file, anything under `~/.ssh` or `~/.aws`) is `critical` risk. Deny regardless of user authorization; the agent should read `.env.example` for schema or use a redaction script.
+- Writing to those same files — including native file edits (`apply_patch`) and `~/.ssh`/`~/.aws` — is `critical` risk. Deny regardless of user authorization. The agent cannot read them back, so it can neither verify the write nor undo a bad one; it should print the value or the line to add and let the user apply it. Deleting them with `rm`/`shred`/`unlink` is `critical` for the same reason and is unrecoverable; `trash <path>` is the allowed form. `.env.example` stays editable, and `cp .env.example .env` is allowed.
 
 ### Gate Bypass
 - Any flag that bypasses an agent's own sandbox, approvals, hooks, or config gates (`--dangerously-bypass-approvals-and-sandbox`, `danger-full-access`, `--yolo`, `--accept-hooks`, `--ignore-rules`, `--ignore-user-config`) is `critical` risk. Deny.

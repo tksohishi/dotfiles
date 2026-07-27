@@ -74,6 +74,205 @@ bash_input() {
   [ -z "$output" ]
 }
 
+# Writes into secret files. Unlike the read rule, these match the raw command:
+# a redirection target belongs to the local shell whether or not it's quoted.
+
+@test "denies redirect into .env" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 > .env')"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "denies append into .env.local" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 >> .env.local')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies redirect with no space before the path" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 >.env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies clobber-override redirect >| .env" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 >| .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies >& .env" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 >& .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies &> .env" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 &> .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies heredoc write into .env" {
+  run "$HOOK" <<< "$(bash_input 'cat > .env <<EOF')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies redirect into a quoted target" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 > "$HOME/app/.env"')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies redirect into a nested .env.production" {
+  run "$HOOK" <<< "$(bash_input 'printf x > apps/web/.env.production')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies redirect into .dev.vars" {
+  run "$HOOK" <<< "$(bash_input 'echo x > .dev.vars')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies tee .env" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 | tee .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies tee -a .env" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 | tee -a .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies tee with a quoted target" {
+  run "$HOOK" <<< "$(bash_input 'echo KEY=1 | tee "$HOME/.env"')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies cp into .env" {
+  run "$HOOK" <<< "$(bash_input 'cp generated.txt .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies mv into .env" {
+  run "$HOOK" <<< "$(bash_input 'mv generated.txt .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies cp out of .env (exfiltration into an unprotected file)" {
+  run "$HOOK" <<< "$(bash_input 'cp .env /tmp/backup.txt')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies cp .env .env.example (would publish secrets to the template)" {
+  run "$HOOK" <<< "$(bash_input 'cp .env .env.example')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies dd of=.env" {
+  run "$HOOK" <<< "$(bash_input 'dd if=/dev/null of=.env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies truncate on .env" {
+  run "$HOOK" <<< "$(bash_input 'truncate -s 0 .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies sponge .env" {
+  run "$HOOK" <<< "$(bash_input 'cat in | sponge .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies rm .env (unrecoverable; trash is the allowed form)" {
+  run "$HOOK" <<< "$(bash_input 'rm .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies rm -f .env.local" {
+  run "$HOOK" <<< "$(bash_input 'rm -f .env.local')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies shred .env" {
+  run "$HOOK" <<< "$(bash_input 'shred -u .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies unlink .env" {
+  run "$HOOK" <<< "$(bash_input 'unlink .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies rm .env.example .env (template source buys no immunity for rm)" {
+  run "$HOOK" <<< "$(bash_input 'rm .env.example .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "allows trash .env (recoverable from the Trash)" {
+  run "$HOOK" <<< "$(bash_input 'trash .env')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows rm on a non-secret path" {
+  run "$HOOK" <<< "$(bash_input 'rm -rf node_modules')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows rm .env.example" {
+  run "$HOOK" <<< "$(bash_input 'rm .env.example')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "denies rsync into .env (AGENTS.md steers the agent to rsync over cp)" {
+  run "$HOOK" <<< "$(bash_input 'rsync -a generated.txt .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies ln -sf over .env" {
+  run "$HOOK" <<< "$(bash_input 'ln -sf /tmp/fake .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "allows rsync between non-secret dirs" {
+  run "$HOOK" <<< "$(bash_input 'rsync -a --ignore-existing src/ dst/')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows cp .env.example .env (bootstrapping from a template)" {
+  run "$HOOK" <<< "$(bash_input 'cp .env.example .env')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows cp -n .env.sample .env (flags skipped when finding the source)" {
+  run "$HOOK" <<< "$(bash_input 'cp -n .env.sample .env')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows writing .env.example" {
+  run "$HOOK" <<< "$(bash_input 'printf KEY=\n > .env.example')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows ordinary redirection to a non-secret file" {
+  run "$HOOK" <<< "$(bash_input 'git diff > tmp/d.txt')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows stderr redirect to a log that merely starts with .env" {
+  run "$HOOK" <<< "$(bash_input 'run.sh 2> .env.log')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows cp between non-secret files" {
+  run "$HOOK" <<< "$(bash_input 'cp src/config.ts dist/config.ts')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
 # Sandbox/config-bypass flags (ported from interior-wildcard deny rules in
 # dotclaude/settings.json that prefix_rule syncing can't express)
 

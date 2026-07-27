@@ -10,6 +10,37 @@
 # match, so that shaping layer is pure friction and was removed. Secrets
 # protection is not allowlist friction, so it stays.
 #
+#   `> .env*` / `cp x .env*`— commands that write into (or copy out of) .env or
+#                           .dev.vars. The agent must not persist values into a
+#                           file it is forbidden to read back: it cannot verify
+#                           what it wrote and cannot clean up a mistake, so a
+#                           bad write becomes the user's manual chore. Hand the
+#                           value to the user instead. Covers redirection
+#                           (> >> >| >& &>), tee, and the path-argument writers
+#                           cp/mv/rsync/ln/install/dd/truncate/sponge (rsync
+#                           because AGENTS.md steers the agent to it over cp,
+#                           ln because `ln -sf x .env` replaces the file just as
+#                           destructively). cp/mv are blocked
+#                           on BOTH sides — a secret source exfiltrates into a
+#                           file no rule protects — with one exception, a source
+#                           named *.example/*.sample/*.template, which keeps
+#                           `cp .env.example .env` bootstrapping working.
+#                           Irreversible deletion (rm/shred/unlink) is blocked
+#                           on the same footing — the agent can't even report
+#                           what it destroyed, having never been able to read
+#                           it. `trash` stays allowed: it's recoverable from
+#                           the Trash, and is the form AGENTS.md already
+#                           prefers.
+#                           Matched against the raw command, not the
+#                           quote-stripped one: a redirection target is the
+#                           local shell's regardless of quoting, so
+#                           `> "$HOME/.env"` must not slip through.
+#                           Not covered: interpreter one-liners that open the
+#                           file from inside a quoted script (python -c, node
+#                           -e). Blocking those means pattern-matching arbitrary
+#                           source in any language; the Write/Edit tool denies
+#                           and the risk classifier cover that ground instead.
+#
 #   `<reader> ... .env*`  — text-reading tools touching .env or .dev.vars.
 #                           Use .env.example for schema; redaction scripts for
 #                           values. Does not block .env.example (template).
@@ -34,6 +65,54 @@ CMD_BARE=$(printf '%s' "$CMD" | tr '\n' '\1' | sed -e "s/'[^']*'//g" -e 's/"[^"]
 
 SECRET_READER_RE='(^|;|&&|\|\||\|)[[:space:]]*(rg|grep|cat|sed|head|tail|awk|less|more|strings|bat|xxd|od|nl|tac)[[:space:]]'
 SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|development|test|prod|stage|dev)([^a-zA-Z0-9]|$)|\.dev\.vars([^a-zA-Z0-9]|$)'
+
+# Redirection (> >> >| >& &>) or tee whose target token contains a secret path.
+# Runs on $CMD, not $CMD_BARE, so a quoted target stays visible.
+SECRET_REDIR_RE='(>>?[|&]?[[:space:]]*|(^|[[:space:];&|(])tee[[:space:]]+(-[^[:space:]]+[[:space:]]+)*)[^[:space:]]*('"$SECRET_FILE_RE"')'
+
+secret_write=""
+[[ "$CMD" =~ $SECRET_REDIR_RE ]] && secret_write=1
+
+# Writers and destroyers that take the path as a plain argument. Scanned per
+# pipeline segment so `echo x | sponge .env` is caught but `rg .env | cp ...`
+# noise is not. `trash` is deliberately absent — it is the recoverable escape
+# hatch the deny message points at.
+if [[ -z "$secret_write" ]]; then
+  while IFS= read -r seg; do
+    [[ "$seg" =~ ^[[:space:]]*(cp|mv|rsync|ln|install|dd|truncate|sponge|rm|shred|unlink)([[:space:]]|$) ]] || continue
+    writer="${BASH_REMATCH[1]}"
+    read -ra toks <<< "$seg"
+    # Bootstrapping from a template is the one legitimate way to create a .env,
+    # and only a copier has a source to judge — `rm .env.example .env` must not
+    # buy immunity for the second path.
+    if [[ "$writer" =~ ^(cp|mv|rsync|ln|install)$ ]]; then
+      src=""
+      for t in "${toks[@]:1}"; do
+        [[ "$t" == -* ]] && continue
+        src="$t"
+        break
+      done
+      [[ "$src" =~ \.(example|sample|template)$ ]] && continue
+    fi
+    for t in "${toks[@]:1}"; do
+      if [[ "$t" =~ $SECRET_FILE_RE ]]; then
+        secret_write=1
+        break 2
+      fi
+    done
+  done < <(printf '%s\n' "$CMD" | sed -E 's/(;|&&|\|\||\|)/\n/g')
+fi
+
+if [[ -n "$secret_write" ]]; then
+  jq -nc --arg reason "Writing to, copying out of, or deleting .env / .dev.vars is blocked. You cannot read these files back, so you cannot verify what you wrote, undo a mistake, or say what an rm just destroyed. To set a value: print the exact line and ask the user to paste it in. To remove the file: use 'trash <path>', which is recoverable, and confirm with the user first. For a schema change, edit .env.example instead; bootstrapping with 'cp .env.example .env' is still allowed." '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: $reason
+    }
+  }'
+  exit 0
+fi
 
 if [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE ]]; then
   jq -nc --arg reason "Reading .env / .dev.vars files is blocked — they contain secrets (API keys, tokens). For schema, read .env.example. To inspect a value, use an approved redaction script (e.g., scripts/check-env.ts, scripts/redact-env.ts) or surface the specific need to the user. Once secrets are read, treat them as compromised and rotate." '{
