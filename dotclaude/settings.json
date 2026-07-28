@@ -565,7 +565,7 @@
       "~/Library/Caches"
     ]
   },
-  "model": "opus",
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -658,7 +658,7 @@
     "command": "bash \"$HOME/.claude/statusline.sh\""
   },
   "enabledPlugins": {},
-  "effortLevel": "high",
+  "effortLevel": "medium",
   "tui": "fullscreen",
   "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
