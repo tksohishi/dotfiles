@@ -39,6 +39,7 @@ When drafting a reply, emulate "reply-all" by default, not "reply to sender only
 - `--to`: the original sender (`From`) plus everyone in the original `To`.
 - `--cc`: everyone in the original `Cc`.
 - Always drop the user's own address (the `-a <account>` identity) from both lists so they don't email themselves. De-duplicate addresses across To/Cc.
+- Keep display names: pass recipients in the full `"Name <email>"` form from the original headers, never bare addresses. Bare addresses show as raw emails in Gmail's To field.
 
 Pull the headers from the latest message in the thread:
 
