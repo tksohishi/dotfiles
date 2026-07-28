@@ -11,9 +11,11 @@ Never guess subcommands. Run `agent-browser --help` if unsure. Always close when
 
 ## Workflow
 
-- **Delegate to a subagent.** Multi-step agent-browser work (investigation, form filling, scraping) runs in a subagent, not the main loop — it's high tool-call volume and, in headed mode, steals the user's screen focus. The main context sends the goal + known page quirks and gets a bounded summary back. A quick single lookup (open → get text → close) may stay inline.
+- **Delegate to a subagent.** Multi-step agent-browser work (investigation, form filling, scraping) runs in a subagent, not the main loop — it's high tool-call volume and, in headed mode, steals the user's screen focus. The main context sends the goal + known page quirks and gets a bounded summary back. A quick single lookup (open → get text → close) may stay inline. This is also a token rule: every snapshot dumped into the main context is re-sent on all later turns for the rest of the session.
 - Common flow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`.
-- To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text).
+- To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text). Prefer a scoped `get text <selector>` over repeated full snapshots when you only need one region.
+- **Refs go stale.** `@ref` handles are only valid for the snapshot that produced them; any navigation, click, or DOM change invalidates them. On `Unknown ref`, don't retry the same ref or guess a neighboring one (`e69` → `e68` → `e45` is a real failure loop from a past session) — re-run `snapshot` and act on the fresh refs.
+- **Screenshots**: don't Read screenshot images in the main session — an image block invalidates the prompt cache and re-writes the whole context at cache-write rates. Have a subagent read the screenshot and return text findings.
 
 ## CAPTCHA and bot checks: stop, don't bypass
 
@@ -27,7 +29,7 @@ Also, `fill` writes instantly into every field, which is itself a bot signal. On
 
 - Each project gets `agent-browser.json` at its root (use the `/agent-browser-init` skill to generate). This is the source of truth for per-project browser behavior; do not override with `--session` / `--profile` flags.
 - The config sets `session` (unique per-project daemon, enables parallel use across projects) and `profile: .agent-browser` (project-local Chrome user-data-dir, required for parallel Chrome instances to avoid `SingletonLock` conflicts).
-- `agent-browser close` closes the current project's session; `close --all` closes every active session across projects.
+- `agent-browser close` closes the current project's session. `close --all` (every session across projects) is hook-blocked for agents (`bash-antipatterns.sh` denies any `agent-browser` call containing `--all`); if cross-project cleanup seems needed, ask the user to run it.
 
 ## Headed mode (for Cloudflare, sign-in, cookie capture)
 
@@ -48,4 +50,4 @@ Profiles render logged out: `open https://x.com/<handle>` then `get text body`. 
 
 ## Recovery
 
-When stuck, clean restart with `agent-browser close --all`. Avoid `pkill`; it leaves a stale `SingletonLock` in the profile dir that breaks subsequent launches.
+When stuck, clean restart with `agent-browser close` (current project's session). `close --all` is hook-blocked for agents — if the wedge spans other projects' sessions, surface it and let the user run `agent-browser close --all` themselves. Avoid `pkill`; it leaves a stale `SingletonLock` in the profile dir that breaks subsequent launches.
