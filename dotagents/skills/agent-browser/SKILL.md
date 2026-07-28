@@ -15,6 +15,14 @@ Never guess subcommands. Run `agent-browser --help` if unsure. Always close when
 - Common flow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`.
 - To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text).
 
+## CAPTCHA and bot checks: stop, don't bypass
+
+A CAPTCHA, "Are you a bot?", or a bot-score rejection is a hard stop. Never spoof the browser's automation flags, install a stealth plugin, or use a solving service. A PreToolUse hook (`no-bot-detection-bypass.sh`) denies these outright, so attempts fail loudly rather than quietly succeeding.
+
+Hand the task to the user instead: save the values they need into a file, say which step is blocked, and let them finish in their own browser.
+
+Also, `fill` writes instantly into every field, which is itself a bot signal. On a form whose submission is bot-scored, expect to hand off rather than to out-run the check.
+
 ## Per-project config (authoritative)
 
 - Each project gets `agent-browser.json` at its root (use the `/agent-browser-init` skill to generate). This is the source of truth for per-project browser behavior; do not override with `--session` / `--profile` flags.

@@ -627,6 +627,15 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/no-bot-detection-bypass.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
