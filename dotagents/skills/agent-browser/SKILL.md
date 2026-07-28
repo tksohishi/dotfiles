@@ -11,6 +11,7 @@ Never guess subcommands. Run `agent-browser --help` if unsure. Always close when
 
 ## Workflow
 
+- **Delegate to a subagent.** Multi-step agent-browser work (investigation, form filling, scraping) runs in a subagent, not the main loop — it's high tool-call volume and, in headed mode, steals the user's screen focus. The main context sends the goal + known page quirks and gets a bounded summary back. A quick single lookup (open → get text → close) may stay inline.
 - Common flow: `open <url>` → `snapshot -ic` → `get text <selector>` → `close`.
 - To read page content: `snapshot` (accessibility tree with refs) or `get text @ref` (element text).
 
@@ -22,8 +23,8 @@ Never guess subcommands. Run `agent-browser --help` if unsure. Always close when
 
 ## Headed mode (for Cloudflare, sign-in, cookie capture)
 
-- Use `--headed` for flows that need a visible browser.
-- Pass `--headed` on every call that should stay attached to a headed daemon. If the launch options don't match the daemon's current config, the daemon can respawn Chrome and lose page state.
+- Headed is a last resort (Cloudflare, sign-in, cookie capture only) — the window takes over the user's screen. Try headless first, and `close` the session as soon as the headed portion is done.
+- Pass `--headed` on EVERY call until the headed flow ends — including `click`, `fill`, `eval`, `snapshot`, not just `open`. A mid-sequence call without it makes the window hide and reappear (focus-stealing flicker), and a launch-option mismatch can make the daemon respawn Chrome and lose page state.
 - The warning `<flags> ignored: daemon already running` fires whenever any launch-time flag (`--headed`, `--profile`, `--args`, etc.) is re-passed against a running daemon, regardless of whether the value matches; it's cosmetic (nothing breaks). Suppress with `-q` or `--json`.
 - Verify headed mode is active: `pgrep -lf "Google Chrome for Testing" | grep -v crashpad | grep -v Helper`; output must NOT contain `--headless=new`.
 - Cloudflare challenges auto-clear within 2-3s in truly-headed mode; they never clear in headless.
