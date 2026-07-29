@@ -1,12 +1,12 @@
 #!/bin/zsh
 # fable-usage [YYYY-MM-DD] — aggregate claude-fable-5 token usage from Claude
-# Code session transcripts, per session, since the given local date (default:
-# today). Reports output tokens (the main quota driver) plus input/cache
-# figures. Transcript lines repeat a message id as streaming rewrites; dedup
-# keeps the max output per id.
+# Code session transcripts, per session, since the given local date. Default:
+# 7 days ago inclusive, matching the weekly usage bar. Reports output tokens
+# (the main quota driver) plus input/cache figures. Transcript lines repeat a
+# message id as streaming rewrites; dedup keeps the max output per id.
 set -euo pipefail
 
-day=${1:-$(date +%Y-%m-%d)}
+day=${1:-$(date -v-6d +%Y-%m-%d)}
 since=$(date -j -f '%Y-%m-%d %H:%M:%S' "$day 00:00:00" +%s)
 
 printf '%-72s %10s %8s %10s %12s %6s\n' "SESSION (since $day)" OUTPUT INPUT CACHE_W CACHE_R MSGS
