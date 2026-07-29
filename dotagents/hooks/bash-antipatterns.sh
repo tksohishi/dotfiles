@@ -51,6 +51,19 @@
 #                           covers cat/head/tail/sed; this also catches
 #                           rg/grep/awk/strings/xxd/od/nl/tac/less/more/bat.
 #                           Doesn't cover bare `env`/`printenv`/`set`.
+#                           Matched per pipeline segment: the reader and the
+#                           secret path must be in the SAME segment, so
+#                           `bun --env-file=.dev.vars x.ts | head` (head reads
+#                           bun's stdout, not the file) passes while
+#                           `cat .dev.vars | head` still denies.
+#
+#   *.example/.sample/.template suffixes are exempt everywhere, not just for
+#   cp sources: `.dev.vars.example` and `.env.local.example` are schema files,
+#   the very alternative the reader deny message recommends. Tokens ending in
+#   those suffixes are stripped before matching. Env-specific secret files
+#   (`.dev.vars.staging` etc.) still match SECRET_FILE_RE (a dot after
+#   `.dev.vars` counts as a boundary) and stay protected — do not widen the
+#   exemption beyond the three template suffixes.
 #
 # Agent-neutral: fires for both Claude and Codex. Quoted regions are stripped
 # before matching so the .env reference must be a bare argument, not a byte
@@ -63,15 +76,25 @@ CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 # for a remote shell and isn't subject to the local secrets check.
 CMD_BARE=$(printf '%s' "$CMD" | tr '\n' '\1' | sed -e "s/'[^']*'//g" -e 's/"[^"]*"//g' | tr '\1' '\n')
 
-SECRET_READER_RE='(^|;|&&|\|\||\|)[[:space:]]*(rg|grep|cat|sed|head|tail|awk|less|more|strings|bat|xxd|od|nl|tac)[[:space:]]'
+SECRET_READER_SEG_RE='^[[:space:]]*(rg|grep|cat|sed|head|tail|awk|less|more|strings|bat|xxd|od|nl|tac)[[:space:]]'
 SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|development|test|prod|stage|dev)([^a-zA-Z0-9]|$)|\.dev\.vars([^a-zA-Z0-9]|$)'
+
+# Drop tokens ending in a template suffix before secret-file matching, so
+# `.dev.vars.example` / `.env.local.sample` never count as secret paths.
+# Anchored on both sides: the run must be plain path characters (so it cannot
+# eat across a redirect operator — `cat .env>.env.example` keeps its `.env`)
+# and must END at whitespace/EOL (so `.dev.vars.example.bak` is not a
+# template and stays matched).
+strip_templates() {
+  sed -E 's/[A-Za-z0-9_./~-]*\.(example|sample|template)([[:space:]]|$)/\2/g'
+}
 
 # Redirection (> >> >| >& &>) or tee whose target token contains a secret path.
 # Runs on $CMD, not $CMD_BARE, so a quoted target stays visible.
 SECRET_REDIR_RE='(>>?[|&]?[[:space:]]*|(^|[[:space:];&|(])tee[[:space:]]+(-[^[:space:]]+[[:space:]]+)*)[^[:space:]]*('"$SECRET_FILE_RE"')'
 
 secret_write=""
-[[ "$CMD" =~ $SECRET_REDIR_RE ]] && secret_write=1
+[[ "$(printf '%s' "$CMD" | strip_templates)" =~ $SECRET_REDIR_RE ]] && secret_write=1
 
 # Writers and destroyers that take the path as a plain argument. Scanned per
 # pipeline segment so `echo x | sponge .env` is caught but `rg .env | cp ...`
@@ -95,6 +118,7 @@ if [[ -z "$secret_write" ]]; then
       [[ "$src" =~ \.(example|sample|template)$ ]] && continue
     fi
     for t in "${toks[@]:1}"; do
+      [[ "$t" =~ \.(example|sample|template)$ ]] && continue
       if [[ "$t" =~ $SECRET_FILE_RE ]]; then
         secret_write=1
         break 2
@@ -114,7 +138,24 @@ if [[ -n "$secret_write" ]]; then
   exit 0
 fi
 
-if [[ "$CMD_BARE" =~ $SECRET_READER_RE ]] && [[ "$CMD_BARE" =~ $SECRET_FILE_RE ]]; then
+# Reader and secret path must share a pipeline segment: `cat .dev.vars | head`
+# denies, `bun --env-file=.dev.vars x.ts | head` (head reads bun's stdout) does
+# not.
+secret_read=""
+while IFS= read -r seg; do
+  [[ "$seg" =~ $SECRET_READER_SEG_RE ]] || continue
+  # Command substitution can smuggle a path across the textual segment split
+  # (`cat $(true | printf .env)`), so a reader segment containing $( or a
+  # backtick is matched against the whole command instead — fail closed.
+  scope="$seg"
+  [[ "$seg" == *'$('* || "$seg" == *'`'* ]] && scope="$CMD_BARE"
+  if [[ "$(printf '%s' "$scope" | strip_templates)" =~ $SECRET_FILE_RE ]]; then
+    secret_read=1
+    break
+  fi
+done < <(printf '%s\n' "$CMD_BARE" | sed -E 's/(;|&&|\|\||\|)/\n/g')
+
+if [[ -n "$secret_read" ]]; then
   jq -nc --arg reason "Reading .env / .dev.vars files is blocked — they contain secrets (API keys, tokens). For schema, read .env.example. To inspect a value, use an approved redaction script (e.g., scripts/check-env.ts, scripts/redact-env.ts) or surface the specific need to the user. Once secrets are read, treat them as compromised and rotate." '{
     hookSpecificOutput: {
       hookEventName: "PreToolUse",

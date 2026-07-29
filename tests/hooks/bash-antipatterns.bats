@@ -74,6 +74,78 @@ bash_input() {
   [ -z "$output" ]
 }
 
+# Per-segment matching: the reader and the secret path must share a pipeline
+# segment. A reader consuming another command's stdout is not reading the file.
+
+@test "allows bun --env-file=.dev.vars piped to head (head reads stdout, not the file)" {
+  run "$HOOK" <<< "$(bash_input 'bun --env-file=apps/api/.dev.vars scripts/probe.ts 2>&1 | head -12')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows ls .env* piped to grep (grep reads ls output)" {
+  run "$HOOK" <<< "$(bash_input 'ls -la eval-lab/.env* golden-set/.env* | grep -v total')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "denies cat .dev.vars piped to head (same segment as the secret)" {
+  run "$HOOK" <<< "$(bash_input 'cat .dev.vars | head -5')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies reader on a secret in a later segment" {
+  run "$HOOK" <<< "$(bash_input 'bun run build && grep KEY .env')"
+  [[ "$output" == *deny* ]]
+}
+
+# Template suffixes are schema files, exempt in every check.
+
+@test "allows cat .dev.vars.example" {
+  run "$HOOK" <<< "$(bash_input 'cat apps/api/.dev.vars.example')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows rg on .env.local.example" {
+  run "$HOOK" <<< "$(bash_input 'rg TOKEN_ENC_KEY .env.local.example')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "denies cat of template and real secret together" {
+  run "$HOOK" <<< "$(bash_input 'cat .env.example .env')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies reader on env-specific .dev.vars.staging (not a template)" {
+  run "$HOOK" <<< "$(bash_input 'cat .dev.vars.staging')"
+  [[ "$output" == *deny* ]]
+}
+
+# Cross-review regressions: holes the first draft of the per-segment /
+# template-strip change opened, pinned here so they stay closed.
+
+@test "denies reader with secret smuggled through command substitution" {
+  run "$HOOK" <<< "$(bash_input 'cat $(true | printf .env)')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies cat .dev.vars.example.bak (template suffix must end the token)" {
+  run "$HOOK" <<< "$(bash_input 'cat .dev.vars.example.bak')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies cat .env>.env.example (template strip must not eat the adjacent secret)" {
+  run "$HOOK" <<< "$(bash_input 'cat .env>.env.example')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies double redirect >.env>.env.example" {
+  run "$HOOK" <<< "$(bash_input 'echo x >.env>.env.example')"
+  [[ "$output" == *deny* ]]
+}
+
 # Writes into secret files. Unlike the read rule, these match the raw command:
 # a redirection target belongs to the local shell whether or not it's quoted.
 
@@ -219,6 +291,23 @@ bash_input() {
   run "$HOOK" <<< "$(bash_input 'rm .env.example')"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
+}
+
+@test "allows rm .dev.vars.example (template suffix exempt for writers too)" {
+  run "$HOOK" <<< "$(bash_input 'rm apps/api/.dev.vars.example')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows redirect into .dev.vars.example" {
+  run "$HOOK" <<< "$(bash_input 'printf KEY=\n > .dev.vars.example')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "denies redirect into .dev.vars.staging (env-specific, not a template)" {
+  run "$HOOK" <<< "$(bash_input 'echo x > .dev.vars.staging')"
+  [[ "$output" == *deny* ]]
 }
 
 @test "denies rsync into .env (AGENTS.md steers the agent to rsync over cp)" {
