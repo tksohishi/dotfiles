@@ -1,0 +1,42 @@
+#!/bin/zsh
+# fable-usage [YYYY-MM-DD] — aggregate claude-fable-5 token usage from Claude
+# Code session transcripts, per session, since the given local date (default:
+# today). Reports output tokens (the main quota driver) plus input/cache
+# figures. Transcript lines repeat a message id as streaming rewrites; dedup
+# keeps the max output per id.
+set -euo pipefail
+
+day=${1:-$(date +%Y-%m-%d)}
+since=$(date -j -f '%Y-%m-%d %H:%M:%S' "$day 00:00:00" +%s)
+
+printf '%-72s %10s %8s %10s %12s %6s\n' "SESSION (since $day)" OUTPUT INPUT CACHE_W CACHE_R MSGS
+
+find ~/.claude/projects -name '*.jsonl' -newermt "$day" 2>/dev/null | while read -r f; do
+  jq -r --arg f "$f" '
+    select(.message.model == "claude-fable-5" and .timestamp) |
+    [$f,
+     (.message.id // .uuid),
+     (.timestamp | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601),
+     (.message.usage.output_tokens // 0),
+     (.message.usage.input_tokens // 0),
+     (.message.usage.cache_creation_input_tokens // 0),
+     (.message.usage.cache_read_input_tokens // 0)
+    ] | @tsv' "$f" 2>/dev/null
+done | awk -v since="$since" -F'\t' '
+  $3 >= since {
+    key = $1 "\t" $2
+    if ($4 + 0 >= out[key] + 0) { out[key]=$4; inp[key]=$5; cw[key]=$6; cr[key]=$7; file[key]=$1 }
+  }
+  END {
+    for (k in out) {
+      fout[file[k]] += out[k]; fin[file[k]] += inp[k]; fcw[file[k]] += cw[k]; fcr[file[k]] += cr[k]
+      n[file[k]]++
+      tout += out[k]; tin += inp[k]; tcw += cw[k]; tcr += cr[k]
+    }
+    for (f in fout) {
+      name = f
+      sub(/^.*projects\//, "", name)
+      printf "%-72s %10d %8d %10d %12d %6d\n", name, fout[f], fin[f], fcw[f], fcr[f], n[f]
+    }
+    printf "%-72s %10d %8d %10d %12d\n", "TOTAL", tout, tin, tcw, tcr
+  }' | sort -k2 -rn
