@@ -65,6 +65,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
 - No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
 - Only change what was asked for; don't refactor, annotate, or "improve" surrounding code unprompted
+- IME safety in web UI: any Enter/keydown handler on a text input must guard IME composition in the first draft (`isComposing`/keyCode 229, plus a compositionend grace window for Safari/WKWebView, which fires compositionend BEFORE the committing keydown). Reuse the project's helper if one exists; reference implementation: koyomi packages/ui/src/ime.ts
 - Never copy real personal data (phone numbers, emails, addresses, names from the user's DB/calendar/inbox) into test fixtures, committed code, or anything else that could be published. Anonymize first: US phone numbers from the reserved 555-01xx range, example.com emails, made-up names. Local data stores (databases, gitignored tmp/) legitimately hold real data — don't flag or scrub those.
 
 ## Package Managers
