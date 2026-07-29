@@ -111,6 +111,7 @@
       "Bash(pnpm search *)",
       "Bash(pnpm test*)",
       "Bash(bash -n *)",
+      "Bash(bun --env-file*)",
       "Bash(bun --version*)",
       "Bash(bun audit*)",
       "Bash(bun info*)",
