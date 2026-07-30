@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Wrapper around agent-browser: rejects real Chrome profiles, and mutes
-# Chrome audio in headless mode.
+# Wrapper around agent-browser: rejects real Chrome profiles, mutes
+# Chrome audio in headless mode, and serializes concurrent invocations
+# per project.
 #
 # A real Chrome profile (~/Library/Application Support/Google/Chrome/<name>)
 # carries Gmail sessions, crypto wallets, and every logged-in site. Letting
@@ -96,4 +97,42 @@ if [ "$headed" -eq 0 ]; then
     export AGENT_BROWSER_ARGS="--mute-audio${AGENT_BROWSER_ARGS:+,$AGENT_BROWSER_ARGS}"
 fi
 
-exec "$REAL" "$@"
+# Serialize invocations per project. Concurrent agents driving one daemon
+# fight over the shared tab: each contested `open` re-navigates the other's
+# page, and on a headed daemon every round re-raises the window (observed
+# Jul 30, 2026: parallel subagents caused a focus-stealing loop). The lock
+# queues calls instead. Keyed by the project's session name when
+# agent-browser.json exists in the cwd, else by a cwd checksum.
+lock_key() {
+    if [ -f "$PWD/agent-browser.json" ]; then
+        local s
+        s=$(sed -n 's/.*"session"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$PWD/agent-browser.json" | head -1)
+        if [ -n "$s" ]; then printf '%s' "$s"; return; fi
+    fi
+    printf '%s' "$(printf '%s' "$PWD" | cksum | cut -d' ' -f1)"
+}
+
+LOCK="${TMPDIR:-/tmp}/agent-browser-$(lock_key).lock"
+deadline=$(( $(date +%s) + 90 ))
+locked=1
+while ! mkdir "$LOCK" 2>/dev/null; do
+    holder=$(cat "$LOCK/pid" 2>/dev/null || true)
+    if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
+        rm -rf "$LOCK"   # stale: holder died without cleanup
+        continue
+    fi
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+        echo "agent-browser wrapper: lock timeout (held by pid ${holder:-?}); proceeding unlocked" >&2
+        locked=0
+        break
+    fi
+    sleep 0.2
+done
+# On timeout the lock still belongs to the holder — don't overwrite its pid
+# file or remove its lock dir on exit.
+if [ "$locked" -eq 1 ]; then
+    echo $$ > "$LOCK/pid" 2>/dev/null || true
+    trap 'rm -rf "$LOCK"' EXIT
+fi
+
+"$REAL" "$@"
