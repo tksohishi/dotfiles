@@ -25,7 +25,8 @@ General heuristic when WebFetch fails on a domain not listed below:
 | imdb.com | empty (WAF challenge) | GraphQL endpoint for star rating; suggestion endpoint for IDs — see IMDb section |
 | 5ch.net | 403 | plain httpie |
 | zillow.com | 403 | plain httpie, no UA needed — see Zillow section (headless browser gets PerimeterX Press & Hold) |
-| quora.com, glassdoor.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
+| quora.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
+| glassdoor.com | Cloudflare "Humans only" terminal block | NO agent path as of Jul 30, 2026. Truly-headed agent-browser gets the terminal block, and a human completing the verification inside that Chrome is still blocked — the Chrome-for-Testing/CDP fingerprint itself is denied. Hand off: user opens the URL in their own browser and pastes content. (Worked headed as late as Jul 16, 2026; re-test occasionally.) |
 | facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
 
 ## Reddit
@@ -116,7 +117,7 @@ Body is ~300-650KB — always save to a file and `rg`, never cat. PX rate-limits
 | redfin.com | 403 | httpie with browser UA (plain httpie 403s) |
 | zumper.com, craigslist (`sfbay.craigslist.org/search/apa`) | untested | plain httpie; craigslist bodies are small (~50KB), nicest to grep |
 | apartmentlist.com | untested | plain httpie on city pages (`/ca/san-francisco`); neighborhood URL guesses often 404 |
-| apartments.com | 403 | nothing — 403 even to httpie with browser UA (quora/glassdoor class); agent-browser --headed only |
+| apartments.com | 403 | nothing — 403 even to httpie with browser UA (quora class); agent-browser --headed only |
 | hotpads.com | untested | nothing anonymous — 200 but empty JS shell |
 
 ## LinkedIn / Instagram
