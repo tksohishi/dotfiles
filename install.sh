@@ -45,6 +45,7 @@ files=(
     .config/starship.toml
     .config/ghostty/config
     .config/mise/config.toml
+    .config/aube/config.toml
     .config/zed/settings.json
     .config/httpie/config.json
 )

@@ -1,0 +1,3 @@
+# aube (mise's npm backend) user config
+# Packages verified as official/trusted but below the weekly-download guard threshold.
+allowedUnpopularPackages = ["@ticktick/ticktick-cli"]
