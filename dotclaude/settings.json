@@ -649,6 +649,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/plan-delegation-nudge.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "Stop": [
