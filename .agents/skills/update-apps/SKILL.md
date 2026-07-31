@@ -1,6 +1,6 @@
 ---
 name: update-apps
-description: Update all Homebrew packages, casks, and Mac App Store apps
+description: Update all Homebrew packages and casks
 ---
 
 ## Run state
@@ -12,10 +12,10 @@ State lives at `.cache/update-apps/state.json` under the repository root. The `.
   "claude_version": "2.1.207",
   "open_items": [
     {
-      "id": "mas-coteditor",
+      "id": "font-sf-pro-reinstall",
       "first_seen": "2026-07-13",
-      "text": "CotEditor 7.0.6 → 7.0.7 — run `mas upgrade` yourself (needs password)",
-      "check": "mas outdated | rg -q '^1024640650'"
+      "text": "font-sf-pro cask record purged — run `brew reinstall --cask font-sf-pro` yourself (needs password)",
+      "check": "brew list --cask font-sf-pro >/dev/null 2>&1; test $? -ne 0"
     }
   ]
 }
@@ -27,14 +27,14 @@ State lives at `.cache/update-apps/state.json` under the repository root. The `.
 
 Run every update operation inside a subagent so the verbose command output stays out of the main context. The main session only reads/writes state, runs the `open_items` checks, picks the "new & noteworthy" entries, and assembles the report from the summaries the subagents return.
 
-Launch the four subagents below as unnamed one-shot Agent calls **in a single message** so they run concurrently — they touch disjoint tools. Subagents can't see this skill, so copy each block's instructions (including the rationale text) into its prompt verbatim, and tell each to return only a bounded summary: the lists the report needs plus any errors verbatim, never full command output.
+Launch the three subagents below as unnamed one-shot Agent calls **in a single message** so they run concurrently — they touch disjoint tools. Subagents can't see this skill, so copy each block's instructions (including the rationale text) into its prompt verbatim, and tell each to return only a bounded summary: the lists the report needs plus any errors verbatim, never full command output.
 
 ### Homebrew subagent
 
 All brew operations stay in this ONE subagent, run sequentially — brew holds a global lock, so never split brew steps across parallel agents. Include the repository root path in its prompt (it needs the Brewfile). Steps, in order:
 
 1. `brew update` — refresh package index. Capture the `==> New Formulae` / `==> New Casks` names.
-2. `brew bundle install --no-upgrade` — install any missing Brewfile entries without upgrading already-present ones (upgrades are handled by steps 3-4 for formulae/casks, auto-update for GUI casks, and `mas upgrade` manually for App Store apps)
+2. `brew bundle install --no-upgrade` — install any missing Brewfile entries without upgrading already-present ones (upgrades are handled by steps 3-4 for formulae/casks and auto-update for GUI casks; Mac App Store apps are out of scope — the App Store updates them itself)
 3. `brew upgrade --formula` — upgrade all formulae
 4. `brew upgrade --cask $(brew info --json=v2 --installed | jq -r '.casks[] | select((.auto_updates | not) and (.version != "latest")) | .token')` — upgrades only casks with no self-update mechanism (CLI casks like codex, 1password-cli, notion-cli; versioned fonts; libreoffice). Self-updating GUI casks (Cursor, VS Code, ChatGPT, ...) are deliberately excluded: a brew re-download re-quarantines the bundle, triggering a one-time Gatekeeper "downloaded from the internet" dialog on next launch, whereas in-app self-update is silent. The cost is that a self-updating app you never launch stays stale until you open it. `version :latest` casks (font-sf-pro, font-sf-mono-nerd-font-ligaturized) are also excluded: brew "upgrades" them by re-downloading and uninstalling the previous artifact, and for pkg-based ones (font-sf-pro) that uninstall runs sudo, which fails headlessly and purges the cask record while leaving files on disk. Reinstall those manually with `brew reinstall --cask <name>` when needed. Never add `--greedy` or run a bare `brew upgrade --cask`.
 5. `agent-browser install` — update its browser binaries
@@ -73,10 +73,6 @@ It summarizes **only entries strictly newer than the passed `claude_version`**. 
 
 Cover new features, breaking changes, settings/hooks schema changes, and notable bug fixes. Skip trivial entries (typo fixes, internal refactors). Return the installed version plus the summarized entries; the main session then sets `claude_version` in the state to the installed version.
 
-### Mac App Store subagent
-
-Run `mas outdated`. Return pending updates (app id, name, current → new version), or "none". If any exist, the main session reports them as 🔴 items telling the user to run `mas upgrade` themselves (it requires a password).
-
 ## What to report
 
 Brewfile packages only. Transitive deps are omitted unless they had a **major version bump**, in which case surface them as informational. Also report Brewfile entries that were newly installed because they were missing locally. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) from the Homebrew subagent's summary. Warn that upgraded GUI apps may need a relaunch if they were running.
@@ -96,7 +92,6 @@ Structure the report as sections with the emojis below. Section headers are orga
 - `### 🧺 Casks` — cask upgrades from `brew upgrade --cask`
 - `### ⚙️ mise tools` — mise-managed tool upgrades
 - `### 🤖 Claude Code` — include current version in the header, e.g. `### 🤖 Claude Code (2.1.148)`
-- `### 🍎 Mac App Store` — mas outdated results
 - `### 🧹 Cleanup` — cache pruning and `brew cleanup` results
 - `### ✨ New & noteworthy` — interesting new formulae/casks
 
@@ -122,7 +117,7 @@ Each run, in order:
 2. Report the surviving items plus any new ones in `### 🔴 Action required`, each with the concrete command or edit that clears it. Annotate carried-over ones with `(open since <first_seen>)` so a stale item is visibly stale.
 3. Write the merged list back to `open_items`.
 
-Write a `check` wherever one exists — an unresolvable item nags forever, which is the failure mode this is meant to prevent. Examples: a pending App Store update is `mas outdated | rg -q '^<app-id>'`; a settings migration is an `rg -q` for the stale key in the config file; a stale binary is a `--version` piped to `rg -q`.
+Write a `check` wherever one exists — an unresolvable item nags forever, which is the failure mode this is meant to prevent. Examples: a settings migration is an `rg -q` for the stale key in the config file; a stale binary is a `--version` piped to `rg -q`.
 
 Before adding a 🔴 item, confirm the problem is real on this machine — the state it describes exists, and the consequence actually follows from it. A recurring item that turns out to be a false positive is worse than no item: it trains the user to ignore the section. Verify first, then track.
 
@@ -132,7 +127,7 @@ If the user says an item is handled, acknowledged, or to stop reporting it (by `
 
 ```
 ### 🔴 Action required
-- Tailscale 1.96.5 → 1.98.2 — run `mas upgrade` yourself (needs password)
+- font-sf-pro cask record purged — run `brew reinstall --cask font-sf-pro` yourself (needs password)
 - /simplify renamed to /code-review — update any scripts referencing /simplify (open since 2026-06-28)
 
 ### 📦 Brewfile formulae
@@ -144,7 +139,7 @@ If the user says an item is handled, acknowledged, or to stop reporting it (by `
 - Bug fix: Bash tool exit code 127 regression resolved
 
 ### 🧹 Cleanup
-- Resolved: Tailscale is now on 1.98.2, no longer pending
+- Resolved: font-sf-pro is reinstalled, no longer pending
 - Pruned chrome-148.0.7778.178 → 341 MB reclaimed
 - brew cleanup → 21.6 MB freed
 ```
