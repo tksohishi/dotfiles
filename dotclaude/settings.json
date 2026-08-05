@@ -638,6 +638,16 @@
             "command": "$HOME/.claude/hooks/no-bot-detection-bypass.sh"
           }
         ]
+      },
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/plan-delegation-annotations.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
