@@ -1,12 +1,22 @@
 ---
 name: handoff
-description: Write a one-shot handoff file (tmp/handoff.md) capturing session state so the user can /clear and continue in a fresh session without losing debugging progress. Use when the user runs /handoff or asks to hand off, wrap up for a fresh session, or preserve state before clearing. Optional argument describes what the next session will focus on.
+description: Write a one-shot handoff file (tmp/handoff.md) capturing session state so the user can /clear and continue in a fresh session without losing debugging progress. Use when the user runs /handoff or asks to hand off, wrap up for a fresh session, or preserve state before clearing. `/handoff resume` ingests and deletes an existing handoff instead. Optional argument (other than "resume") describes what the next session will focus on.
 disable-model-invocation: true
 ---
 
 # Handoff
 
-Write a handoff document to `tmp/handoff.md` (project-local `tmp/`, globally gitignored — never the OS temp dir), then tell the user how to load it into a fresh session.
+Two modes: **write** (default) creates `tmp/handoff.md`; **resume** (argument is `resume`) ingests and deletes it. Writing goes to project-local `tmp/` (globally gitignored — never the OS temp dir).
+
+## Resume mode (`/handoff resume`)
+
+1. Read `tmp/handoff.md`. If absent, say so and stop.
+2. Re-ground before acting — the file is point-in-time, not live state. Check `git log`/`git status` since the file's mtime and re-run any verify commands it lists. Anything it calls open or broken may since be done; fresh evidence wins over the file, always.
+3. Salvage: any still-true fact future sessions can't derive (from code, git, or existing memory) goes to project memory now.
+4. Delete the file (`trash tmp/handoff.md`) — before starting the work, not after, so an interrupted session can't leave it behind.
+5. Continue with the handoff's next step, corrected by what re-grounding found.
+
+## Write mode
 
 The reason this exists instead of `/compact`: generic summaries drop exactly the state that makes long debugging arcs expensive to resume — what was already ruled out, and the evidence that ruled it out. Write those sections with the most care.
 
@@ -25,7 +35,7 @@ If the transcript's memory of something conflicts with what these show, the comm
 ```markdown
 # Handoff — <one-line topic> (<YYYY-MM-DD HH:MM>)
 
-One-shot handoff: after reading this file, trash it (`trash tmp/handoff.md`).
+One-shot handoff: re-ground claims against git/live state, then trash this file (`trash tmp/handoff.md`).
 
 ## Goal
 What the overall task is and what "done" looks like.
@@ -63,6 +73,6 @@ Redact secrets (API keys, tokens, passwords) — the file is plaintext on disk.
 Tell the user exactly this, substituting nothing else in:
 
 1. Run `/clear` (or open a new session in this directory)
-2. Start it with: `Read tmp/handoff.md and continue`
+2. Start it with: `/handoff resume`
 
-The receiving session will see the self-destruct header and trash the file after ingesting it.
+Resume mode re-grounds the handoff's claims, salvages durable facts to memory, and trashes the file. If the user starts with a plain "read the handoff" instead, the file's self-destruct header still directs the receiving session to trash it after ingesting.
