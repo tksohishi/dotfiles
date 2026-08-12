@@ -229,7 +229,6 @@
       "Bash(ghostty +show-face*)",
       "Bash(ghostty +validate-config*)",
       "Bash(ghostty +version*)",
-      "Bash(glow *)",
       "Bash(hermes -z *)",
       "Bash(hermes auth status*)",
       "Bash(hermes doctor*)",
