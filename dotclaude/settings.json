@@ -609,6 +609,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/httpie-flag-order.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/bash-output-efficiency.sh",
+            "timeout": 5
           }
         ]
       },

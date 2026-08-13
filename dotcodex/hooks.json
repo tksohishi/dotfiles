@@ -16,6 +16,10 @@
           {
             "type": "command",
             "command": "$HOME/.codex/hooks/httpie-flag-order.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/bash-output-efficiency.sh"
           }
         ]
       }
