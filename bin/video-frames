@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# video-frames — split a video into review frames with endpoint coverage
+# and a frame-count assertion.
+#
+# Usage: video-frames <video> [interval-seconds]   (default interval: 3)
+#
+# Writes to project-local tmp/frames-<basename>/ (always recreated fresh):
+#   f001.png..fNNN.png  one frame per interval, grid starts at t=0
+#   last.png            the true final frame (the fps grid can miss it)
+# Exits non-zero if the body frame count doesn't match ceil(duration/N) ±1,
+# so a partial or contaminated extraction can't be reviewed by accident.
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+    echo "usage: video-frames <video> [interval-seconds]" >&2
+    exit 2
+fi
+video=$1
+n=${2:-3}
+
+[ -f "$video" ] || { echo "no such file: $video" >&2; exit 1; }
+
+base=$(basename "${video%.*}")
+dir="tmp/frames-$base"
+
+# Fresh dir every run — extracting into an existing dir is how stale frames
+# from an earlier video end up in a new review.
+[ -e "$dir" ] && trash "$dir"
+mkdir -p "$dir"
+
+duration=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$video")
+
+ffmpeg -v error -i "$video" -vf "fps=1/$n,scale=1280:-1" "$dir/f%03d.png"
+ffmpeg -v error -sseof -1 -i "$video" -update 1 -vf scale=1280:-1 "$dir/last.png"
+
+expected=$(awk -v d="$duration" -v n="$n" 'BEGIN { e = d / n; i = int(e); print (e > i) ? i + 1 : i }')
+got=$(find "$dir" -name 'f[0-9]*.png' | wc -l | tr -d ' ')
+delta=$((got - expected))
+if [ "${delta#-}" -gt 1 ]; then
+    echo "COUNT MISMATCH: ${duration}s / ${n}s -> expected ~$expected body frames, got $got in $dir" >&2
+    exit 1
+fi
+[ -f "$dir/last.png" ] || { echo "missing last.png in $dir" >&2; exit 1; }
+
+echo "OK: ${duration}s / ${n}s -> $got body frames (expected $expected +/-1) + last.png in $dir/"
