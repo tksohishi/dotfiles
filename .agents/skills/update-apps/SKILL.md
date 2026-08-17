@@ -56,7 +56,9 @@ Have it return:
 - The homepage URL from `brew info <name>` (the first URL line, above the `From:` Homebrew-formula line) for each upgraded Brewfile package
 - The new formulae/casks names from step 1
 - Bytes reclaimed: cache prune per location, and the `brew cleanup` total
-- Any errors or warnings verbatim
+- Any errors or warnings verbatim, EXCEPT these known-benign ones, which must be omitted entirely (not merely marked benign):
+  - "Not upgrading <cask>, the latest version is already installed" lines from step 4
+  - the gogcli shadow warning ("gog (shadowed by /Users/takeshi/.local/bin/gog)") — `~/.local/bin/gog` is the user's intentional dotfiles wrapper that execs the Homebrew binary, verified 2026-08-14; brew prints this on every gogcli upgrade
 
 ### mise subagent
 
