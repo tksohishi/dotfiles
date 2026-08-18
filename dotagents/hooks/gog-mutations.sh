@@ -29,6 +29,11 @@ esac
 
 command -v gog >/dev/null 2>&1 || exit 0
 
+# Resolved canonical paths exempt from the ask: draft composition only writes
+# a draft the user reviews before sending (the gmail-draft skill's whole
+# workflow). "drafts send" and "drafts delete" are NOT exempt.
+EXEMPT_PATHS='["gmail drafts create","gmail drafts update","gmail drafts forward","gmail drafts reply","gmail drafts reply-all"]'
+
 # Leaf verbs (canonical names or aliases) that mutate remote state.
 MUTATION_VERBS='["create","new","add","invite","update","edit","set","unset","delete","del","rm","remove","send","post","move","transfer","trash","untrash","import","upload","copy","rename","clear","revoke","respond","rsvp","reply","subscribe","unsubscribe","archive","unarchive","restore","append","write","insert","format","share","mkdir","stop","end","submit","abort","prune","modify","batch-modify","replace","setup","reset","rotate","grant","call"]'
 
@@ -45,7 +50,7 @@ while IFS= read -r seg; do
   # placed before the subcommand (-a/--account, --client, --home).
   tokens=$(printf '%s' "$seg" | sed -E 's/^.*(^|[[:space:]])gog([[:space:]]|$)/\2/' )
   # Schema is piped on stdin: it is too large for --argjson (argv limit).
-  resolved=$(printf '%s' "$SCHEMA" | jq -r --arg toks "$tokens" --argjson verbs "$MUTATION_VERBS" '
+  resolved=$(printf '%s' "$SCHEMA" | jq -r --arg toks "$tokens" --argjson verbs "$MUTATION_VERBS" --argjson exempt "$EXEMPT_PATHS" '
     def matches($tok): .name == $tok or ((.aliases // []) | index($tok) != null);
     ($toks | split(" ") | map(select(length > 0))) as $t
     | {node: .command, i: 0, skip: false, path: []}
@@ -64,8 +69,10 @@ while IFS= read -r seg; do
       )
     | .path as $p
     | if ($p | length) == 0 then empty
-      else ($p | last) as $leaf
-        | if ($verbs | index($leaf)) != null then ($p | join(" ")) else empty end
+      else ($p | join(" ")) as $joined
+        | if ($exempt | index($joined)) != null then empty
+          elif ($verbs | index($p | last)) != null then $joined
+          else empty end
       end
   ' 2>/dev/null)
   if [[ -n "$resolved" ]]; then

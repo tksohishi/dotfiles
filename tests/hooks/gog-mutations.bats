@@ -84,6 +84,28 @@ codex_input() {
   [[ "$output" != *'"ask"'* ]]
 }
 
+@test "allows gmail draft create (exempt: draft composition)" {
+  run "$HOOK" <<< "$(bash_input 'gog gmail draft create --to x@example.com --subject hi')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows gmail drafts reply via alias" {
+  run "$HOOK" <<< "$(bash_input 'gog mail drafts reply 18c2 --body ok')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "asks on gmail drafts send (not exempt)" {
+  run "$HOOK" <<< "$(bash_input 'gog gmail drafts send 18c2')"
+  [[ "$output" == *'"ask"'* ]]
+}
+
+@test "asks on gmail drafts delete (not exempt)" {
+  run "$HOOK" <<< "$(bash_input 'gog gmail draft delete 18c2')"
+  [[ "$output" == *'"ask"'* ]]
+}
+
 @test "asks on gog in pipeline segment" {
   run "$HOOK" <<< "$(bash_input 'cat ids.txt | gog gmail trash 18c2')"
   [[ "$output" == *'"ask"'* ]]
