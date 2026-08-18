@@ -20,6 +20,10 @@
           {
             "type": "command",
             "command": "$HOME/.codex/hooks/bash-output-efficiency.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/gog-mutations.sh"
           }
         ]
       }
