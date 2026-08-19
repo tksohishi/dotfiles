@@ -58,6 +58,16 @@ if [ -n "$staged_files" ]; then
         "blocked_domains"
     )
 
+    # Personal strings (names, emails, phone numbers) live untracked in
+    # ~/.claude/private-strings.txt — one fixed string per line, # comments ok.
+    PRIVATE_STRINGS_FILE="$HOME/.claude/private-strings.txt"
+    if [ -f "$PRIVATE_STRINGS_FILE" ]; then
+        while IFS= read -r line; do
+            case "$line" in ''|'#'*) continue ;; esac
+            BLOCKED_STRINGS+=("$line")
+        done < "$PRIVATE_STRINGS_FILE"
+    fi
+
     diff_content=$(git diff --cached -U0 -- $staged_files | grep '^+' | grep -v '^+++')
 
     found=0
