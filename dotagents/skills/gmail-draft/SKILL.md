@@ -73,7 +73,12 @@ Best,
 Takeshi
 ```
 
-The sign-off and name sit on consecutive lines with NO blank spacer between them — either two adjacent `gmail_default` divs or one div with a single `<br>` (matches the user's own sent mail; a blank line there reads as a gap the user never types). For personal mail from tks.ohishi@gmail.com the signature is just the name; for other accounts the signature block is one div with `<br>` line breaks inside (name / title+company / email / phone as applicable). Signatures are account-specific: check the project's AGENTS.md for a "Signature" entry matching the `-a` account before composing; if none exists, ask the user once and suggest saving it there.
+The sign-off and name sit on consecutive lines with NO blank spacer between them — either two adjacent `gmail_default` divs or one div with a single `<br>` (matches the user's own sent mail; a blank line there reads as a gap the user never types).
+
+Signature by account type:
+
+- **Personal** (tks.ohishi@gmail.com): sign-off is `Thanks,` or `Best,` (pick whichever fits the tone), name line is `Takeshi`. Append email and/or phone lines only when relevant to the message (e.g. the recipient needs a way to reach him); omit them by default.
+- **Work** (any non-personal account): sign-off is `Best,`, name line is `Takeshi Ohishi`, followed by title + company on the next line and the work email on the line after. Build the block as one div with `<br>` line breaks inside. Get the title/company/email from the project's AGENTS.md "Signature" entry matching the `-a` account; if none exists, ask the user once and suggest saving it there.
 
 ## Wording
 
