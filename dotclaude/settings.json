@@ -515,6 +515,7 @@
       "Read(//**/.env.prod)",
       "Read(//**/.env.stage)",
       "Read(//**/.env.dev)",
+      "Edit(//opt/homebrew/**)",
       "Edit(//**/.dev.vars)",
       "Edit(//**/.env)",
       "Edit(//**/.env.local)",
