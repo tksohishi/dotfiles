@@ -69,16 +69,13 @@ Dear <name>,
 (blank)
 <body paragraph(s), spacer div between paragraphs>
 (blank)
-Best,
-Takeshi
+<sign-off>,
+<signature block>
 ```
 
 The sign-off and name sit on consecutive lines with NO blank spacer between them — either two adjacent `gmail_default` divs or one div with a single `<br>` (matches the user's own sent mail; a blank line there reads as a gap the user never types).
 
-Signature by account type:
-
-- **Personal** (tks.ohishi@gmail.com): sign-off is `Thanks,` or `Best,` (pick whichever fits the tone), name line is `Takeshi`. Append email and/or phone lines only when relevant to the message (e.g. the recipient needs a way to reach him); omit them by default.
-- **Work** (any non-personal account): sign-off is `Best,`, name line is `Takeshi Ohishi`, followed by title + company on the next line and the work email on the line after. Build the block as one div with `<br>` line breaks inside. Get the title/company/email from the project's AGENTS.md "Signature" entry matching the `-a` account; if none exists, ask the user once and suggest saving it there.
+Signature content is personal data and does not live in this file. Read the per-account signature conventions (sign-off, name form, title/company/contact lines) from the user's `~/.claude/personal.md` ("Gmail Signatures" section) and any "Signature" entry in the project's AGENTS.md matching the `-a` account. Multi-line signature blocks go in one div with `<br>` line breaks inside. If no convention is found for the account, ask the user once and suggest saving it there.
 
 ## Wording
 
