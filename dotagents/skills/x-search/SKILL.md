@@ -28,6 +28,10 @@ Return up to 5 most-relevant recent posts. For each, output:
 Separate posts with a blank line. No commentary or summary." 2>&1
 ```
 
+### Trending queries
+
+When the query asks what's "trending" (or hot / talked about right now), constrain the window explicitly: add "Only consider posts from the last 6-12 hours." to the prompt. Without it, ranking favors day-old viral posts whose accumulated engagement outscores a story that broke hours ago, so genuinely-current stories get buried.
+
 `-t x_search` restricts the toolset for this invocation regardless of global `hermes tools` config — the call stays on the subscription path even if other toolsets are re-enabled later.
 
 ### Single post or article lookup
