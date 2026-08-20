@@ -216,18 +216,6 @@ fi
 ln -s "$source" "$target"
 echo "Linked dotclaude/statusline.sh -> ~/.claude/statusline.sh"
 
-# Claude Code output styles
-target="$HOME/.claude/output-styles"
-source="$DOTFILES_DIR/dotclaude/output-styles"
-if [ -L "$target" ]; then
-    rm "$target"
-elif [ -d "$target" ]; then
-    echo "Backing up $target to $target.bak"
-    mv "$target" "$target.bak"
-fi
-ln -s "$source" "$target"
-echo "Linked dotclaude/output-styles -> ~/.claude/output-styles"
-
 # Cross-agent custom skills: canonical in dotagents/skills/, symlinked into
 # both ~/.claude/skills/ (Claude scans here) and ~/.agents/skills/ (Codex
 # scans here natively). Per-skill symlinks so bunx skills-installed entries
