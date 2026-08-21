@@ -80,6 +80,7 @@ Signature content is personal data and does not live in this file. Read the per-
 ## Wording
 
 - Write like a person, not a spec. The email reads as written by the user; technical qualifiers sound machine-generated. Example the user corrected: "around 5:10 pm, Eastern Daylight Time (UTC-4)" → "around 5:10 pm Eastern Time (New York)". Before finalizing, reread for phrasing no ordinary correspondent would use (UTC offsets, RFC-style dates, over-qualified units) and simplify.
+- Match date/time precision to what the recipient needs. When the recipient already has the specifics (calendar invite exists, they proposed the time) or only needs the gist, say just "Tuesday" — not "Tuesday, August 25 at 4pm Eastern". Full date/time only when it's new information the recipient must act on (e.g. proposing times). User correction, Aug 2026; his own style: "Scheduled a call on Monday."
 
 ## Common gotchas
 
