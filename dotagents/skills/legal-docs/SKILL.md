@@ -50,7 +50,11 @@ Relevant slugs: `terms-of-use`, `privacy-policy-us`, `privacy-policy-gdpr`, `coo
 - Where a real judgment call remains (arbitration clause, liability caps, data-retention periods, governing law when the user had no preference), keep sensible template language but tag it inline with `[REVIEW: <question>]`.
 - Set the effective date to today; grep the final files for `<mark>` and `[` to confirm nothing unfilled slipped through.
 
-## Step 5: Output
+## Step 5: Cross-review
+
+After the drafts are complete (files written, placeholders filled), invoke the `cross-review` skill on them before reporting. Ask the other model to review from first principles as a skeptical legal reader: unfilled or mismatched placeholders, sections that contradict the product's actual data practices, jurisdiction gaps (GDPR/CCPA sections missing or misapplied), and clauses that don't fit the product (e.g. payment terms in a free product). Fold its findings into the drafts or into additional `[REVIEW: ...]` flags before the final report.
+
+## Step 6: Output
 
 - Write to `docs/legal/terms-of-use.md` and `docs/legal/privacy-policy.md` unless the project has an obvious existing home (a website's `content/`/`pages/` dir, `public/`).
 - Prepend to each file an HTML comment: `<!-- DRAFT for legal review — not yet reviewed by counsel. Based on General-Legal/legal-templates (CC0). -->`
