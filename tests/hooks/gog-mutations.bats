@@ -101,9 +101,10 @@ codex_input() {
   [[ "$output" == *'"ask"'* ]]
 }
 
-@test "asks on gmail drafts delete (not exempt)" {
+@test "allows gmail drafts delete (exempt: only discards unsent text)" {
   run "$HOOK" <<< "$(bash_input 'gog gmail draft delete 18c2')"
-  [[ "$output" == *'"ask"'* ]]
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "allows --help on mutation subcommand" {

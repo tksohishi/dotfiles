@@ -31,8 +31,9 @@ command -v gog >/dev/null 2>&1 || exit 0
 
 # Resolved canonical paths exempt from the ask: draft composition only writes
 # a draft the user reviews before sending (the gmail-draft skill's whole
-# workflow). "drafts send" and "drafts delete" are NOT exempt.
-EXEMPT_PATHS='["gmail drafts create","gmail drafts update","gmail drafts forward","gmail drafts reply","gmail drafts reply-all"]'
+# workflow), and deleting a draft only discards unsent text. "drafts send"
+# is NOT exempt.
+EXEMPT_PATHS='["gmail drafts create","gmail drafts update","gmail drafts forward","gmail drafts reply","gmail drafts reply-all","gmail drafts delete"]'
 
 # Leaf verbs (canonical names or aliases) that mutate remote state.
 MUTATION_VERBS='["create","new","add","invite","update","edit","set","unset","delete","del","rm","remove","send","post","move","transfer","trash","untrash","import","upload","copy","rename","clear","revoke","respond","rsvp","reply","subscribe","unsubscribe","archive","unarchive","restore","append","write","insert","format","share","mkdir","stop","end","submit","abort","prune","modify","batch-modify","replace","setup","reset","rotate","grant","call"]'
