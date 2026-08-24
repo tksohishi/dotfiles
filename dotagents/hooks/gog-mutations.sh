@@ -49,6 +49,8 @@ while IFS= read -r seg; do
   # Tokens after `gog`, up to the first flag; skip value-taking global flags
   # placed before the subcommand (-a/--account, --client, --home).
   tokens=$(printf '%s' "$seg" | sed -E 's/^.*(^|[[:space:]])gog([[:space:]]|$)/\2/' )
+  # A help invocation only prints usage — never mutates. Let it through.
+  if printf '%s' "$tokens" | grep -qwE -- '--help|-h'; then continue; fi
   # Schema is piped on stdin: it is too large for --argjson (argv limit).
   resolved=$(printf '%s' "$SCHEMA" | jq -r --arg toks "$tokens" --argjson verbs "$MUTATION_VERBS" --argjson exempt "$EXEMPT_PATHS" '
     def matches($tok): .name == $tok or ((.aliases // []) | index($tok) != null);

@@ -106,6 +106,18 @@ codex_input() {
   [[ "$output" == *'"ask"'* ]]
 }
 
+@test "allows --help on mutation subcommand" {
+  run "$HOOK" <<< "$(bash_input 'gog gmail send --help')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows -h on mutation subcommand" {
+  run "$HOOK" <<< "$(bash_input 'gog calendar create -h')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
 @test "asks on gog in pipeline segment" {
   run "$HOOK" <<< "$(bash_input 'cat ids.txt | gog gmail trash 18c2')"
   [[ "$output" == *'"ask"'* ]]
