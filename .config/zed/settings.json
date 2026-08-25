@@ -1,6 +1,28 @@
 // Zed settings
 // https://zed.dev/docs/configuring-zed
 {
+  "project_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "agent": {
+    "dock": "right",
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  "git": {
+    "inline_blame": {
+      "enabled": false
+    }
+  },
   "ui_font_size": 15,
   "buffer_font_family": "JetBrainsMonoNL Nerd Font",
   "buffer_font_size": 13,
