@@ -20,10 +20,10 @@ User invokes via `/x-search <query>`. `$ARGUMENTS` is the raw query string — p
 ```bash
 hermes -t x_search -z "Use the x_search tool to search X for: $ARGUMENTS
 
-Return up to 5 most-relevant recent posts. For each, output:
+Only include posts from accounts with a sizeable following (roughly 5,000+ followers) or from the company/people directly involved in the topic; skip anonymous or low-reach accounts. Return up to 5 most-relevant recent posts. For each, output:
 - Post text in quotes (truncate to ~200 chars with '…' if longer)
 - URL
-- Date and author handle (e.g. 2026-05-17 by @NousResearch)
+- Date, author handle, and approximate follower count (e.g. 2026-05-17 by @NousResearch, 120K followers)
 
 Separate posts with a blank line. No commentary or summary." 2>&1
 ```
