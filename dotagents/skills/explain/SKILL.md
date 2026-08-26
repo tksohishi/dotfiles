@@ -30,6 +30,8 @@ Deliver as an HTML artifact: load the `artifact-design` skill first, and `artifa
 
 - One idea per section, each with an inline SVG diagram or a large illustrated figure that carries the meaning on its own; the text underneath is a caption, not an essay.
 - Show numbers as a picture (bars, timelines, boxes scaled to size) rather than a table wherever a comparison is the point.
+- Never draw tables or rows of text inside an SVG; `<text>` does not wrap and clips at the viewBox edge. Tabular data (traces, step tables, comparisons) is an HTML `<table>` in an `overflow-x: auto` wrapper. SVG is for shapes and short labels only.
+- For an algorithm or process, prefer a small interactive stepper (Back/Next buttons, inline `<script>`, state precomputed as frames) that replays it on the same diagram introduced earlier, with a synced HTML table of each step, over a static sequence of frames. Respect `prefers-reduced-motion`.
 - Finish with a 3-bullet "if you remember one thing" recap, the "what I left out" line, and 2-3 questions the reader could look up next.
 - Total length: about a five-minute read.
 
