@@ -62,7 +62,7 @@ Have it return:
 
 ### mise subagent
 
-Run `mise upgrade`. Return each upgraded tool with old → new version (or "nothing upgraded"), plus any errors verbatim.
+Run `mise upgrade`, then `mise prune -y` (removes installed versions no tracked config or stub still references; versions pinned by another project's `mise.toml` are kept, which is correct). Return each upgraded tool with old → new version (or "nothing upgraded"), each pruned tool@version (or "nothing pruned"), plus any errors verbatim. The main session reports pruned versions in `### 🧹 Cleanup`.
 
 ### Claude Code subagent
 
