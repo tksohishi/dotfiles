@@ -2,6 +2,8 @@
 // https://zed.dev/docs/configuring-zed
 {
   "autosave": "on_focus_change",
+  // autosave would otherwise strip the auto-indent on a blank line and reset the cursor to column 0
+  "remove_trailing_whitespace_on_save": false,
   "project_panel": {
     "dock": "left"
   },
