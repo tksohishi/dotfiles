@@ -26,7 +26,7 @@ Do not explain from memory of the topic name. Read the actual thing:
 
 ## Step 3: format
 
-Deliver as an HTML artifact: load the `artifact-design` skill first, and `artifact-diagramming` for the diagrams. Big pictures, few words:
+Deliver as an HTML artifact: load the `artifact-design` skill first, and `artifact-diagramming` for the diagrams. Typography is fixed, do not pick fonts: the system UI stack for everything (`-apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif`, i.e. SF Pro on a Mac) and `ui-monospace, "SF Mono", Menlo, monospace` for code; no Google Fonts link. Headings get weight 700 and slight negative letter-spacing. Big pictures, few words:
 
 - One idea per section, each with an inline SVG diagram or a large illustrated figure that carries the meaning on its own; the text underneath is a caption, not an essay.
 - Show numbers as a picture (bars, timelines, boxes scaled to size) rather than a table wherever a comparison is the point.
