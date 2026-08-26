@@ -1,6 +1,7 @@
 // Zed settings
 // https://zed.dev/docs/configuring-zed
 {
+  "autosave": "on_focus_change",
   "project_panel": {
     "dock": "left"
   },
