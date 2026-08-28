@@ -36,5 +36,7 @@
   "features": {
     "edit_prediction_provider": "none"
   },
-  "show_completions_on_input": true
+  "show_completions_on_input": true,
+  "soft_wrap": "bounded",
+  "preferred_line_length": 100
 }
