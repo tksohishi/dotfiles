@@ -18,3 +18,5 @@ zillow.com|WebFetch gets a 403 (PerimeterX). Plain httpie works, no UA needed; Z
 trulia.com|WebFetch gets a 403. Plain httpie works (Zillow-owned, same listing data). See the fetch-blocked skill.
 redfin.com|WebFetch gets a 403. Use httpie with a browser User-Agent header (plain httpie also 403s). See the fetch-blocked skill.
 apartments.com|Bot-walled (403 even to httpie with browser UA). Use agent-browser --headed, or prefer zillow/trulia/craigslist via httpie instead.
+youtube.com|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.
+youtu.be|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.

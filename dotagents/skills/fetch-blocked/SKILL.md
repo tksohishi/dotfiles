@@ -126,7 +126,7 @@ Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section
 
 ## YouTube
 
-`summarize <url>` (direct access is blocked for agents; see repo instructions).
+`summarize <url>` (direct access is blocked for agents; see repo instructions). `--extract` prints the raw transcript instead of a summary (pipe to a file under `tmp/` when a subagent needs the full text); `--length short|medium|long|xl` and `--lang ja` control the summary. Don't hand-roll yt-dlp + VTT cleanup: summarize already does that (`--youtube yt-dlp` forces that source).
 
 ## Cloudflare-challenged pages ("Just a moment...", 403 with cf headers)
 
