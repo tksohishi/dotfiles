@@ -38,5 +38,12 @@
   },
   "show_completions_on_input": true,
   "soft_wrap": "bounded",
-  "preferred_line_length": 100
+  "preferred_line_length": 100,
+  "languages": {
+    "TypeScript": { "formatter": "prettier", "format_on_save": "on" },
+    "TSX": { "formatter": "prettier", "format_on_save": "on" },
+    "JavaScript": { "formatter": "prettier", "format_on_save": "on" }
+  },
+  // defaults only; a project .prettierrc overrides these
+  "prettier": { "printWidth": 100 }
 }
