@@ -251,6 +251,7 @@
       "Bash(tail*)",
       "Bash(tee *)",
       "Bash(tg *)",
+      "Bash(trash *)",
       "Bash(pgrep *)",
       "Bash(ps *)",
       "Bash(rclone about *)",
