@@ -20,3 +20,5 @@ redfin.com|WebFetch gets a 403. Use httpie with a browser User-Agent header (pla
 apartments.com|Bot-walled (403 even to httpie with browser UA). Use agent-browser --headed, or prefer zillow/trulia/craigslist via httpie instead.
 youtube.com|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.
 youtu.be|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.
+flightaware.com|WebFetch gets a 403. Use httpie with a browser User-Agent header; scheduled times are epoch fields (gateDepartureTimes/gateArrivalTimes .scheduled) in the embedded JSON of /live/flight/<ICAO callsign, e.g. KAL82>.
+flightradar24.com|WebFetch gets a 403. Use flightaware.com via httpie with a browser User-Agent instead.
