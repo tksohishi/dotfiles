@@ -42,7 +42,7 @@ All of these 403 httpie even with a browser UA; the differences are in what agen
 | adidas.com | bot page ("unable to give you access") | try --headed; else hand off to user's browser |
 | asics.com | Access Denied | no verified path; check the product on footlocker.com instead |
 | jdsports.com | empty JS shell (~670B) | try --headed; else hand off to user's browser |
-| stockx.com | login-verify wall | hand off to user's browser; checkout adds ~8-12% fees + shipping |
+| stockx.com | login-verify wall | headed patchright real-Chrome (`launchChrome({profileDir})` pattern, chrome-canary) gets the full product page incl. Buy Now/Last Sale (verified 2026-08-30); checkout adds ~8-12% fees + shipping |
 | streeteasy.com | access denied | no verified path (PerimeterX class); use compass.com headless instead |
 
 ## Reddit
