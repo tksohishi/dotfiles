@@ -38,12 +38,14 @@ All of these 403 httpie even with a browser UA; the differences are in what agen
 | footlocker.com | works (full server-rendered product + search pages) | agent-browser headless — best default for sneaker price/stock checks |
 | compass.com | works (listing search + homedetails) | agent-browser headless — also the fallback for StreetEasy queries |
 | cashbackmonitor.com | works | WebFetch returns 200 but rates are JS-rendered placeholders; use agent-browser headless and wait ~6s |
-| snipesusa.com | Cloudflare verification page | agent-browser --headed (Cloudflare class, auto-clears) |
+| snipesusa.com | Cloudflare verification page | headed patchright verified 2026-08-30 (search + product pages incl. price/size/stock render fully; ~8s wait). agent-browser --headed untested |
 | adidas.com | bot page ("unable to give you access") | try --headed, then headed patchright; else hand off to user's browser |
 | asics.com | Access Denied | no verified path; check the product on footlocker.com instead |
-| jdsports.com | empty JS shell (~670B) | try --headed, then headed patchright; else hand off to user's browser |
+| jdsports.com | empty JS shell (~670B) | headed patchright verified 2026-08-30 (product page with price/promo/size renders; ~6s wait) |
 | stockx.com | login-verify wall | headed patchright real-Chrome — see Last resort section (verified 2026-08-30); checkout adds ~8-12% fees + shipping |
 | streeteasy.com | access denied | no verified path (PerimeterX class); use compass.com headless instead |
+| shop.app | 429 to WebFetch | httpie with browser UA returns the full page; product title/price/vendor in embedded JSON (`rg '"name"|"price"'`). shop.app links are third-party Shopify stores — verify the seller before trusting a price |
+| westnyc.com (Shopify boutiques generally) | agent-browser headless returns near-empty shell | Shopify JSON endpoints via plain httpie: `/search/suggest.json?q=...&resources[type]=product` works; `/products/<handle>.json` and `/collections/<x>/products.json` may be disabled per store |
 
 ## Last resort: headed patchright real-Chrome
 
