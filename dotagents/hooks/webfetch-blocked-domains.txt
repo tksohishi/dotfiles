@@ -22,3 +22,9 @@ youtube.com|WebFetch only returns the page title (JS shell). Use summarize <url>
 youtu.be|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.
 flightaware.com|WebFetch gets a 403. Use httpie with a browser User-Agent header; scheduled times are epoch fields (gateDepartureTimes/gateArrivalTimes .scheduled) in the embedded JSON of /live/flight/<ICAO callsign, e.g. KAL82>.
 flightradar24.com|WebFetch gets a 403. Use flightaware.com via httpie with a browser User-Agent instead.
+streeteasy.com|Bot-walled (403 even to httpie with browser UA; agent-browser headless also denied). No verified agent path — use Compass via agent-browser headless instead, or hand off to the user's browser.
+stockx.com|Bot-walled (403 to httpie; agent-browser headless gets a login-verify wall). Hand off to the user's browser; remind that checkout adds ~8-12% fees + shipping.
+adidas.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets a bot page). Try agent-browser --headed, else hand off to the user's browser.
+asics.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets Access Denied). Product/price checks: use footlocker.com via agent-browser headless instead.
+snipesusa.com|Cloudflare-challenged (403 to httpie; headless gets the verification page). Use agent-browser --headed (Cloudflare auto-clears headed).
+jdsports.com|403 to httpie with browser UA; agent-browser headless gets an empty JS shell. Try agent-browser --headed, else hand off to the user's browser.

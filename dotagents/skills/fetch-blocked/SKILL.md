@@ -29,6 +29,22 @@ General heuristic when WebFetch fails on a domain not listed below:
 | glassdoor.com | Cloudflare "Humans only" terminal block | NO agent path as of Jul 30, 2026. Truly-headed agent-browser gets the terminal block, and a human completing the verification inside that Chrome is still blocked — the Chrome-for-Testing/CDP fingerprint itself is denied. Hand off: user opens the URL in their own browser and pastes content. (Worked headed as late as Jul 16, 2026; re-test occasionally.) |
 | facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
 
+## Sneaker / fashion retail (verified 2026-08-30)
+
+All of these 403 httpie even with a browser UA; the differences are in what agent-browser gets.
+
+| Site | Headless agent-browser | What works |
+|---|---|---|
+| footlocker.com | works (full server-rendered product + search pages) | agent-browser headless — best default for sneaker price/stock checks |
+| compass.com | works (listing search + homedetails) | agent-browser headless — also the fallback for StreetEasy queries |
+| cashbackmonitor.com | works | WebFetch returns 200 but rates are JS-rendered placeholders; use agent-browser headless and wait ~6s |
+| snipesusa.com | Cloudflare verification page | agent-browser --headed (Cloudflare class, auto-clears) |
+| adidas.com | bot page ("unable to give you access") | try --headed; else hand off to user's browser |
+| asics.com | Access Denied | no verified path; check the product on footlocker.com instead |
+| jdsports.com | empty JS shell (~670B) | try --headed; else hand off to user's browser |
+| stockx.com | login-verify wall | hand off to user's browser; checkout adds ~8-12% fees + shipping |
+| streeteasy.com | access denied | no verified path (PerimeterX class); use compass.com headless instead |
+
 ## Reddit
 
 WebFetch refuses every reddit domain client-side ("unable to fetch"). Use httpie against `old.reddit.com`:
