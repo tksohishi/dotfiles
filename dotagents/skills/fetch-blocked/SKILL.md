@@ -5,7 +5,7 @@ description: Access content on bot-blocked sites (Reddit, X/Twitter, Cloudflare-
 
 # Fetch Blocked Sites
 
-Strategy map for sites that block plain HTTP fetchers. Escalate in order: URL rewrite → public endpoint → agent-browser. Don't start with the browser when a rewrite works.
+Strategy map for sites that block plain HTTP fetchers. Escalate in order: URL rewrite → public endpoint → httpie (browser UA) → agent-browser (headless, then --headed) → headed patchright real-Chrome. Don't start with a browser when a rewrite works, and don't reach for patchright before agent-browser --headed has failed.
 
 **Every `http`/`https` (httpie) call below needs `--ignore-stdin`** (flags after the URL). Without it httpie blocks reading stdin in the Bash tool (no TTY/EOF): the command hangs, gets auto-backgrounded, then fails with exit 144 and a 0-byte body. Add `--follow` for endpoints that 302 to an empty body (e.g. Naver).
 
@@ -39,11 +39,21 @@ All of these 403 httpie even with a browser UA; the differences are in what agen
 | compass.com | works (listing search + homedetails) | agent-browser headless — also the fallback for StreetEasy queries |
 | cashbackmonitor.com | works | WebFetch returns 200 but rates are JS-rendered placeholders; use agent-browser headless and wait ~6s |
 | snipesusa.com | Cloudflare verification page | agent-browser --headed (Cloudflare class, auto-clears) |
-| adidas.com | bot page ("unable to give you access") | try --headed; else hand off to user's browser |
+| adidas.com | bot page ("unable to give you access") | try --headed, then headed patchright; else hand off to user's browser |
 | asics.com | Access Denied | no verified path; check the product on footlocker.com instead |
-| jdsports.com | empty JS shell (~670B) | try --headed; else hand off to user's browser |
-| stockx.com | login-verify wall | headed patchright real-Chrome (`launchChrome({profileDir})` pattern, chrome-canary) gets the full product page incl. Buy Now/Last Sale (verified 2026-08-30); checkout adds ~8-12% fees + shipping |
+| jdsports.com | empty JS shell (~670B) | try --headed, then headed patchright; else hand off to user's browser |
+| stockx.com | login-verify wall | headed patchright real-Chrome — see Last resort section (verified 2026-08-30); checkout adds ~8-12% fees + shipping |
 | streeteasy.com | access denied | no verified path (PerimeterX class); use compass.com headless instead |
+
+## Last resort: headed patchright real-Chrome
+
+When WebFetch, httpie, and both agent-browser modes fail (StockX login-verify walls, PerimeterX Press & Hold, Zillow mid-session captcha), a headed patchright launch of real Chrome Canary often still gets through — the Chrome-for-Testing/CDP fingerprint is what's being denied, not the IP. Verified: StockX (2026-08-30), Zillow while PX-blocked (2026-07).
+
+- Needs `patchright` in the project (`bun add patchright`) and Chrome Canary installed. In `~/Work/life`, use the existing helper `lib/browser.ts` (`launchChrome`); elsewhere, the pattern is `chromium.launchPersistentContext(profileDir, { channel: 'chrome-canary', headless: false })`.
+- **Always pass a persistent `profileDir`** (project-local `tmp/`) — PerimeterX-class walls trust the profile across runs; a fresh context re-triggers the wall (see patchright-bot-walls memory).
+- Headed only — headless patchright fails the same as headless agent-browser. The window takes over the user's screen, so keep it to one short run and close.
+- No rapid retries. If a captcha/Press & Hold renders, stop and hand the solve to the user in that window; never automate the interaction.
+- This is fingerprint avoidance for reading public pages, not a license to bypass logins or rate limits; the no-bot-detection-bypass hook still governs what's off-limits.
 
 ## Reddit
 
