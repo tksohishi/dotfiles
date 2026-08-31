@@ -41,7 +41,7 @@ All of these except nike.com 403 httpie even with a browser UA; the differences 
 | cashbackmonitor.com | works | WebFetch returns 200 but rates are JS-rendered placeholders; use agent-browser headless and wait ~6s |
 | snipesusa.com | Cloudflare verification page | headed patchright verified 2026-08-30 (search + product pages incl. price/size/stock render fully; ~8s wait). agent-browser --headed untested |
 | adidas.com | bot page ("unable to give you access") | try --headed, then headed patchright; else hand off to user's browser |
-| asics.com | Access Denied | no verified path; check the product on footlocker.com instead |
+| asics.com | Access Denied | headed patchright verified 2026-08-31 (Training category page renders fully, ~8s wait); quick checks: footlocker.com headless |
 | jdsports.com | empty JS shell (~670B) | headed patchright verified 2026-08-30 (product page with price/promo/size renders; ~6s wait) |
 | stockx.com | login-verify wall | headed patchright real-Chrome — see Last resort section (verified 2026-08-30); quote only the checkout total, not Ask + a memorized fee % |
 | streeteasy.com | access denied | no verified path (PerimeterX class); use compass.com headless instead |

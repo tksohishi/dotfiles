@@ -25,6 +25,6 @@ flightradar24.com|WebFetch gets a 403. Use flightaware.com via httpie with a bro
 streeteasy.com|Bot-walled (403 even to httpie with browser UA; agent-browser headless also denied). No verified agent path — use Compass via agent-browser headless instead, or hand off to the user's browser.
 stockx.com|Bot-walled (403 to httpie; agent-browser headless gets a login-verify wall). Headed patchright real-Chrome with a persistent profile works (see fetch-blocked skill); quote only the checkout total, not Ask plus a memorized fee %.
 adidas.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets a bot page). Try agent-browser --headed, else hand off to the user's browser.
-asics.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets Access Denied). Product/price checks: use footlocker.com via agent-browser headless instead.
+asics.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets Access Denied). Headed patchright with persistent profile works (verified 2026-08-31); quick price checks: footlocker.com via agent-browser headless.
 snipesusa.com|Cloudflare-challenged (403 to httpie; headless gets the verification page). Headed patchright with persistent profile works (verified 2026-08-30); see the fetch-blocked skill.
 jdsports.com|403 to httpie with browser UA; agent-browser headless gets an empty JS shell. Headed patchright with persistent profile works (verified 2026-08-30); see the fetch-blocked skill.
