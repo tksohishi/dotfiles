@@ -52,7 +52,7 @@ insert_newline = ["alt-enter", "shift-enter", "ctrl-j", "ctrl-m"]
 
 [sandbox_workspace_write]
 network_access = true
-writable_roots = ["~/.cache/uv", "~/.cache/patchright-fetch"]
+writable_roots = ["~/.cache"]
 
 # Guardian auto-reviewer policy. The policy REPLACES the default tenant-policy
 # block, so the upstream default (codex-rs/core/src/guardian/policy.md) is
