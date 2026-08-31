@@ -112,7 +112,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Claude Code's own `model` and `effortLevel` in `dotclaude/settings.json` are self-modification: never add or change them without explicit direction. Gotchas: `model` omitted = session default (`"default"` is NOT a valid value, it errors); valid `effortLevel` values are `low`/`medium`/`high`/`xhigh`. Read the file for the current value; never memorize it.
 
 ## Secrets
-- Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), or `.dev.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
+- Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), `.dev.vars`, or `.prod.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
 
 ## Google Workspace
 - Use the `gog` CLI for all Google services (Gmail, Calendar, Drive, Docs, Sheets, ...), not the MCP Google tools. MCP is the fallback only when `gog` lacks the account or capability. Run `gog <service> --help` before concluding an operation isn't supported.

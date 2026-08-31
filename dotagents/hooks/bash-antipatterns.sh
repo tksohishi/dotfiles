@@ -77,7 +77,7 @@ CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 CMD_BARE=$(printf '%s' "$CMD" | tr '\n' '\1' | sed -e "s/'[^']*'//g" -e 's/"[^"]*"//g' | tr '\1' '\n')
 
 SECRET_READER_SEG_RE='^[[:space:]]*(rg|grep|cat|sed|head|tail|awk|less|more|strings|bat|xxd|od|nl|tac)[[:space:]]'
-SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|development|test|prod|stage|dev)([^a-zA-Z0-9]|$)|\.dev\.vars([^a-zA-Z0-9]|$)'
+SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|development|test|prod|stage|dev)([^a-zA-Z0-9]|$)|\.(dev|prod)\.vars([^a-zA-Z0-9]|$)'
 
 # Drop tokens ending in a template suffix before secret-file matching, so
 # `.dev.vars.example` / `.env.local.sample` never count as secret paths.
