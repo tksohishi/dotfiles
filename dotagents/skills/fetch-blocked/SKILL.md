@@ -42,7 +42,7 @@ All of these 403 httpie even with a browser UA; the differences are in what agen
 | adidas.com | bot page ("unable to give you access") | try --headed, then headed patchright; else hand off to user's browser |
 | asics.com | Access Denied | no verified path; check the product on footlocker.com instead |
 | jdsports.com | empty JS shell (~670B) | headed patchright verified 2026-08-30 (product page with price/promo/size renders; ~6s wait) |
-| stockx.com | login-verify wall | headed patchright real-Chrome — see Last resort section (verified 2026-08-30); checkout adds ~8-12% fees + shipping |
+| stockx.com | login-verify wall | headed patchright real-Chrome — see Last resort section (verified 2026-08-30); quote only the checkout total, not Ask + a memorized fee % |
 | streeteasy.com | access denied | no verified path (PerimeterX class); use compass.com headless instead |
 | shop.app | 429 to WebFetch | httpie with browser UA returns the full page; product title/price/vendor in embedded JSON (`rg '"name"|"price"'`). shop.app links are third-party Shopify stores — verify the seller before trusting a price |
 | westnyc.com (Shopify boutiques generally) | agent-browser headless returns near-empty shell | Shopify JSON endpoints via plain httpie: `/search/suggest.json?q=...&resources[type]=product` works; `/products/<handle>.json` and `/collections/<x>/products.json` may be disabled per store |
@@ -55,7 +55,7 @@ When WebFetch, httpie, and both agent-browser modes fail (StockX login-verify wa
 - **Always pass a persistent `profileDir`** (project-local `tmp/`) — PerimeterX-class walls trust the profile across runs; a fresh context re-triggers the wall (see patchright-bot-walls memory).
 - Headed only — headless patchright fails the same as headless agent-browser. The window takes over the user's screen, so keep it to one short run and close.
 - No rapid retries. If a captcha/Press & Hold renders, stop and hand the solve to the user in that window; never automate the interaction.
-- This is fingerprint avoidance for reading public pages, not a license to bypass logins or rate limits; the no-bot-detection-bypass hook still governs what's off-limits.
+- Scope: reading public pages in this user-sanctioned setup (patchright is an established tool here — lib/browser.ts in life, patchright-bot-walls memory). It is NOT a license to bypass logins, rate limits, or CAPTCHAs — the CAPTCHA hard-stop from the agent-browser skill applies unchanged, and agent-browser itself stays on Chrome-for-Testing, never the user's real Chrome.
 
 ## Reddit
 
