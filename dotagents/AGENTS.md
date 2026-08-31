@@ -118,6 +118,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Use the `gog` CLI for all Google services (Gmail, Calendar, Drive, Docs, Sheets, ...), not the MCP Google tools. MCP is the fallback only when `gog` lacks the account or capability. Run `gog <service> --help` before concluding an operation isn't supported.
 - Never recreate a Google Doc to change its content; edit in place with `gog docs` (write, insert, insert-image with local-file upload, format). Once shared, the URL is load-bearing.
 - `gog drive upload --convert-to doc` turns a local file (e.g. .docx with embedded images) into a native Doc; `--replace <fileId>` works for binary files only, never native Docs.
+- When the user reports an email arrived (「返信あり」「メール来た」), read the actual message via `gog gmail` before recording or acting on it — the one-line summary drops details (exact wording, times, conditions).
 
 ## Browser Automation
 - Default to `agent-browser` for all browser automation (headless by default). Use WebFetch/httpie for simple HTTP requests; agent-browser only for sites that need a real browser. Never drive the real installed Google Chrome from scripts (e.g. Playwright `channel: "chrome"`) — it holds logged-in personal sessions; isolated browsers only.
