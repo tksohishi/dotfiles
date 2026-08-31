@@ -36,6 +36,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Avoid using emdashes in writing
 - Avoid using the section sign `§` in writing meant for humans; it reads as an AI artifact. Use the word "Section", "see", or drop the marker.
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
+- No self-attribution stamps: never mark facts or decisions that came from the user with name/date attributions like "(Name, Aug 2026)" or "(Name's drafts, Jul 21)" in any file (instruction files, prep docs, notes). State them as plain facts; a bare date is fine when timing matters. Attribute only external sources where provenance matters (e.g. "(Source: <person>, Jul 16 call)"). Authorship history lives in git.
 
 ## 日本語の注意点
 - 人称は一人称「私」、二人称（you）「あなた」で統一

@@ -3,16 +3,6 @@
     "PreToolUse": [
       {
         "_dotfiles": true,
-        "matcher": "^apply_patch$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.codex/hooks/no-instruction-attribution.sh"
-          }
-        ]
-      },
-      {
-        "_dotfiles": true,
         "matcher": "^Bash$",
         "hooks": [
           {
