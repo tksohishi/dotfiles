@@ -31,10 +31,11 @@ General heuristic when WebFetch fails on a domain not listed below:
 
 ## Sneaker / fashion retail (verified 2026-08-30)
 
-All of these 403 httpie even with a browser UA; the differences are in what agent-browser gets.
+All of these except nike.com 403 httpie even with a browser UA; the differences are in what agent-browser gets.
 
 | Site | Headless agent-browser | What works |
 |---|---|---|
+| nike.com | not needed | httpie with browser UA + `--follow` (verified 2026-08-31; bare request only returns a 301). Category and product pages come back server-rendered (~1MB); on a PDP the first `<title>` is a localization string — read `og:title` or the JSON-LD `Product` node for name/price. WebFetch untested |
 | footlocker.com | works (full server-rendered product + search pages) | agent-browser headless — best default for sneaker price/stock checks |
 | compass.com | works (listing search + homedetails) | agent-browser headless — also the fallback for StreetEasy queries |
 | cashbackmonitor.com | works | WebFetch returns 200 but rates are JS-rendered placeholders; use agent-browser headless and wait ~6s |
