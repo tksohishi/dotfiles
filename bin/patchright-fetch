@@ -9,15 +9,18 @@
 // - Per-host persistent profile under ./tmp/patchright/ (cwd-local by design: a global
 //   cache dir would need sandbox approval in Codex). PX-class walls trust the profile
 //   across runs; body text is saved to ./tmp/patchright/<host>.txt.
+// - --wait is a cap, not a fixed sleep: polls every 2s and returns once the body text
+//   is stable and no challenge marker is on screen.
 // - Bun auto-installs the pinned patchright below into its global cache on first run;
 //   needs Chrome Canary installed.
-import { mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 // @ts-expect-error bun resolves versioned specifiers via auto-install
 import { chromium } from 'patchright@1.60.0'
 
 const args = process.argv.slice(2)
 const showIdx = args.indexOf('--show')
-const show = showIdx >= 0 && !!args.splice(showIdx, 1)
+const show = showIdx >= 0
+if (show) args.splice(showIdx, 1)
 const waitIdx = args.indexOf('--wait')
 const waitSec = waitIdx >= 0 ? Number(args.splice(waitIdx, 2)[1]) : 20
 const url = args[0]
@@ -26,26 +29,76 @@ if (!url || Number.isNaN(waitSec)) {
   process.exit(1)
 }
 
-const host = new URL(url).hostname.replace(/^www\./, '')
-mkdirSync('tmp/patchright', { recursive: true })
-const ctx = await chromium.launchPersistentContext(`tmp/patchright/${host}-profile`, {
-  channel: 'chrome-canary',
-  headless: false,
-  args: show ? [] : ['--window-position=-2400,-2400'],
-})
+let host = ''
 try {
-  const page = ctx.pages()[0] ?? (await ctx.newPage())
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
-  await page.waitForTimeout(waitSec * 1000)
-  const title = await page.title()
-  const text = await page.innerText('body').catch(() => '(no body)')
-  const out = `tmp/patchright/${host}.txt`
-  await Bun.write(out, text)
-  console.log('TITLE:', title)
-  console.log('URL:', page.url())
-  console.log('LEN:', text.length, '→', out)
-  console.log('---')
-  console.log(text.slice(0, 2500))
+  host = new URL(url).hostname.replace(/^www\./, '')
+} catch {
+  console.error(`not a valid URL: ${url}`)
+  process.exit(1)
+}
+
+mkdirSync('tmp/patchright', { recursive: true })
+
+// One run per host profile: a second Chrome on the same profile dies on
+// Chrome's SingletonLock with a cryptic error. Stale locks (crashed run)
+// are detected via signal-0 probe and taken over.
+const lockFile = `tmp/patchright/${host}.lock`
+if (existsSync(lockFile)) {
+  const pid = Number(readFileSync(lockFile, 'utf8'))
+  let alive = false
+  try {
+    if (pid > 0) {
+      process.kill(pid, 0)
+      alive = true
+    }
+  } catch {}
+  if (alive) {
+    console.error(`another patchright-fetch holds ${host} (pid ${pid}); wait for it or kill it`)
+    process.exit(1)
+  }
+}
+writeFileSync(lockFile, String(process.pid))
+
+const CHALLENGE = /press & hold|press and hold|verify you are|just a moment|checking your browser|are you a robot/i
+
+try {
+  const ctx = await chromium.launchPersistentContext(`tmp/patchright/${host}-profile`, {
+    channel: 'chrome-canary',
+    headless: false,
+    args: show ? [] : ['--window-position=-2400,-2400'],
+  })
+  try {
+    const page = ctx.pages()[0] ?? (await ctx.newPage())
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    const deadline = Date.now() + waitSec * 1000
+    let text = ''
+    let prev = -1
+    while (Date.now() < deadline) {
+      await page.waitForTimeout(2000)
+      text = await page.innerText('body').catch(() => '')
+      // Length within 2% of the previous poll counts as settled: dynamic pages
+      // (ads, lazy-loaded listings) never reach exact text equality.
+      const settled = text.length > 0 && prev >= 0 && Math.abs(text.length - prev) <= prev * 0.02
+      if (settled && !CHALLENGE.test(text)) break
+      prev = text.length
+    }
+    if (CHALLENGE.test(text)) console.error('challenge unsolved at --wait cap; rerun with --show to solve it by hand')
+    const title = await page.title()
+    const out = `tmp/patchright/${host}.txt`
+    await Bun.write(out, text)
+    console.log('TITLE:', title)
+    console.log('URL:', page.url())
+    console.log('LEN:', text.length, '→', out)
+    console.log('---')
+    console.log(text.slice(0, 2500))
+  } finally {
+    await ctx.close()
+  }
+} catch (err) {
+  const msg = err instanceof Error ? err.message.split('\n')[0] : String(err)
+  console.error('ERROR:', msg)
+  if (/chrome-canary|executable/i.test(msg)) console.error('hint: Chrome Canary must be installed (brew install --cask google-chrome@canary)')
+  process.exitCode = 1
 } finally {
-  await ctx.close()
+  rmSync(lockFile, { force: true })
 }
