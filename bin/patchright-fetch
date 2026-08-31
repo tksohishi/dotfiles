@@ -1,0 +1,51 @@
+#!/usr/bin/env bun
+// Fetch a bot-walled page with headed patchright real-Chrome (see fetch-blocked skill).
+//
+// Usage: patchright-fetch <url> [--wait <seconds>] [--show]
+//
+// - Headed only: headless is detected even on a trusted profile. The window opens
+//   offscreen by default so it doesn't take over the screen; --show puts it onscreen
+//   (needed when a captcha/Press & Hold must be solved by hand).
+// - Per-host persistent profile under ./tmp/patchright/ (cwd-local by design: a global
+//   cache dir would need sandbox approval in Codex). PX-class walls trust the profile
+//   across runs; body text is saved to ./tmp/patchright/<host>.txt.
+// - Bun auto-installs the pinned patchright below into its global cache on first run;
+//   needs Chrome Canary installed.
+import { mkdirSync } from 'node:fs'
+// @ts-expect-error bun resolves versioned specifiers via auto-install
+import { chromium } from 'patchright@1.60.0'
+
+const args = process.argv.slice(2)
+const showIdx = args.indexOf('--show')
+const show = showIdx >= 0 && !!args.splice(showIdx, 1)
+const waitIdx = args.indexOf('--wait')
+const waitSec = waitIdx >= 0 ? Number(args.splice(waitIdx, 2)[1]) : 20
+const url = args[0]
+if (!url || Number.isNaN(waitSec)) {
+  console.error('usage: patchright-fetch <url> [--wait <seconds>] [--show]')
+  process.exit(1)
+}
+
+const host = new URL(url).hostname.replace(/^www\./, '')
+mkdirSync('tmp/patchright', { recursive: true })
+const ctx = await chromium.launchPersistentContext(`tmp/patchright/${host}-profile`, {
+  channel: 'chrome-canary',
+  headless: false,
+  args: show ? [] : ['--window-position=-2400,-2400'],
+})
+try {
+  const page = ctx.pages()[0] ?? (await ctx.newPage())
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
+  await page.waitForTimeout(waitSec * 1000)
+  const title = await page.title()
+  const text = await page.innerText('body').catch(() => '(no body)')
+  const out = `tmp/patchright/${host}.txt`
+  await Bun.write(out, text)
+  console.log('TITLE:', title)
+  console.log('URL:', page.url())
+  console.log('LEN:', text.length, '→', out)
+  console.log('---')
+  console.log(text.slice(0, 2500))
+} finally {
+  await ctx.close()
+}
