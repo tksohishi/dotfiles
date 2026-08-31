@@ -6,9 +6,9 @@
 // - Headed only: headless is detected even on a trusted profile. The window opens
 //   offscreen by default so it doesn't take over the screen; --show puts it onscreen
 //   (needed when a captcha/Press & Hold must be solved by hand).
-// - Per-host persistent profile under ./tmp/patchright/ (cwd-local by design: a global
-//   cache dir would need sandbox approval in Codex). PX-class walls trust the profile
-//   across runs; body text is saved to ./tmp/patchright/<host>.txt.
+// - Per-host persistent profile under ~/.cache/patchright-fetch/, shared across
+//   projects so a PX-class wall solved once is trusted everywhere; body text is
+//   saved to ~/.cache/patchright-fetch/<host>.txt.
 // - --wait is a cap, not a fixed sleep: polls every 2s and returns once the body text
 //   is stable and no challenge marker is on screen.
 // - Bun auto-installs the pinned patchright below into its global cache on first run;
@@ -37,12 +37,13 @@ try {
   process.exit(1)
 }
 
-mkdirSync('tmp/patchright', { recursive: true })
+const cacheDir = `${process.env.XDG_CACHE_HOME ?? `${process.env.HOME}/.cache`}/patchright-fetch`
+mkdirSync(cacheDir, { recursive: true })
 
 // One run per host profile: a second Chrome on the same profile dies on
 // Chrome's SingletonLock with a cryptic error. Stale locks (crashed run)
 // are detected via signal-0 probe and taken over.
-const lockFile = `tmp/patchright/${host}.lock`
+const lockFile = `${cacheDir}/${host}.lock`
 if (existsSync(lockFile)) {
   const pid = Number(readFileSync(lockFile, 'utf8'))
   let alive = false
@@ -62,7 +63,7 @@ writeFileSync(lockFile, String(process.pid))
 const CHALLENGE = /press & hold|press and hold|verify you are|just a moment|checking your browser|are you a robot/i
 
 try {
-  const ctx = await chromium.launchPersistentContext(`tmp/patchright/${host}-profile`, {
+  const ctx = await chromium.launchPersistentContext(`${cacheDir}/${host}-profile`, {
     channel: 'chrome-canary',
     headless: false,
     args: show ? [] : ['--window-position=-2400,-2400'],
@@ -84,7 +85,7 @@ try {
     }
     if (CHALLENGE.test(text)) console.error('challenge unsolved at --wait cap; rerun with --show to solve it by hand')
     const title = await page.title()
-    const out = `tmp/patchright/${host}.txt`
+    const out = `${cacheDir}/${host}.txt`
     await Bun.write(out, text)
     console.log('TITLE:', title)
     console.log('URL:', page.url())
