@@ -26,7 +26,7 @@ General heuristic when WebFetch fails on a domain not listed below:
 | 5ch.net | 403 | plain httpie |
 | zillow.com | 403 | plain httpie, no UA needed — see Zillow section (headless browser gets PerimeterX Press & Hold) |
 | quora.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
-| glassdoor.com | Cloudflare "Humans only" terminal block | NO agent path as of Jul 30, 2026. Truly-headed agent-browser gets the terminal block, and a human completing the verification inside that Chrome is still blocked — the Chrome-for-Testing/CDP fingerprint itself is denied. Hand off: user opens the URL in their own browser and pastes content. (Worked headed as late as Jul 16, 2026; re-test occasionally.) |
+| glassdoor.com | Cloudflare "Humans only" terminal block (agent-browser, even truly-headed with a human solving — the Chrome-for-Testing/CDP fingerprint itself is denied) | headed patchright verified 2026-08-31 (company reviews page renders anonymously incl. pros/cons; ~8s wait) |
 | facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
 
 ## Sneaker / fashion retail (verified 2026-08-30)
@@ -40,17 +40,17 @@ All of these except nike.com 403 httpie even with a browser UA; the differences 
 | compass.com | works (listing search + homedetails) | agent-browser headless — also the fallback for StreetEasy queries |
 | cashbackmonitor.com | works | WebFetch returns 200 but rates are JS-rendered placeholders; use agent-browser headless and wait ~6s |
 | snipesusa.com | Cloudflare verification page | headed patchright verified 2026-08-30 (search + product pages incl. price/size/stock render fully; ~8s wait). agent-browser --headed untested |
-| adidas.com | bot page ("unable to give you access") | try --headed, then headed patchright; else hand off to user's browser |
+| adidas.com | bot page ("unable to give you access") | headed patchright verified 2026-08-31 (product page incl. price/description/reviews renders; ~8s wait). agent-browser --headed untested |
 | asics.com | Access Denied | headed patchright verified 2026-08-31 (Training category page renders fully, ~8s wait); quick checks: footlocker.com headless |
 | jdsports.com | empty JS shell (~670B) | headed patchright verified 2026-08-30 (product page with price/promo/size renders; ~6s wait) |
 | stockx.com | login-verify wall | headed patchright real-Chrome — see Last resort section (verified 2026-08-30); quote only the checkout total, not Ask + a memorized fee % |
-| streeteasy.com | access denied | no verified path (PerimeterX class); use compass.com headless instead |
+| streeteasy.com | access denied | no verified path (PerimeterX class; headed patchright on a fresh profile also gets Press & Hold, 2026-08-31); use compass.com headless instead |
 | shop.app | 429 to WebFetch | httpie with browser UA returns the full page; product title/price/vendor in embedded JSON (`rg '"name"|"price"'`). shop.app links are third-party Shopify stores — verify the seller before trusting a price |
 | westnyc.com (Shopify boutiques generally) | agent-browser headless returns near-empty shell | Shopify JSON endpoints via plain httpie: `/search/suggest.json?q=...&resources[type]=product` works; `/products/<handle>.json` and `/collections/<x>/products.json` may be disabled per store |
 
 ## Last resort: headed patchright real-Chrome
 
-When WebFetch, httpie, and both agent-browser modes fail (StockX login-verify walls, PerimeterX Press & Hold, Zillow mid-session captcha), a headed patchright launch of real Chrome Canary often still gets through — the Chrome-for-Testing/CDP fingerprint is what's being denied, not the IP. Verified: StockX (2026-08-30), Zillow while PX-blocked (2026-07).
+When WebFetch, httpie, and both agent-browser modes fail (StockX login-verify walls, PerimeterX Press & Hold, Zillow mid-session captcha), a headed patchright launch of real Chrome Canary often still gets through — the Chrome-for-Testing/CDP fingerprint is what's being denied, not the IP. Verified: StockX (2026-08-30), Zillow while PX-blocked (2026-07), asics/adidas/glassdoor/apartments.com/hotpads (2026-08-31). Known failure: StreetEasy — PerimeterX Press & Hold renders even in headed real Chrome on a fresh profile.
 
 - Needs `patchright` in the project (`bun add patchright`) and Chrome Canary installed. In `~/Work/life`, use the existing helper `lib/browser.ts` (`launchChrome`); elsewhere, the pattern is `chromium.launchPersistentContext(profileDir, { channel: 'chrome-canary', headless: false })`.
 - **Always pass a persistent `profileDir`** (project-local `tmp/`) — PerimeterX-class walls trust the profile across runs; a fresh context re-triggers the wall (see patchright-bot-walls memory).
@@ -146,8 +146,8 @@ Body is ~300-650KB — always save to a file and `rg`, never cat. PX rate-limits
 | redfin.com | 403 | httpie with browser UA (plain httpie 403s) |
 | zumper.com, craigslist (`sfbay.craigslist.org/search/apa`) | untested | plain httpie; craigslist bodies are small (~50KB), nicest to grep |
 | apartmentlist.com | untested | plain httpie on city pages (`/ca/san-francisco`); neighborhood URL guesses often 404 |
-| apartments.com | 403 | nothing — 403 even to httpie with browser UA (quora class); agent-browser --headed only |
-| hotpads.com | untested | nothing anonymous — 200 but empty JS shell |
+| apartments.com | 403 | headed patchright verified 2026-08-31 (search results with listing prices render; ~8s wait); agent-browser --headed also an option |
+| hotpads.com | untested | httpie/WebFetch get an empty JS shell; headed patchright verified 2026-08-31 (listings with prices render; ~8s wait) |
 
 ## LinkedIn / Instagram
 

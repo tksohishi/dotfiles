@@ -13,18 +13,18 @@ amazon.co.jp|WebFetch gets a 500 bot block. Use httpie with a browser User-Agent
 imdb.com|WebFetch gets an empty AWS WAF challenge. Star rating: POST to caching.graphql.imdb.com (ratingsSummary.aggregateRating). Name→ID: suggestion endpoint (v3.sg.media-imdb.com/suggestion/x/<query>.json). See the fetch-blocked skill.
 naver.com|WebFetch refuses naver client-side. Plain httpie works (http GET <url>) — server-rendered HTML, no browser UA needed.
 quora.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.
-glassdoor.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.
+glassdoor.com|Bot-walled (403 even to httpie; agent-browser headed hits a terminal Cloudflare block). Headed patchright with persistent profile works (verified 2026-08-31); see the fetch-blocked skill.
 zillow.com|WebFetch gets a 403 (PerimeterX). Plain httpie works, no UA needed; Zestimate/rentZestimate embedded in escaped __NEXT_DATA__ JSON. See the Zillow section of the fetch-blocked skill.
 trulia.com|WebFetch gets a 403. Plain httpie works (Zillow-owned, same listing data). See the fetch-blocked skill.
 redfin.com|WebFetch gets a 403. Use httpie with a browser User-Agent header (plain httpie also 403s). See the fetch-blocked skill.
-apartments.com|Bot-walled (403 even to httpie with browser UA). Use agent-browser --headed, or prefer zillow/trulia/craigslist via httpie instead.
+apartments.com|Bot-walled (403 even to httpie with browser UA). Headed patchright with persistent profile works (verified 2026-08-31); or prefer zillow/trulia/craigslist via httpie instead.
 youtube.com|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.
 youtu.be|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.
 flightaware.com|WebFetch gets a 403. Use httpie with a browser User-Agent header; scheduled times are epoch fields (gateDepartureTimes/gateArrivalTimes .scheduled) in the embedded JSON of /live/flight/<ICAO callsign, e.g. KAL82>.
 flightradar24.com|WebFetch gets a 403. Use flightaware.com via httpie with a browser User-Agent instead.
-streeteasy.com|Bot-walled (403 even to httpie with browser UA; agent-browser headless also denied). No verified agent path — use Compass via agent-browser headless instead, or hand off to the user's browser.
+streeteasy.com|Bot-walled (403 even to httpie with browser UA; agent-browser headless also denied; headed patchright gets PX Press & Hold, 2026-08-31). No verified agent path — use Compass via agent-browser headless instead, or hand off to the user's browser.
 stockx.com|Bot-walled (403 to httpie; agent-browser headless gets a login-verify wall). Headed patchright real-Chrome with a persistent profile works (see fetch-blocked skill); quote only the checkout total, not Ask plus a memorized fee %.
-adidas.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets a bot page). Try agent-browser --headed, else hand off to the user's browser.
+adidas.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets a bot page). Headed patchright with persistent profile works (verified 2026-08-31); see the fetch-blocked skill.
 asics.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets Access Denied). Headed patchright with persistent profile works (verified 2026-08-31); quick price checks: footlocker.com via agent-browser headless.
 snipesusa.com|Cloudflare-challenged (403 to httpie; headless gets the verification page). Headed patchright with persistent profile works (verified 2026-08-30); see the fetch-blocked skill.
 jdsports.com|403 to httpie with browser UA; agent-browser headless gets an empty JS shell. Headed patchright with persistent profile works (verified 2026-08-30); see the fetch-blocked skill.
