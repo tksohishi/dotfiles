@@ -52,7 +52,8 @@ All of these except nike.com 403 httpie even with a browser UA; the differences 
 
 When WebFetch, httpie, and both agent-browser modes fail (StockX login-verify walls, PerimeterX Press & Hold, Zillow mid-session captcha), a headed patchright launch of real Chrome Canary often still gets through — the Chrome-for-Testing/CDP fingerprint is what's being denied, not the IP. Verified: StockX (2026-08-30), Zillow while PX-blocked (2026-07), asics/adidas/glassdoor/apartments.com/hotpads (2026-08-31). Known failure: StreetEasy — PerimeterX Press & Hold renders even in headed real Chrome on a fresh profile.
 
-- Needs `patchright` in the project (`bun add patchright`) and Chrome Canary installed. In `~/Work/life`, use the existing helper `lib/browser.ts` (`launchChrome`); elsewhere, the pattern is `chromium.launchPersistentContext(profileDir, { channel: 'chrome-canary', headless: false })`.
+- In `~/Work/life` there is a ready-made runner: `bun scripts/patchright-fetch.ts <url> [--wait <seconds>]` — per-host persistent profile under `tmp/patchright/`, default 20s wait (deliberately long; bot walls need settle time — shorten only when the site is known fast), body text saved to `tmp/patchright/<host>.txt`. Prefer it over writing a new script.
+- Elsewhere: needs `patchright` in the project (`bun add patchright`) and Chrome Canary installed; the pattern is `chromium.launchPersistentContext(profileDir, { channel: 'chrome-canary', headless: false })`.
 - **Always pass a persistent `profileDir`** (project-local `tmp/`) — PerimeterX-class walls trust the profile across runs; a fresh context re-triggers the wall (see patchright-bot-walls memory).
 - Headed only — headless patchright fails the same as headless agent-browser. The window takes over the user's screen, so keep it to one short run and close.
 - No rapid retries. If a captcha/Press & Hold renders, stop and hand the solve to the user in that window; never automate the interaction.
