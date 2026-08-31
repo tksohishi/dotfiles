@@ -32,6 +32,7 @@ Most files are self-explanatory. These have *why* worth knowing:
 
 ## When Editing
 
+- In `dotagents/AGENTS.md` (and any AGENTS.md), state rules as they stand now — no version history or "since X changed" clauses; history is derivable from git.
 - The `files` array in `install.sh` must be updated when adding new dotfiles
 - New cross-agent capabilities go in `dotagents/skills/<name>/SKILL.md`. `install.sh` symlinks them into both `~/.claude/skills/` and `~/.agents/skills/` automatically; no separate Codex wiring needed (Codex scans `~/.agents/skills/` natively, Claude scans `~/.claude/skills/`).
 - Agent hooks live in `dotagents/hooks/` (shared, symlinked to both `~/.claude/hooks/` and `~/.codex/hooks/`). When changing hook wiring, update BOTH `dotclaude/settings.json` and `dotcodex/hooks.json`, then run `scripts/sync-codex-hooks.sh`. Keep `_dotfiles: true` on Codex entries so the sync preserves app-managed hooks while replacing tracked entries. Hook scripts themselves only need editing once. Codex's `PreToolUse` accepts only `allow`/`deny` (not `ask`); `bash-antipatterns.sh` detects Codex via `has("model")` on the input JSON (Codex includes `model` as a common field; Claude doesn't) and downgrades `ask`→`deny`. Don't use `permission_mode` as the detector — both agents populate it.
