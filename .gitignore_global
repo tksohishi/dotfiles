@@ -17,3 +17,5 @@ playwright-mcp/
 agent-browser.json
 .agent-browser/
 .wrangler/
+
+**/.claude/.cc-writes/
