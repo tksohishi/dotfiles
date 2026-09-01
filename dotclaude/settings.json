@@ -11,6 +11,22 @@
     "commit": "",
     "pr": ""
   },
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyWrite": [
+        "**/.env",
+        "**/.env.*",
+        "**/.dev.vars",
+        "**/.prod.vars"
+      ],
+      "allowWrite": [
+        "**/.env.example",
+        "**/.dev.vars.example",
+        "**/.prod.vars.example"
+      ]
+    }
+  },
   "permissions": {
     "allow": [
       "Bash(git add *)",
