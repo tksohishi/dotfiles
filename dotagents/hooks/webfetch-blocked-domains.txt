@@ -28,3 +28,6 @@ adidas.com|Bot-walled (403 to httpie with browser UA; agent-browser headless get
 asics.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets Access Denied). Headed patchright with persistent profile works (verified 2026-08-31); quick price checks: footlocker.com via agent-browser headless.
 snipesusa.com|Cloudflare-challenged (403 to httpie; headless gets the verification page). Headed patchright with persistent profile works (verified 2026-08-30); see the fetch-blocked skill.
 jdsports.com|403 to httpie with browser UA; agent-browser headless gets an empty JS shell. Headed patchright with persistent profile works (verified 2026-08-30); see the fetch-blocked skill.
+t.me|Telegram checks go through the tg CLI, not the web: tg chats to find the chat, tg read <chat> for messages (tg --help for details). Don't scrape t.me or web.telegram.org via browser tools.
+telegram.me|Telegram checks go through the tg CLI, not the web: tg chats to find the chat, tg read <chat> for messages (tg --help for details). Don't scrape t.me or web.telegram.org via browser tools.
+web.telegram.org|Telegram checks go through the tg CLI, not the web: tg chats to find the chat, tg read <chat> for messages (tg --help for details). (core.telegram.org API docs stay fetchable.)
