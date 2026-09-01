@@ -570,6 +570,9 @@
   "model": "fable",
   "switchModelsOnFlag": false,
   "disableClaudeAiConnectors": true,
+  "deniedMcpServers": [
+    { "serverName": "claude-in-chrome" }
+  ],
   "hooks": {
     "PreToolUse": [
       {
