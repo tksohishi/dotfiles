@@ -14,6 +14,12 @@ General heuristic when WebFetch fails on a domain not listed below:
 - Media/content sites (news, forums, docs, shops): `http GET <url> --ignore-stdin` via httpie; if that 403s/500s, retry with a browser User-Agent header. Much of the "blocking" is specific to WebFetch's fetcher, and plain httpie from this residential IP gets through.
 - Social or account-required sites (login walls, JS shells): `agent-browser --headed` with login, and only if the content is really needed; don't burn time escalating for low-value pages.
 
+**Before classifying a site as bot-walled, diagnose:**
+
+1. Confirm the block on a known-good URL (homepage or a page you know exists) with the SAME method. A 404/410 on a deep URL is a dead page (delisted product, changed slug — re-find it via the site's own search), never a block signal. Real block signals: 403/406/429, a challenge page ("Just a moment", Press & Hold), an "Access Denied" title, or an empty JS shell on a page that should have content.
+2. A block is per-method, not per-site: agent-browser getting 406/denied says nothing about httpie+UA (runningwarehouse: headless 406, httpie+UA fine). Walk the ladder in order and re-test each rung against the known-good URL; don't skip to patchright because a lower rung failed on a URL that was simply dead.
+3. Only after the ladder is exhausted on a known-good URL is the site "no verified path" — then record it in the table with per-method results.
+
 ## Other verified sites (2026-06)
 
 | Site | WebFetch | What works |
