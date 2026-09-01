@@ -45,6 +45,7 @@ All of these except nike.com 403 httpie even with a browser UA; the differences 
 | jdsports.com | empty JS shell (~670B) | headed patchright verified 2026-08-30 (product page with price/promo/size renders; ~6s wait) |
 | stockx.com | login-verify wall | headed patchright real-Chrome — see Last resort section (verified 2026-08-30); quote only the checkout total, not Ask + a memorized fee % |
 | streeteasy.com | access denied | `patchright-fetch --show` + user solves Press & Hold once, verified 2026-08-31; PX trust persists in the shared profile, later offscreen runs pass in ~6s. Fresh profile always re-triggers the wall. compass.com headless as the no-user fallback |
+| runningwarehouse.com | 406 Not Acceptable | httpie with browser UA (verified 2026-08-31; plain httpie untested). Headed patchright also works. A 404 on a Google-indexed descpage URL means the product was delisted, not a block |
 | shop.app | 429 to WebFetch | httpie with browser UA returns the full page; product title/price/vendor in embedded JSON (`rg '"name"|"price"'`). shop.app links are third-party Shopify stores — verify the seller before trusting a price |
 | westnyc.com (Shopify boutiques generally) | agent-browser headless returns near-empty shell | Shopify JSON endpoints via plain httpie: `/search/suggest.json?q=...&resources[type]=product` works; `/products/<handle>.json` and `/collections/<x>/products.json` may be disabled per store |
 
