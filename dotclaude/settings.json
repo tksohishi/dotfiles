@@ -15,15 +15,23 @@
     "enabled": true,
     "filesystem": {
       "denyWrite": [
-        "**/.env",
-        "**/.env.*",
-        "**/.dev.vars",
-        "**/.prod.vars"
+        "/**/.env",
+        "/**/.env.local",
+        "/**/.env.production",
+        "/**/.env.development",
+        "/**/.env.staging",
+        "/**/.env.test",
+        "/**/.env.prod",
+        "/**/.env.dev",
+        "/**/.env.stage",
+        "/**/.dev.vars",
+        "/**/.prod.vars"
       ],
-      "allowWrite": [
-        "**/.env.example",
-        "**/.dev.vars.example",
-        "**/.prod.vars.example"
+      "allowRead": [
+        "/**/.env",
+        "/**/.env.*",
+        "/**/.dev.vars",
+        "/**/.prod.vars"
       ]
     }
   },
