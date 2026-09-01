@@ -11,30 +11,6 @@
     "commit": "",
     "pr": ""
   },
-  "sandbox": {
-    "enabled": true,
-    "filesystem": {
-      "denyWrite": [
-        "/**/.env",
-        "/**/.env.local",
-        "/**/.env.production",
-        "/**/.env.development",
-        "/**/.env.staging",
-        "/**/.env.test",
-        "/**/.env.prod",
-        "/**/.env.dev",
-        "/**/.env.stage",
-        "/**/.dev.vars",
-        "/**/.prod.vars"
-      ],
-      "allowRead": [
-        "/**/.env",
-        "/**/.env.*",
-        "/**/.dev.vars",
-        "/**/.prod.vars"
-      ]
-    }
-  },
   "permissions": {
     "allow": [
       "Bash(git add *)",
