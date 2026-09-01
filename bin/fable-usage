@@ -1,5 +1,5 @@
 #!/bin/zsh
-# fable-usage [YYYY-MM-DD] — aggregate claude-fable-5 token usage from Claude
+# fable-usage [YYYY-MM-DD] — aggregate claude-fable-5* token usage from Claude
 # Code session transcripts, per session, since the given local date. Default:
 # 7 days ago inclusive, matching the weekly usage bar. Reports output tokens
 # (the main quota driver) plus input/cache figures. Transcript lines repeat a
@@ -13,7 +13,7 @@ printf '%-72s %10s %8s %10s %12s %6s\n' "SESSION (since $day)" OUTPUT INPUT CACH
 
 find ~/.claude/projects -name '*.jsonl' -newermt "$day" 2>/dev/null | while read -r f; do
   jq -r --arg f "$f" '
-    select(.message.model == "claude-fable-5" and .timestamp) |
+    select((.message.model // "" | startswith("claude-fable-5")) and .timestamp) |
     [$f,
      (.message.id // .uuid),
      (.timestamp | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601),
