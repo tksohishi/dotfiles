@@ -102,12 +102,16 @@ fi
 
 EMDASH=$(printf '\xe2\x80\x94')
 SECTION=$(printf '\xc2\xa7')
+# HTML entity spellings evade the codepoint check (an &-mdash; entity in an
+# email-draft HTML body rendered as a real emdash, 2026-08-31). Match the
+# entity forms too; "-Ee" keeps the literal-vs-regex split explicit.
+EMDASH_RE="${EMDASH}|&mdash;|&#8212;|&#x2014;"
 
 REASON=""
 
-if printf '%s' "$CONTENT" | grep -q "$EMDASH"; then
-  EXCERPT=$(printf '%s' "$CONTENT" | grep -m1 -oE ".{0,40}${EMDASH}.{0,40}" | head -1)
-  REASON="Emdash (U+2014) detected in $FIELD of a publish-bound file. Replace with comma, colon, period, or parentheses per ~/.claude/CLAUDE.md Writing Style. Excerpt: …${EXCERPT}…"
+if printf '%s' "$CONTENT" | grep -qEe "$EMDASH_RE"; then
+  EXCERPT=$(printf '%s' "$CONTENT" | grep -m1 -oEe ".{0,40}(${EMDASH_RE}).{0,40}" | head -1)
+  REASON="Emdash (U+2014, incl. &mdash;/&#8212; entities) detected in $FIELD of a publish-bound file. Replace with comma, colon, period, or parentheses per ~/.claude/CLAUDE.md Writing Style. Excerpt: …${EXCERPT}…"
 elif printf '%s' "$CONTENT" | grep -q "$SECTION"; then
   EXCERPT=$(printf '%s' "$CONTENT" | grep -m1 -oE ".{0,40}${SECTION}.{0,40}" | head -1)
   REASON="Section sign (U+00A7) detected in $FIELD of a publish-bound file. Reads as an AI artifact in human-facing copy. Replace with the word 'Section', 'see', or omit the marker per ~/.claude/CLAUDE.md Writing Style. Excerpt: …${EXCERPT}…"
