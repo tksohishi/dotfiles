@@ -87,7 +87,6 @@ cask "zoom" # Password prompt: audio device
 
 mas "Amphetamine", id: 937984704
 mas "CotEditor", id: 1024640650
-mas "Day One", id: 1055511498
 mas "Keynote", id: 409183694
 mas "NordVPN", id: 905953485
 mas "Pages", id: 409201541
