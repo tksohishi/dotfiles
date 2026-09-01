@@ -568,6 +568,7 @@
     ]
   },
   "model": "fable",
+  "switchModelsOnFlag": false,
   "disableClaudeAiConnectors": true,
   "hooks": {
     "PreToolUse": [
