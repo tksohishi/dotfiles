@@ -2,16 +2,19 @@
 # fable-usage [YYYY-MM-DD] — aggregate claude-fable-5* token usage from Claude
 # Code session transcripts, per session, since the given local date. Default:
 # 7 days ago inclusive, matching the weekly usage bar. Reports output tokens
-# (the main quota driver) plus input/cache figures. Transcript lines repeat a
-# message id as streaming rewrites; dedup keeps the max output per id.
+# (the main quota driver) plus input/cache figures, then prompt-cache misses:
+# a request that re-cached >= 2000 tokens and > 5% of what it could have read
+# (Claude Code's own /usage definition). Misses are split by the idle gap
+# before the request: >= 55 min means the 1h TTL expired, shorter means the
+# prefix was invalidated (compaction, tool-result clearing, settings/tool
+# changes). Transcript lines repeat a message id as streaming rewrites; dedup
+# keeps the max output per id.
 set -euo pipefail
 
 day=${1:-$(date -v-6d +%Y-%m-%d)}
 since=$(date -j -f '%Y-%m-%d %H:%M:%S' "$day 00:00:00" +%s)
 
-printf '%-72s %10s %8s %10s %12s %6s\n' "SESSION (since $day)" OUTPUT INPUT CACHE_W CACHE_R MSGS
-
-find ~/.claude/projects -name '*.jsonl' -newermt "$day" 2>/dev/null | while read -r f; do
+rows=$(find ~/.claude/projects -name '*.jsonl' -newermt "$day" 2>/dev/null | while read -r f; do
   jq -r --arg f "$f" '
     select((.message.model // "" | startswith("claude-fable-5")) and .timestamp) |
     [$f,
@@ -25,18 +28,51 @@ find ~/.claude/projects -name '*.jsonl' -newermt "$day" 2>/dev/null | while read
 done | awk -v since="$since" -F'\t' '
   $3 >= since {
     key = $1 "\t" $2
-    if ($4 + 0 >= out[key] + 0) { out[key]=$4; inp[key]=$5; cw[key]=$6; cr[key]=$7; file[key]=$1 }
+    if ($4 + 0 >= out[key] + 0) { out[key]=$4; ts[key]=$3; inp[key]=$5; cw[key]=$6; cr[key]=$7 }
+  }
+  END { for (k in out) print k "\t" ts[k] "\t" out[k] "\t" inp[k] "\t" cw[k] "\t" cr[k] }
+' | sort -t$'\t' -k1,1 -k3,3n)
+
+printf '%-72s %10s %8s %10s %12s %6s %6s %10s\n' "SESSION (since $day)" OUTPUT INPUT CACHE_W CACHE_R MSGS MISSES MISS_TOK
+
+report=$(printf '%s\n' "$rows" | awk -F'\t' '
+  {
+    f=$1; t=$3; o=$4; i=$5; w=$6; r=$7
+    n[f]++; fout[f]+=o; fin[f]+=i; fcw[f]+=w; fcr[f]+=r
+    tout+=o; tin+=i; tcw+=w; tcr+=r
+    if (w >= 2000 && w > 0.05 * (w + r)) {
+      miss[f]++; misstok[f]+=w; tmiss++; tmisstok+=w
+      gap = (f in last) ? t - last[f] : -1
+      if (gap < 0) { first++; firsttok+=w }
+      else if (gap >= 55*60) { expired++; expiredtok+=w; if (gap > maxgap) maxgap=gap }
+      else if (gap >= 5*60) { mid++; midtok+=w }
+      else { inval++; invaltok+=w }
+    }
+    last[f]=t
   }
   END {
-    for (k in out) {
-      fout[file[k]] += out[k]; fin[file[k]] += inp[k]; fcw[file[k]] += cw[k]; fcr[file[k]] += cr[k]
-      n[file[k]]++
-      tout += out[k]; tin += inp[k]; tcw += cw[k]; tcr += cr[k]
-    }
     for (f in fout) {
-      name = f
-      sub(/^.*projects\//, "", name)
-      printf "%-72s %10d %8d %10d %12d %6d\n", name, fout[f], fin[f], fcw[f], fcr[f], n[f]
+      name = f; sub(/^.*projects\//, "", name)
+      printf "T\t%-72s %10d %8d %10d %12d %6d %6d %10d\n", name, fout[f], fin[f], fcw[f], fcr[f], n[f], miss[f], misstok[f]
     }
-    printf "%-72s %10d %8d %10d %12d\n", "TOTAL", tout, tin, tcw, tcr
-  }' | sort -k2 -rn
+    printf "S\t%-72s %10d %8d %10d %12d %6d %6d %10d\n", "TOTAL", tout, tin, tcw, tcr, NR, tmiss, tmisstok
+    printf "S\t\nS\tCACHE MISSES (re-cached >= 2000 tokens and > 5%% of the prefix)\n"
+    printf "S\t  session start   %4d  %10d tokens  (first request of each session; unavoidable)\n", first, firsttok
+    printf "S\t  TTL expired     %4d  %10d tokens  (idle >= 55 min before the request; longest %d min)\n", expired, expiredtok, maxgap/60
+    printf "S\t  idle 5-55 min   %4d  %10d tokens  (5m TTL expired if on usage credits; otherwise invalidated)\n", mid, midtok
+    printf "S\t  invalidated     %4d  %10d tokens  (idle < 5 min: compaction, tool-result clearing, settings/tool/MCP changes)\n", inval, invaltok
+    share = tcw > 0 ? 100 * (expiredtok + midtok + invaltok) / tcw : 0
+    printf "S\t  avoidable share of all cache writes: %.0f%%\n", share
+    printf "S\t\nS\tMITIGATION\n"
+    if (expiredtok > 0)
+      printf "S\t  - TTL expired: run /keepalive before stepping away for < 8h, or /clear an abandoned session; on return to a large session accept \"resume from summary\"\n"
+    if (midtok > 0)
+      printf "S\t  - idle 5-55 min: if these fell while on usage credits, nothing but /keepalive at a 4-min cadence helps (rarely worth it); otherwise treat as invalidated\n"
+    if (invaltok > 0)
+      printf "S\t  - invalidated: keep settings/hooks/MCP servers unchanged mid-session, avoid /compact on huge contexts (start fresh instead), and check /usage > Prompt cache (main) for the last miss cause\n"
+    if (expiredtok == 0 && midtok == 0 && invaltok == 0)
+      printf "S\t  - nothing avoidable in this window\n"
+  }')
+
+printf '%s\n' "$report" | grep '^T' | cut -f2- | sort -k2 -rn
+printf '%s\n' "$report" | grep '^S' | cut -f2-
