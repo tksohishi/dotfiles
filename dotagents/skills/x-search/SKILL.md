@@ -1,59 +1,44 @@
 ---
 name: x-search
-description: Search X (Twitter) via Hermes Agent's `x_search` tool, billed against the user's X Premium subscription quota (no per-call cost). Use when the user runs `/x-search <query>`, or asks to search X / Twitter / Tweets / ツイート for recent posts. Returns post text, URL, date, and author handle. Read-only; does not post.
+description: Search X (Twitter) via `x-search`, a thin wrapper over xAI's Responses API `x_search` tool authenticated with the Hermes-held X Premium OAuth token (subscription quota, no per-call cost, ~5s per query). Use when the user runs `/x-search <query>`, or asks to search X / Twitter / Tweets / ツイート for recent posts, or pastes an x.com post/article URL to read. Returns post text, URL, date, and author handle. Read-only; does not post.
 ---
 
 # X Search
 
-Shell out to `hermes -z` to invoke xAI's `x_search` tool, which routes through the user's X Premium OAuth credential. Search-only, no posting. Each call uses the X Premium subscription quota, not a paid API key.
+Run `x-search` (in `~/.dotfiles/bin/`, on PATH). It posts straight to `api.x.ai/v1/responses` with the `x_search` server-side tool and prints the model's plain-text answer. Hermes Agent is only the credential holder: the script asks Hermes's Python for the xai-oauth access token, which refreshes it when near expiry. No Hermes agent loop runs, so a query takes seconds, not minutes.
 
 ## Usage
 
-User invokes via `/x-search <query>`. `$ARGUMENTS` is the raw query string — pass it through to Hermes with a formatting wrapper.
-
-`$ARGUMENTS` may also be a single X URL (`x.com/<handle>/status/<id>` or `x.com/i/article/<id>`), in which case use the lookup form below instead of the search form. That is the only anonymous way to read an X article: articles are login-walled, and `agent-browser` is not signed in.
-
-## Run
-
-`-t` must come before `-z`. `hermes -z -t x_search "..."` fails with `argument -z/--oneshot: expected one argument`, because argparse refuses a value starting with `-`.
+`/x-search <query>`: pass `$ARGUMENTS` through as the query words.
 
 ```bash
-hermes -t x_search -z "Use the x_search tool to search X for: $ARGUMENTS
-
-Only include posts from accounts with a sizeable following (roughly 5,000+ followers) or from the company/people directly involved in the topic; skip anonymous or low-reach accounts. Return up to 5 most-relevant recent posts. For each, output:
-- Post text in quotes (truncate to ~200 chars with '…' if longer)
-- URL
-- Date, author handle, and approximate follower count (e.g. 2026-05-17 by @NousResearch, 120K followers)
-
-Separate posts with a blank line. No commentary or summary." 2>&1
+x-search $ARGUMENTS
 ```
 
-### Trending queries
-
-When the query asks what's "trending" (or hot / talked about right now), constrain the window explicitly: add "Only consider posts from the last 6-12 hours." to the prompt. Without it, ranking favors day-old viral posts whose accumulated engagement outscores a story that broke hours ago, so genuinely-current stories get buried.
-
-`-t x_search` restricts the toolset for this invocation regardless of global `hermes tools` config — the call stays on the subscription path even if other toolsets are re-enabled later.
-
-### Single post or article lookup
-
-```bash
-hermes -t x_search -z "Use the x_search tool to look up this specific X post: $ARGUMENTS
-
-Return the post's full text verbatim, its author handle, and its date. If it is an article, return the article body. No commentary." 2>&1
-```
-
-A post that links to an X article often resolves to the article body rather than the short post text; that is usually what you wanted, but say which one you got.
+If `$ARGUMENTS` is a single X URL (`x.com/<handle>/status/<id>` or `x.com/i/article/<id>`), the script switches to lookup mode and returns the post's full text, handle, and date, or the article body. This is the only anonymous way to read an X article; they are login-walled and `agent-browser` is not signed in. A post that links to an article often resolves to the article body rather than the short post text; say which one you got.
 
 Output is plain text. Quote it back to the user as-is unless they ask for a different format.
 
+## Options
+
+Map the user's phrasing onto flags instead of stuffing constraints into the query:
+
+- `--hours N`: use for "trending" / "what's hot right now" queries (6 or 12). Without it, ranking favors day-old viral posts that outscore a story that broke hours ago.
+- `--since YYYY-MM-DD` / `--until YYYY-MM-DD`: explicit date window. Date-only format; the API ignored full ISO timestamps in testing.
+- `--handles a,b,c`: only posts from named accounts (max 20). Also turns off the default 5,000+ follower filter.
+- `--any`: turn off the follower filter without naming handles.
+- `--limit N`: posts to return (default 5).
+- `--model M`: default `grok-4.20-0309-non-reasoning`. Reasoning models return the same posts about 10x slower; don't switch unless the user asks.
+- `--json`: raw API response, for debugging.
+
 ## Caveats
 
-- **Auth check (one-time).** Requires `xai-oauth` credential. If `hermes auth status xai-oauth` does not print `logged in`, ask the user to run `hermes auth add xai-oauth --type oauth` themselves (browser OAuth, can't be scripted). The older `hermes login` subcommand was removed.
-- **Subscription tier matters.** OAuth succeeds with any X Premium tier, but `x_search` calls only work if the xAI account behind the OAuth has Grok entitlement (X Premium / Premium+ or SuperGrok). Failure mode: OAuth passes, the call returns a 403 or quota error.
-- **`hermes doctor` warning is cosmetic.** It checks for `XAI_API_KEY` env var and shows `⚠ x_search (missing XAI_API_KEY)` even when OAuth is working. Trust the actual call result, not doctor.
+- **Auth (one-time).** Requires the Hermes `xai-oauth` credential. If the script fails with an auth error, ask the user to run `hermes auth add xai-oauth --type oauth` themselves (browser OAuth, can't be scripted). OAuth succeeds with any X Premium tier, but `x_search` only works if the account has Grok entitlement (Premium / Premium+ / SuperGrok); the failure mode is a 403 or quota error.
+- **Unofficial path.** The token is issued to Hermes's OAuth client; calling api.x.ai with it directly is not a documented xAI feature. If xAI or Hermes changes the client or token storage, fall back to `hermes -t x_search -z "<prompt>"` (slow but supported) and report it.
+- **Quota.** Draws on the subscription's Grok quota, shared with the Grok app. One query fires up to ~10 server-side x_search calls.
+- **`hermes doctor` warning is cosmetic.** It checks for `XAI_API_KEY` and warns even when OAuth works. Trust the actual call result.
 
 ## When NOT to use
 
-- Deep multi-step X research — `hermes -z` is one-shot. For follow-ups, suggest the user run `hermes` interactively.
 - Non-X web research — use WebSearch / WebFetch. `x_search` queries X posts only.
-- Posting / replying / DMs — not supported by `x_search`.
+- Posting / replying / DMs — not supported.

@@ -1,0 +1,98 @@
+#!/usr/bin/env bun
+// x-search — search X via xAI's Responses API x_search tool, authenticated
+// with the OAuth token Hermes Agent holds for the user's X Premium / SuperGrok
+// entitlement (subscription quota, no per-call cost). Hermes is only used for
+// login + token refresh; the search request itself goes straight to api.x.ai.
+//
+// Usage:
+//   x-search [options] <query words...>
+//   x-search [options] https://x.com/<handle>/status/<id>      (single post / article)
+// Options:
+//   --handles a,b,c   only posts from these handles (max 20)
+//   --hours N         only posts from the last N hours (use for "trending" queries)
+//   --since ISO       from_date (YYYY-MM-DD or full ISO8601)
+//   --until ISO       to_date
+//   --limit N         number of posts to return (default 5)
+//   --any             don't filter out low-reach accounts
+//   --model M         xAI model (default grok-4.20-0309-non-reasoning; reasoning
+//                     models take ~10x longer for the same results)
+//   --json            print the raw Responses API JSON
+
+import { execFileSync } from "node:child_process";
+
+const args = process.argv.slice(2);
+const opt: Record<string, string | boolean> = {};
+const words: string[] = [];
+for (let i = 0; i < args.length; i++) {
+  const a = args[i];
+  if (a === "--any" || a === "--json") opt[a.slice(2)] = true;
+  else if (a.startsWith("--")) opt[a.slice(2)] = args[++i] ?? "";
+  else words.push(a);
+}
+const query = words.join(" ").trim();
+if (!query) {
+  console.error("usage: x-search [--handles a,b] [--hours N] [--since ISO] [--until ISO] [--limit N] [--any] [--model M] [--json] <query | x.com URL>");
+  process.exit(2);
+}
+
+const tool: Record<string, unknown> = { type: "x_search" };
+if (opt.handles) tool.allowed_x_handles = String(opt.handles).split(",").map((h) => h.trim().replace(/^@/, "")).filter(Boolean);
+// The API honors YYYY-MM-DD but ignored full ISO timestamps in testing, so
+// --hours sends the date and leaves the hour bound to the prompt.
+if (opt.hours) tool.from_date = new Date(Date.now() - Number(opt.hours) * 3600_000).toISOString().slice(0, 10);
+if (opt.since) tool.from_date = String(opt.since);
+if (opt.until) tool.to_date = String(opt.until);
+
+const limit = Number(opt.limit ?? 5);
+const isUrl = /^https?:\/\/(x|twitter)\.com\//.test(query);
+const prompt = isUrl
+  ? `Use the x_search tool to look up this specific X post: ${query}
+
+Return the post's full text verbatim, its author handle, and its date. If it is an article, return the article body. No commentary.`
+  : `Use the x_search tool to search X for: ${query}
+
+${opt.any || opt.handles ? "" : "Only include posts from accounts with a sizeable following (roughly 5,000+ followers) or from the company/people directly involved in the topic; skip anonymous or low-reach accounts.\n"}${opt.hours ? `Only consider posts from the last ${opt.hours} hours.\n` : ""}Return up to ${limit} most-relevant recent posts. For each, output:
+- Post text in quotes (truncate to ~200 chars with '…' if longer)
+- URL
+- Date, author handle, and approximate follower count (e.g. 2026-05-17 by @NousResearch, 120K followers)
+
+Separate posts with a blank line. No commentary or summary.`;
+
+// Hermes's resolver refreshes the token when it is near expiry.
+const python = execFileSync("brew", ["--prefix", "hermes-agent"], { encoding: "utf8" }).trim() + "/libexec/bin/python3";
+const token = execFileSync(
+  python,
+  ["-c", "from hermes_cli.auth import resolve_xai_oauth_runtime_credentials as r; print(r()['api_key'])"],
+  { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
+).trim();
+if (!token) {
+  console.error("no xai-oauth token; run: hermes auth add xai-oauth --type oauth");
+  process.exit(1);
+}
+
+const res = await fetch("https://api.x.ai/v1/responses", {
+  method: "POST",
+  headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+  body: JSON.stringify({
+    model: String(opt.model ?? "grok-4.20-0309-non-reasoning"),
+    input: [{ role: "user", content: prompt }],
+    tools: [tool],
+  }),
+  signal: AbortSignal.timeout(180_000),
+});
+const body = await res.json();
+if (opt.json) {
+  console.log(JSON.stringify(body, null, 2));
+  process.exit(res.ok ? 0 : 1);
+}
+if (!res.ok) {
+  console.error(`xAI ${res.status}: ${JSON.stringify(body.error ?? body)}`);
+  process.exit(1);
+}
+const text = (body.output ?? [])
+  .filter((o: { type: string }) => o.type === "message")
+  .flatMap((o: { content?: { text?: string }[] }) => o.content ?? [])
+  .map((c: { text?: string }) => c.text ?? "")
+  .join("\n")
+  .trim();
+console.log(text || "(empty response)");
