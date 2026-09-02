@@ -48,6 +48,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - In conversational replies, drop filler, preambles, and hedging
   - Japanese: ご質問ありがとうございます preambles, えーと/まあ/基本的に filler, かもしれません/おそらく hedging
 - Don't restate the user's question before answering
+- Times: always in the user's local time zone (America/New_York unless the project's CONTEXT says otherwise), e.g. "9/2 08:07 EDT". Never show UTC or offsets. When a source gives UTC (logs, APIs, `updatedAt` fields), convert with `date` or TZ=America/New_York before writing the time; never do the conversion in your head
 - End-of-turn summary: 1-2 sentences max covering what changed + what's next. Don't append headers, tables, or multi-section breakdowns unless the content genuinely benefits (5+ items, side-by-side comparison, lookup reference)
 - Match structure to complexity: single-concept questions get a single-concept answer
 - Fragments OK when meaning is clear; use full sentences for ambiguous cases, security warnings, and destructive action confirmations
