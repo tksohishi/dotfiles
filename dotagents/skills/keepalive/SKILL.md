@@ -20,16 +20,16 @@ Cache economics: a ping re-reads the cached prefix at the cache-read price and r
 
 ## Schedule
 
-Invoke the `loop` skill with a 50-minute interval (not 55: the TTL clock starts at the request's start, and scheduler drift or a slow response pushes 55 past the hour). The loop prompt, with the deadline filled in:
+Invoke the `loop` skill in dynamic mode (no interval token; cron can't express 50 minutes cleanly, `*/50` fires at :00 and :50). On every wake, pick `delaySeconds: 3000` (50 minutes, not 55: the TTL clock starts at the request's start, and drift or a slow response pushes 55 past the hour) and `noop: true`. The loop prompt, with the deadline filled in; don't write "every" in it, the loop parser would read a trailing time as a cron interval:
 
 ```
-keepalive ping. Deadline <HH:MM local>. If the current local time is past the deadline, or the user has sent any message since this loop started, stop this loop (CronDelete) and say "keepalive stopped". Otherwise reply with exactly "ok". No tools, no analysis.
+keepalive ping, 50-minute cadence. Deadline <HH:MM local>. If the current local time is past the deadline, or the user has sent any message since this loop started, stop this loop (ScheduleWakeup stop) and say "keepalive stopped". Otherwise reply with exactly "ok". No tools, no analysis.
 ```
 
 ## Stopping
 
 - The user's first real message means they're back and refreshing the cache themselves: stop the loop in that turn, even if they don't mention it.
-- `/keepalive stop` stops it immediately.
+- `/keepalive stop` stops it immediately (ScheduleWakeup with stop: true).
 - Never extend past the deadline on your own; the user re-runs the skill if they need more.
 
 ## Report
