@@ -571,7 +571,9 @@
   "switchModelsOnFlag": false,
   "disableClaudeAiConnectors": true,
   "deniedMcpServers": [
-    { "serverName": "claude-in-chrome" }
+    {
+      "serverName": "claude-in-chrome"
+    }
   ],
   "hooks": {
     "PreToolUse": [
@@ -687,6 +689,16 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/plan-delegation-nudge.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/fetch-blocked-detect.sh",
             "timeout": 5
           }
         ]
