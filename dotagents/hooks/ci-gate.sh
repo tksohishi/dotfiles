@@ -19,8 +19,31 @@ runs=$(cd "$cwd" && gh run list --commit "$sha" --json databaseId,workflowName,s
 short=${sha:0:7}
 block() { jq -n --arg r "$1" '{decision:"block", reason:$r}'; exit 0; }
 
+# Second line of defense behind ci-gate-record.sh: a marker for a repo with no
+# push/pull_request-triggered workflow can never resolve, so drop it instead of
+# blocking. Same parser as ci-gate-record.sh; keep them in sync.
+has_push_workflow() {
+  local f
+  for f in "$1"/.github/workflows/*.yml "$1"/.github/workflows/*.yaml; do
+    [ -f "$f" ] || continue
+    awk '
+      /^[[:space:]]*#/ { next }
+      /^("on"|'"'"'on'"'"'|on)[[:space:]]*:/ {
+        inon = 1; v = $0; sub(/^[^:]*:[[:space:]]*/, "", v)
+        if (v ~ /(^|[^a-z_])(push|pull_request)([^a-z_]|$)/) { found = 1; exit }
+        next
+      }
+      inon && /^[^[:space:]#]/ { inon = 0 }
+      inon && /^[[:space:]]+(-[[:space:]]*)?(push|pull_request)[[:space:]]*(:|$)/ { found = 1; exit }
+      END { exit !found }
+    ' "$f" && return 0
+  done
+  return 1
+}
+
 if [ "$(echo "$runs" | jq 'length')" = "0" ]; then
-  block "CI gate: no Actions runs found yet for pushed commit $short. Wait ~15s (sleep is blocked; use gh run list --commit $sha) and end the turn again. If this repo has no workflow for this branch, say so explicitly."
+  if ! has_push_workflow "$cwd"; then rm -f "$marker"; exit 0; fi
+  block "CI gate: no Actions runs found yet for pushed commit $short. Wait ~15s (sleep is blocked; use gh run list --commit $sha) and end the turn again."
 fi
 pending=$(echo "$runs" | jq -r '[.[] | select(.status != "completed")] | map("\(.workflowName) (\(.databaseId))") | join(", ")')
 if [ -n "$pending" ]; then

@@ -15,6 +15,7 @@ fake_gh() {
   chmod +x "$BATS_TEST_TMPDIR/bin/gh"
 }
 make_marker() { jq -nc --arg cwd "$BATS_TEST_TMPDIR" --argjson blocks "${1:-0}" '{cwd:$cwd,sha:"abc1234def",blocks:$blocks}' > "$MARKER"; }
+push_workflow() { mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"; printf 'on:\n  push:\n' > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"; }
 input() { echo '{"session_id":"sid-1","stop_hook_active":false}'; }
 
 @test "no marker: passes silently" {
@@ -24,11 +25,21 @@ input() { echo '{"session_id":"sid-1","stop_hook_active":false}'; }
 }
 
 @test "no runs yet: blocks and keeps the marker" {
-  make_marker; fake_gh '[]'
+  make_marker; push_workflow; fake_gh '[]'
   run "$HOOK" <<< "$(input)"
   [[ "$output" == *'"decision": "block"'* ]]
   [[ "$output" == *'no Actions runs found yet'* ]]
   [ -f "$MARKER" ]
+}
+
+@test "no runs and no push-triggered workflow: clears the marker silently" {
+  make_marker; fake_gh '[]'
+  mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"
+  printf 'on:\n  issues:\n    types: [opened]\n' > "$BATS_TEST_TMPDIR/.github/workflows/issues.yml"
+  run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ ! -e "$MARKER" ]
 }
 
 @test "in-progress run: blocks with the run id and keeps the marker" {
