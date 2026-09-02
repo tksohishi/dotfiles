@@ -744,6 +744,15 @@
             "timeout": 30
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/no-bang-sudo.sh",
+            "timeout": 5
+          }
+        ]
       }
     ]
   },
