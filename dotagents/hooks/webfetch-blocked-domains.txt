@@ -32,3 +32,5 @@ t.me|Telegram checks go through the tg CLI, not the web: tg chats to find the ch
 telegram.me|Telegram checks go through the tg CLI, not the web: tg chats to find the chat, tg read <chat> for messages (tg --help for details). Don't scrape t.me or web.telegram.org via browser tools.
 web.telegram.org|Telegram checks go through the tg CLI, not the web: tg chats to find the chat, tg read <chat> for messages (tg --help for details). (core.telegram.org API docs stay fetchable.)
 pacsun.com|403 to WebFetch, httpie+UA and headless agent-browser. Headed patchright with persistent profile works (verified 2026-09-02); see the fetch-blocked skill.
+us.dailypaperclothing.com|403 to WebFetch; plain httpie works (add ?country=US for USD). See fetch-blocked skill.
+ssense.com|403 to WebFetch and httpie, Cloudflare verify page to headless agent-browser; headed patchright-fetch works. See fetch-blocked skill.
