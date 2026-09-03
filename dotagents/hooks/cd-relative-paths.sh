@@ -10,7 +10,9 @@
 # or use `git -C <dir>`.
 #
 # Fires only when ALL of these hold:
-#   - a segment (split on &&, ;, ||, newline) starts with cd/pushd
+#   - a segment (split on &&, ;, ||, newline) starts with cd/pushd whose
+#     target can leave the working tree (absolute, ~, $VAR, `..`, `-`, none).
+#     `cd packages/api && ls src/` inside a monorepo is left alone.
 #   - a LATER segment (or a pipeline stage inside it) runs one of
 #     rg grep cat sed head tail fd ls find
 #   - that command has a path-position argument that is not absolute
@@ -67,6 +69,8 @@ check_stage() {
       if [[ "$t" =~ $VALUE_FLAGS_RE ]]; then i=$((i + 1)); continue; fi
       [[ "$t" == -* ]] && continue
     fi
+    # Redirects and heredocs (2>/dev/null, >out, <<EOF, &>log) are not paths.
+    [[ "$t" =~ ^[0-9]*[\<\>] || "$t" == \&* ]] && continue
     if [ $pattern_pending -eq 1 ]; then pattern_pending=0; continue; fi
     if ! is_absolute "$t"; then
       OFFENDER="$tool $t"
@@ -83,7 +87,18 @@ while IFS= read -r seg; do
   [ -z "$seg" ] && continue
   first="${seg%%[[:space:]]*}"
   if [ "$first" = "cd" ] || [ "$first" = "pushd" ]; then
-    cd_seen=1
+    # Only a cd that can leave the working tree matters: Claude Code resolves
+    # `cd packages/api && ls src/` fine (docs: read-only when the target is
+    # inside the working directory). Escaping targets: absolute, ~, $VAR,
+    # `..` anywhere, `-` (previous dir), or no target (home).
+    target="${seg#"$first"}"
+    target="${target#"${target%%[![:space:]]*}"}"
+    target="${target%%[[:space:]]*}"
+    target="${target#[\"\']}"
+    target="${target%[\"\']}"
+    case "$target" in
+      '' | /* | '~'* | '$'* | -* | *..*) cd_seen=1 ;;
+    esac
     continue
   fi
   [ $cd_seen -eq 0 ] && continue

@@ -81,6 +81,46 @@ bash_input() {
   [ -z "$output" ]
 }
 
+@test "allows in-tree cd (monorepo package) with relative paths" {
+  run "$HOOK" <<< "$(bash_input "cd packages/api && rg -n 'x' src/index.ts; ls src/")"
+  [ -z "$output" ]
+}
+
+@test "allows in-tree cd with ./ prefix" {
+  run "$HOOK" <<< "$(bash_input "cd ./apps/web && cat package.json")"
+  [ -z "$output" ]
+}
+
+@test "denies cd .. with relative path" {
+  run "$HOOK" <<< "$(bash_input 'cd ../other && cat README.md')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies cd \$VAR with relative path" {
+  run "$HOOK" <<< "$(bash_input 'cd "$DIR" && ls src')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "denies bare cd (home) with relative path" {
+  run "$HOOK" <<< "$(bash_input 'cd && cat .zshrc')"
+  [[ "$output" == *deny* ]]
+}
+
+@test "allows redirect tokens after cd" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/proj && rg pattern /abs/src 2>/dev/null > /abs/out; ls /abs &>/dev/null')"
+  [ -z "$output" ]
+}
+
+@test "allows heredoc after cd" {
+  run "$HOOK" <<< "$(bash_input $'cd ~/proj && cat <<\'EOF\' | pbcopy\nhi\nEOF')"
+  [ -z "$output" ]
+}
+
+@test "still denies relative path alongside a redirect" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/proj && rg pattern src 2>/dev/null')"
+  [[ "$output" == *"rg src"* ]]
+}
+
 @test "allows empty command" {
   run "$HOOK" <<< '{"tool_input": {}}'
   [ "$status" -eq 0 ]
