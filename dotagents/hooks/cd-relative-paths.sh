@@ -26,11 +26,23 @@ CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command // empty')
 [ -z "$CMD" ] && exit 0
 
 TOOLS_RE='^(rg|grep|egrep|fgrep|cat|sed|head|tail|fd|ls|find)$'
-# Flags that consume the next token, per tool. The value must not be
-# mistaken for a path.
-VALUE_FLAGS_RE='^(-g|-t|-T|-e|-f|-m|-A|-B|-C|-M|-d|-E|-x|-X|-S|-n|-c|--glob|--type|--type-not|--regexp|--file|--max-count|--after-context|--before-context|--context|--max-columns|--include|--exclude|--exclude-dir|--extension|--max-depth|--min-depth|--expression|--lines|--bytes)$'
-# Tools whose first positional is a pattern/script, not a path.
+# Flags that consume the next token, per tool (so the value is not
+# mistaken for a path). Boolean flags like `cat -n`, `tail -f`, `ls -t`,
+# `sed -n` must NOT be listed.
+value_flags_for() {
+  case "$1" in
+    rg) echo '^(-g|-t|-T|-e|-f|-m|-A|-B|-C|-M|-d|-E|-r|--glob|--iglob|--type|--type-not|--regexp|--file|--max-count|--after-context|--before-context|--context|--max-columns|--max-depth|--encoding|--replace|--threads|-j)$' ;;
+    grep | egrep | fgrep) echo '^(-e|-f|-m|-A|-B|-C|-d|-D|--regexp|--file|--max-count|--after-context|--before-context|--context|--include|--exclude|--exclude-dir|--directories)$' ;;
+    sed) echo '^(-e|-f|--expression|--file)$' ;;
+    head | tail) echo '^(-n|-c|--lines|--bytes)$' ;;
+    fd) echo '^(-e|-t|-E|-d|-x|-X|-S|-o|--extension|--type|--exclude|--max-depth|--min-depth|--exec|--exec-batch|--size|--owner|--threads|-j)$' ;;
+    *) echo '^$' ;;
+  esac
+}
+# Tools whose first positional is a pattern/script, not a path, unless
+# the pattern was supplied through a flag (rg/grep -e/-f, sed -e/-f).
 PATTERN_FIRST_RE='^(rg|grep|egrep|fgrep|fd|sed)$'
+PATTERN_FLAG_RE='^(-e|-f|--regexp|--file|--expression)$'
 
 is_absolute() {
   case "$1" in
@@ -60,13 +72,19 @@ check_stage() {
 
   local pattern_pending=0
   [[ "$tool" =~ $PATTERN_FIRST_RE ]] && pattern_pending=1
+  local value_flags_re
+  value_flags_re=$(value_flags_for "$tool")
   local dashdash=0
   while [ $i -lt "${#toks[@]}" ]; do
     local t="${toks[$i]}"
     i=$((i + 1))
     if [ $dashdash -eq 0 ]; then
       if [ "$t" = "--" ]; then dashdash=1; continue; fi
-      if [[ "$t" =~ $VALUE_FLAGS_RE ]]; then i=$((i + 1)); continue; fi
+      if [[ "$t" =~ $value_flags_re ]]; then
+        [[ "$tool" != fd && "$t" =~ $PATTERN_FLAG_RE ]] && pattern_pending=0
+        i=$((i + 1))
+        continue
+      fi
       [[ "$t" == -* ]] && continue
     fi
     # Redirects and heredocs (2>/dev/null, >out, <<EOF, &>log) are not paths.

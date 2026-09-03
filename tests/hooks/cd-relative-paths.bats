@@ -121,6 +121,51 @@ bash_input() {
   [[ "$output" == *"rg src"* ]]
 }
 
+@test "denies sed -n script with relative file" {
+  run "$HOOK" <<< "$(bash_input "cd ~/x && sed -n '1,5p' file.txt")"
+  [[ "$output" == *"sed file.txt"* ]]
+}
+
+@test "denies cat -n relative file" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && cat -n file.txt')"
+  [[ "$output" == *"cat file.txt"* ]]
+}
+
+@test "denies tail -f relative file" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && tail -f app.log')"
+  [[ "$output" == *"tail app.log"* ]]
+}
+
+@test "denies ls -t relative dir" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && ls -t src')"
+  [[ "$output" == *"ls src"* ]]
+}
+
+@test "denies rg -e pattern with relative path" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && rg -e pat src')"
+  [[ "$output" == *"rg src"* ]]
+}
+
+@test "denies sed -e script with relative file" {
+  run "$HOOK" <<< "$(bash_input "cd ~/x && sed -e 's/a/b/' file.txt")"
+  [[ "$output" == *"sed file.txt"* ]]
+}
+
+@test "allows fd -e ext -t f pattern with absolute root" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && fd -e ts -t f pat /abs')"
+  [ -z "$output" ]
+}
+
+@test "denies fd pattern with relative root" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && fd -e ts pat src')"
+  [[ "$output" == *"fd src"* ]]
+}
+
+@test "allows head -n 30 with absolute file" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && head -n 30 /abs/file')"
+  [ -z "$output" ]
+}
+
 @test "allows empty command" {
   run "$HOOK" <<< '{"tool_input": {}}'
   [ "$status" -eq 0 ]
