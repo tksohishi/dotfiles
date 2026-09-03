@@ -24,6 +24,10 @@
           {
             "type": "command",
             "command": "$HOME/.codex/hooks/gog-mutations.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/cd-relative-paths.sh"
           }
         ]
       }

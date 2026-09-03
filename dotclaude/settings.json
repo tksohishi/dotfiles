@@ -624,6 +624,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/gog-mutations.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/cd-relative-paths.sh",
+            "timeout": 5
           }
         ]
       },
