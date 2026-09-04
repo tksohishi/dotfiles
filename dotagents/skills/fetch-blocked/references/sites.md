@@ -6,6 +6,7 @@ Look a host up with `rg -i '<host>' references/sites.md` from the skill director
 
 | Site | WebFetch | What works |
 |---|---|---|
+| safe-client.safe.global (Safe{Wallet} client gateway, e.g. `/v1/chains/1/safes/<addr>/collectibles`) | n/a (not tried) | httpie GET 403 (2026-09-04). Use the transaction service instead: `safe-transaction-mainnet.safe.global/api/v1/safes/<addr>/balances/`, `/transfers/?erc721=true` are 200 to plain httpie |
 | qantas.com | 60s timeout (no block signature) | plain httpie, 200 server-rendered (~19KB, Akamai Bot Manager cookies but no challenge; verified 2026-09-02). Response is geo-routed by a `usercontext` cookie |
 | book.qantas.com (award/cash search) | n/a (POST form from the qantas.com widget) | No verified path (2026-09-02). Headless agent-browser: `ERR_HTTP2_PROTOCOL_ERROR` on api/book hosts. Headed agent-browser fills the form logged out (no login wall) but the POST to `/qf-booking/dyn/air/tripflow.redirect` gets an Akamai "Access Denied"; patchright-fetch headed same (GET only, so not clean evidence). Untested: seeding cookies via the `/qf-booking/dyn/air/prefetcher` script then replaying the POST with httpie. Airport lookup `api.qantas.com/flight/routesearch/v1/airports?locale=en_US&queryFrom=LAX` is 200 to plain httpie. Use seats.aero (`seats` CLI, source `qantas`) for Qantas FF availability |
 | roadtrailrun.com | Cloudflare "Just a moment" (also to headless patchright) | httpie sometimes 200, sometimes Cloudflare; `patchright-fetch` headed clears it in ~12s (verified 2026-09-02) |
