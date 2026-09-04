@@ -135,4 +135,19 @@ if [ "$locked" -eq 1 ]; then
     trap 'rm -rf "$LOCK"' EXIT
 fi
 
-"$REAL" "$@"
+# An unresponsive daemon (client gives up with "daemon may be busy or
+# unresponsive", os error 35) never recovers on its own; close the session
+# and retry the same call once. Stderr goes through a file so it can be
+# inspected, then is replayed.
+errf="${TMPDIR:-/tmp}/agent-browser-$$.err"
+"$REAL" "$@" 2> "$errf"
+rc=$?
+cat "$errf" >&2
+if grep -q "daemon may be busy or unresponsive" "$errf"; then
+    echo "agent-browser wrapper: daemon unresponsive; closing session and retrying once" >&2
+    "$REAL" close >/dev/null 2>&1 || true
+    "$REAL" "$@"
+    rc=$?
+fi
+rm -f "$errf"
+exit $rc
