@@ -171,3 +171,34 @@ bash_input() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+@test "denies grep with | inside a quoted pattern (pipe must not split the stage)" {
+  run "$HOOK" <<< "$(bash_input "cd /private/tmp/claude-501/x/scratchpad && jq -r '\"\\(.date)|\\(.sender)\"' kudasai.jsonl > flat.txt && grep -inE 'pons|cashcat|RH' flat.txt | head -60")"
+  [[ "$output" == *deny* ]]
+  [[ "$output" == *"grep flat.txt"* ]]
+}
+
+@test "denies sed script containing ; with relative file" {
+  run "$HOOK" <<< "$(bash_input "cd ~/x && sed -n 's/a/b/;p' file.txt")"
+  [[ "$output" == *"sed file.txt"* ]]
+}
+
+@test "allows 2>&1 and spaced redirect targets after cd" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/proj && cat /abs/file 2>&1 > out.txt; ls /abs >> log.txt')"
+  [ -z "$output" ]
+}
+
+@test "denies relative path on a newline after cd" {
+  run "$HOOK" <<< "$(bash_input $'cd ~/proj\ncat README.md')"
+  [[ "$output" == *"cat README.md"* ]]
+}
+
+@test "allows && inside quotes after cd" {
+  run "$HOOK" <<< "$(bash_input "cd ~/proj && rg 'a && b' /abs/file")"
+  [ -z "$output" ]
+}
+
+@test "denies relative path inside a subshell after cd" {
+  run "$HOOK" <<< "$(bash_input '(cd ~/proj && cat README.md)')"
+  [[ "$output" == *"cat README.md"* ]]
+}

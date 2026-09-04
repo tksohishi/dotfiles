@@ -10,7 +10,7 @@
 # or use `git -C <dir>`.
 #
 # Fires only when ALL of these hold:
-#   - a segment (split on &&, ;, ||, newline) starts with cd/pushd whose
+#   - a segment (split on &&, ;, ||, &, newline) starts with cd/pushd whose
 #     target can leave the working tree (absolute, ~, $VAR, `..`, `-`, none).
 #     `cd packages/api && ls src/` inside a monorepo is left alone.
 #   - a LATER segment (or a pipeline stage inside it) runs one of
@@ -20,6 +20,10 @@
 #
 # Not blocked: `cd` alone, `cd X && git -C ...`, absolute paths after a cd,
 # and tools with no positional path at all (`cd X && head -30`).
+#
+# The command is tokenized with a quote-aware scanner (single/double quotes,
+# backslashes) so operators inside quoted strings, e.g. the `|` in
+# `grep -E 'a|b' file`, do not split stages and hide the path argument.
 
 TOOL_INPUT=$(cat)
 CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command // empty')
@@ -51,13 +55,51 @@ is_absolute() {
   return 1
 }
 
-# Returns 0 and sets OFFENDER if the pipeline stage has a relative path arg.
+# Tokenize the command. Fills TOKS (text, quotes removed) and KINDS:
+# "w" for a word, "o" for an unquoted operator (&&, ||, |, ;, &).
+# Newlines and unquoted ( ) act as `;`. A heredoc body is swallowed as
+# words; it contains no cd/tool shapes that matter.
+TOKS=()
+KINDS=()
+tokenize() {
+  local s="$1" n=${#1} i=0 c cur="" have=0 q=""
+  flush() { if [ $have -eq 1 ]; then TOKS+=("$cur"); KINDS+=("w"); fi; cur=""; have=0; }
+  while [ $i -lt "$n" ]; do
+    c="${s:$i:1}"
+    if [ -n "$q" ]; then
+      if [ "$c" = "$q" ]; then q=""
+      elif [ "$q" = '"' ] && [ "$c" = '\' ] && [ $((i + 1)) -lt "$n" ]; then i=$((i + 1)); cur+="${s:$i:1}"
+      else cur+="$c"; fi
+      i=$((i + 1)); continue
+    fi
+    case "$c" in
+      "'" | '"') q="$c"; have=1 ;;
+      '\') i=$((i + 1)); cur+="${s:$i:1}"; have=1 ;;
+      ' ' | $'\t') flush ;;
+      $'\n' | ';' | '(' | ')') flush; TOKS+=(";"); KINDS+=("o") ;;
+      '&')
+        # `2>&1` and `&>log` are redirect syntax, not a background operator.
+        if [[ "$cur" == *[\<\>] || "${s:$((i + 1)):1}" == '>' ]]; then cur+="$c"; have=1
+        else
+          flush
+          if [ "${s:$((i + 1)):1}" = '&' ]; then TOKS+=("&&"); i=$((i + 1)); else TOKS+=("&"); fi
+          KINDS+=("o")
+        fi ;;
+      '|')
+        flush
+        if [ "${s:$((i + 1)):1}" = '|' ]; then TOKS+=("||"); i=$((i + 1)); else TOKS+=("|"); fi
+        KINDS+=("o") ;;
+      *) cur+="$c"; have=1 ;;
+    esac
+    i=$((i + 1))
+  done
+  flush
+}
+
+# Args: tokens of one pipeline stage. Returns 0 and sets OFFENDER if the
+# stage runs a file tool with a relative path argument.
 check_stage() {
-  local stage="$1"
-  local -a toks=()
-  local tok
-  # xargs tokenizes shell quotes; unbalanced quotes make it fail -> no tokens.
-  while IFS= read -r tok; do toks+=("$tok"); done < <(printf '%s' "$stage" | xargs printf '%s\n' 2>/dev/null)
+  local -a toks=("$@")
   [ "${#toks[@]}" -eq 0 ] && return 1
 
   local i=0
@@ -88,7 +130,11 @@ check_stage() {
       [[ "$t" == -* ]] && continue
     fi
     # Redirects and heredocs (2>/dev/null, >out, <<EOF, &>log) are not paths.
-    [[ "$t" =~ ^[0-9]*[\<\>] || "$t" == \&* ]] && continue
+    # A bare operator (`>`, `2>`, `<<`) consumes the following token too.
+    if [[ "$t" =~ ^[0-9]*[\<\>] || "$t" == \&* ]]; then
+      [[ "$t" =~ ^[0-9]*[\<\>\&]+$ ]] && i=$((i + 1))
+      continue
+    fi
     if [ $pattern_pending -eq 1 ]; then pattern_pending=0; continue; fi
     if ! is_absolute "$t"; then
       OFFENDER="$tool $t"
@@ -98,32 +144,41 @@ check_stage() {
   return 1
 }
 
+tokenize "$CMD"
+
 cd_seen=0
 OFFENDER=""
-while IFS= read -r seg; do
-  seg="${seg#"${seg%%[![:space:]]*}"}"
-  [ -z "$seg" ] && continue
-  first="${seg%%[[:space:]]*}"
-  if [ "$first" = "cd" ] || [ "$first" = "pushd" ]; then
-    # Only a cd that can leave the working tree matters: Claude Code resolves
-    # `cd packages/api && ls src/` fine (docs: read-only when the target is
-    # inside the working directory). Escaping targets: absolute, ~, $VAR,
-    # `..` anywhere, `-` (previous dir), or no target (home).
-    target="${seg#"$first"}"
-    target="${target#"${target%%[![:space:]]*}"}"
-    target="${target%%[[:space:]]*}"
-    target="${target#[\"\']}"
-    target="${target%[\"\']}"
-    case "$target" in
-      '' | /* | '~'* | '$'* | -* | *..*) cd_seen=1 ;;
-    esac
-    continue
+stage=()
+seg_start=1
+end_stage() {
+  if [ $seg_start -eq 1 ] && [ "${#stage[@]}" -gt 0 ]; then
+    local first="${stage[0]}"
+    if [ "$first" = "cd" ] || [ "$first" = "pushd" ]; then
+      # Only a cd that can leave the working tree matters: Claude Code
+      # resolves `cd packages/api && ls src/` fine (docs: read-only when the
+      # target is inside the working directory). Escaping targets: absolute,
+      # ~, $VAR, `..` anywhere, `-` (previous dir), or no target (home).
+      case "${stage[1]:-}" in
+        '' | /* | '~'* | '$'* | -* | *..*) cd_seen=1 ;;
+      esac
+      stage=()
+      return
+    fi
   fi
-  [ $cd_seen -eq 0 ] && continue
-  while IFS= read -r stage; do
-    if check_stage "$stage"; then break 2; fi
-  done < <(printf '%s\n' "$seg" | sed -E 's/\|/\n/g')
-done < <(printf '%s\n' "$CMD" | sed -E 's/(&&|\|\||;)/\n/g')
+  if [ $cd_seen -eq 1 ] && [ -z "$OFFENDER" ]; then
+    check_stage "${stage[@]}"
+  fi
+  stage=()
+}
+for ((k = 0; k < ${#TOKS[@]}; k++)); do
+  if [ "${KINDS[$k]}" = "o" ]; then
+    end_stage
+    if [ "${TOKS[$k]}" = "|" ]; then seg_start=0; else seg_start=1; fi
+  else
+    stage+=("${TOKS[$k]}")
+  fi
+done
+end_stage
 
 [ -z "$OFFENDER" ] && exit 0
 
