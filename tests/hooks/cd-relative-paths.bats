@@ -202,3 +202,99 @@ bash_input() {
   run "$HOOK" <<< "$(bash_input '(cd ~/proj && cat README.md)')"
   [[ "$output" == *"cat README.md"* ]]
 }
+
+@test "skips heredoc bodies (data, not commands)" {
+  run "$HOOK" <<< "$(bash_input $'cd ~/x && python3 - <<\'EOF\'\nprint("a" | "b")\ncat f\nEOF\nls /abs')"
+  [ -z "$output" ]
+}
+
+@test "heredoc with unbalanced quote in body does not hide a later read" {
+  run "$HOOK" <<< "$(bash_input $'cd ~/x && cat <<EOF > out.txt\nit\'s\nEOF\ncat f')"
+  [[ "$output" == *"cat f"* ]]
+}
+
+@test "allows heredoc redirect target after cd" {
+  run "$HOOK" <<< "$(bash_input $'cd ~/x && cat > script.sh <<\'EOF\'\necho hi\nEOF')"
+  [ -z "$output" ]
+}
+
+@test "ignores comments" {
+  run "$HOOK" <<< "$(bash_input $'cd ~/x; # note && cat f\nls /abs')"
+  [ -z "$output" ]
+}
+
+@test "backslash-newline continuation is whitespace" {
+  run "$HOOK" <<< "$(bash_input $'cd ~/x && rg -n pat \\\n  /abs')"
+  [ -z "$output" ]
+  run "$HOOK" <<< "$(bash_input $'cd ~/x && rg -n pat \\\n  src')"
+  [[ "$output" == *"rg src"* ]]
+}
+
+@test "denies inside a brace group" {
+  run "$HOOK" <<< "$(bash_input '{ cd ~/x; cat f; }')"
+  [[ "$output" == *"cat f"* ]]
+}
+
+@test "keeps \${VAR} and brace expansion as one word" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && cat ${HOME}/file; ls ${d}/x')"
+  [[ "$output" == *'ls ${d}/x'* ]]
+}
+
+@test "denies through time/sudo/! wrappers and prefix redirects" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && time cat f')"
+  [[ "$output" == *"cat f"* ]]
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && 2>/dev/null cat f')"
+  [[ "$output" == *"cat f"* ]]
+  run "$HOOK" <<< "$(bash_input 'builtin cd ~/x && ! cat f')"
+  [[ "$output" == *"cat f"* ]]
+}
+
+@test "denies --regexp=PAT with relative path" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && rg --regexp=PAT src')"
+  [[ "$output" == *"rg src"* ]]
+}
+
+@test "denies relative pattern file (-f) and relative input redirect" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && rg -f patterns /abs')"
+  [[ "$output" == *"rg patterns"* ]]
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && cat < rel.txt')"
+  [[ "$output" == *"cat <rel.txt"* ]]
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && cat < /abs/rel.txt')"
+  [ -z "$output" ]
+}
+
+@test "quoted pattern starting with < is not a redirect" {
+  run "$HOOK" <<< "$(bash_input "cd ~/x && rg '<title>[^<]*' /abs/f")"
+  [ -z "$output" ]
+  run "$HOOK" <<< "$(bash_input "cd ~/x && rg '<title>[^<]*' f")"
+  [[ "$output" == *"rg f"* ]]
+}
+
+@test "allows find expression operands (-name, -exec grep {} +)" {
+  run "$HOOK" <<< "$(bash_input "cd ~/x && find /abs -name '*.ts' -exec grep -l pat {} +")"
+  [ -z "$output" ]
+}
+
+@test "allows BSD sed -i '' with absolute file" {
+  run "$HOOK" <<< "$(bash_input "cd ~/x && sed -i '' 's/a/b/' /abs/file")"
+  [ -z "$output" ]
+}
+
+@test "nested quotes inside \$(...) do not flip quote parity" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && rg "$(rg -l foo "/abs")" /abs; ls /abs')"
+  [ -z "$output" ]
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && echo "$(cat "f")" && cat g')"
+  [[ "$output" == *"cat g"* ]]
+}
+
+@test "top-level \$(...) is inspected, without a stray \$ token" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && rg foo $(rg -l foo --glob "*.py" /abs | head -1)')"
+  [ -z "$output" ]
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && rg foo $(rg -l foo src)')"
+  [[ "$output" == *"rg src"* ]]
+}
+
+@test "allows here-string and ls with only flags" {
+  run "$HOOK" <<< "$(bash_input 'cd ~/x && cat <<< "$x" | head; ls -la')"
+  [ -z "$output" ]
+}
