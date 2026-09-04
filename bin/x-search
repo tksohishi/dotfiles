@@ -17,17 +17,47 @@
 //   --model M         xAI model (default grok-4.20-0309-non-reasoning; reasoning
 //                     models take ~10x longer for the same results)
 //   --json            print the raw Responses API JSON
+//   --usage           print today's and the last 7 days' call counts from the ledger and exit
+//
+// Every call is appended to ~/.cache/x-search/usage.jsonl (time, mode, query, HTTP status, number of
+// server-side x_search calls the model made). The subscription quota is not published, so the ledger
+// is how a daily budget gets sized.
 
 import { execFileSync } from "node:child_process";
+import { appendFileSync, mkdirSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+
+const LEDGER = `${homedir()}/.cache/x-search/usage.jsonl`;
+type Entry = { at: string; mode: "search" | "lookup"; query: string; status: number; toolCalls: number };
+function readLedger(): Entry[] {
+  try { return readFileSync(LEDGER, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)); } catch { return []; }
+}
 
 const args = process.argv.slice(2);
 const opt: Record<string, string | boolean> = {};
 const words: string[] = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
-  if (a === "--any" || a === "--json") opt[a.slice(2)] = true;
+  if (a === "--any" || a === "--json" || a === "--usage") opt[a.slice(2)] = true;
   else if (a.startsWith("--")) opt[a.slice(2)] = args[++i] ?? "";
   else words.push(a);
+}
+if (opt.usage) {
+  const entries = readLedger();
+  const day = (d: Date) => d.toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
+  const today = day(new Date());
+  const week = new Date(Date.now() - 7 * 86400_000);
+  const rows = new Map<string, { calls: number; toolCalls: number; errors: number }>();
+  for (const e of entries) {
+    if (new Date(e.at) < week) continue;
+    const k = day(new Date(e.at));
+    const r = rows.get(k) ?? { calls: 0, toolCalls: 0, errors: 0 };
+    r.calls++; r.toolCalls += e.toolCalls; if (e.status !== 200) r.errors++;
+    rows.set(k, r);
+  }
+  for (const [k, r] of [...rows].sort()) console.log(`${k}${k === today ? " (today)" : ""}: ${r.calls} calls, ${r.toolCalls} x_search tool calls${r.errors ? `, ${r.errors} errors` : ""}`);
+  if (!rows.size) console.log("no calls in the last 7 days");
+  process.exit(0);
 }
 const query = words.join(" ").trim();
 if (!query) {
@@ -81,6 +111,12 @@ const res = await fetch("https://api.x.ai/v1/responses", {
   signal: AbortSignal.timeout(180_000),
 });
 const body = await res.json();
+// ledger: one line per call; toolCalls counts the server-side x_search invocations behind this one request
+const toolCalls = (body.output ?? []).filter((o: { type?: string }) => /x_search|tool/.test(o.type ?? "")).length;
+try {
+  mkdirSync(`${homedir()}/.cache/x-search`, { recursive: true });
+  appendFileSync(LEDGER, JSON.stringify({ at: new Date().toISOString(), mode: isUrl ? "lookup" : "search", query: query.slice(0, 200), status: res.status, toolCalls } satisfies Entry) + "\n");
+} catch {}
 if (opt.json) {
   console.log(JSON.stringify(body, null, 2));
   process.exit(res.ok ? 0 : 1);

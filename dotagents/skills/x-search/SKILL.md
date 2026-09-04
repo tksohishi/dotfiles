@@ -15,7 +15,11 @@ Run `x-search` (in `~/.dotfiles/bin/`, on PATH). It posts straight to `api.x.ai/
 x-search $ARGUMENTS
 ```
 
-If `$ARGUMENTS` is a single X URL (`x.com/<handle>/status/<id>` or `x.com/i/article/<id>`), the script switches to lookup mode and returns the post's full text, handle, and date, or the article body. This is the only anonymous way to read an X article; they are login-walled and `agent-browser` is not signed in. A post that links to an article often resolves to the article body rather than the short post text; say which one you got.
+If `$ARGUMENTS` is a single X URL (`x.com/<handle>/status/<id>` or `x.com/i/article/<id>`), the script switches to lookup mode and returns the post's full text, handle, and date, or the article body. Articles are login-walled, so lookup mode is the way to read one unless the project has a signed-in `agent-browser` session. A post that links to an article often resolves to the article body rather than the short post text; say which one you got.
+
+## Budget
+
+Each query draws on the subscription's Grok quota and fires up to ~10 server-side `x_search` calls, so the limit arrives after a handful of narrow queries. Treat `x-search` as discovery: one broad query per topic with `--limit` raised, not several narrow ones. Once you know the accounts or posts, read details (profile, thread, replies, links) with `agent-browser` if the project's AGENTS.md or memory says it holds an X session; otherwise use lookup mode on the specific URL. `x-search --usage` prints the last 7 days of calls from the ledger at `~/.cache/x-search/usage.jsonl`; check it before a fan-out of more than two queries.
 
 Output is plain text. Quote it back to the user as-is unless they ask for a different format.
 
@@ -35,7 +39,7 @@ Map the user's phrasing onto flags instead of stuffing constraints into the quer
 
 - **Auth (one-time).** Requires the Hermes `xai-oauth` credential. If the script fails with an auth error, ask the user to run `hermes auth add xai-oauth --type oauth` themselves (browser OAuth, can't be scripted). OAuth succeeds with any X Premium tier, but `x_search` only works if the account has Grok entitlement (Premium / Premium+ / SuperGrok); the failure mode is a 403 or quota error.
 - **Unofficial path.** The token is issued to Hermes's OAuth client; calling api.x.ai with it directly is not a documented xAI feature. If xAI or Hermes changes the client or token storage, fall back to `hermes -t x_search -z "<prompt>"` (slow but supported) and report it.
-- **Quota.** Draws on the subscription's Grok quota, shared with the Grok app. One query fires up to ~10 server-side x_search calls.
+- **Quota.** Draws on the subscription's Grok quota, shared with the Grok app. The limit is not published; the ledger (`--usage`) is how it gets sized.
 - **`hermes doctor` warning is cosmetic.** It checks for `XAI_API_KEY` and warns even when OAuth works. Trust the actual call result.
 
 ## When NOT to use
