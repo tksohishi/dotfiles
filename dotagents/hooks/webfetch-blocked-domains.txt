@@ -38,3 +38,4 @@ nycgovparks.org|403 CloudFront to WebFetch, httpie+UA, headless agent-browser; h
 codelibrary.amlegal.com|403 to WebFetch; headed agent-browser or patchright-fetch works. See fetch-blocked skill.
 ccn.com|403 to WebFetch; plain httpie works. See fetch-blocked skill.
 blofin.com|403 to WebFetch and httpie (plain and browser UA); needs headed browser. See fetch-blocked skill.
+help.us.puma.com|403 to WebFetch; httpie with browser UA works. See fetch-blocked skill.
