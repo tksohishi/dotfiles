@@ -776,6 +776,9 @@
     },
     "claude-opus-5": {
       "effortLevel": "xhigh"
+    },
+    "claude-sonnet-5": {
+      "effortLevel": "xhigh"
     }
   },
   "showClearContextOnPlanAccept": true,
