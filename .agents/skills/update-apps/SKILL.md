@@ -23,6 +23,10 @@ State lives at `.cache/update-apps/state.json` under the repository root. The `.
 
 `claude_version` is the version whose changelog was last reported. `open_items` are the 🔴 action-required items still outstanding — see "Action required" below.
 
+## Report archive
+
+After printing the report, write the exact same markdown to `.cache/update-apps/reports/<YYYY-MM-DD>.md` (same gitignored `.cache/` root; create the directory when needed; `date +%F` for the name, overwrite if a second run happens the same day). The chat transcript is the only other copy and it gets summarized or cleared, so the archive is what lets a later session answer "was X reported?" by grepping past reports.
+
 ## Execution: one subagent per operation
 
 Run every update operation inside a subagent so the verbose command output stays out of the main context. The main session only reads/writes state, runs the `open_items` checks, picks the "new & noteworthy" entries, and assembles the report from the summaries the subagents return.
