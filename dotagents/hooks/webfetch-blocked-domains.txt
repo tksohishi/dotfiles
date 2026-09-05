@@ -39,3 +39,4 @@ codelibrary.amlegal.com|403 to WebFetch; headed agent-browser or patchright-fetc
 ccn.com|403 to WebFetch; plain httpie works. See fetch-blocked skill.
 blofin.com|403 to WebFetch and httpie (plain and browser UA); needs headed browser. See fetch-blocked skill.
 help.us.puma.com|403 to WebFetch; httpie with browser UA works. See fetch-blocked skill.
+jal.co.jp|403 to WebFetch and httpie; needs patchright-fetch headed. See fetch-blocked skill.
