@@ -41,4 +41,4 @@ blofin.com|403 to WebFetch and httpie (plain and browser UA); needs headed brows
 help.us.puma.com|403 to WebFetch; httpie with browser UA works. See fetch-blocked skill.
 jal.co.jp|403 to WebFetch and httpie; needs patchright-fetch headed. See fetch-blocked skill.
 starlinkflights.com|403 to WebFetch; httpie returns an empty JS shell. Use travelsort.com Starlink roundup instead. See fetch-blocked skill.
-t-mobile.com|403 to WebFetch; httpie and patchright return no page body. Use news coverage instead. See fetch-blocked skill.
+t-mobile.com|403 to WebFetch and httpie; patchright-fetch headed works. See fetch-blocked skill.
