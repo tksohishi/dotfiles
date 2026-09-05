@@ -86,7 +86,6 @@ cask "visual-studio-code" # Password prompt: shell command
 cask "zed"
 cask "zoom" # Password prompt: audio device
 
-mas "1Password for Safari", id: 1569813296
 mas "Amphetamine", id: 937984704
 mas "CotEditor", id: 1024640650
 mas "Keynote", id: 409183694
