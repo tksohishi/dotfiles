@@ -87,6 +87,9 @@ try {
     const title = await page.title()
     const out = `${cacheDir}/${host}.txt`
     await Bun.write(out, text)
+    if (!title.trim() || text.length < 1000) {
+      console.error('WARN: empty title or body under 1KB — likely a dead URL, not a bot wall. Re-check with a URL known to be live before recording the host as blocked')
+    }
     console.log('TITLE:', title)
     console.log('URL:', page.url())
     console.log('LEN:', text.length, '→', out)
