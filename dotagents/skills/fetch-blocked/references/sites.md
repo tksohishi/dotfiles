@@ -159,6 +159,7 @@ Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section
 | aa.com | untested | Akamai "Access Denied" + `Reference #18.…` | same Access Denied (headed does NOT clear it) | works |
 | jal.co.jp | 403 to WebFetch and httpie+browser UA (2026-09-05) | untested | untested | works (`/jp/en/inter/service/economy/seat/A350-1000.html`; `/jp/en/aircraft/conf/A350-1000.html` is a dead URL, the aircraft page is `/conf/351.html`) |
 | starlinkflights.com | WebFetch 403; httpie+browser UA returns a 2.5KB JS shell, no content (2026-09-05) | untested | untested | untested (low value; travelsort.com Starlink roundup fetches fine via WebFetch) |
+| t-mobile.com (marketing pages) | WebFetch 403; httpie+browser UA returns a 2KB JS shell (2026-09-05) | untested | untested | renders nav only, no page body (`/benefits/travel/in-flight-connection`); use news coverage (OMAAT, tmo.report) instead |
 | delta.com | untested | Akamai "Access Denied" + `Reference 0.…` | booking form renders and can be driven | page renders |
 | aircanada.com | untested | booking form renders and can be driven; the award **results** URL is Akamai "Access Denied" + `Reference #18.…` | not needed (headless drives the form) | booking page renders; award results URL redirects to `/clogin/pages/login` |
 | united.com | untested | `ERR_HTTP2_PROTOCOL_ERROR` on every path incl. the homepage | deeplink renders and can be driven | deeplink renders, but results stay on "Loading results…" |
