@@ -21,6 +21,8 @@ Look a host up with `rg -i '<host>' references/sites.md` from the skill director
 | naver.com | refused client-side | plain httpie + `--ignore-stdin --follow` (else 302s to an empty body); server-rendered, browser UA not needed. Only some titles expose a rating: grep ``"key":"평점"..."text":"NN/100"`` (out of 100) |
 | imdb.com | empty (WAF challenge) | GraphQL endpoint for star rating; suggestion endpoint for IDs — see IMDb section below |
 | 5ch.net | 403 | plain httpie |
+| ccn.com | 403 | plain httpie, no UA needed (verified 2026-09-04) |
+| blofin.com | 403 | No path below patchright: httpie plain and browser-UA both 403 (2026-09-04); agent-browser/patchright rungs not tried (content was redundant) |
 | zillow.com | 403 | plain httpie, no UA needed — see Zillow section below (headless browser gets PerimeterX Press & Hold) |
 | quora.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
 | glassdoor.com | Cloudflare "Humans only" terminal block (agent-browser, even truly-headed with a human solving — the Chrome-for-Testing/CDP fingerprint itself is denied) | headed patchright verified 2026-08-31 (company reviews page renders anonymously incl. pros/cons; ~8s wait) |
@@ -50,12 +52,13 @@ All of these except nike.com 403 httpie even with a browser UA; the differences 
 
 ## Reddit
 
-WebFetch refuses every reddit domain client-side ("unable to fetch"). Use httpie against `old.reddit.com`:
+Try ordinary HTTPie against `www.reddit.com` RSS first. A visible browser is not required when the endpoint returns Atom XML.
 
-- HTML (works anonymously): `http GET 'https://old.reddit.com/r/<sub>/top/?t=week'` — server-rendered, pipe through `rg`/`head` to trim.
-- Structured: append `.rss` (Atom XML), e.g. `https://old.reddit.com/r/<sub>/top/.rss?t=week` or `https://old.reddit.com/r/<sub>/comments/<id>/.rss` for a thread.
-- `.json` from httpie/WebFetch returns 403 regardless of User-Agent. Don't try it there.
-- Blocking is intermittent: the same old.reddit URL returned 200 and, an hour earlier, a login shell / "You've been blocked by network security" (2026-09-02). When old.reddit fails, go straight to `patchright-fetch` headed against `www.reddit.com` — from real Chrome the `.json` endpoints work, including search: `https://www.reddit.com/r/<sub>/search.json?q=<q>&restrict_sr=1&sort=new&limit=50` and `https://www.reddit.com/<permalink>.json?limit=100` (verified 2026-09-02, ~6s wait). Headless patchright gets the network-security block. Mirrors (redlib etc.) and search engines are not a rung; skip them.
+- Thread comments: `http GET 'https://www.reddit.com/r/<sub>/comments/<id>/.rss' --ignore-stdin --follow --body`.
+- Listings and search: `https://www.reddit.com/r/<sub>/top/.rss?t=week` and `https://www.reddit.com/r/<sub>/search.rss?q=<q>&restrict_sr=1&sort=new`. Check the response body for actual feed entries; HTTP 200 alone can be a login or block page.
+- If the www RSS response is blocked or a login shell, try the corresponding `old.reddit.com` RSS URL. Failure on old does not imply failure on www: ordinary HTTPie returned Atom XML for www while old returned “Welcome to Reddit” HTML for the same thread (verified 2026-09-04).
+- WebFetch and direct `.json` requests have returned access errors. Do not infer RSS availability from those results.
+- If both RSS hosts fail, consult the skill's browser escalation and CAPTCHA stop rules. Headed `patchright-fetch` against www has retrieved RSS; headless patchright has encountered a network-security block. These observations do not establish that all Reddit RSS requires headed mode. Use isolated browser profiles, never the user's personal Chrome session. Mirrors and search engines are not an escalation rung.
 
 ## X / Twitter
 
