@@ -1,6 +1,6 @@
 ---
 name: fetch-blocked
-description: Access content on bot-blocked sites (Reddit, X/Twitter, Cloudflare-walled pages) anonymously, without login, via URL rewrites, public endpoints, agent-browser, or headed patchright; per-host verified paths in references/sites.md. Use when WebFetch is denied by the blocked-domains hook, returns 403/429 or a challenge page, or the user asks to read a Reddit thread, a tweet/post URL, or any bot-walled page.
+description: Access content on bot-blocked sites (Reddit, X/Twitter, Cloudflare-walled pages) anonymously, without login, via URL rewrites, public endpoints, agent-browser, or headed patchright; per-host verified paths in references/sites.md. Use when WebFetch is denied by the blocked-domains hook, returns 403/429 or a challenge page, times out, or comes back empty (httpie 0-byte body, empty title) on a URL that should have content; before driving agent-browser for any fetch failure; or when the user asks to read a Reddit thread, a tweet/post URL, or any bot-walled page.
 ---
 
 # Fetch Blocked Sites
