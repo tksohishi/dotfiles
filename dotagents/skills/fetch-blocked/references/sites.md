@@ -9,6 +9,7 @@ Look a host up with `rg -i '<host>' references/sites.md` from the skill director
 | safe-client.safe.global (Safe{Wallet} client gateway, e.g. `/v1/chains/1/safes/<addr>/collectibles`) | n/a (not tried) | httpie GET 403 (2026-09-04). Use the transaction service instead: `safe-transaction-mainnet.safe.global/api/v1/safes/<addr>/balances/`, `/transfers/?erc721=true` are 200 to plain httpie |
 | qantas.com | 60s timeout (no block signature) | plain httpie, 200 server-rendered (~19KB, Akamai Bot Manager cookies but no challenge; verified 2026-09-02). Response is geo-routed by a `usercontext` cookie |
 | help.us.puma.com (Zendesk help center) | 403 | plain httpie with browser UA, 200 (2026-09-05). Article body is in `div.article-body` |
+| morphllm.com | 429 (WebFetch and plain httpie) | httpie with browser UA, 200 (2026-09-07). Next.js page; table content is in the RSC payload, strip tags and grep |
 | nycgovparks.org | 403 (CloudFront) | 403 to httpie+UA and headless agent-browser ("request could not be satisfied"); headed agent-browser redirects `/rules/*` to codelibrary.amlegal.com but `get text` needs a selector; `patchright-fetch <url>` headed works for both hosts, ~10s (2026-09-04) |
 | api.geckoterminal.com | n/a (not tried) | plain httpie 200. A 429 here is the free-tier rate limit (about 30 requests/min), not a bot wall: pace calls, do not escalate (2026-09-06) |
 | codelibrary.amlegal.com (NYC rules mirror) | 403 | headed agent-browser loads; `patchright-fetch` headed works (2026-09-04) |
