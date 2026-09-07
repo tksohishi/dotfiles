@@ -49,7 +49,7 @@ HOST=$(printf '%s' "$URL" | sed -E 's#^https?://##; s#[/:?].*##; s#^www\.##')
 
 RESP=$(echo "$TOOL_INPUT" | jq -r '.tool_response | if type=="string" then . else tostring end' | head -c 20000)
 
-BLOCK_RE='Just a moment|blocked by network security|Access Denied|Access to this page has been denied|Performing security verification|Pardon Our Interruption|Press (&|&amp;|and) Hold|unable to give you access|Humans only|verify (that )?you are (a )?human|Are you a robot|\b(403 Forbidden|406 Not Acceptable|429 Too Many Requests)\b|HTTP/[0-9.]+ (403|406|429)\b|status(Code)?["=: ]+(403|406|429)\b|unable to fetch|blocked-domains'
+BLOCK_RE='Just a moment|blocked by network security|Access Denied|Access to this page has been denied|Performing security verification|Pardon Our Interruption|Press (&|&amp;|and) Hold|unable to give you access|Humans only|verify (that )?you are (a )?human|Are you a robot|\b(403 Forbidden|406 Not Acceptable|429 Too Many Requests)\b|HTTP/[0-9.]+ (403|406|429)\b|status(Code)?["=: ]+(403|406|429)\b|unable to fetch|blocked-domains|timeout of [0-9]+ms exceeded|\b(ETIMEDOUT|ECONNRESET|ECONNREFUSED)\b|request timed out'
 BLOCKED=0
 printf '%s' "$RESP" | rg -qi "$BLOCK_RE" && BLOCKED=1
 
