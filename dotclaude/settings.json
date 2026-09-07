@@ -629,6 +629,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/cd-relative-paths.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/bg-timeout.sh",
+            "timeout": 5
           }
         ]
       },
