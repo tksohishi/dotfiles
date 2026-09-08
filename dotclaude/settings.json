@@ -732,6 +732,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/handoff-stale.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/session-title.sh",
+            "timeout": 5
           }
         ]
       }
