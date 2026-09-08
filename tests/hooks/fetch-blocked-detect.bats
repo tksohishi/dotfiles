@@ -24,6 +24,11 @@ assert_silent() {
   assert_injects
 }
 
+@test "WebFetch result with a Cloudflare challenge script marker injects" {
+  run "$HOOK" <<< "$(hook_input WebFetch '' '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>')"
+  assert_injects
+}
+
 @test "WebFetch result with 403 injects" {
   run "$HOOK" <<< "$(hook_input WebFetch '' 'HTTP/1.1 403 Forbidden')"
   assert_injects
