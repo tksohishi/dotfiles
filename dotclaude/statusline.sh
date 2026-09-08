@@ -6,6 +6,7 @@ input=$(cat)
 
 # -- Extract fields --
 model=$(echo "$input" | jq -r '.model.display_name // empty')
+effort=$(echo "$input" | jq -r '.effort.level // empty')
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 cwd=$(echo "$input" | jq -r '.workspace.current_dir')
 rate_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
@@ -135,6 +136,7 @@ fi
 model_part=""
 if [ -n "$model" ]; then
   model_part="${model}"
+  [ -n "$effort" ] && model_part+=" ${dim}${effort}${reset}"
 fi
 
 # -- Assemble --
