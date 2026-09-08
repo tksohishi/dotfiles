@@ -43,3 +43,7 @@ jal.co.jp|403 to WebFetch and httpie; needs patchright-fetch headed. See fetch-b
 morphllm.com|429 to WebFetch and plain httpie; httpie with browser UA works. See fetch-blocked skill.
 starlinkflights.com|403 to WebFetch; httpie returns an empty JS shell. Use travelsort.com Starlink roundup instead. See fetch-blocked skill.
 t-mobile.com|403 to WebFetch and httpie; patchright-fetch headed works. See fetch-blocked skill.
+howrare.is|403 to WebFetch; plain httpie 200. Keyless JSON at api.howrare.is/v0.1/*. See fetch-blocked skill.
+sniper.xyz|403 to WebFetch and httpie; Cloudflare challenge headless. See fetch-blocked skill.
+nftsolana.io|403 to WebFetch; plain httpie 200. See fetch-blocked skill.
+gnc.com|307/denied to WebFetch; PerimeterX Press & Hold on every rung. See fetch-blocked skill.
