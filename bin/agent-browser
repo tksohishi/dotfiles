@@ -97,6 +97,18 @@ if [ "$headed" -eq 0 ]; then
     export AGENT_BROWSER_ARGS="--mute-audio${AGENT_BROWSER_ARGS:+,$AGENT_BROWSER_ARGS}"
 fi
 
+# A running dapp launcher (degen scripts/dapp.ts writes tmp/dapp.pid) owns the
+# daemon: its headed window, init script and signing bridge die with a `close`
+# from any other script (Sep 8, 2026: x-act.ts closed it mid-flow, twice). Only
+# the launcher itself closes it, with AGENT_BROWSER_OWNER_CLOSE=1.
+if [ "${1:-}" = "close" ] && [ -z "${AGENT_BROWSER_OWNER_CLOSE:-}" ] && [ -f "$PWD/tmp/dapp.pid" ]; then
+    owner=$(cat "$PWD/tmp/dapp.pid" 2>/dev/null || true)
+    if [ -n "$owner" ] && kill -0 "$owner" 2>/dev/null; then
+        echo "agent-browser wrapper: daemon owned by dapp launcher pid $owner; use 'bun scripts/dapp.ts stop'" >&2
+        exit 3
+    fi
+fi
+
 # Serialize invocations per project. Concurrent agents driving one daemon
 # fight over the shared tab: each contested `open` re-navigates the other's
 # page, and on a headed daemon every round re-raises the window (observed
