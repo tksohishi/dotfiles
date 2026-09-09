@@ -1,7 +1,8 @@
 #!/bin/bash
 # Merge editors/settings.common.json into every installed VS Code-family
 # editor's User/settings.json (VS Code, Cursor, Windsurf, Antigravity).
-# Keys in the common file win; everything else in the editor file is kept.
+# Recursive merge: keys in the common file win, sibling keys inside the same
+# object and everything else in the editor file are kept.
 # A settings.json with JSONC comments or trailing commas is normalized to
 # plain JSON on first merge.
 
@@ -22,7 +23,7 @@ for app in Code Cursor Windsurf Antigravity; do
     if [ -f "$dst" ]; then
         # Strip // line comments and trailing commas so jq can parse JSONC.
         perl -0pe 's#^\s*//.*$##mg; s#,(\s*[\]\}])#$1#g' "$dst" \
-            | jq -s '.[0] + .[1]' - "$src" > "$tmp"
+            | jq -s '.[0] * .[1]' - "$src" > "$tmp"
     else
         jq . "$src" > "$tmp"
     fi
