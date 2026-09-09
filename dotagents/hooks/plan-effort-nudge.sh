@@ -1,16 +1,18 @@
 #!/bin/bash
-# UserPromptSubmit: record the session's baseline effort (first level seen)
-# for plan-exit-effort-gate.sh, and in plan mode at low effort remind the
-# user once per session that a higher effort may be worth it for planning.
-# Effort is fixed per process and no hook can change it; this only surfaces
-# the choice.
+# UserPromptSubmit: in plan mode at low effort, remind the user once per
+# session that a higher effort may be worth it for planning. Effort is fixed
+# per process and no hook can change it; this only surfaces the choice.
+#
+# UserPromptSubmit input has no effort field. Read the live level from
+# CLAUDE_EFFORT when present, else the session baseline that
+# effort-baseline.sh records on the first tool call.
 input=$(cat)
+sid=$(jq -r '.session_id // empty' <<< "$input")
 effort=$(jq -r '.effort.level // empty' <<< "$input")
 [ -n "$effort" ] || effort=${CLAUDE_EFFORT:-}
-sid=$(jq -r '.session_id // empty' <<< "$input")
-if [ -n "$sid" ] && [ -n "$effort" ]; then
+if [ -z "$effort" ] && [ -n "$sid" ]; then
   base="${TMPDIR:-/tmp}/claude-effort-baseline-$sid"
-  [ -e "$base" ] || printf '%s' "$effort" > "$base"
+  [ -f "$base" ] && effort=$(cat "$base")
 fi
 [ "$(jq -r '.permission_mode // empty' <<< "$input")" = "plan" ] || exit 0
 [ "$effort" = "low" ] || exit 0
