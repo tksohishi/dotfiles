@@ -35,11 +35,10 @@
 #                           quote-stripped one: a redirection target is the
 #                           local shell's regardless of quoting, so
 #                           `> "$HOME/.env"` must not slip through.
-#                           Not covered: interpreter one-liners that open the
-#                           file from inside a quoted script (python -c, node
-#                           -e). Blocking those means pattern-matching arbitrary
-#                           source in any language; the Write/Edit tool denies
-#                           and the risk classifier cover that ground instead.
+#                           Interpreter source (python -c, node -e, `bun x.ts`)
+#                           that opens the file from inside code is not matched
+#                           here; env-io-in-scripts.sh scans that source and
+#                           asks before it runs.
 #
 #   `<reader> ... .env*`  — text-reading tools touching .env or .dev.vars.
 #                           Use .env.example for schema; redaction scripts for
