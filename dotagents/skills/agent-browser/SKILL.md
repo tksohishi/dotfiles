@@ -51,6 +51,10 @@ Also, `fill` writes instantly into every field, which is itself a bot signal. On
 
 Profiles render logged out: `open https://x.com/<handle>` then `get text body`. Articles (`x.com/i/article/<id>`) do not; the browser profile is not signed in to X, so they redirect to the login flow. Use `/x-search` for those. See the `fetch-blocked` skill for the full site map.
 
+## Google Forms
+
+`click` and `check` no-op on Google Forms' jsaction widgets (checkboxes, radios): the DOM does not change and nothing is reported. Drive them with `mouse move` to the element's box centre, then `mouse down` and `mouse up`, and verify through the hidden `entry.<id>` inputs (`eval` on `document.querySelectorAll('input[name^=entry]')`) before submitting. Text fields take `fill` as usual; the success state is the "Your response has been recorded." page.
+
 ## Recovery
 
 When stuck, clean restart with `agent-browser close` (current project's session). `close --all` is hook-blocked for agents — if the wedge spans other projects' sessions, surface it and let the user run `agent-browser close --all` themselves. Avoid `pkill`; it leaves a stale `SingletonLock` in the profile dir that breaks subsequent launches.
