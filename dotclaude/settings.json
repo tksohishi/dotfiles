@@ -673,6 +673,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/plan-delegation-annotations.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/plan-exit-effort-gate.sh",
+            "timeout": 5
           }
         ]
       }

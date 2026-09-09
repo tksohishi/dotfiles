@@ -34,3 +34,10 @@ setup() {
   run "$HOOK" <<< '{"permission_mode":"plan","effort":{"level":"low"},"session_id":"s5"}'
   [ -z "$output" ]
 }
+
+@test "records the first effort seen as the session baseline" {
+  run "$HOOK" <<< '{"permission_mode":"auto","effort":{"level":"low"},"session_id":"s6"}'
+  [ "$(cat "$TMPDIR/claude-effort-baseline-s6")" = "low" ]
+  run "$HOOK" <<< '{"permission_mode":"auto","effort":{"level":"high"},"session_id":"s6"}'
+  [ "$(cat "$TMPDIR/claude-effort-baseline-s6")" = "low" ]
+}
