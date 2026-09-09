@@ -148,6 +148,9 @@ if [ "$SKIP_MACOS" = false ]; then
     bash "$DOTFILES_DIR/macos.sh"
 fi
 
+# ── Editor settings (VS Code, Cursor, Windsurf, Antigravity) ───
+bash "$DOTFILES_DIR/scripts/sync-editor-settings.sh"
+
 # ── Git hooks ─────────────────────────────────────────────────
 git -C "$DOTFILES_DIR" config core.hooksPath hooks
 echo "Configured git hooks from hooks/"

@@ -1,0 +1,6 @@
+{
+    "workbench.localHistory.exclude": {
+        "**/.env": true,
+        "**/.env.*": true
+    }
+}

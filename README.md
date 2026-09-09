@@ -27,6 +27,8 @@ Use `--skip-brew` to skip Homebrew installation and only symlink files.
 
 **Tool configs:** `starship.toml`, `ghostty/config`, `mise/config.toml`
 
+**Editor settings:** `editors/settings.common.json` merged into `User/settings.json` of every installed VS Code-family editor (VS Code, Cursor, Windsurf, Antigravity) by `scripts/sync-editor-settings.sh`. Keeps `.env*` out of the editors' plaintext local history.
+
 **AI agent configs:**
 - `dotagents/AGENTS.md` symlinked to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`
 - `dotclaude/settings.json` symlinked to `~/.claude/settings.json`
