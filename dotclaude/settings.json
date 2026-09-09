@@ -721,6 +721,11 @@
             "type": "command",
             "command": "echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"Current local time: $(date '+%A %Y-%m-%d %H:%M:%S %Z')\\\"}}\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/plan-effort-nudge.sh",
+            "timeout": 5
           }
         ]
       }
