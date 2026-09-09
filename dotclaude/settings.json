@@ -533,6 +533,7 @@
       "Bash(git commit --amend*)",
       "Bash(git reset --hard*)",
       "Bash(brew install*)",
+      "Bash(bun add -g*)",
       "Bash(brew uninstall*)",
       "Bash(caddy add-package*)",
       "Bash(caddy remove-package*)",
