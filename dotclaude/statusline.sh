@@ -66,14 +66,14 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
 fi
 
 # -- Context remaining --
-# Thresholds tuned for 1M context: yellow at 25% used, red at 75% used.
+# Thresholds tuned for 1M context: yellow at 25% used, red at 50% used.
 # Anthropic's MRCR v2 shows retrieval accuracy drops from 93% at 256K to
-# 76-78% at 1M, so rot is a gradient, not a cliff. Early yellow matches
-# observed quality degradation around 50% used; red around auto-compact.
+# 76-78% at 1M, so rot is a gradient, not a cliff. Red at 50% used matches
+# observed quality degradation, early enough to start a fresh session.
 remaining=$((100 - ${used_pct:-0}))
 if [ "$remaining" -gt 75 ]; then
   ctx_part="${green}${remaining}%${reset} context"
-elif [ "$remaining" -gt 25 ]; then
+elif [ "$remaining" -gt 50 ]; then
   ctx_part="${yellow}${remaining}%${reset} context"
 else
   ctx_part="${red}${remaining}%${reset} context"
