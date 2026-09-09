@@ -569,7 +569,6 @@
     ]
   },
   "model": "fable",
-  "switchModelsOnFlag": false,
   "disableClaudeAiConnectors": true,
   "deniedMcpServers": [
     {
@@ -805,6 +804,7 @@
   "showClearContextOnPlanAccept": true,
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
+  "switchModelsOnFlag": false,
   "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
