@@ -50,3 +50,4 @@ gnc.com|307/denied to WebFetch; PerimeterX Press & Hold on every rung. See fetch
 nado.xyz|403 to WebFetch; plain httpie 200 (Framer site). See fetch-blocked skill.
 yelp.com|403 (DataDome) to WebFetch and httpie+UA; agent-browser headless and headed both get the geo.captcha-delivery.com stub; patchright-fetch --show with a one-time user slider solve, then offscreen passes. See fetch-blocked skill.
 jobs.lever.co|403 to WebFetch; plain httpie 200, or api.lever.co/v0/postings/<slug>. See fetch-blocked skill.
+medium.com|403 to WebFetch; httpie with browser UA 200, server-rendered. See fetch-blocked skill.
