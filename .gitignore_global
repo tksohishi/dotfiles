@@ -16,6 +16,7 @@ node_modules/
 playwright-mcp/
 agent-browser.json
 .agent-browser/
+.gcloud/
 .wrangler/
 
 **/.claude/.cc-writes/
