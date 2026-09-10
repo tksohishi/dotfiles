@@ -788,6 +788,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "$HOME/.claude/hooks/fetch-ladder-gate.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "$HOME/.claude/hooks/no-bang-sudo.sh",
             "timeout": 5
           }
