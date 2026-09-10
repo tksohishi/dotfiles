@@ -428,3 +428,52 @@ bash_input() {
   run "$HOOK" <<< "$(bash_input "echo 'x => 1' > .env")"
   [[ "$output" == *deny* ]]
 }
+
+# Secret-store reads: ask on Claude, deny on Codex (which cannot prompt).
+
+@test "asks on security find-generic-password" {
+  run "$HOOK" <<< "$(bash_input 'security find-generic-password -s foo -w')"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+}
+
+@test "asks on find-generic-password inside a bun -e script" {
+  run "$HOOK" <<< "$(bash_input "bun -e \"spawnSync('security', ['find-generic-password', '-s', 'foo'])\"")"
+  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+}
+
+@test "asks on op read and op item get" {
+  run "$HOOK" <<< "$(bash_input 'op read op://vault/item/field')"
+  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+  run "$HOOK" <<< "$(bash_input 'export T=$(op item get foo --fields token)')"
+  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+}
+
+@test "asks on gcloud secrets versions access, aws get-secret-value, vault kv get" {
+  run "$HOOK" <<< "$(bash_input 'gcloud --project p secrets versions access latest --secret=s')"
+  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+  run "$HOOK" <<< "$(bash_input 'aws secretsmanager get-secret-value --secret-id s')"
+  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+  run "$HOOK" <<< "$(bash_input 'vault kv get secret/foo')"
+  [[ "$output" == *'"permissionDecision":"ask"'* ]]
+}
+
+@test "allows secret-store writes and listings" {
+  run "$HOOK" <<< "$(bash_input 'security add-generic-password -s foo -w bar')"
+  [ -z "$output" ]
+  run "$HOOK" <<< "$(bash_input 'op item list')"
+  [ -z "$output" ]
+  run "$HOOK" <<< "$(bash_input 'gcloud secrets versions add s --data-file=f')"
+  [ -z "$output" ]
+}
+
+@test "allows words that merely contain op or vault" {
+  run "$HOOK" <<< "$(bash_input 'gop read foo && vault-tool read bar')"
+  [ -z "$output" ]
+}
+
+@test "downgrades secret-store ask to deny for Codex" {
+  run "$HOOK" <<< "$(jq -n '{model: "gpt-5", tool_input: {command: "op read op://v/i/f"}}')"
+  [[ "$output" == *'"permissionDecision":"deny"'* ]]
+  [[ "$output" == *'Codex hooks cannot prompt'* ]]
+}

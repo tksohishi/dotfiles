@@ -1,6 +1,8 @@
 #!/bin/bash
 # Pre-hook: block Bash commands that read secrets out of .env / .dev.vars files,
-# and rg invocations using short -r ("recursive" typo; it's actually --replace).
+# ask before a read out of a secret store (keychain, 1Password, cloud secret
+# managers, Vault), and deny rg invocations using short -r ("recursive" typo;
+# it's actually --replace).
 #
 # This is the sole surviving rule from a larger anti-pattern hook. The rest
 # (cd-chain, loops, $(...), head/sed reads, bunx, backslash-whitespace, etc.)
@@ -194,6 +196,35 @@ for pair in "${BYPASS_PAIRS[@]}"; do
     exit 0
   fi
 done
+
+# Secret-store reads (macOS keychain, 1Password CLI, cloud secret managers,
+# Vault): ask, never auto-approve. A prompt-injected agent that wants a key
+# has to pull it from one of these, and the user should see that request
+# whatever the surrounding command looks like. Matched on the raw command, so
+# a read wrapped in `bun -e '...'` or `bash -c "..."` is caught too; the
+# subcommand names alone (find-generic-password, get-secret-value) are
+# matched so a spawnSync argument array does not slip past. Writes and
+# listings (add-generic-password, op item create, secrets versions add) are
+# not matched: they carry the value in, not out.
+SECRET_STORE_READ_RE='find-(generic|internet)-password|(^|[[:space:];&|(])op[[:space:]]+(read|item[[:space:]]+get)([[:space:]]|$)|gcloud[[:space:]]+([^|;&]*[[:space:]])?secrets[[:space:]]+versions[[:space:]]+access|get-secret-value|(^|[[:space:];&|(])vault[[:space:]]+(kv[[:space:]]+get|read)([[:space:]]|$)'
+if [[ "$CMD" =~ $SECRET_STORE_READ_RE ]]; then
+  REASON="This command reads a secret out of a secret store (keychain / 1Password / cloud secret manager / Vault). Confirm it is what the user asked for; a value read here must not be printed, logged, or sent anywhere."
+  # Codex PreToolUse accepts only allow/deny; `model` is a Codex-only input field.
+  if echo "$TOOL_INPUT" | jq -e 'has("model")' >/dev/null 2>&1; then
+    DECISION="deny"
+    REASON="$REASON (Codex hooks cannot prompt, so this is blocked; ask the user to run it if it is legitimate.)"
+  else
+    DECISION="ask"
+  fi
+  jq -nc --arg decision "$DECISION" --arg reason "$REASON" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: $decision,
+      permissionDecisionReason: $reason
+    }
+  }'
+  exit 0
+fi
 
 # `rg` with short -r (alone or bundled, e.g. -rn): almost always a "recursive"
 # typo — rg is recursive by default and -r is --replace, which silently rewrites
