@@ -51,3 +51,5 @@ nado.xyz|403 to WebFetch; plain httpie 200 (Framer site). See fetch-blocked skil
 yelp.com|403 (DataDome) to WebFetch and httpie+UA; agent-browser headless and headed both get the geo.captcha-delivery.com stub; patchright-fetch --show with a one-time user slider solve, then offscreen passes. See fetch-blocked skill.
 jobs.lever.co|403 to WebFetch; plain httpie 200, or api.lever.co/v0/postings/<slug>. See fetch-blocked skill.
 medium.com|403 to WebFetch; httpie with browser UA 200, server-rendered. See fetch-blocked skill.
+crunchbase.com|403 to WebFetch, httpie, and agent-browser (Cloudflare block page); patchright-fetch headed works but funding data is paywalled logged out. See fetch-blocked skill.
+servicenow.com|403 to WebFetch; httpie hangs; agent-browser gets Akamai Access Denied; patchright-fetch headed works. See fetch-blocked skill.
