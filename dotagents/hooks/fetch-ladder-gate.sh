@@ -18,6 +18,11 @@
 input=$(cat)
 sid=$(echo "$input" | jq -r '.session_id // empty')
 [ -z "$sid" ] && exit 0
+event=$(echo "$input" | jq -r '.hook_event_name // empty')
+# Subagents are forbidden from browser rungs (headed Chrome steals focus), so
+# for SubagentStop the ladder ends at httpie: a host that failed httpie too is
+# handed back to the main session, whose own Stop gate walks the browser rungs.
+subagent=0; [ "$event" = "SubagentStop" ] && subagent=1
 state="$HOME/.cache/fetch-blocked/$sid.tsv"
 [ -s "$state" ] || exit 0
 sites="$HOME/.claude/skills/fetch-blocked/references/sites.md"
@@ -30,10 +35,16 @@ for host in $(cut -f1 "$state" | sort -u); do
   rg -qiF "$host" "$sites" 2>/dev/null && continue
   rg -q "^$host	passed" "$state" && continue
   rg -q "^$host	blocked	patchright-fetch headed" "$state" && continue
+  [ "$subagent" = 1 ] && rg -q "^$host	blocked	httpie" "$state" && continue
   tried=$(rg "^$host	blocked" "$state" | cut -f3 | sort -u | paste -sd, -)
   pending="$pending $host (tried: $tried);"
 done
 [ -z "$pending" ] && exit 0
 
 echo $((blocks + 1)) > "$counter"
-jq -n --arg r "Fetch ladder not finished for:$pending Do not report these as blocked or say what the next rung would be. Load the fetch-blocked skill and walk the remaining rungs now (agent-browser --headed, then patchright-fetch headed), then record the outcome in references/sites.md. A CAPTCHA hand-off counts as an outcome: record it and the gate clears." '{decision:"block", reason:$r}'
+if [ "$subagent" = 1 ]; then
+  msg="Fetch ladder not finished for:$pending Do not report these as blocked or unverified. Load the fetch-blocked skill and try the non-browser rungs now: httpie GET <url> --ignore-stdin with a browser User-Agent header, and any public endpoint the skill lists. If httpie passes, use the content and record the host in references/sites.md. If httpie also fails, say so in your report with the URL (\"needs a browser rung\"); do not run agent-browser or patchright-fetch yourself."
+else
+  msg="Fetch ladder not finished for:$pending Do not report these as blocked or say what the next rung would be. Load the fetch-blocked skill and walk the remaining rungs now (agent-browser --headed, then patchright-fetch headed), then record the outcome in references/sites.md. A CAPTCHA hand-off counts as an outcome: record it and the gate clears."
+fi
+jq -n --arg r "$msg" '{decision:"block", reason:$r}'
