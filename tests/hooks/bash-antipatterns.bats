@@ -408,3 +408,23 @@ bash_input() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+# JS arrow functions and env objects: `=> process.env[...]` reads as a
+# redirect into `.env[` to the redirect rule, so those tokens are stripped
+# before matching.
+
+@test "allows JS arrow function reading process.env" {
+  run "$HOOK" <<< "$(bash_input "bun -e \"const f = () => process.env['KEY']\"")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows Bun.env and import.meta.env after an arrow" {
+  run "$HOOK" <<< "$(bash_input "bun -e 'const g = () => Bun.env[k] ?? import.meta.env[k]'")"
+  [ -z "$output" ]
+}
+
+@test "still denies a real redirect into .env next to an arrow" {
+  run "$HOOK" <<< "$(bash_input "echo 'x => 1' > .env")"
+  [[ "$output" == *deny* ]]
+}

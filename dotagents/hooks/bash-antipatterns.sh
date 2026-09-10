@@ -85,7 +85,8 @@ SECRET_FILE_RE='\.env([^.a-zA-Z0-9]|$)|\.env\.(local|production|staging|developm
 # and must END at whitespace/EOL (so `.dev.vars.example.bak` is not a
 # template and stays matched).
 strip_templates() {
-  sed -E 's/[A-Za-z0-9_./~-]*\.(example|sample|template)([[:space:]]|$)/\2/g'
+  # also drops JS `=>` and the process/Bun/import.meta env objects, which read as `> ... .env[` to the redirect rule
+  sed -E 's/[A-Za-z0-9_./~-]*\.(example|sample|template)([[:space:]]|$)/\2/g; s/=>//g; s/(process|Bun|import\.meta)\.env//g'
 }
 
 # Redirection (> >> >| >& &>) or tee whose target token contains a secret path.
