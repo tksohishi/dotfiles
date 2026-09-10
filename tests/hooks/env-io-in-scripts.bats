@@ -98,16 +98,16 @@ EOF
   [[ "$output" == *"Inline code"* ]]
 }
 
-@test "asks when inline source comes from a command substitution" {
+@test "silent when inline source comes from a command substitution" {
   run "$HOOK" <<< "$(bash_input 'bun -e "$(cat f)"' "$BATS_TEST_TMPDIR")"
-  [[ "$output" == *'"ask"'* ]]
-  [[ "$output" == *"not inspectable"* ]]
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
-@test "asks when the script path holds a variable" {
-  run "$HOOK" <<< "$(bash_input 'bun "$DIR/x.ts"' "$BATS_TEST_TMPDIR")"
-  [[ "$output" == *'"ask"'* ]]
-  [[ "$output" == *"not inspectable"* ]]
+@test "silent when the script path holds a variable or a glob" {
+  run "$HOOK" <<< "$(bash_input 'node --check "$S/burn.js" && bun scripts/*.ts' "$BATS_TEST_TMPDIR")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "silent when .env appears only in a comment and process.env" {

@@ -13,11 +13,12 @@
 # tool. Print the value and ask the user to paste it.
 #
 # NOT covered: the path literal living in another module (the import chain is
-# not followed), and paths assembled without any `.env` literal in the file
-# (path.join(dir, name), a filename taken from argv or a config value).
-# Source that cannot be inspected at all — inline code from a command
-# substitution, a script path holding a variable or a glob — is asked about
-# rather than passed, since missing source is not evidence of safety.
+# not followed), paths assembled without any `.env` literal in the file
+# (path.join(dir, name), a filename taken from argv or a config value), and
+# source the hook cannot open (a script path holding a variable or a glob,
+# inline code from a command substitution). Those pass silently: the hook
+# already lets unfollowed imports through, so prompting on every `$DIR/x.ts`
+# was noise without a matching gain in coverage.
 #
 # Codex PreToolUse supports only allow/deny, so "ask" downgrades to "deny"
 # there (same detection as bash-antipatterns.sh: Codex includes "model" in
@@ -147,11 +148,6 @@ while IFS= read -r seg; do
   done
 
   if [ "$inline" -eq 1 ]; then
-    case "$seg" in
-      *'$('*|*'`'*)
-        emit "'$head' runs inline code built by a shell substitution, so its source is not inspectable and .env file I/O cannot be ruled out."
-        ;;
-    esac
     if scan_text "$CMD"; then
       emit "Inline code passed to '$head' does file I/O on a .env-family secrets file (match: $MATCH_LINE)."
     fi
@@ -162,11 +158,6 @@ while IFS= read -r seg; do
     case "$a" in
       *.ts|*.tsx|*.js|*.mjs|*.cjs|*.py) ;;
       *) continue ;;
-    esac
-    case "$a" in
-      *'$'*|*'*'*|*'?'*|*'['*)
-        emit "The script path '$a' passed to '$head' holds a variable or a glob, so its source is not inspectable and .env file I/O cannot be ruled out."
-        ;;
     esac
     f=$(resolve "$a")
     if scan_file "$f"; then
