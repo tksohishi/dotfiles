@@ -685,6 +685,10 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/no-bot-detection-bypass.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/env-example-secrets.sh"
           }
         ]
       },
