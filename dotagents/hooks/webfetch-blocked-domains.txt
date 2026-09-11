@@ -54,3 +54,4 @@ medium.com|403 to WebFetch; httpie with browser UA 200, server-rendered. See fet
 crunchbase.com|403 to WebFetch, httpie, and agent-browser (Cloudflare block page); patchright-fetch headed works but funding data is paywalled logged out. See fetch-blocked skill.
 servicenow.com|403 to WebFetch; httpie hangs; agent-browser gets Akamai Access Denied; patchright-fetch headed works. See fetch-blocked skill.
 support.discord.com|403 to WebFetch; httpie with browser UA 200, server-rendered Zendesk. See fetch-blocked skill.
+site.financialmodelingprep.com|403 to WebFetch; httpie with browser UA 200. See fetch-blocked skill.
