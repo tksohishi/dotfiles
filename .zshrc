@@ -16,6 +16,8 @@ export HOMEBREW_BUNDLE_FILE=~/.dotfiles/Brewfile
 export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1
 export GOPATH="$HOME/.local/share/go"
 export WRANGLER_CONFIG_DIR=.wrangler
+# gcloud: one interpreter (with numpy for IAP tunnels) for every CLOUDSDK_CONFIG dir
+export CLOUDSDK_PYTHON=$HOME/.config/gcloud/virtenv/bin/python3.14
 
 # History
 HISTFILE=~/.zsh_history
