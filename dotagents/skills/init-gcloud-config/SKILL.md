@@ -17,21 +17,22 @@ gcloud's own answer to per-project settings is named configurations plus `CLOUDS
 
 1. **Confirm the directory is a project root** (`.git/`, `package.json`, `mise.toml`, etc.). Ask if unclear.
 
-2. **Collect account and project.** Ask for the Google account (email) if not given. For the project, always resolve the **project ID**, not the display name; they differ (`bl-sandbox` displays for ID `bl-sandbox-446517`). List candidates with the shared store:
+2. **Gather what the project already uses before touching anything.** Look for existing hints first, then ask the user one round of questions (AskUserQuestion, or plain prose in Codex) covering everything at once:
 
-    ```sh
-    CLOUDSDK_CORE_ACCOUNT=<email> gcloud projects list --format='table(projectId,name)'
-    ```
+    - Existing state: `mise.local.toml`, `.gcloud/`, `.envrc`, and any `CLOUDSDK_*` in `.env.local`. Also `rg -n -- '--project|--zone|--region|CLOUDSDK|GOOGLE_CLOUD_PROJECT|gcloud ' -g '!node_modules'` across deploy scripts, `Makefile`/`justfile`, `cloudbuild.yaml`, `app.yaml`, Terraform, and GitHub workflows. Present what was found as the default answers.
+    - **Account**: which Google account (email). Offer the credentialed ones from the shared store (`gcloud auth list`).
+    - **Project**: the **project ID**, not the display name; they differ (`bl-sandbox` displays for ID `bl-sandbox-446517`). Offer candidates with `CLOUDSDK_CORE_ACCOUNT=<email> gcloud projects list --format='table(projectId,name)'`. If the account has no shared-store credentials the listing fails; ask for the ID directly.
+    - **Key components already in use**: the VMs, Cloud Run services, GKE clusters, buckets, Cloud SQL instances, or functions this project talks to. These decide the default zone/region and confirm the project ID is right. Ask by name; do not guess from the repo alone.
 
-    If the account has no credentials in the shared store, the listing fails; ask the user for the project ID directly.
+    Do not write anything until the user has confirmed account, project ID, and components.
 
-3. **Resolve the zone.** If the user named a VM, find its zone:
+3. **Resolve zone and region from the components.** For a VM:
 
     ```sh
     CLOUDSDK_CORE_ACCOUNT=<email> gcloud compute instances list --project <project-id> --format='table(name,zone,status)'
     ```
 
-    Otherwise ask, or leave zone unset.
+    For Cloud Run, `gcloud run services list`; for GKE, `gcloud container clusters list`; both print the region. If components span several regions, pick the one the user names as primary and say so in the report. With no components, leave zone and region unset.
 
 4. **If `mise.local.toml` already exists**, read it and merge; never overwrite other keys. Write:
 
