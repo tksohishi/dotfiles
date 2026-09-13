@@ -57,3 +57,6 @@ support.discord.com|403 to WebFetch; httpie with browser UA 200, server-rendered
 site.financialmodelingprep.com|403 to WebFetch; httpie with browser UA 200. See fetch-blocked skill.
 tealhq.com|403 to WebFetch; httpie with browser UA 200. See fetch-blocked skill.
 infinex.xyz|429 Too Many Requests to WebFetch; httpie with browser UA 200 (Next.js marketing/changelog, server-rendered). See fetch-blocked skill.
+defillama.com|403 on /protocol/*; httpie with browser UA returns the full page. Free api.llama.fi endpoints: /overview/dexs, /overview/fees, /overview/open-interest, /tvl/<slug>; /overview/derivatives is 402 paywalled. See fetch-blocked skill.
+dydx.foundation|403 to WebFetch on /blog/*; plain httpie (no UA header) returns the full page. dydx.xyz is NOT blocked. See fetch-blocked skill.
+devin.ai|429 Too Many Requests to WebFetch; httpie with a Chrome UA returns the full page (Safari UA gets an empty shell). See fetch-blocked skill.
