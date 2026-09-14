@@ -1,5 +1,5 @@
 [tools]
-node = { version = "24.13", postinstall = "corepack enable pnpm" }
+node = { version = "lts", postinstall = "corepack enable pnpm" }
 bun = "latest"
 deno = "latest"
 "npm:@ticktick/ticktick-cli" = "latest"
