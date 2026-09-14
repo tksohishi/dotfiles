@@ -191,7 +191,7 @@ Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section
 **aa.com** — the whole award search is URL-encodable, so no form driving is needed. One `patchright-fetch` on a deeplink returns the full results page as text:
 
 ```bash
-patchright-fetch 'https://www.aa.com/booking/search?locale=en_US&pax=1&adult=1&type=OneWay&searchType=Award&slices=%5B%7B%22orig%22%3A%22JFK%22%2C%22origNearby%22%3Afalse%2C%22dest%22%3A%22HND%22%2C%22destNearby%22%3Afalse%2C%22date%22%3A%222026-12-01%22%7D%5D' --wait 45
+patchright-fetch 'https://www.aa.com/booking/search?locale=en_US&pax=1&adult=1&type=OneWay&searchType=Award&slices=%5B%7B%22orig%22%3A%22JFK%22%2C%22origNearby%22%3Afalse%2C%22dest%22%3A%22HND%22%2C%22destNearby%22%3Afalse%2C%22date%22%3A%222027-03-15%22%7D%5D' --wait 45
 ```
 
 It redirects to `/booking/choose-flights/1?sid=<uuid>`; that sid URL is session-bound, but the deeplink itself reproduces the search from cold. Rows read as text anchors: `One way Business <N>K + $<tax> for <ORIG> to <DEST>, departing at <time>`, plus `Not available` where the cabin has no award space.
@@ -201,15 +201,15 @@ It redirects to `/booking/choose-flights/1?sid=<uuid>`; that sid URL is session-
 **delta.com deep link (verified 2026-09-03)** — the Book a Flight widget is an Angular app (`/flightsearch/8.0.31/main-*.js` + `chunk-*.js`). `chunk-XK7UNFV4.js` maps the page's query string onto the widget state, whitelisting exactly these names: `paxCount`, `originCity`, `destinationCity`, `tripType`, `flexAirport`, `datesFlexible`, `cabinFareClass`, `departureDate`, `awardTravel`, `returnDate`, `meetingEventCode`, `refundableFlightsOnly`. `originCity`/`destinationCity` are validated as 3-letter airport codes despite the name. `tripType` takes `ONE_WAY` / `ROUND_TRIP` / `MULTICITY`. Dates are split on `-` or `/` and read year-first when the first part is > 31, so `YYYY-MM-DD` works. `awardTravel` is compared against the string `"true"` and drives the Shop with Miles checkbox.
 
 ```
-https://www.delta.com/flightsearch/book-a-flight?originCity=JFK&destinationCity=HND&departureDate=2026-12-01&tripType=ONE_WAY&paxCount=1&awardTravel=true
+https://www.delta.com/flightsearch/book-a-flight?originCity=JFK&destinationCity=HND&departureDate=2027-03-15&tripType=ONE_WAY&paxCount=1&awardTravel=true
 ```
 
-Confirmed in headed agent-browser: the widget renders `JFK | HND | One Way | Dec 1 | 1` with the `shopWithMiles` checkbox checked. Verdict: yes for prefill, no for results — the human still presses Find Flights, and the results hop is still the session-bound `search-results?cacheKeySuffix=<uuid>` Akamai wall above.
+Confirmed in headed agent-browser: the widget renders `JFK | HND | One Way | Mar 15 | 1` with the `shopWithMiles` checkbox checked. Verdict: yes for prefill, no for results — the human still presses Find Flights, and the results hop is still the session-bound `search-results?cacheKeySuffix=<uuid>` Akamai wall above.
 
 **aircanada.com (Aeroplan)** — no bot wall on the booking page, but Aeroplan award results are **login-walled**. Headless agent-browser drives the US-edition form fine (checkbox "Book with Aeroplan points", One-way, JFK/HND, date typed as `DD/MM`); the form then shows "Please sign in to book with Aeroplan points." and Search is inert. Accepting the "you will be redirected to the Canadian edition" dialog (OK) navigates to a clean, fully URL-encoded deeplink:
 
 ```
-https://www.aircanada.com/aeroplan/redeem/availability/outbound?org0=JFK&dest0=HND&departureDate0=2026-12-01&ADT=1&YTH=0&CHD=0&INF=0&INS=0&lang=en-CA&tripType=O&marketCode=INT
+https://www.aircanada.com/aeroplan/redeem/availability/outbound?org0=JFK&dest0=HND&departureDate0=2027-03-15&ADT=1&YTH=0&CHD=0&INF=0&INS=0&lang=en-CA&tripType=O&marketCode=INT
 ```
 
 That URL is not session-bound, but neither rung reads it logged out: headless agent-browser gets the Akamai Access Denied, and `patchright-fetch '<url>' --wait 60` redirects to `https://www.aircanada.com/clogin/pages/login?gig_client_id=…` (Aeroplan sign-in). Guessed booking deeplinks on `/booking/flights?org0=…` are silently ignored — the params drop and the page lands on `/home/<ed>/en/aco/flights`. No verified path to Aeroplan award prices logged out.
@@ -217,7 +217,7 @@ That URL is not session-bound, but neither rung reads it logged out: headless ag
 **united.com (MileagePlus)** — award results are **login-walled**, stated in-page: "We can show you flight results with money. You must be signed-in to see flight results with miles." The `/en/us/fsr/choose-flights` deeplink is honoured (origin, destination, date, pax, and `at=1` pre-selecting the "Show price in: Miles" dropdown):
 
 ```
-https://www.united.com/en/us/fsr/choose-flights?f=JFK&t=HND&d=2026-12-01&tt=1&at=1&sc=3&px=1&taxng=1&newHP=True&clm=7&st=bestmatches&tqp=A
+https://www.united.com/en/us/fsr/choose-flights?f=JFK&t=HND&d=2027-03-15&tt=1&at=1&sc=3&px=1&taxng=1&newHP=True&clm=7&st=bestmatches&tqp=A
 ```
 
 but the results pane never leaves "Loading results…" for patchright-fetch (`--wait 120`) or for headed agent-browser until you dismiss the cookie banner and the sign-in modal and press **Update**, which is when the sign-in requirement surfaces. Choosing "Show flights with money" flips the URL to `at=0` and returns "We're sorry, but united.com was unable to complete your request." — a generic error, not an Akamai block. Headless agent-browser can't reach united.com at all (`ERR_HTTP2_PROTOCOL_ERROR`, same signature as book.qantas.com). Use seats.aero for UA/AC award space.
@@ -227,12 +227,12 @@ but the results pane never leaves "Loading results…" for patchright-fetch (`--
 The widget itself *does* read a query string off its host page (`K.parse(window.location.search)` → `mapToReduxState`) and prefills when any of these are present: `departureAirportCode`, `arrivalAirportCode`, `departureDate`, `returnDate` (both `YYYY-M-D`, regex `^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$`), `tripType` (`O` one way / `R` return), `travelClass` (`ECO`/`PRM`/`BUS`/`FIR`/`ALL`), `usePoints`, `adults`, `youths`, `children`, `infants`. Candidate widget-prefill link (built only from observed names, **not** confirmed rendering):
 
 ```
-https://www.qantas.com/us/en.html?departureAirportCode=JFK&arrivalAirportCode=HND&departureDate=2026-12-01&tripType=O&travelClass=BUS&adults=1&usePoints=true
+https://www.qantas.com/us/en.html?departureAirportCode=JFK&arrivalAirportCode=HND&departureDate=2027-03-15&tripType=O&travelClass=BUS&adults=1&usePoints=true
 ```
 
 Verdict: partial — prefill-the-widget yes, jump-to-results no; the human still has to press Search. Unverified in-browser because after one successful headed load `www.qantas.com` started returning `net::ERR_HTTP2_PROTOCOL_ERROR` to every subsequent navigation (same signature as united.com), while plain httpie still gets 200 on the same URL. Don't retry the browser rung on qantas.com in the same session.
 
-Qantas prefill link confirmed by hand (2026-09-03): `https://www.qantas.com/us/en/book-a-trip/flights.html?departureAirportCode=JFK&arrivalAirportCode=HND&departureDate=2026-12-1&tripType=O&travelClass=BUS&adults=1&usePoints=true` fills the widget; the `/us/en.html` host page and a zero-padded date do not.
+Qantas prefill link confirmed by hand (2026-09-03): `https://www.qantas.com/us/en/book-a-trip/flights.html?departureAirportCode=JFK&arrivalAirportCode=HND&departureDate=2027-3-15&tripType=O&travelClass=BUS&adults=1&usePoints=true` fills the widget; the `/us/en.html` host page and a zero-padded date do not.
 
 **robinhoodchain.blockscout.com (verified 2026-09-09)** — Cloudflare managed challenge on the httpie/curl path: both `/api/v2/*` and the HTML pages return 403 with the `cf_chl_opt` interstitial. **Headless `agent-browser` clears it on the first navigation** — no headed mode, no patchright needed. Read token stats off the rendered page (`agent-browser open https://robinhoodchain.blockscout.com/token/<addr>` then `eval` on `document.body.innerText`); the Details block carries Total supply / Holders / Transfers. Its ERC-721 "Holders" figure can be wrong (Project Mars Land reported 5,467 holders for a 5,000-item collection), so cross-check ownership against the chain. For raw numbers prefer the public RPC `https://rpc.mainnet.chain.robinhood.com` (`eth_call`, `eth_getBalance`) — it is not walled at all and needs no browser.
 
