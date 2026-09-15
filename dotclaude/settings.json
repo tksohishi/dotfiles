@@ -757,6 +757,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/plan-effort-nudge.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/context-size-nudge.sh",
+            "timeout": 5
           }
         ]
       }
