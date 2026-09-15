@@ -20,7 +20,8 @@ TOOL_INPUT=$(cat)
 CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command')
 
 REMINDER=""
-LAST_ARG=$(echo "$CMD" | awk '{print $NF}')
+# Last word before any pipe, redirect, or chain, so `brew upgrade x 2>&1 | tail -c 10000` yields x
+LAST_ARG=$(echo "$CMD" | sed -E 's/[0-9]*[|;&<>].*//' | awk '{print $NF}')
 
 if [[ "$CMD" =~ ^[[:space:]]*brew[[:space:]]+(install|uninstall|upgrade) ]]; then
     if [[ "$LAST_ARG" =~ ^- ]] || [[ -z "$LAST_ARG" ]]; then

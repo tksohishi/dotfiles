@@ -16,6 +16,16 @@ bash_input() {
   [[ "$output" == *"brew list"* ]]
 }
 
+@test "brew reminder ignores args after a pipe or redirect" {
+  run "$HOOK" <<< "$(bash_input 'brew install jq 2>&1 | tail -c 10000')"
+  [[ "$output" == *"brew list | grep jq\""* ]]
+}
+
+@test "brew reminder falls back when a flag precedes the pipe" {
+  run "$HOOK" <<< "$(bash_input 'brew upgrade --formula 2>&1 | tail -c 10000')"
+  [[ "$output" == *"Verify: brew list\""* ]]
+}
+
 @test "reminds after rm" {
   run "$HOOK" <<< "$(bash_input 'rm -f /tmp/x')"
   [[ "$output" == *"the rm'd path"* ]]
