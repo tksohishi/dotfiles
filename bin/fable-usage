@@ -7,8 +7,10 @@
 # (Claude Code's own /usage definition). Misses are split by the idle gap
 # before the request: >= 55 min means the 1h TTL expired, shorter means the
 # prefix was invalidated (compaction, tool-result clearing, settings/tool
-# changes). Transcript lines repeat a message id as streaming rewrites; dedup
-# keeps the max output per id.
+# changes). AVG_CTX is the average context per request, which every request
+# re-reads; the closing API-equivalent cost line weighs it against output.
+# Transcript lines repeat a message id as streaming rewrites; dedup keeps the
+# max output per id.
 set -euo pipefail
 
 day=${1:-$(date -v-6d +%Y-%m-%d)}
@@ -33,7 +35,7 @@ done | awk -v since="$since" -F'\t' '
   END { for (k in out) print k "\t" ts[k] "\t" out[k] "\t" inp[k] "\t" cw[k] "\t" cr[k] }
 ' | sort -t$'\t' -k1,1 -k3,3n)
 
-printf '%-72s %10s %8s %10s %12s %6s %6s %10s\n' "SESSION (since $day)" OUTPUT INPUT CACHE_W CACHE_R MSGS MISSES MISS_TOK
+printf '%-72s %10s %8s %10s %12s %6s %6s %10s %8s\n' "SESSION (since $day)" OUTPUT INPUT CACHE_W CACHE_R MSGS MISSES MISS_TOK AVG_CTX
 
 report=$(printf '%s\n' "$rows" | awk -F'\t' '
   {
@@ -53,9 +55,9 @@ report=$(printf '%s\n' "$rows" | awk -F'\t' '
   END {
     for (f in fout) {
       name = f; sub(/^.*projects\//, "", name)
-      printf "T\t%-72s %10d %8d %10d %12d %6d %6d %10d\n", name, fout[f], fin[f], fcw[f], fcr[f], n[f], miss[f], misstok[f]
+      printf "T\t%-72s %10d %8d %10d %12d %6d %6d %10d %7dK\n", name, fout[f], fin[f], fcw[f], fcr[f], n[f], miss[f], misstok[f], (fin[f] + fcw[f] + fcr[f]) / n[f] / 1000
     }
-    printf "S\t%-72s %10d %8d %10d %12d %6d %6d %10d\n", "TOTAL", tout, tin, tcw, tcr, NR, tmiss, tmisstok
+    printf "S\t%-72s %10d %8d %10d %12d %6d %6d %10d %7dK\n", "TOTAL", tout, tin, tcw, tcr, NR, tmiss, tmisstok, NR ? (tin + tcw + tcr) / NR / 1000 : 0
     printf "S\t\nS\tCACHE MISSES (re-cached >= 2000 tokens and > 5%% of the prefix)\n"
     printf "S\t  session start   %4d  %10d tokens  (first request of each session; unavoidable)\n", first, firsttok
     printf "S\t  TTL expired     %4d  %10d tokens  (idle >= 55 min before the request; longest %d min)\n", expired, expiredtok, maxgap/60
@@ -63,6 +65,12 @@ report=$(printf '%s\n' "$rows" | awk -F'\t' '
     printf "S\t  invalidated     %4d  %10d tokens  (idle < 5 min: compaction, tool-result clearing, settings/tool/MCP changes)\n", inval, invaltok
     share = tcw > 0 ? 100 * (expiredtok + midtok + invaltok) / tcw : 0
     printf "S\t  avoidable share of all cache writes: %.0f%%\n", share
+    # Fable 5.1 API rates per MTok; Claude Code writes the 1h cache (2x input)
+    co = tout * 50 / 1e6; ci = tin * 10 / 1e6; cw = tcw * 20 / 1e6; cr = tcr * 0.25 / 1e6; ct = co + ci + cw + cr
+    if (ct > 0) {
+      printf "S\t\nS\tAPI-EQUIVALENT COST (Fable 5.1 rates; not what the plan meter counts, see ~/.claude/state/rate-limits.tsv)\n"
+      printf "S\t  cache reads $%.0f (%.0f%%)  cache writes $%.0f (%.0f%%)  output $%.0f (%.0f%%)  input $%.0f  total $%.0f\n", cr, 100 * cr / ct, cw, 100 * cw / ct, co, 100 * co / ct, ci, ct
+    }
     printf "S\t\nS\tMITIGATION\n"
     if (expiredtok > 0)
       printf "S\t  - TTL expired: run /keepalive before stepping away for < 8h, or /clear an abandoned session; on return to a large session accept \"resume from summary\"\n"

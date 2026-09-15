@@ -14,6 +14,18 @@ rate_5h_resets=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empt
 rate_7d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 rate_7d_resets=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
+# -- Rate-limit log --
+# One row per change of the 5h/7d bars (epoch, 7d %, 5h %, model, session), so
+# a fable-usage review can line bar movement up against the token mix.
+if [ -n "$rate_7d" ]; then
+  rate_log="$HOME/.claude/state/rate-limits.tsv"
+  last=$(tail -n 1 "$rate_log" 2>/dev/null | cut -f2,3 || true)
+  if [ "$last" != "${rate_7d}"$'\t'"${rate_5h}" ]; then
+    mkdir -p "${rate_log%/*}"
+    printf '%s\t%s\t%s\t%s\t%s\n' "$(date +%s)" "$rate_7d" "$rate_5h" "$model" "$(echo "$input" | jq -r '.session_id // empty')" >> "$rate_log"
+  fi
+fi
+
 # -- Colors --
 green=$'\e[92m'
 yellow=$'\e[33m'
