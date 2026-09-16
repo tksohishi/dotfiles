@@ -1,0 +1,5 @@
+{
+  "name": "context-nudge",
+  "version": "0.1.0",
+  "description": "Once the main context passes 300K tokens, and at each further 100K, show its size and have the agent offer /handoff at the next task boundary."
+}

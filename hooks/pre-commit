@@ -2,6 +2,7 @@
 # Pre-commit hook:
 #   1. Bats coverage — a changed dotagents/hooks/*.sh must have a matching
 #      tests/hooks/<name>.bats, and `bats tests/hooks/` must pass.
+#   1b. Mods — a changed dotclaude/mods/<name>/ must pass `claude plugin test`.
 #   2. Privacy — warn if staged public agent-config changes look like they
 #      contain personal/private info.
 # Escape hatch for either: git commit --no-verify.
@@ -31,6 +32,16 @@ if [ -n "$changed_hooks" ] || [ -n "$changed_hook_tests" ]; then
         fail=1
     fi
 fi
+
+# ── 1b. Claude mods: a changed dotclaude/mods/<name>/ must pass its own tests ─
+changed_mods=$(git diff --cached --name-only --diff-filter=ACM -- dotclaude/mods/ | cut -d/ -f3 | sort -u || true)
+for m in $changed_mods; do
+    [ -d "dotclaude/mods/$m" ] || continue
+    if ! CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude plugin test "dotclaude/mods/$m" >/dev/null 2>&1; then
+        echo "pre-commit: mod $m failed: CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude plugin test dotclaude/mods/$m" >&2
+        fail=1
+    fi
+done
 
 # ── 2. Personal/private info scan in public agent-config dirs ─────────────
 SENSITIVE_DIRS="dotagents/ dotclaude/ dotcodex/"

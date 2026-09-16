@@ -1,0 +1,4 @@
+{
+  "description": "Context-size nudge: on each prompt the user types, read the live context size; when it crosses a new 100K band from 300K up, log the size and attach a handoff instruction beside the prompt. A compaction resets the band.",
+  "modules": ["./register.ts"]
+}
