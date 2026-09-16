@@ -68,6 +68,10 @@ If the user passed an argument, treat it as what the next session will focus on 
 
 Redact secrets (API keys, tokens, passwords) — the file is plaintext on disk.
 
+## Language
+
+Write the document in the language the session was mostly conducted in. If the user's prompts were largely Japanese, write the whole handoff in Japanese (headings included; keep the `# Handoff` prefix, commands, paths, and verbatim error output as they are). The next session reads it in the same language the user will continue in. Follow the Japanese conventions in the global instructions (first person 私, no circled numbers, punctuation outside `**`).
+
 ## After writing
 
 Tell the user exactly this, substituting nothing else in:
