@@ -101,8 +101,13 @@ codex_input() {
   [[ "$output" == *'"ask"'* ]]
 }
 
-@test "allows gmail drafts delete (exempt: only discards unsent text)" {
+@test "asks on gmail drafts delete (permanent; can take a just-sent message)" {
   run "$HOOK" <<< "$(bash_input 'gog gmail draft delete 18c2')"
+  [[ "$output" == *'"ask"'* ]]
+}
+
+@test "allows gmail trash (exempt: recoverable from Trash)" {
+  run "$HOOK" <<< "$(bash_input 'gog gmail trash 18c2')"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
@@ -120,6 +125,6 @@ codex_input() {
 }
 
 @test "asks on gog in pipeline segment" {
-  run "$HOOK" <<< "$(bash_input 'cat ids.txt | gog gmail trash 18c2')"
+  run "$HOOK" <<< "$(bash_input 'cat ids.txt | gog gmail send --to a@b.c')"
   [[ "$output" == *'"ask"'* ]]
 }
