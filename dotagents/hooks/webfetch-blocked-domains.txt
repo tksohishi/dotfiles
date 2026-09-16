@@ -7,6 +7,7 @@ twitter.com|Single post: anonymous syndication endpoint (invoke the fetch-blocke
 instagram.com|Instagram requires login. Use agent-browser --headed.
 rubyhome.com|403 to WebFetch; httpie with browser UA returns the full page. For SF MLS listing data compass.com homedetails also works via WebFetch. See fetch-blocked skill.
 realtyhop.com|Skip this host. Cloudflare-walled below patchright, and compass.com homedetails has the same SF MLS data via plain WebFetch.
+ana.co.jp|WebFetch times out (no block page, just ETIMEDOUT); httpie with a browser UA returns the full page. Award seat availability is not on those pages: cam.ana.co.jp needs an AMC login via agent-browser --headed (award-flights skill). See fetch-blocked skill.
 reddit.com|WebFetch cannot reach reddit at all. Use httpie against old.reddit.com: HTML works anonymously, or append .rss for structured Atom (.json is 403). See the fetch-blocked skill.
 stackoverflow.com|WebFetch cannot reach Stack Overflow. Plain httpie works (http GET <url>), or use the Stack Exchange API for structured JSON. See the fetch-blocked skill.
 nytimes.com|WebFetch cannot reach nytimes.com. Plain httpie works (paywall still applies to full articles).
