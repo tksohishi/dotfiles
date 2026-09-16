@@ -13,15 +13,23 @@
 # Override: drop the value or change the frontmatter type.
 #
 # Claude-only (not wired in dotcodex/config.toml); Codex does not use this dir.
-# Reads .content (Write) or .new_string (Edit) so both tools are inspected.
+# Reads .content (Write), .new_string (Edit), or the whole command (Bash: a
+# heredoc, echo >, tee, sed -i, perl -pi aimed at a memory .md) so all three
+# tools are inspected.
 
 TOOL_INPUT=$(cat)
-FILE_PATH=$(echo "$TOOL_INPUT" | jq -r '.tool_input.file_path // ""')
-CONTENT=$(echo "$TOOL_INPUT" | jq -r '.tool_input.content // .tool_input.new_string // ""')
+TOOL_NAME=$(echo "$TOOL_INPUT" | jq -r '.tool_name // ""')
 
-# Only inspect memory-dir markdown writes (MEMORY.md index included).
-if [[ ! "$FILE_PATH" =~ /memory/.*\.md$ ]]; then
-  exit 0
+if [ "$TOOL_NAME" = "Bash" ]; then
+  # A shell write aimed at a memory .md: the command carries the content.
+  CONTENT=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command // ""')
+  echo "$CONTENT" | grep -qE '/memory/[^[:space:]"'"'"']*\.md' || exit 0
+  echo "$CONTENT" | grep -qE '(>|\btee\b|\bsed\b.*-i|\bperl\b.*-p?i|\b(cp|mv)\b)' || exit 0
+else
+  FILE_PATH=$(echo "$TOOL_INPUT" | jq -r '.tool_input.file_path // ""')
+  CONTENT=$(echo "$TOOL_INPUT" | jq -r '.tool_input.content // .tool_input.new_string // ""')
+  # Only inspect memory-dir markdown writes (MEMORY.md index included).
+  [[ "$FILE_PATH" =~ /memory/.*\.md$ ]] || exit 0
 fi
 
 emit() { # $1=decision $2=reason
@@ -36,7 +44,7 @@ emit() { # $1=decision $2=reason
 }
 
 # 1. Feedback-type memory -> deny.
-if echo "$CONTENT" | head -20 | grep -qE '^[[:space:]]*type:[[:space:]]*feedback[[:space:]]*$'; then
+if echo "$CONTENT" | grep -qE '^[[:space:]]*type:[[:space:]]*feedback[[:space:]]*$'; then
   emit deny "Feedback-type memory blocked (Enforcement Hierarchy level 3). Put the rule in the relevant skill or the repo's AGENTS.md, not memory. Do not target the global AGENTS.md."
 fi
 

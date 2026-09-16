@@ -48,3 +48,53 @@ make_edit()  { jq -nc --arg fp "$1" --arg c "$2" '{tool_input:{file_path:$fp,new
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+make_bash() { jq -nc --arg c "$1" '{tool_name:"Bash",tool_input:{command:$c}}'; }
+
+@test "denies feedback-type heredoc write via Bash" {
+  run "$HOOK" <<< "$(make_bash "cat > $MEM/x.md <<'EOF'
+---
+name: t
+type: feedback
+---
+EOF")"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "denies config-value appended via Bash echo >>" {
+  run "$HOOK" <<< "$(make_bash "echo 'settings.json \`model\` is \`\"claude-fable-5\"\`' >> $MEM/MEMORY.md")"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "denies config-value via sed -i on a memory file" {
+  run "$HOOK" <<< "$(make_bash "sed -i '' 's/x/\`dotclaude\/settings.json\` has \`effortLevel: \"xhigh\"\`/' $MEM/x.md")"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "passes Bash read of a memory file that mentions feedback" {
+  run "$HOOK" <<< "$(make_bash "grep -n 'type: feedback' $MEM/x.md")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "passes Bash heredoc write of a project-type memory" {
+  run "$HOOK" <<< "$(make_bash "cat > $MEM/x.md <<'EOF'
+---
+type: project
+---
+Backlog: migrate the widget pipeline
+EOF")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "passes Bash feedback-type write outside memory dir" {
+  run "$HOOK" <<< "$(make_bash "cat > /Users/me/notes.md <<'EOF'
+type: feedback
+EOF")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
