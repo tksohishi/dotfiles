@@ -66,3 +66,4 @@ devin.ai|429 Too Many Requests to WebFetch; httpie with a Chrome UA returns the 
 scopvc.com|403 to WebFetch (Cloudflare); plain httpie (no UA header) returns the full page. See fetch-blocked skill.
 indeed.com|403 to WebFetch and httpie+UA; agent-browser headless and headed blocked; patchright-fetch headed returns the page. See fetch-blocked skill.
 pitchbook.com|403 to WebFetch and httpie+UA; headless agent-browser gets Cloudflare "Just a moment"; agent-browser --headed loads the public profile. See fetch-blocked skill.
+support.biltrewards.com|403 to WebFetch (Cloudflare, Zendesk help center); plain httpie (no UA header) returns the full article. See fetch-blocked skill.
