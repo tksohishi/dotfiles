@@ -344,12 +344,17 @@ if [ -f "$skills_list" ] && command -v bunx &>/dev/null; then
         case "$line" in
             \#*) continue ;;
         esac
+        agent_flag=()
+        if [[ "$line" == *" @"* ]]; then
+            agent_flag=(-a "${line##* @}")
+            line="${line%% @*}"
+        fi
         if [[ "$line" == *:* ]]; then
             pkg="${line%%:*}"
             skill="${line##*:}"
-            bunx skills add -g "$pkg" --skill "$skill" || echo "  Failed: $line"
+            bunx skills add -g "$pkg" --skill "$skill" "${agent_flag[@]}" || echo "  Failed: $line"
         else
-            bunx skills add -g "$line" || echo "  Failed: $line"
+            bunx skills add -g "$line" "${agent_flag[@]}" || echo "  Failed: $line"
         fi
     done < "$skills_list"
 fi

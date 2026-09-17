@@ -4,10 +4,15 @@
 # Format:
 #   <owner>/<repo>           install all skills from repo
 #   <owner>/<repo>:<skill>   install specific skill from repo
+#   <entry> @<agents>        restrict to those agents (comma-separated, passed to -a);
+#                            default installs for every agent
 # Blank lines and lines starting with # are ignored.
 
-anthropics/skills:docx
+anthropics/skills:docx @codex
 anthropics/skills:frontend-design
-anthropics/skills:pdf
+anthropics/skills:pdf @codex
 vercel-labs/skills:find-skills
 blader/humanizer:humanizer
+
+# docx/pdf are Codex-only: Claude gets the same skills from the bundled
+# anthropic-skills plugin, and a second copy competes for triggering.
