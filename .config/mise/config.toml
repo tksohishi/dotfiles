@@ -1,3 +1,7 @@
+# No [settings] trusted_config_paths here: this file is reached through the
+# ~/.config/mise symlink into ~/.dotfiles, which mise treats as non-global and
+# ignores the setting ("ignored for security reasons"). Trust lives in mise's
+# state store instead: run `mise trust ~/.dotfiles` once; `mise trust --show`.
 [tools]
 node = { version = "lts", postinstall = "corepack enable pnpm" }
 bun = "latest"

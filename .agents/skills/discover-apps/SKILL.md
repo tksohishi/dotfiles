@@ -22,7 +22,7 @@ Read the `Brewfile` in this repo. Build a list of everything already installed (
 
 ## Step 3: Filter
 
-Remove any tool that's already in the Brewfile. Also remove tools that:
+Remove any tool that's already in the Brewfile, and anything listed in `skipped.md` next to this file (previously declined; re-propose only if its noted condition changed). Also remove tools that:
 
 - Don't support macOS
 - Are abandoned or unmaintained (no updates in 2+ years)
@@ -53,5 +53,7 @@ Show the 3 tools in a numbered list using this format per tool:
 ```
 
 After presenting, ask: "Want me to install any of these?"
+
+Record each declined pick in `skipped.md` with the date and the reason given.
 
 If the user picks one or more, use the `/install-app` skill workflow for each.
