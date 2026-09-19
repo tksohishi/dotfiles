@@ -41,6 +41,12 @@ gcloud's own answer to per-project settings is named configurations plus `CLOUDS
     CLOUDSDK_CONFIG = "{{config_root}}/.gcloud"
     ```
 
+    Then trust it, or mise prints an untrusted-config warning on every command in the directory:
+
+    ```sh
+    mise trust <abs project root>/mise.local.toml
+    ```
+
 5. **Seed the store.** These work without credentials in the new store:
 
     ```sh
@@ -58,7 +64,7 @@ gcloud's own answer to per-project settings is named configurations plus `CLOUDS
     gcloud auth login
     ```
 
-    mise exports `CLOUDSDK_CONFIG` on entering the directory, so no env prefix is needed. If mise warns the config is untrusted, `mise trust` once.
+    mise exports `CLOUDSDK_CONFIG` on entering the directory, so no env prefix is needed.
 
 7. **After login**, set the zone and verify:
 
