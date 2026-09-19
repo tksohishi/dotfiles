@@ -9,6 +9,14 @@ setup() {
   printf 'on:\n  push:\n' > "$REPO/.github/workflows/ci.yml"
   git -C "$REPO" init -q
   git -C "$REPO" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m init
+  git init -q --bare "$BATS_TEST_TMPDIR/remote.git"
+  git -C "$REPO" remote add origin "$BATS_TEST_TMPDIR/remote.git"
+  git -C "$REPO" push -q -u origin HEAD
+  SHA=$(git -C "$REPO" rev-parse HEAD)
+}
+
+unpushed_commit() {
+  git -C "$REPO" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m next
   SHA=$(git -C "$REPO" rev-parse HEAD)
 }
 
@@ -53,4 +61,27 @@ make_input() { jq -nc --arg cwd "$REPO" --arg cmd "$1" '{session_id:"sid-1",cwd:
     run "$HOOK" <<< "$(make_input "git push")"
     [ -f "$CLAUDE_CI_GATE_DIR/sid-1.json" ]
   done
+}
+
+@test "ignores a push that did not reach the remote" {
+  unpushed_commit
+  run "$HOOK" <<< "$(make_input "git push")"
+  [ "$status" -eq 0 ]
+  [ ! -e "$CLAUDE_CI_GATE_DIR/sid-1.json" ]
+}
+
+@test "drops a stale marker for the same unpushed SHA" {
+  unpushed_commit
+  mkdir -p "$CLAUDE_CI_GATE_DIR"
+  jq -nc --arg cwd "$REPO" --arg sha "$SHA" '{cwd:$cwd,sha:$sha,blocks:5}' > "$CLAUDE_CI_GATE_DIR/sid-1.json"
+  run "$HOOK" <<< "$(make_input "git push")"
+  [ ! -e "$CLAUDE_CI_GATE_DIR/sid-1.json" ]
+}
+
+@test "keeps the marker of an earlier pushed SHA when a later push fails" {
+  run "$HOOK" <<< "$(make_input "git push")"
+  PUSHED=$SHA
+  unpushed_commit
+  run "$HOOK" <<< "$(make_input "git push")"
+  [ "$(jq -r .sha "$CLAUDE_CI_GATE_DIR/sid-1.json")" = "$PUSHED" ]
 }

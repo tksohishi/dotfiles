@@ -36,4 +36,10 @@ has_push_workflow "$cwd" || exit 0
 sha=$(git -C "$cwd" rev-parse HEAD 2>/dev/null) || exit 0
 sid=$(echo "$input" | jq -r '.session_id')
 dir="${CLAUDE_CI_GATE_DIR:-$HOME/.claude/state/ci-gate}"; mkdir -p "$dir"
+# A rejected or failed push leaves no remote-tracking ref holding the SHA, and no run will ever exist for it: record
+# nothing, and drop a marker an earlier attempt at the same SHA left behind.
+if ! git -C "$cwd" branch -r --contains "$sha" 2>/dev/null | grep -q .; then
+  [ -f "$dir/$sid.json" ] && [ "$(jq -r '.sha' "$dir/$sid.json")" = "$sha" ] && rm -f "$dir/$sid.json"
+  exit 0
+fi
 jq -nc --arg cwd "$cwd" --arg sha "$sha" '{cwd:$cwd, sha:$sha, blocks:0}' > "$dir/$sid.json"
