@@ -72,7 +72,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Never copy real personal data (phone numbers, emails, addresses, names from the user's DB/calendar/inbox) into test fixtures, committed code, or anything else that could be published. Anonymize first: US phone numbers from the reserved 555-01xx range, example.com emails, made-up names. Local data stores (databases, gitignored tmp/) legitimately hold real data — don't flag or scrub those.
 
 ## Package Managers
-- Node.js: pnpm, not npm
+- TypeScript/JavaScript: bun as both runner and package manager (`bun add`, `bun run`, `bunx`), not npm. In a project that already has a `pnpm-lock.yaml`, stay on pnpm.
 - Python: uv, not pip
 - Bun auto-loads `.env` (and `.env.local`, `.env.{NODE_ENV}`) from the working directory. Just run `bun script.ts`; don't add `--env-file=.env` redundantly. Use the flag only for non-default filenames (e.g. `--env-file=.env.staging`).
 - Global CLI tools: prefer `brew install` over `npm install -g`, `pip install`, or `go install`. Homebrew tracks everything in the Brewfile.
@@ -110,7 +110,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 ## Symlinked Configs
 - Most files under `~/.claude/` and `~/.codex/` symlink into `~/.dotfiles/`. Edit/Write refuses to write through symlinks.
 - When wd is `~/.dotfiles/`, edit the source files directly (e.g. `dotagents/AGENTS.md`, `dotclaude/settings.json`) instead of the `~/.<tool>/` paths.
-- In any project, `CLAUDE.md` is conventionally a symlink to `AGENTS.md` (the canonical instructions file). When editing project instructions, go to `AGENTS.md` directly — don't write through `CLAUDE.md`, skip the `readlink` round trip. Same for `.cursorrules` → `AGENTS.md` if present.
+- In any project, `AGENTS.md` is the canonical instructions file; Claude Code reads it natively when no `CLAUDE.md` exists, so don't create a `CLAUDE.md` symlink in new projects. Where a project has `CLAUDE.md` as a symlink to `AGENTS.md`, edit `AGENTS.md` directly; don't write through `CLAUDE.md`, skip the `readlink` round trip. Same for `.cursorrules` → `AGENTS.md` if present.
 - Claude Code's own `model` and `effortLevel` in `dotclaude/settings.json` are self-modification: never add or change them without explicit direction. Gotchas: `model` omitted = session default (`"default"` is NOT a valid value, it errors); valid `effortLevel` values are `low`/`medium`/`high`/`xhigh`. Read the file for the current value; never memorize it.
 
 ## Secrets
