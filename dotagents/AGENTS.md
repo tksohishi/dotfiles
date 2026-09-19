@@ -68,6 +68,8 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
 - No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
 - Only change what was asked for; don't refactor, annotate, or "improve" surrounding code unprompted
+- Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
+- Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 - IME safety in web UI: any Enter/keydown handler on a text input must guard IME composition in the first draft (`isComposing`/keyCode 229, plus a compositionend grace window for Safari/WKWebView, which fires compositionend BEFORE the committing keydown). Reuse the project's helper if one exists; reference implementation: koyomi packages/ui/src/ime.ts
 - Never copy real personal data (phone numbers, emails, addresses, names from the user's DB/calendar/inbox) into test fixtures, committed code, or anything else that could be published. Anonymize first: US phone numbers from the reserved 555-01xx range, example.com emails, made-up names. Local data stores (databases, gitignored tmp/) legitimately hold real data — don't flag or scrub those.
 
@@ -97,8 +99,6 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - For intermediate files (pdftotext output, downloaded HTML, etc.), use project-local `tmp/` (globally gitignored), not `/tmp`. In code, write `path.join(process.cwd(), 'tmp')` (Node/TS) or `Path.cwd() / 'tmp'` (Python). Never reach for `os.tmpdir()`, `fs.mkdtemp`, `tempfile.gettempdir()`, `tempfile.NamedTemporaryFile()`, or bare `mktemp` — they all bypass the rule by returning a system temp path. Keeps operations in the project directory and avoids `cd`-chain patterns.
 - `cp`, `mv`, `rm` with flags trigger a Claude Code built-in path-safety check that prompts even when the command is in `permissions.allow`. Bare single-file `cp src dst` is fine. For recursive / no-clobber copy use `rsync -a --ignore-existing src/ dst/` (trailing slashes copy contents into dst) — rsync isn't subject to the path-safety check and its allow rule works.
 - Prefer reversible deletion over `rm -rf` for bulk/cache/directory removal: use `trash <paths...>` (macOS built-in, recoverable from Trash). Besides being safer, `rm -rf` of home paths is denied outright by the auto-mode classifier, while `trash` passes cleanly. Reserve `rm` for cases where non-recoverable removal is actually required.
-- Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
-- Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 - For `sqlite3`, pass `-readonly` for read queries (SELECT, PRAGMA, .schema, .tables, .dump) so the database is opened read-only at the engine level. Omit it only for intentional mutations.
 - macOS 15+ silently drops LAN unicast (ping/SSH return "No route to host" with ARP populated and gateway reachable) when the host app lacks Local Network permission in System Settings → Privacy & Security → Local Network. Resets on major OS updates.
 
