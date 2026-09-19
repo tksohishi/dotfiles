@@ -68,3 +68,5 @@ indeed.com|403 to WebFetch and httpie+UA; agent-browser headless and headed bloc
 pitchbook.com|403 to WebFetch and httpie+UA; headless agent-browser gets Cloudflare "Just a moment"; agent-browser --headed loads the public profile. See fetch-blocked skill.
 support.biltrewards.com|403 to WebFetch (Cloudflare, Zendesk help center); plain httpie (no UA header) returns the full article. See fetch-blocked skill.
 blog.kraken.com|403 to WebFetch and httpie+UA (nginx); patchright-fetch headed returns the post. See fetch-blocked skill.
+cpu-monkey.com|403 to WebFetch; httpie with a browser UA returns the page (scores not in the HTML text). See fetch-blocked skill.
+browser.geekbench.com|403 to WebFetch and httpie+UA; headless agent-browser gets Cloudflare "Just a moment"; agent-browser --headed loads the charts. See fetch-blocked skill.
