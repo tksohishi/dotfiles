@@ -114,7 +114,7 @@ Then ask the user how to set it up before installing anything (AskUserQuestion i
 2. Rule set: the tool's recommended defaults (recommended), or stricter/looser rules they specify.
 3. Enforcement: lint command only (recommended), plus a git pre-commit hook, or plus CI.
 
-Install with the project's package manager (pnpm for Node, uv for Python), generate the config with the tool's own init command where one exists (e.g. `pnpm biome init`), and add `lint` / `format` scripts to the manifest. Put the exact commands in the AGENTS.md `## Commands` section. Don't restate the linter's rules in AGENTS.md; the tool enforces them.
+Install with the project's package manager: for TypeScript projects use bun as both runner and package manager (`bun add -d`, `bun run`, `bunx`), for Python use uv. Generate the config with the tool's own init command where one exists (e.g. `bunx biome init`), and add `lint` / `format` scripts to the manifest. Put the exact commands in the AGENTS.md `## Commands` section. Don't restate the linter's rules in AGENTS.md; the tool enforces them.
 
 ## Step 4: Initialize git and commit
 
