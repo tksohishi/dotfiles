@@ -1,6 +1,6 @@
 ---
 name: init-agents
-description: Initialize a new project with AGENTS.md. Use when the user runs /init-agents or asks to bootstrap a project's agent instructions file from scratch (templates for both empty projects and existing codebases, plus the CLAUDE.md symlink and initial commit).
+description: Initialize a new project with AGENTS.md. Use when the user runs /init-agents or asks to bootstrap a project's agent instructions file from scratch (templates for both empty projects and existing codebases, plus linter setup for code-based projects and the initial commit).
 ---
 
 # init-agents
@@ -96,27 +96,39 @@ AGENTS.md is a constraint system to prevent specific mistakes, not documentation
 
 Keep it under 150 lines. Instruction-following quality degrades as the file grows; research shows adherence drops uniformly across all instructions, not just the newest ones. Shorter is better. If growing beyond 150 lines, split into separate files.
 
-## Step 3: Create CLAUDE.md symlink
+## Step 3: Set up a linter (code-based projects only)
 
-```bash
-ln -s AGENTS.md CLAUDE.md
-```
+Skip this step for projects with no source code and no chosen stack (notes, docs, prep folders), and for projects that already have a linter configured (`biome.json`, `eslint.config.*`, `[tool.ruff]` in `pyproject.toml`, `.golangci.yml`, etc.).
 
-AGENTS.md is the cross-agent standard. Claude Code reads CLAUDE.md, so this symlink ensures both files stay in sync. Other tools read AGENTS.md natively.
+Pick the default for the stack:
+
+- TypeScript / JavaScript: Biome (lint + format in one tool)
+- Python: Ruff (lint + format)
+- Go: golangci-lint, with gofmt for formatting
+- Rust: clippy, with rustfmt for formatting
+- Swift: SwiftLint, with swift-format for formatting
+
+Then ask the user how to set it up before installing anything (AskUserQuestion in Claude Code, a plain question elsewhere). Cover:
+
+1. Which linter: the stack default above (recommended), another tool they name, or none.
+2. Rule set: the tool's recommended defaults (recommended), or stricter/looser rules they specify.
+3. Enforcement: lint command only (recommended), plus a git pre-commit hook, or plus CI.
+
+Install with the project's package manager (pnpm for Node, uv for Python), generate the config with the tool's own init command where one exists (e.g. `pnpm biome init`), and add `lint` / `format` scripts to the manifest. Put the exact commands in the AGENTS.md `## Commands` section. Don't restate the linter's rules in AGENTS.md; the tool enforces them.
 
 ## Step 4: Initialize git and commit
 
 If the current directory is not already a git repository, run `git init`.
 
-Stage and commit:
+Stage AGENTS.md plus any linter files from Step 3 (config, manifest, lockfile), then commit:
 
 ```bash
-git add AGENTS.md CLAUDE.md
+git add AGENTS.md
 git commit -m "Initialize project with AGENTS.md"
 ```
 
 ## Important notes
 
 - Never overwrite existing AGENTS.md or CLAUDE.md
-- The CLAUDE.md symlink is required for Claude Code; without it Claude Code won't read AGENTS.md
+- Don't create a CLAUDE.md symlink. Claude Code reads AGENTS.md natively when no CLAUDE.md exists, and a CLAUDE.md in the same directory makes it ignore AGENTS.md.
 - Treat AGENTS.md like code: review, prune, and iterate. If the agent isn't following a rule, the problem is likely in your file (too long, too vague, or buried), not the agent.
