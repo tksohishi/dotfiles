@@ -49,6 +49,16 @@ assert_silent() {
   assert_injects
 }
 
+@test "httpie call with an Authorization header stays silent on 403" {
+  run "$HOOK" <<< "$(hook_input Bash 'http GET https://api.example.com/v1/items "Authorization:Bearer $TOKEN"' 'HTTP/1.1 403 Forbidden')"
+  assert_silent
+}
+
+@test "curl call with an Authorization header stays silent on 429" {
+  run "$HOOK" <<< "$(hook_input Bash 'curl -H "authorization: Bearer $TOKEN" https://api.example.com/v1/items' 'HTTP/1.1 429 Too Many Requests')"
+  assert_silent
+}
+
 @test "agent-browser Bash call hitting Press and Hold injects" {
   run "$HOOK" <<< "$(hook_input Bash "agent-browser open https://zillow.com" 'Press & Hold to confirm you are a human')"
   assert_injects

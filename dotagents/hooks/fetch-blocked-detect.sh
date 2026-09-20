@@ -31,6 +31,9 @@ if [ "$TOOL" = "Bash" ]; then
   # File edits that mention a fetch tool by name (sed into sites.md, git) are not fetches.
   printf '%s' "$CMD" | rg -q '^\s*(sed|git|grep|rg|cat|printf|echo)\b' && exit 0
   printf '%s' "$CMD" | rg -q 'https?://|\bhttps? (GET|POST|HEAD)\b|agent-browser|patchright-fetch|\bcurl\b|\bwget\b' || exit 0
+  # An Authorization header means an authenticated API call: a 401/403/429 there
+  # is an auth or quota error, not a bot wall, and the ladder can't fix it.
+  printf '%s' "$CMD" | rg -qi 'Authorization:' && exit 0
   URL=$(printf '%s' "$CMD" | rg -o 'https?://[^ "'"'"'>)]+' | head -1)
   case "$CMD" in
     *patchright-fetch*) METHOD="patchright-fetch headed" ;;
