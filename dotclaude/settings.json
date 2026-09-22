@@ -813,7 +813,7 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/ci-gate.sh",
-            "timeout": 30
+            "timeout": 540
           }
         ]
       },
