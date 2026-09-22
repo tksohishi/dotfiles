@@ -73,3 +73,13 @@ browser.geekbench.com|403 to WebFetch and httpie+UA; headless agent-browser gets
 bhphotovideo.com|403 to WebFetch, Cloudflare challenge to httpie+UA and headless agent-browser; patchright-fetch headed returns the page. See fetch-blocked skill.
 zecbit.net|429 Vercel challenge to WebFetch and plain httpie; httpie with a browser UA returns the full page. See fetch-blocked skill.
 nftcalendar.io|403 to WebFetch (Cloudflare); plain httpie (no UA header) returns the full page. See fetch-blocked skill.
+edmunds.com|403 to WebFetch (Akamai), httpie plain and httpie+UA, and headless agent-browser; patchright-fetch headed returns the full article. See fetch-blocked skill.
+data.consumerreports.org|403 to WebFetch; httpie with a browser UA returns the page (WordPress/Elementor, strip tags before reading). See fetch-blocked skill.
+rivianforums.com|403 to WebFetch; httpie with a browser UA returns the full thread. See fetch-blocked skill.
+congress.gov|403 to WebFetch, plain httpie and httpie+UA; no verified path yet (browser rungs untested). For tax-credit questions use irs.gov instead. See fetch-blocked skill.
+chevrolet.com|403 to WebFetch (Akamai) and headless agent-browser; httpie+UA works for spec pages, but /current-offers needs agent-browser --headed. See fetch-blocked skill.
+cadillac.com|403 to WebFetch (Akamai) and headless agent-browser; httpie+UA works for spec pages, but /current-offers needs agent-browser --headed. See fetch-blocked skill.
+ford.com|403 to WebFetch and httpie+UA (Akamai); agent-browser --headed loads it. fromtheroad.ford.com is not walled. See fetch-blocked skill.
+gmauthority.com|403 to WebFetch and httpie+UA; use the OEM offers pages instead. See fetch-blocked skill.
+cnbc.com|403 to WebFetch; httpie + browser UA returns the full page. See fetch-blocked skill.
+tesla.com|403 to WebFetch and httpie+UA (Akamai); browser rungs untested. See fetch-blocked skill.
