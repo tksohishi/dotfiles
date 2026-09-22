@@ -277,3 +277,4 @@ Qantas prefill link confirmed by hand (2026-09-03): `https://www.qantas.com/us/e
 
 
 **sourcify.dev (Royal Mechanica lookup)** — Direct public `/server/v2/contract/4663/<address>` returned a normal JSON 404 with null match for the queried NFT contract. No bot-wall response on this host; no browser escalation was needed. A combined fetch also queried robinhoodchain.blockscout.com, whose separate 403 Cloudflare response caused a misleading host attribution. That host passed headless agent-browser as documented above.
+| catalyst.markets (2026-09-22) | Site itself renders headless (Privy sign-in modal). The X OAuth consent page it redirects to (x.com/i/oauth2/authorize) answers HTTP 403 "Access to x.com was denied" in headless agent-browser | `scripts/x-act.ts authorize ... --headed` (headed agent-browser reaches the consent page; WebFetch and httpie untested, not needed) |
