@@ -70,3 +70,6 @@ support.biltrewards.com|403 to WebFetch (Cloudflare, Zendesk help center); plain
 blog.kraken.com|403 to WebFetch and httpie+UA (nginx); patchright-fetch headed returns the post. See fetch-blocked skill.
 cpu-monkey.com|403 to WebFetch; httpie with a browser UA returns the page (scores not in the HTML text). See fetch-blocked skill.
 browser.geekbench.com|403 to WebFetch and httpie+UA; headless agent-browser gets Cloudflare "Just a moment"; agent-browser --headed loads the charts. See fetch-blocked skill.
+bhphotovideo.com|403 to WebFetch, Cloudflare challenge to httpie+UA and headless agent-browser; patchright-fetch headed returns the page. See fetch-blocked skill.
+zecbit.net|429 Vercel challenge to WebFetch and plain httpie; httpie with a browser UA returns the full page. See fetch-blocked skill.
+nftcalendar.io|403 to WebFetch (Cloudflare); plain httpie (no UA header) returns the full page. See fetch-blocked skill.
