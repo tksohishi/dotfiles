@@ -9,6 +9,8 @@
 # prefix was invalidated (compaction, tool-result clearing, settings/tool
 # changes). AVG_CTX is the average context per request, which every request
 # re-reads; the closing API-equivalent cost line weighs it against output.
+# FABLE CUTOFFS lists main sessions that switched from Fable to another model
+# mid-session, which is how hitting the Fable cap shows up in transcripts.
 # Transcript lines repeat a message id as streaming rewrites; dedup keeps the
 # max output per id.
 set -euo pipefail
@@ -18,29 +20,44 @@ since=$(date -j -f '%Y-%m-%d %H:%M:%S' "$day 00:00:00" +%s)
 
 rows=$(find ~/.claude/projects -name '*.jsonl' -newermt "$day" 2>/dev/null | while read -r f; do
   jq -r --arg f "$f" '
-    select((.message.model // "" | startswith("claude-fable-5")) and .timestamp) |
+    select((.message.model // "" | startswith("claude-")) and .message.usage and .timestamp) |
     [$f,
      (.message.id // .uuid),
      (.timestamp | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601),
      (.message.usage.output_tokens // 0),
      (.message.usage.input_tokens // 0),
      (.message.usage.cache_creation_input_tokens // 0),
-     (.message.usage.cache_read_input_tokens // 0)
+     (.message.usage.cache_read_input_tokens // 0),
+     .message.model
     ] | @tsv' "$f" 2>/dev/null
 done | awk -v since="$since" -F'\t' '
-  $3 >= since {
+  $3 < since { next }
+  $8 ~ /^claude-fable-5/ {
     key = $1 "\t" $2
     if ($4 + 0 >= out[key] + 0) { out[key]=$4; ts[key]=$3; inp[key]=$5; cw[key]=$6; cr[key]=$7 }
   }
-  END { for (k in out) print k "\t" ts[k] "\t" out[k] "\t" inp[k] "\t" cw[k] "\t" cr[k] }
+  $1 !~ /\/subagents\// {
+    if (!($1 in cut) && pm[$1] ~ /^claude-fable-5/ && $8 !~ /^claude-fable-5/) cut[$1] = pt[$1] "\t" $8
+    pm[$1]=$8; pt[$1]=$3
+  }
+  END {
+    for (k in out) print k "\t" ts[k] "\t" out[k] "\t" inp[k] "\t" cw[k] "\t" cr[k]
+    for (f in cut) print "C\t" f "\t" cut[f]
+  }
 ' | sort -t$'\t' -k1,1 -k3,3n)
 
 printf '%-72s %10s %8s %10s %12s %6s %6s %10s %8s\n' "SESSION (since $day)" OUTPUT INPUT CACHE_W CACHE_R MSGS MISSES MISS_TOK AVG_CTX
 
 report=$(printf '%s\n' "$rows" | awk -F'\t' '
+  $1 == "C" {
+    name = $2; sub(/^.*projects\//, "", name); sub(/\.jsonl$/, "", name)
+    cmd = "date -r " $3 " \"+%m/%d %H:%M %Z\""; cmd | getline d; close(cmd)
+    printf "K\t%d\t  %s  last Fable request in %s, continued on %s\n", $3, d, name, $4
+    next
+  }
   {
     f=$1; t=$3; o=$4; i=$5; w=$6; r=$7
-    n[f]++; fout[f]+=o; fin[f]+=i; fcw[f]+=w; fcr[f]+=r
+    nreq++; n[f]++; fout[f]+=o; fin[f]+=i; fcw[f]+=w; fcr[f]+=r
     tout+=o; tin+=i; tcw+=w; tcr+=r
     if (w >= 2000 && w > 0.05 * (w + r)) {
       miss[f]++; misstok[f]+=w; tmiss++; tmisstok+=w
@@ -57,7 +74,7 @@ report=$(printf '%s\n' "$rows" | awk -F'\t' '
       name = f; sub(/^.*projects\//, "", name)
       printf "T\t%-72s %10d %8d %10d %12d %6d %6d %10d %7dK\n", name, fout[f], fin[f], fcw[f], fcr[f], n[f], miss[f], misstok[f], (fin[f] + fcw[f] + fcr[f]) / n[f] / 1000
     }
-    printf "S\t%-72s %10d %8d %10d %12d %6d %6d %10d %7dK\n", "TOTAL", tout, tin, tcw, tcr, NR, tmiss, tmisstok, NR ? (tin + tcw + tcr) / NR / 1000 : 0
+    printf "S\t%-72s %10d %8d %10d %12d %6d %6d %10d %7dK\n", "TOTAL", tout, tin, tcw, tcr, nreq, tmiss, tmisstok, nreq ? (tin + tcw + tcr) / nreq / 1000 : 0
     printf "S\t\nS\tCACHE MISSES (re-cached >= 2000 tokens and > 5%% of the prefix)\n"
     printf "S\t  session start   %4d  %10d tokens  (first request of each session; unavoidable)\n", first, firsttok
     printf "S\t  TTL expired     %4d  %10d tokens  (idle >= 55 min before the request; longest %d min)\n", expired, expiredtok, maxgap/60
@@ -68,12 +85,12 @@ report=$(printf '%s\n' "$rows" | awk -F'\t' '
     # Fable 5.1 API rates per MTok; Claude Code writes the 1h cache (2x input)
     co = tout * 50 / 1e6; ci = tin * 10 / 1e6; cw = tcw * 20 / 1e6; cr = tcr * 0.25 / 1e6; ct = co + ci + cw + cr
     if (ct > 0) {
-      printf "S\t\nS\tAPI-EQUIVALENT COST (Fable 5.1 rates; not what the plan meter counts, see ~/.claude/state/rate-limits.tsv)\n"
+      printf "S\t\nS\tAPI-EQUIVALENT COST (Fable 5.1 rates; the plan meter weights token types differently)\n"
       printf "S\t  cache reads $%.0f (%.0f%%)  cache writes $%.0f (%.0f%%)  output $%.0f (%.0f%%)  input $%.0f  total $%.0f\n", cr, 100 * cr / ct, cw, 100 * cw / ct, co, 100 * co / ct, ci, ct
     }
     printf "S\t\nS\tMITIGATION\n"
     if (expiredtok > 0)
-      printf "S\t  - TTL expired: run /keepalive before stepping away for < 8h, or /clear an abandoned session; on return to a large session accept \"resume from summary\"\n"
+      printf "S\t  - TTL expired: run /keepalive (pings until end of day), or /clear an abandoned session; on return to a large session accept \"resume from summary\"\n"
     if (midtok > 0)
       printf "S\t  - idle 5-55 min: if these fell while on usage credits, nothing but /keepalive at a 4-min cadence helps (rarely worth it); otherwise treat as invalidated\n"
     if (invaltok > 0)
@@ -84,3 +101,6 @@ report=$(printf '%s\n' "$rows" | awk -F'\t' '
 
 printf '%s\n' "$report" | grep '^T' | cut -f2- | sort -k2 -rn
 printf '%s\n' "$report" | grep '^S' | cut -f2-
+echo
+echo "FABLE CUTOFFS (main sessions that switched off Fable mid-session: the Fable cap, or a manual /model change)"
+printf '%s\n' "$report" | grep '^K' | sort -t$'\t' -k2,2n | cut -f3- | grep . || echo "  none in this window"
