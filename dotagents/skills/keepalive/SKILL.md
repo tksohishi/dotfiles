@@ -1,6 +1,6 @@
 ---
 name: keepalive
-description: Keep the current session's prompt cache warm while the user steps away, by scheduling minimal pings on a 50-minute interval with a hard deadline. Use when the user runs /keepalive [duration|until HH:MM], or says "keep the session alive", "keep the cache warm", "I'll be back in N hours". Claude Code only (uses /loop); refuses when the transcript shows a 5-minute cache TTL (usage credits).
+description: Keep the current session's prompt cache warm through the end of the day (or an earlier deadline) by scheduling minimal pings on a 50-minute interval. Use when the user runs /keepalive [duration|until HH:MM|stop], or says "keep the session alive", "keep the cache warm", "I'll be back in N hours". Claude Code only (uses /loop); refuses when the transcript shows a 5-minute cache TTL (usage credits).
 ---
 
 Cache economics: a ping re-reads the cached prefix at the cache-read price and refreshes the 1-hour TTL; letting it expire costs a full cache write on the next real message (80x a read on Fable 5.1, 20x on Fable 5). Worth it only when the user will actually come back, and only on the 1-hour TTL.
@@ -15,7 +15,7 @@ Cache economics: a ping re-reads the cached prefix at the cache-read price and r
    ```
 
    `ephemeral_1h_input_tokens` > 0 means the 1-hour TTL (subscription). `ephemeral_5m_input_tokens` > 0 with the 1h field at 0 means the 5-minute TTL (usage credits, or API key): every 50-minute ping would be a full rewrite, so stop and say so; don't schedule. If neither field is set, ask the user whether they're on usage credits.
-2. Parse the argument into an absolute local deadline (`date +%H:%M` is in the UserPromptSubmit hook context). Accepted forms: `2h`, `90m`, `until 14:00`. Default 2h. Cap at 8h; if the request exceeds it, clamp and say so.
+2. Parse the argument into an absolute local deadline (`date +%H:%M` is in the UserPromptSubmit hook context). Accepted forms: `2h`, `90m`, `until 14:00`. Default and cap: 23:59 today. If the request runs past midnight, clamp to 23:59 and say so.
 3. State the deadline and the interval, then schedule.
 
 ## Schedule
@@ -23,15 +23,15 @@ Cache economics: a ping re-reads the cached prefix at the cache-read price and r
 Invoke the `loop` skill in dynamic mode (no interval token; cron can't express 50 minutes cleanly, `*/50` fires at :00 and :50). On every wake, pick `delaySeconds: 3000` (50 minutes, not 55: the TTL clock starts at the request's start, and drift or a slow response pushes 55 past the hour) and `noop: true`. The loop prompt, with the deadline filled in; don't write "every" in it, the loop parser would read a trailing time as a cron interval:
 
 ```
-keepalive ping, 50-minute cadence. Deadline <HH:MM local>. If the current local time is past the deadline, or the user has sent any message since this loop started, stop this loop (ScheduleWakeup stop) and say "keepalive stopped". Otherwise reply with exactly "ok". No tools, no analysis.
+keepalive ping, 50-minute cadence. Deadline <HH:MM local>. If the current local time is past the deadline, stop this loop (ScheduleWakeup stop) and say "keepalive stopped". Otherwise reply with exactly "ok". No tools, no analysis.
 ```
 
 ## Stopping
 
-- The user's first real message means they're back and refreshing the cache themselves: stop the loop in that turn, even if they don't mention it.
+- The loop runs until the deadline. The user's messages, Monitor events, and `<task-notification>` completions don't stop it: the user keeps working in the session between pings, and background events are not the user coming back.
 - `/keepalive stop` stops it immediately (ScheduleWakeup with stop: true).
-- Never extend past the deadline on your own; the user re-runs the skill if they need more.
+- Never extend past the deadline on your own; the user re-runs the skill the next day.
 
 ## Report
 
-One line on scheduling: "Keeping cache warm every 50m until HH:MM. Any message from you stops it." Nothing else.
+One line on scheduling: "Keeping cache warm every 50m until HH:MM. /keepalive stop ends it." Nothing else.
