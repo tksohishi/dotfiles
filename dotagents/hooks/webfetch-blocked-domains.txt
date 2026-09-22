@@ -84,3 +84,5 @@ gmauthority.com|403 to WebFetch and httpie+UA; use the OEM offers pages instead.
 cnbc.com|403 to WebFetch; httpie + browser UA returns the full page. See fetch-blocked skill.
 tesla.com|403 to WebFetch and httpie+UA (Akamai); browser rungs untested. See fetch-blocked skill.
 catapult.trade|403 to WebFetch; httpie + browser UA returns the full page (docs.catapult.trade too). See fetch-blocked skill.
+famsf.org|Cloudflare challenge to WebFetch and httpie+UA; agent-browser --headed clears it. See fetch-blocked skill.
+mlb.com|WebFetch fails; httpie + browser UA returns the server-rendered page. See fetch-blocked skill.
