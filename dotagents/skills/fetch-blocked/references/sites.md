@@ -278,3 +278,16 @@ Qantas prefill link confirmed by hand (2026-09-03): `https://www.qantas.com/us/e
 
 **sourcify.dev (Royal Mechanica lookup)** — Direct public `/server/v2/contract/4663/<address>` returned a normal JSON 404 with null match for the queried NFT contract. No bot-wall response on this host; no browser escalation was needed. A combined fetch also queried robinhoodchain.blockscout.com, whose separate 403 Cloudflare response caused a misleading host attribution. That host passed headless agent-browser as documented above.
 | catalyst.markets (2026-09-22) | Site itself renders headless (Privy sign-in modal). The X OAuth consent page it redirects to (x.com/i/oauth2/authorize) answers HTTP 403 "Access to x.com was denied" in headless agent-browser | `scripts/x-act.ts authorize ... --headed` (headed agent-browser reaches the consent page; WebFetch and httpie untested, not needed) |
+| catapult.trade, docs.catapult.trade (2026-09-22) | WebFetch 403 | httpie + browser UA returns 200 (Next.js site with the chain in the page body; docs are GitBook) |
+| rarehoodfriends.xyz (2026-09-22) | no wall: plain httpie 200; the `/api/` 403 is a directory-listing deny | plain httpie; the early-access form posts to `/api/*.php` |
+| robinhoodchain.blockscout.com (2026-09-22) | httpie 403 Cloudflare "Just a moment" on the page and `/api/v2` | agent-browser headless 200, the API JSON renders as body text; `/api/v2/smart-contracts/<addr>` gives is_verified, source_code and additional_sources |
+
+## IPFS gateways (2026-09-22)
+
+| host | httpie | httpie+UA | agent-browser headless | note |
+|---|---|---|---|---|
+| ipfs.io | 429 "switching to a service worker gateway only" | 403 Cloudflare "Just a moment" | "Just a moment" | deprecated as an HTTP gateway (gatewaychanges.ipfs.io); not a bot wall to climb, use another gateway |
+| dweb.link, w3s.link | 429 same notice | untested | untested | same deprecation |
+| cloudflare-ipfs.com | DNS gone | | | |
+| gateway.pinata.cloud | 200 JSON | | | public, rate-limited; fine for one read |
+| ipfs2.seadn.io | 200 JSON | | | OpenSea's gateway (the `metadata_url` OpenSea reports); best for a collection-wide pull |

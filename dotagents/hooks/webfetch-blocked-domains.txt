@@ -83,3 +83,4 @@ ford.com|403 to WebFetch and httpie+UA (Akamai); agent-browser --headed loads it
 gmauthority.com|403 to WebFetch and httpie+UA; use the OEM offers pages instead. See fetch-blocked skill.
 cnbc.com|403 to WebFetch; httpie + browser UA returns the full page. See fetch-blocked skill.
 tesla.com|403 to WebFetch and httpie+UA (Akamai); browser rungs untested. See fetch-blocked skill.
+catapult.trade|403 to WebFetch; httpie + browser UA returns the full page (docs.catapult.trade too). See fetch-blocked skill.
