@@ -2,6 +2,15 @@
 
 Look a host up with `rg -i '<host>' references/sites.md` from the skill directory; read only the matching section or row. Dates are when the path was last verified. Ladder, diagnosis rules, and the patchright-fetch runner live in SKILL.md.
 
+## Rate-limited API endpoints
+
+A 429 from a JSON API after a burst of calls is a quota, not a bot wall: do not climb the ladder. Pause, retry one known-good call with the same method; a 200 confirms the rate limit. Then pace calls, batch where the API allows, or switch to a source without the quota (an RPC for chain data). A 429 on the very first call, or one that comes with a challenge page, is a wall; walk the ladder.
+
+| Endpoint | Limit observed | What works |
+|---|---|---|
+| api.geckoterminal.com | free tier, about 30 requests/min | plain httpie 200; pace calls (2026-09-06) |
+| eth.blockscout.com `/api/v2` | 429 during a burst of log queries | plain httpie `GET /api/v2/addresses/<addr>` 200 after a pause; use an archive RPC for wide log ranges; WebFetch untested (2026-09-23) |
+
 ## General sites
 
 | Site | WebFetch | What works |
@@ -39,7 +48,6 @@ Look a host up with `rg -i '<host>' references/sites.md` from the skill director
 | nftsolana.io (Solana mint calendar, WordPress + The Events Calendar) | 403 | plain httpie, 200, no UA needed (2026-09-07). Keyless JSON at `nftsolana.io/wp-json/tribe/events/v1/events` — but it returns `total: 0`, the calendar is abandoned |
 | howrare.is (Solana NFT rarity + upcoming drops) | 403 | plain httpie, 200, no UA needed (2026-09-07). Public JSON API needs no key: `api.howrare.is/v0.1/collections`, `/v0.1/drops` (drops has been returning an empty `data` array, i.e. the page is dormant, not blocked) |
 | api.mainnet.tensordev.io (Tensor API) | n/a | Not a bot wall: 403 is the missing-key response. Needs `x-tensor-api-key`, granted via the Airtable access form linked from docs.tensor.trade (2026-09-07) |
-| api.geckoterminal.com | n/a (not tried) | plain httpie 200. A 429 here is the free-tier rate limit (about 30 requests/min), not a bot wall: pace calls, do not escalate (2026-09-06) |
 | codelibrary.amlegal.com (NYC rules mirror) | 403 | headed agent-browser loads; `patchright-fetch` headed works (2026-09-04) |
 | book.qantas.com (award/cash search) | n/a (POST form from the qantas.com widget) | No verified path (2026-09-02). Headless agent-browser: `ERR_HTTP2_PROTOCOL_ERROR` on api/book hosts. Headed agent-browser fills the form logged out (no login wall) but the POST to `/qf-booking/dyn/air/tripflow.redirect` gets an Akamai "Access Denied"; patchright-fetch headed same (GET only, so not clean evidence). Untested: seeding cookies via the `/qf-booking/dyn/air/prefetcher` script then replaying the POST with httpie. Airport lookup `api.qantas.com/flight/routesearch/v1/airports?locale=en_US&queryFrom=LAX` is 200 to plain httpie. Use seats.aero (`seats` CLI, source `qantas`) for Qantas FF availability |
 | walmart.com | n/a (not tried) | httpie+UA 403; agent-browser headless AND headed both land on PerimeterX "Robot or human?" Press & Hold (hard stop, do not solve); `patchright-fetch <url> --wait 35` headed returns the full product page including price block (2026-09-07). Grep the saved body for "Current price is" — the price sits ~line 600, far below sponsored-recommendation prices near the top |
