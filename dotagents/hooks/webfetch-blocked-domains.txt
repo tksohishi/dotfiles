@@ -88,3 +88,4 @@ famsf.org|Cloudflare challenge to WebFetch and httpie+UA; agent-browser --headed
 mlb.com|WebFetch fails; httpie + browser UA returns the server-rendered page. See fetch-blocked skill.
 exploratorium.edu|WebFetch gets a 403. Use httpie with a browser User-Agent header; calendar is server-rendered. See fetch-blocked skill.
 sfstation.com|WebFetch gets a 403. Use httpie with a browser User-Agent header; calendar pages are server-rendered. See fetch-blocked skill.
+boardgamegeek.com|WebFetch gets a Cloudflare 403. Use patchright-fetch (headed); httpie and agent-browser also fail. See fetch-blocked skill.

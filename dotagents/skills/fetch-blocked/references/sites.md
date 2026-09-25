@@ -15,6 +15,8 @@ A 429 from a JSON API after a burst of calls is a quota, not a bot wall: do not 
 
 | Site | WebFetch | What works |
 |---|---|---|
+| variational.io, docs.variational.io (2026-09-24) | 200 on www (`/en/terms`) and docs; the app host `omni.variational.io` refuses a bare HEAD with 403 | WebFetch; legal pages live under docs.variational.io/legal/ |
+| boardgamegeek.com (game pages) | 403 | patchright-fetch headed (offscreen, no manual solve), 200 (2026-09-25). Cloudflare: httpie and httpie+browser UA 403 "Just a moment", agent-browser headless "Attention Required", --headed stuck on the challenge. XML API `/xmlapi2/thing` needs auth (401) |
 | rivianforums.com (XenForo forum) | 403 | httpie with a browser UA, 200 (2026-09-22). Server-rendered thread pages; strip tags and read. Data tables in lease-analysis posts are often images, so the numbers may not be in the text |
 | congress.gov (incl. CRS products, `/crs-product/<id>`) | 403 | No verified path yet (2026-09-22). plain httpie and httpie+browser-UA both 403; agent-browser and patchright-fetch untested. For IRS/tax-credit statutes, irs.gov answers the same question and is plain-httpie/WebFetch friendly |
 | edmunds.com (2026-09-22) | WebFetch 403 (AkamaiGHost); httpie plain and httpie + browser UA both 403; agent-browser headless loads a "403 - Access Denied \| Edmunds" page | `patchright-fetch <url> --wait 30` headed returns the full article in ~15s; body text lands in `~/.cache/patchright-fetch/edmunds.com.txt` (note the cache file drops the `www.` prefix). The saved text keeps paragraph line breaks, so `grep -n -B4 -A6` works for pulling context |
@@ -133,6 +135,7 @@ Try ordinary HTTPie against `www.reddit.com` RSS first. A visible browser is not
   Returns JSON: `.text`, `.user.screen_name`, `.created_at`, plus quoted tweet and media if present. As of 2026-06 the `token` param is not validated (any value or absent works); if valid IDs start returning 404, token validation may be back — the formula is `((Number(id)/1e15)*Math.PI).toString(36).replace(/(0+|\.)/g,'')` (float precision loss intentional, matches the official widget). If that also fails, escalate to agent-browser.
 - X articles (`x.com/i/article/<id>`, what a `t.co` on a long post usually expands to): login-walled. httpie returns a ~260KB JS shell with no article text, and `agent-browser --headed` redirects to `/i/jf/onboarding/web?...mode=login` — the browser profile is not signed in to X, and signing it in is not worth it. Use `/x-search` and pass the post or article URL as the query; x_search resolves it through the user's X Premium credential and returns the article body (verified 2026-07).
 - Profiles, threads, replies: `agent-browser --headed` (x.com renders nothing without JS). Profiles do render logged out — `open https://x.com/<handle>` then `get text body` gives bio plus recent posts (verified 2026-07).
+- Profile timeline via the syndication host (`syndication.twitter.com/srv/timeline-profile/screen-name/<handle>`): HTTP 429 from httpie on the first request (2026-09-25), not a usable rung; a profile read goes through `agent-browser --headed` as above.
 
 ## IMDb
 
@@ -303,3 +306,4 @@ Qantas prefill link confirmed by hand (2026-09-03): `https://www.qantas.com/us/e
 | cloudflare-ipfs.com | DNS gone | | | |
 | gateway.pinata.cloud | 200 JSON | | | public, rate-limited; fine for one read |
 | ipfs2.seadn.io | 200 JSON | | | OpenSea's gateway (the `metadata_url` OpenSea reports); best for a collection-wide pull |
+| ipfs.filebase.io | 200 JSON | | | plain httpie, single file read (2026-09-24); about 40% within 6 s under 8-way concurrency |
