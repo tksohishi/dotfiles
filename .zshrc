@@ -54,7 +54,7 @@ bindkey "^n" history-beginning-search-forward-end
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
 # ssh-agent (macOS keychain)
-if [ -f ~/.ssh/id_ed25519 ]; then
+if [ -n "$SSH_AUTH_SOCK" ] && [ -f ~/.ssh/id_ed25519 ]; then
     KEY_FINGERPRINT=$(ssh-keygen -lf ~/.ssh/id_ed25519.pub | awk '{print $2}')
     if ! ssh-add -l 2>/dev/null | grep -q "$KEY_FINGERPRINT"; then
         ssh-add --apple-use-keychain ~/.ssh/id_ed25519
