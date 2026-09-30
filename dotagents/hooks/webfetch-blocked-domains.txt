@@ -1,13 +1,11 @@
 # Domains where WebFetch is known to fail. Format: domain[|guidance].
 # Subdomains match. !domain = exception, must come before the block it carves out.
 # Full strategy map: fetch-blocked skill (dotagents/skills/fetch-blocked/SKILL.md).
+# Personal and one-off hosts: webfetch-blocked-domains.local.txt (gitignored), checked first.
 linkedin.com|LinkedIn requires login. Use agent-browser --headed (see the LinkedIn section in the agent-browser skill).
 x.com|Single post: anonymous syndication endpoint (invoke the fetch-blocked skill). Search + articles (/i/article/, login-walled): /x-search. Profiles/threads: agent-browser --headed.
 twitter.com|Single post: anonymous syndication endpoint (invoke the fetch-blocked skill). Search + articles (/i/article/, login-walled): /x-search. Profiles/threads: agent-browser --headed.
 instagram.com|Instagram requires login. Use agent-browser --headed.
-rubyhome.com|403 to WebFetch; httpie with browser UA returns the full page. For SF MLS listing data compass.com homedetails also works via WebFetch. See fetch-blocked skill.
-realtyhop.com|Skip this host. Cloudflare-walled below patchright, and compass.com homedetails has the same SF MLS data via plain WebFetch.
-ana.co.jp|WebFetch times out (no block page, just ETIMEDOUT); httpie with a browser UA returns the full page. Award seat availability is not on those pages: cam.ana.co.jp needs an AMC login via agent-browser --headed (award-flights skill). See fetch-blocked skill.
 reddit.com|WebFetch cannot reach reddit at all. Use httpie against old.reddit.com: HTML works anonymously, or append .rss for structured Atom (.json is 403). See the fetch-blocked skill.
 stackoverflow.com|WebFetch cannot reach Stack Overflow. Plain httpie works (http GET <url>), or use the Stack Exchange API for structured JSON. See the fetch-blocked skill.
 nytimes.com|WebFetch cannot reach nytimes.com. Plain httpie works (paywall still applies to full articles).
@@ -16,76 +14,9 @@ amazon.co.jp|WebFetch gets a 500 bot block. Use httpie with a browser User-Agent
 imdb.com|WebFetch gets an empty AWS WAF challenge. Star rating: POST to caching.graphql.imdb.com (ratingsSummary.aggregateRating). Name→ID: suggestion endpoint (v3.sg.media-imdb.com/suggestion/x/<query>.json). See the fetch-blocked skill.
 naver.com|WebFetch refuses naver client-side. Plain httpie works (http GET <url>) — server-rendered HTML, no browser UA needed.
 quora.com|Bot-walled (403 even to httpie). Use agent-browser --headed, only if really needed.
-glassdoor.com|Bot-walled (403 even to httpie; agent-browser headed hits a terminal Cloudflare block). Headed patchright with persistent profile works (verified 2026-08-31); see the fetch-blocked skill.
-zillow.com|WebFetch gets a 403 (PerimeterX). Plain httpie works, no UA needed; Zestimate/rentZestimate embedded in escaped __NEXT_DATA__ JSON. See the Zillow section of the fetch-blocked skill.
-trulia.com|WebFetch gets a 403. Plain httpie works (Zillow-owned, same listing data). See the fetch-blocked skill.
-redfin.com|WebFetch gets a 403. Use httpie with a browser User-Agent header (plain httpie also 403s). See the fetch-blocked skill.
-apartments.com|Bot-walled (403 even to httpie with browser UA). Headed patchright with persistent profile works (verified 2026-08-31); or prefer zillow/trulia/craigslist via httpie instead.
 youtube.com|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.
 youtu.be|WebFetch only returns the page title (JS shell). Use summarize <url> (--extract for the raw transcript, --length long --lang ja for a Japanese summary). See the YouTube section of the fetch-blocked skill.
-flightaware.com|WebFetch gets a 403. Use httpie with a browser User-Agent header; scheduled times are epoch fields (gateDepartureTimes/gateArrivalTimes .scheduled) in the embedded JSON of /live/flight/<ICAO callsign, e.g. KAL82>.
-flightradar24.com|WebFetch gets a 403. Use flightaware.com via httpie with a browser User-Agent instead.
-streeteasy.com|Bot-walled (403 even to httpie with browser UA; agent-browser headless also denied). Verified path: patchright-fetch; a fresh profile gets PX Press & Hold once — run with --show, ask the user to solve it, and later offscreen runs pass on the stored trust. compass.com via agent-browser headless as the no-user fallback.
-stockx.com|Bot-walled (403 to httpie; agent-browser headless gets a login-verify wall). Headed patchright real-Chrome with a persistent profile works (see fetch-blocked skill); quote only the checkout total, not Ask plus a memorized fee %.
-adidas.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets a bot page). Headed patchright with persistent profile works (verified 2026-08-31); see the fetch-blocked skill.
-asics.com|Bot-walled (403 to httpie with browser UA; agent-browser headless gets Access Denied). Headed patchright with persistent profile works (verified 2026-08-31); quick price checks: footlocker.com via agent-browser headless.
-snipesusa.com|Cloudflare-challenged (403 to httpie; headless gets the verification page). Headed patchright with persistent profile works (verified 2026-08-30); see the fetch-blocked skill.
-jdsports.com|403 to httpie with browser UA; agent-browser headless gets an empty JS shell. Headed patchright with persistent profile works (verified 2026-08-30); see the fetch-blocked skill.
 t.me|Telegram checks go through the tg CLI, not the web: tg chats to find the chat, tg read <chat> for messages (tg --help for details). Don't scrape t.me or web.telegram.org via browser tools.
 telegram.me|Telegram checks go through the tg CLI, not the web: tg chats to find the chat, tg read <chat> for messages (tg --help for details). Don't scrape t.me or web.telegram.org via browser tools.
 web.telegram.org|Telegram checks go through the tg CLI, not the web: tg chats to find the chat, tg read <chat> for messages (tg --help for details). (core.telegram.org API docs stay fetchable.)
-pacsun.com|403 to WebFetch, httpie+UA and headless agent-browser. Headed patchright with persistent profile works (verified 2026-09-02); see the fetch-blocked skill.
-us.dailypaperclothing.com|403 to WebFetch; plain httpie works (add ?country=US for USD). See fetch-blocked skill.
-ssense.com|403 to WebFetch and httpie, Cloudflare verify page to headless agent-browser; headed patchright-fetch works. See fetch-blocked skill.
-nycgovparks.org|403 CloudFront to WebFetch, httpie+UA, headless agent-browser; headed patchright-fetch works. See fetch-blocked skill.
-codelibrary.amlegal.com|403 to WebFetch; headed agent-browser or patchright-fetch works. See fetch-blocked skill.
-ccn.com|403 to WebFetch; plain httpie works. See fetch-blocked skill.
-blofin.com|403 to WebFetch and httpie (plain and browser UA); needs headed browser. See fetch-blocked skill.
-help.us.puma.com|403 to WebFetch; httpie with browser UA works. See fetch-blocked skill.
-jal.co.jp|403 to WebFetch and httpie; needs patchright-fetch headed. See fetch-blocked skill.
-morphllm.com|429 to WebFetch and plain httpie; httpie with browser UA works. See fetch-blocked skill.
-starlinkflights.com|403 to WebFetch; httpie returns an empty JS shell. Use travelsort.com Starlink roundup instead. See fetch-blocked skill.
-t-mobile.com|403 to WebFetch and httpie; patchright-fetch headed works. See fetch-blocked skill.
-howrare.is|403 to WebFetch; plain httpie 200. Keyless JSON at api.howrare.is/v0.1/*. See fetch-blocked skill.
-sniper.xyz|403 to WebFetch and httpie; Cloudflare challenge headless. See fetch-blocked skill.
-nftsolana.io|403 to WebFetch; plain httpie 200. See fetch-blocked skill.
-gnc.com|307/denied to WebFetch; PerimeterX Press & Hold on every rung. See fetch-blocked skill.
-nado.xyz|403 to WebFetch; plain httpie 200 (Framer site). See fetch-blocked skill.
-yelp.com|403 (DataDome) to WebFetch and httpie+UA; agent-browser headless and headed both get the geo.captcha-delivery.com stub; patchright-fetch --show with a one-time user slider solve, then offscreen passes. See fetch-blocked skill.
-jobs.lever.co|403 to WebFetch; plain httpie 200, or api.lever.co/v0/postings/<slug>. See fetch-blocked skill.
 medium.com|403 to WebFetch; httpie with browser UA 200, server-rendered. See fetch-blocked skill.
-crunchbase.com|403 to WebFetch, httpie, and agent-browser (Cloudflare block page); patchright-fetch headed works but funding data is paywalled logged out. See fetch-blocked skill.
-servicenow.com|403 to WebFetch; httpie hangs; agent-browser gets Akamai Access Denied; patchright-fetch headed works. See fetch-blocked skill.
-support.discord.com|403 to WebFetch; httpie with browser UA 200, server-rendered Zendesk. See fetch-blocked skill.
-site.financialmodelingprep.com|403 to WebFetch; httpie with browser UA 200. See fetch-blocked skill.
-tealhq.com|403 to WebFetch; httpie with browser UA 200. See fetch-blocked skill.
-infinex.xyz|429 Too Many Requests to WebFetch; httpie with browser UA 200 (Next.js marketing/changelog, server-rendered). See fetch-blocked skill.
-defillama.com|403 on /protocol/*; httpie with browser UA returns the full page. Free api.llama.fi endpoints: /overview/dexs, /overview/fees, /overview/open-interest, /tvl/<slug>; /overview/derivatives is 402 paywalled. See fetch-blocked skill.
-dydx.foundation|403 to WebFetch on /blog/*; plain httpie (no UA header) returns the full page. dydx.xyz is NOT blocked. See fetch-blocked skill.
-devin.ai|429 Too Many Requests to WebFetch; httpie with a Chrome UA returns the full page (Safari UA gets an empty shell). See fetch-blocked skill.
-scopvc.com|403 to WebFetch (Cloudflare); plain httpie (no UA header) returns the full page. See fetch-blocked skill.
-indeed.com|403 to WebFetch and httpie+UA; agent-browser headless and headed blocked; patchright-fetch headed returns the page. See fetch-blocked skill.
-pitchbook.com|403 to WebFetch and httpie+UA; headless agent-browser gets Cloudflare "Just a moment"; agent-browser --headed loads the public profile. See fetch-blocked skill.
-support.biltrewards.com|403 to WebFetch (Cloudflare, Zendesk help center); plain httpie (no UA header) returns the full article. See fetch-blocked skill.
-blog.kraken.com|403 to WebFetch and httpie+UA (nginx); patchright-fetch headed returns the post. See fetch-blocked skill.
-cpu-monkey.com|403 to WebFetch; httpie with a browser UA returns the page (scores not in the HTML text). See fetch-blocked skill.
-browser.geekbench.com|403 to WebFetch and httpie+UA; headless agent-browser gets Cloudflare "Just a moment"; agent-browser --headed loads the charts. See fetch-blocked skill.
-bhphotovideo.com|403 to WebFetch, Cloudflare challenge to httpie+UA and headless agent-browser; patchright-fetch headed returns the page. See fetch-blocked skill.
-zecbit.net|429 Vercel challenge to WebFetch and plain httpie; httpie with a browser UA returns the full page. See fetch-blocked skill.
-nftcalendar.io|403 to WebFetch (Cloudflare); plain httpie (no UA header) returns the full page. See fetch-blocked skill.
-edmunds.com|403 to WebFetch (Akamai), httpie plain and httpie+UA, and headless agent-browser; patchright-fetch headed returns the full article. See fetch-blocked skill.
-data.consumerreports.org|403 to WebFetch; httpie with a browser UA returns the page (WordPress/Elementor, strip tags before reading). See fetch-blocked skill.
-rivianforums.com|403 to WebFetch; httpie with a browser UA returns the full thread. See fetch-blocked skill.
-congress.gov|403 to WebFetch, plain httpie and httpie+UA; no verified path yet (browser rungs untested). For tax-credit questions use irs.gov instead. See fetch-blocked skill.
-chevrolet.com|403 to WebFetch (Akamai) and headless agent-browser; httpie+UA works for spec pages, but /current-offers needs agent-browser --headed. See fetch-blocked skill.
-cadillac.com|403 to WebFetch (Akamai) and headless agent-browser; httpie+UA works for spec pages, but /current-offers needs agent-browser --headed. See fetch-blocked skill.
-ford.com|403 to WebFetch and httpie+UA (Akamai); agent-browser --headed loads it. fromtheroad.ford.com is not walled. See fetch-blocked skill.
-gmauthority.com|403 to WebFetch and httpie+UA; use the OEM offers pages instead. See fetch-blocked skill.
-cnbc.com|403 to WebFetch; httpie + browser UA returns the full page. See fetch-blocked skill.
-tesla.com|403 to WebFetch and httpie+UA (Akamai); browser rungs untested. See fetch-blocked skill.
-catapult.trade|403 to WebFetch; httpie + browser UA returns the full page (docs.catapult.trade too). See fetch-blocked skill.
-famsf.org|Cloudflare challenge to WebFetch and httpie+UA; agent-browser --headed clears it. See fetch-blocked skill.
-mlb.com|WebFetch fails; httpie + browser UA returns the server-rendered page. See fetch-blocked skill.
-exploratorium.edu|WebFetch gets a 403. Use httpie with a browser User-Agent header; calendar is server-rendered. See fetch-blocked skill.
-sfstation.com|WebFetch gets a 403. Use httpie with a browser User-Agent header; calendar pages are server-rendered. See fetch-blocked skill.
-boardgamegeek.com|WebFetch gets a Cloudflare 403. Use patchright-fetch (headed); httpie and agent-browser also fail. See fetch-blocked skill.

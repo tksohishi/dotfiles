@@ -8,7 +8,7 @@
 # It also closes the loop on the skill's site map: every blocked host is
 # written to a per-session state file, and when a later fetch of that host
 # passes (or the last rung fails) while the host is missing from
-# references/sites.md, the hook asks for the row to be written right then.
+# references/sites.md and sites.local.md, the hook asks for the row to be written right then.
 # Suggest-only by design: which URL was known-good is a judgment the hook
 # can't make, so it never edits sites.md itself.
 #
@@ -24,7 +24,7 @@
 
 TOOL_INPUT=$(cat)
 TOOL=$(echo "$TOOL_INPUT" | jq -r '.tool_name // empty')
-SITES="$HOME/.claude/skills/fetch-blocked/references/sites.md"
+SITES="$HOME/.claude/skills/fetch-blocked/references"
 
 if [ "$TOOL" = "Bash" ]; then
   CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command // empty')
@@ -63,7 +63,7 @@ STATE="$STATE_DIR/${SESSION:-$PPID}.tsv"
 touch "$STATE"
 
 REGISTERED=0
-[ -n "$HOST" ] && rg -qiF "$HOST" "$SITES" 2>/dev/null && REGISTERED=1
+[ -n "$HOST" ] && rg -qiF "$HOST" "$SITES/sites.md" "$SITES/sites.local.md" 2>/dev/null && REGISTERED=1
 
 emit() {
   jq -nc --arg ctx "$1" '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $ctx}}'
@@ -76,9 +76,9 @@ if [ "$BLOCKED" = 1 ]; then
   if [ -n "$HOST" ] && [ "$REGISTERED" = 0 ]; then
     if [ "$METHOD" = "patchright-fetch headed" ]; then
       FAILED=$(rg "^$HOST\tblocked" "$STATE" | cut -f3 | sort -u | paste -sd, -)
-      MSG="Last rung failed for $HOST (failed this session: $FAILED). If the URL was known-good, record the host in references/sites.md as 'No verified path' with the per-method results before continuing."
+      MSG="Last rung failed for $HOST (failed this session: $FAILED). If the URL was known-good, record the host in references/sites.local.md as 'No verified path' with the per-method results before continuing."
     else
-      MSG="$MSG $HOST is not in references/sites.md: recording the outcome there (which rungs failed, which one passed) is the final step of the ladder, not optional."
+      MSG="$MSG $HOST is not in the site map: recording the outcome in references/sites.local.md (which rungs failed, which one passed) is the final step of the ladder, not optional."
     fi
   fi
   emit "$MSG"
@@ -90,4 +90,4 @@ fi
 rg -q "^$HOST\tblocked" "$STATE" || exit 0
 FAILED=$(rg "^$HOST\tblocked" "$STATE" | cut -f3 | sort -u | paste -sd, -)
 printf '%s\tpassed\t%s\n' "$HOST" "$METHOD" >> "$STATE"
-emit "$HOST passed via $METHOD after being blocked this session via: $FAILED. It is not in the fetch-blocked skill's references/sites.md. Add a row now (site | what blocks | what works, with today's date), and add the host to dotagents/hooks/webfetch-blocked-domains.txt if WebFetch was among the failures. Then continue the task."
+emit "$HOST passed via $METHOD after being blocked this session via: $FAILED. It is not in the fetch-blocked skill site map. Add a row to references/sites.local.md now (site | what blocks | what works, with today's date), and add the host to dotagents/hooks/webfetch-blocked-domains.local.txt if WebFetch was among the failures. Then continue the task."

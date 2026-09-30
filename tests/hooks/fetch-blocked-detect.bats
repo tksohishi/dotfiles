@@ -78,3 +78,19 @@ assert_silent() {
   run "$HOOK" <<< '{}'
   assert_silent
 }
+
+@test "host recorded only in sites.local.md counts as registered" {
+  export HOME="$BATS_TEST_TMPDIR"
+  mkdir -p "$HOME/.claude/skills/fetch-blocked/references"
+  echo '| example.com | 403 | httpie |' > "$HOME/.claude/skills/fetch-blocked/references/sites.local.md"
+  run "$HOOK" <<< "$(hook_input WebFetch '' '403 Forbidden')"
+  assert_injects
+  ! echo "$output" | jq -r '.hookSpecificOutput.additionalContext' | rg -q 'not in the site map'
+}
+
+@test "unrecorded host is pointed at sites.local.md" {
+  export HOME="$BATS_TEST_TMPDIR"
+  run "$HOOK" <<< "$(hook_input WebFetch '' '403 Forbidden')"
+  assert_injects
+  echo "$output" | jq -r '.hookSpecificOutput.additionalContext' | rg -q 'not in the site map: recording the outcome in references/sites.local.md'
+}

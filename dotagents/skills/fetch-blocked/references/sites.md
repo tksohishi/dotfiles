@@ -1,6 +1,6 @@
 # Site map: verified access paths per host
 
-Look a host up with `rg -i '<host>' references/sites.md` from the skill directory; read only the matching section or row. Dates are when the path was last verified. Ladder, diagnosis rules, and the patchright-fetch runner live in SKILL.md.
+Public map of general platforms. Personal and one-off hosts live in the gitignored `sites.local.md` next to this file; look a host up in both with `rg -i '<host>' references/sites*.md` from the skill directory and read only the matching section or row. Dates are when the path was last verified. Ladder, diagnosis rules, and the patchright-fetch runner live in SKILL.md.
 
 ## Rate-limited API endpoints
 
@@ -10,105 +10,21 @@ A 429 from a JSON API after a burst of calls is a quota, not a bot wall: do not 
 |---|---|---|
 | api.geckoterminal.com | free tier, about 30 requests/min | plain httpie 200; pace calls (2026-09-06) |
 | eth.blockscout.com `/api/v2` | 429 during a burst of log queries | plain httpie `GET /api/v2/addresses/<addr>` 200 after a pause; use an archive RPC for wide log ranges; WebFetch untested (2026-09-23) |
+| core-api.prod.blur.io (Blur API) | Cloudflare challenge: httpie 403 | `agent-browser --headed open .../v1/collections/<slug>` clears it and returns the JSON (floor, volume); agent-browser headless, WebFetch and patchright untested (2026-09-29) |
 
 ## General sites
 
 | Site | WebFetch | What works |
 |---|---|---|
-| variational.io, docs.variational.io (2026-09-24) | 200 on www (`/en/terms`) and docs; the app host `omni.variational.io` refuses a bare HEAD with 403 | WebFetch; legal pages live under docs.variational.io/legal/ |
-| boardgamegeek.com (game pages) | 403 | patchright-fetch headed (offscreen, no manual solve), 200 (2026-09-25). Cloudflare: httpie and httpie+browser UA 403 "Just a moment", agent-browser headless "Attention Required", --headed stuck on the challenge. XML API `/xmlapi2/thing` needs auth (401) |
-| rivianforums.com (XenForo forum) | 403 | httpie with a browser UA, 200 (2026-09-22). Server-rendered thread pages; strip tags and read. Data tables in lease-analysis posts are often images, so the numbers may not be in the text |
-| congress.gov (incl. CRS products, `/crs-product/<id>`) | 403 | No verified path yet (2026-09-22). plain httpie and httpie+browser-UA both 403; agent-browser and patchright-fetch untested. For IRS/tax-credit statutes, irs.gov answers the same question and is plain-httpie/WebFetch friendly |
-| edmunds.com (2026-09-22) | WebFetch 403 (AkamaiGHost); httpie plain and httpie + browser UA both 403; agent-browser headless loads a "403 - Access Denied \| Edmunds" page | `patchright-fetch <url> --wait 30` headed returns the full article in ~15s; body text lands in `~/.cache/patchright-fetch/edmunds.com.txt` (note the cache file drops the `www.` prefix). The saved text keeps paragraph line breaks, so `grep -n -B4 -A6` works for pulling context |
-| famsf.org (de Young / Legion of Honor, 2026-09-22) | Failed (Cloudflare managed challenge) | httpie + browser UA 403 "Just a moment..."; agent-browser headless stuck on the challenge. `agent-browser --headed` clears it in under 8s and returns the full page |
-| mlb.com (team schedules, 2026-09-22) | Failed | httpie with a browser UA, 200. `/giants/schedule/2026-09` is server-rendered (~600KB) with opponent names in the HTML |
-| exploratorium.edu (events calendar, 2026-09-22) | 403 | httpie with a browser UA, 200 (~270KB). `/visit/calendar` is server-rendered with event dates, After Dark themes and hours in the HTML; strip script/style tags and grep |
-| sfstation.com (daily event calendar, 2026-09-22) | 403 | httpie with a browser UA, 200. `/calendar/MM-DD-YYYY` is server-rendered; strip tags and grep for venue and time |
-| data.consumerreports.org (2026-09-22) | WebFetch 403 | `http GET <url> --ignore-stdin --body User-Agent:"Mozilla/5.0 …"` returns 200. It is a WordPress/Elementor site, so the raw HTML is mostly inline CSS — strip tags and grep rather than dumping. The `/reports/active-driving-assistance-evaluation-report/` page is stale (JSON-LD `datePublished` 2023-01-24, `dateModified` 2023-10-18); current ADA rankings are not there |
-| chevrolet.com / cadillac.com (2026-09-22) | WebFetch 403 (AkamaiGHost); agent-browser headless gets "Access Denied" | httpie + browser UA returns the full page (~0.5-1.5MB) and is enough for model/spec/MSRP pages and the Super Cruise FAQ. It is NOT enough for `/current-offers`: lease payments are rendered client-side and absent from the HTML. For offers use `agent-browser --headed`, which loads them; set the region with `#?requestedPostalcode=<zip>&postalcode=<zip>&vehicleType=electric` (Chevy honors the hash; Cadillac ignores it, so `fill "#gmst-postalcode-input" <zip>` then `press Enter`). Offer expiry only appears as `9/30/26` in the DOM, not in body text |
-| ford.com (2026-09-22) | WebFetch 403 and httpie + browser UA 403 (AkamaiGHost); agent-browser headless "Access Denied" | `agent-browser --headed` loads it. Offers live at `/suvs/<model>/pricing-and-incentives/` (redirects to `/incentives-and-offers/`); `/finance/offers/` and `shop.ford.com/showroom/offers/` are 404, and `/suvs/mach-e/` itself was Access Denied even headed. The `?zipcode=` param did not stick (page kept 10001). `fromtheroad.ford.com` is NOT walled - plain WebFetch works there and carries the BlueCruise pricing article |
-| nissanusa.com (2026-09-22) | not blocked to httpie | `http GET <url> --ignore-stdin --follow User-Agent:"Mozilla/5.0 …"` returns the full page (~550KB); strip tags and grep. WebFetch untested. The detect hook fired on page copy, not a block |
-| gmauthority.com (2026-09-22) | WebFetch 403 and httpie + browser UA 403 | Not needed - the OEM sites carry the same offers first-hand. Browser rungs untested |
-| cnbc.com (2026-09-22) | WebFetch 403 | `http GET <url> --ignore-stdin --follow --body User-Agent:"Mozilla/5.0 …"` returns the full page (~830KB); article text is in `<div class="group">` blocks, `datePublished` in JSON-LD; strip tags and grep |
-| tesla.com (2026-09-22) | WebFetch 403; httpie + browser UA also "Access Denied" (Akamai, 380-byte body) on /support/fsd | Browser rungs untested - FSD pricing was taken from a CNBC article instead |
-| safe-client.safe.global (Safe{Wallet} client gateway, e.g. `/v1/chains/1/safes/<addr>/collectibles`) | n/a (not tried) | httpie GET 403 (2026-09-04). Use the transaction service instead: `safe-transaction-mainnet.safe.global/api/v1/safes/<addr>/balances/`, `/transfers/?erc721=true` are 200 to plain httpie |
-| qantas.com | 60s timeout (no block signature) | plain httpie, 200 server-rendered (~19KB, Akamai Bot Manager cookies but no challenge; verified 2026-09-02). Response is geo-routed by a `usercontext` cookie |
-| help.us.puma.com (Zendesk help center) | 403 | plain httpie with browser UA, 200 (2026-09-05). Article body is in `div.article-body` |
-| blog.kraken.com | 403 (nginx, 476-byte body) | httpie+UA 403 too; agent-browser untested (daemon held by another driver at the time); patchright-fetch headed returns the full post in ~10s (2026-09-17). Body text lands in ~/.cache/patchright-fetch/blog.kraken.com.txt |
-| cpu-monkey.com | 403 | httpie with browser UA, 200 (2026-09-19). Comparison pages carry the prose summary and specs server-side, but the benchmark scores are not in the HTML text (chart rows render empty); use browser.geekbench.com for scores |
-| browser.geekbench.com | 403 | httpie+UA 403, agent-browser headless stuck on Cloudflare "Just a moment"; `agent-browser --headed` clears in ~6s (2026-09-19). On `/mac-benchmarks` only the single-core tab is in `get text body`; read hidden tabs with `eval` over `.tab-pane` rows (`textContent`) |
-| muji.com (JP store) | 60s timeout (no block signature) | httpie --ignore-stdin + browser UA: 30s timeout; agent-browser headless: `ERR_HTTP2_PROTOCOL_ERROR` (ASCII-only paths load with `--disable-http2`, percent-encoded Japanese paths still fail); `patchright-fetch <url> --wait 30` headed: 200, full product page (2026-09-07). muji.us is Shopify: `/products/<handle>.json` returns body_html with the size table |
-| morphllm.com | 429 (WebFetch and plain httpie) | httpie with browser UA, 200 (2026-09-07). Next.js page; table content is in the RSC payload, strip tags and grep |
-| hoodminer.live | n/a (not tried) | headless agent-browser gets a Cloudflare Turnstile checkbox; `http GET <url> --ignore-stdin` with a Chrome UA returns the page (2026-09-08). Pages are small (WL share badge pages under 2KB) |
-| nycgovparks.org | 403 (CloudFront) | 403 to httpie+UA and headless agent-browser ("request could not be satisfied"); headed agent-browser redirects `/rules/*` to codelibrary.amlegal.com but `get text` needs a selector; `patchright-fetch <url>` headed works for both hosts, ~10s (2026-09-04) |
-| voice.cc (VOICE / Social Camp, Next.js SPA) | n/a (not tried) | headless agent-browser gets Cloudflare "Just a moment"; plain httpie 200, no UA needed (2026-09-07). Page shells are Next.js: content lives in the RSC/`__NEXT_DATA__` payload, strip tags and grep. Logged-out `/socialcamp` renders only the Privy auth shell (no leaderboard) |
-| scopvc.com (ScOp Venture Capital, WordPress behind Cloudflare) | 403 | plain httpie, 200, no UA needed (~94KB server-rendered, portfolio names in the HTML; 2026-09-14). WordPress REST API at `/wp-json/wp/v2/pages/<id>` is also exposed. The response headers list challenges.cloudflare.com in permissions-policy, which trips the block detector on a 200; ignore it |
-| solscan.io (Solana explorer, account labels) | untested | `patchright-fetch <url> --wait 30` headed passes; the account label (e.g. "Bybit Hot Wallet") is in the saved body text. httpie browser-UA 403, `api-v2.solscan.io` returns an undecodable body, agent-browser headless and --headed both stay on Cloudflare "Just a moment" (2026-09-20) |
-| sniper.xyz (Solana NFT marketplace/launchpad) | 403 | httpie plain and browser-UA also 403; headless agent-browser gets Cloudflare "Just a moment". Untested above that rung (2026-09-07) |
-| zecbit.net (Zcash ZSA NFT marketplace, Next.js on Vercel) | 429 `X-Vercel-Mitigated: challenge` | plain httpie 429 too; httpie with a desktop Chrome UA, 200, ~180KB server-rendered (2026-09-20). Floors, supply, volume and the live sale feed are all in the HTML text — strip tags and read |
-| nftcalendar.io (NFT drop calendar) | 403 (Cloudflare) | plain httpie, 200, no UA needed (2026-09-20). Event pages are server-rendered; note the calendar carries stale 2021-era entries under names that collide with current projects, so check the listed date before trusting a hit |
-| nftsolana.io (Solana mint calendar, WordPress + The Events Calendar) | 403 | plain httpie, 200, no UA needed (2026-09-07). Keyless JSON at `nftsolana.io/wp-json/tribe/events/v1/events` — but it returns `total: 0`, the calendar is abandoned |
-| howrare.is (Solana NFT rarity + upcoming drops) | 403 | plain httpie, 200, no UA needed (2026-09-07). Public JSON API needs no key: `api.howrare.is/v0.1/collections`, `/v0.1/drops` (drops has been returning an empty `data` array, i.e. the page is dormant, not blocked) |
-| api.mainnet.tensordev.io (Tensor API) | n/a | Not a bot wall: 403 is the missing-key response. Needs `x-tensor-api-key`, granted via the Airtable access form linked from docs.tensor.trade (2026-09-07) |
-| codelibrary.amlegal.com (NYC rules mirror) | 403 | headed agent-browser loads; `patchright-fetch` headed works (2026-09-04) |
-| book.qantas.com (award/cash search) | n/a (POST form from the qantas.com widget) | No verified path (2026-09-02). Headless agent-browser: `ERR_HTTP2_PROTOCOL_ERROR` on api/book hosts. Headed agent-browser fills the form logged out (no login wall) but the POST to `/qf-booking/dyn/air/tripflow.redirect` gets an Akamai "Access Denied"; patchright-fetch headed same (GET only, so not clean evidence). Untested: seeding cookies via the `/qf-booking/dyn/air/prefetcher` script then replaying the POST with httpie. Airport lookup `api.qantas.com/flight/routesearch/v1/airports?locale=en_US&queryFrom=LAX` is 200 to plain httpie. Use seats.aero (`seats` CLI, source `qantas`) for Qantas FF availability |
-| walmart.com | n/a (not tried) | httpie+UA 403; agent-browser headless AND headed both land on PerimeterX "Robot or human?" Press & Hold (hard stop, do not solve); `patchright-fetch <url> --wait 35` headed returns the full product page including price block (2026-09-07). Grep the saved body for "Current price is" — the price sits ~line 600, far below sponsored-recommendation prices near the top |
-| tools.usps.com (package tracking, `/go/TrackConfirmAction?qtc_tLabels1=<num>`) | n/a (not tried) | `agent-browser --headed`, but only on the **second** `open` (2026-09-10). Plain httpie returns an empty body; headless agent-browser gets an Akamai "Access Denied" page (Reference #18.…). Headed, the first `open` lands on an Akamai JS challenge — 249KB of obfuscated script, empty `<title>`, `body.innerText.length` 0 — that never self-resolves no matter how long you wait; re-issuing the same `open` replays it with the challenge cookie set and the real page renders (redirects to `/tracking/<num>`, title `USPS Tracking® | USPS`). So do not treat that empty first load as the wall. Read `.tb-status` (current stage), `.tb-status-detail` (scan rows), and the `.track-bar-container` text for the expected-delivery date. `patchright-fetch` not needed |
-| iherb.com | n/a (not tried) | httpie+UA 403; agent-browser headless gets Cloudflare "Just a moment"; agent-browser --headed clears it and renders the full product page (2026-09-07). First headed `open` after a `close` can silently keep the previous page — re-issue the `open` and check the title |
-| costco.com | n/a (not tried) | httpie+UA 403; agent-browser headless `ERR_HTTP2_PROTOCOL_ERROR`; agent-browser headed Akamai "Access Denied"; `patchright-fetch <url> --wait 30` headed returns the page (2026-09-07). Prices are membership-gated: product pages show "Members Only / Sign In for Price" logged out. Query strings on category URLs (`?refine=...`) get dropped on the redirect |
-| vitaminshoppe.com | n/a (not tried) | No verified path (2026-09-07). httpie+UA 403; agent-browser headless and headed both return a DataDome `var dd={...}` / geo.captcha-delivery.com stub; `patchright-fetch` headed returns an empty body (LEN 0) on both the product URL and the homepage, so the empty body is the wall, not a dead URL. Ladder exhausted |
-| gnc.com | 307 to WebFetch | No verified path (2026-09-07). httpie+UA and agent-browser headless/headed all return "Access to this page has been denied"; `patchright-fetch` headed lands on a PerimeterX "Before we continue" Press & Hold (LEN 128) that did not clear in 150s with `--show`. Next attempt: rerun `--show` and solve the hold by hand; the clearance should then persist in the profile |
-| shop.bodybuilding.com | n/a (not tried) | plain httpie 200, no UA needed (2026-09-07). Shopify: use `/search/suggest.json?q=<query>&resources[type]=product&resources[limit]=10` for title+price+url instead of scraping. Note: no longer carries Optimum Nutrition |
 | medium.com (articles) | 403 | httpie with browser UA, 200 (2026-09-10). Server-rendered: article body is in the HTML (172KB), `<title>` is just "Medium" so don't use the title as the liveness check; strip tags and grep for a phrase from the article |
-| crunchbase.com (organization pages) | 403 | httpie+UA 403; agent-browser headless and headed both get Cloudflare "Sorry, you have been blocked" (a hard block page, not a challenge, so headed does not clear it); `patchright-fetch <url> --wait 30` headed returns the page (2026-09-10). Logged out, funding amounts and investors are paywalled ("Unlock company funding data"); only round count and basic profile fields are readable |
-| indeed.com (company pages, `/cmp/<name>/interviews`) | 403 | httpie+UA 403; agent-browser headless lands on a "Blocked - Indeed.com" page; agent-browser --headed gets Cloudflare "Just a moment" that did not clear in 5s; `patchright-fetch <url> --wait 30` headed returns the page (2026-09-14). Company slugs are ambiguous (`/cmp/Yogi` is not necessarily the company you want); check the page matches before citing |
-| pitchbook.com (public company profiles, `/profiles/company/<id>`) | 403 | httpie+UA 403; agent-browser headless gets Cloudflare "Just a moment"; `agent-browser --headed` loads the profile directly (2026-09-14). Logged out, only the latest deal row (type, date, amount, status) is readable; full funding history, raised-to-date, and valuation need an account |
-| servicenow.com | 403 | httpie+UA hangs past 120s (no response); agent-browser headless and headed both get Akamai "Access Denied" (Reference #18...); `patchright-fetch <url> --wait 30` headed returns the full product page (2026-09-10) |
-| roadtrailrun.com | Cloudflare "Just a moment" (also to headless patchright) | httpie sometimes 200, sometimes Cloudflare; `patchright-fetch` headed clears it in ~12s (verified 2026-09-02) |
-| us.dailypaperclothing.com (Daily Paper) | 403 | plain httpie (no UA needed); Shopify `/products/<handle>.js` for name+price. Geo defaults to NL/EUR — append `?country=US` to the product URL for USD (verified 2026-09-02) |
-| ssense.com | 403 | httpie (plain and browser UA) 403, headless agent-browser gets a Cloudflare "security verification" page; `patchright-fetch` headed returns the page (verified 2026-09-02). Delisted product URLs render a generic nav/recommendation page rather than a 404 |
-|---|---|---|
 | stackoverflow.com | refused client-side | plain httpie; Stack Exchange API (`api.stackexchange.com/2.3/questions/<id>?site=stackoverflow&filter=withbody`) for structured JSON |
 | nytimes.com | refused client-side | plain httpie (paywall still applies to full articles) |
 | amazon.com / amazon.co.jp | 500 bot block | httpie with browser UA — see Amazon section below (price gotchas) |
 | naver.com | refused client-side | plain httpie + `--ignore-stdin --follow` (else 302s to an empty body); server-rendered, browser UA not needed. Only some titles expose a rating: grep ``"key":"평점"..."text":"NN/100"`` (out of 100) |
 | imdb.com | empty (WAF challenge) | GraphQL endpoint for star rating; suggestion endpoint for IDs — see IMDb section below |
 | 5ch.net | 403 | plain httpie |
-| ccn.com | 403 | plain httpie, no UA needed (verified 2026-09-04) |
-| blofin.com | 403 | No path below patchright: httpie plain and browser-UA both 403 (2026-09-04); agent-browser/patchright rungs not tried (content was redundant) |
-| zillow.com | 403 | plain httpie, no UA needed — see Zillow section below (headless browser gets PerimeterX Press & Hold) |
 | quora.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
-| glassdoor.com | Cloudflare "Humans only" terminal block (agent-browser, even truly-headed with a human solving — the Chrome-for-Testing/CDP fingerprint itself is denied) | headed patchright verified 2026-08-31 (company reviews page renders anonymously incl. pros/cons; ~8s wait) |
 | facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
-| nado.xyz (Nado orderbook DEX on Ink, Framer-hosted) | 403 | plain httpie `--ignore-stdin` (no custom UA), 200 (2026-09-08). Framer site: article prose is in the page HTML, strip tags and grep; `/articles` index is empty (client-rendered), so hit `/articles/<slug>` directly |
-| jobs.lever.co (Lever job boards, e.g. `/Flex/`) | 403 | plain httpie `--ignore-stdin` (no custom UA), 200 server-rendered board (2026-09-08). Better: public API `https://api.lever.co/v0/postings/<slug>?mode=json` (list) and `/v0/postings/<slug>/<id>` (one posting, `descriptionPlain` + `lists`), 200 to httpie |
-| theinfatuation.com | works — returns the real rendered review text | WebFetch is the correct tool here (2026-09-08). httpie plain and with a browser UA returns only a ~2.5KB JS shell (same shell on the `/new-york` hub, so it is the shell, not a dead page); agent-browser headless renders the page fully. Gotcha: on a spot they have not visited the page really does say "We haven't been here yet, but want you to know this spot exists" — that is the actual content, not a truncated fetch, so do not escalate the ladder over it |
-| bhphotovideo.com | 403 | Cloudflare challenge below the top rung: httpie + browser UA returns a ~5KB "Just a moment..." page, agent-browser headless shows "Performing security verification". `patchright-fetch <url> --wait 30` returns the full page in ~15s (2026-09-20); `/c/search?q=<terms>` works and the saved body carries each result's name, BH#/MFR#, price (split across lines as `$289` / `99`) and stock line. agent-browser --headed untested |
-| bestbuy.com | not tried (hook-denied) | httpie + browser UA returns a 0-byte body; agent-browser headless `ERR_HTTP2_PROTOCOL_ERROR` on product URLs. `patchright-fetch <url> --wait 35` returns the full product page (2026-09-20). Gotcha: the price block can belong to a Marketplace seller — grep the saved body for "Sold & shipped by" near the price before calling it a Best Buy price |
-| yelp.com | 403 (DataDome) | `patchright-fetch <url> --show` + user solves the DataDome slider once (2026-09-08); the clearance persists in the shared profile and later offscreen `--wait 40` runs should pass. On a fresh profile the offscreen run does not pass by itself, so notify the user and run `--show` first. httpie+UA 403 on both a biz page and the homepage; agent-browser headless AND headed both return the DataDome `var dd={...}` / `geo.captcha-delivery.com` stub (~410 bytes, confirmed on the homepage too). On a biz page the aggregate "Popular Dishes" block (dish name + review count) sits near the top and is the cheapest way to get dish counts across all reviews; the body text carries only page 1 of reviews (~9 of N), so paginating costs another headed run per page |
-
-## Sneaker / fashion retail (verified 2026-08-30)
-
-All of these except nike.com 403 httpie even with a browser UA; the differences are in what agent-browser gets.
-
-| Site | Headless agent-browser | What works |
-|---|---|---|
-| nike.com | not needed | httpie with browser UA + `--follow` (verified 2026-08-31; bare request only returns a 301). Category and product pages come back server-rendered (~1MB); on a PDP the first `<title>` is a localization string — read `og:title` or the JSON-LD `Product` node for name/price. WebFetch untested |
-| footlocker.com | works (full server-rendered product + search pages) | agent-browser headless — best default for sneaker price/stock checks |
-| compass.com | works (listing search + homedetails) | agent-browser headless — also the fallback for StreetEasy queries |
-| cashbackmonitor.com | works | WebFetch returns 200 but rates are JS-rendered placeholders; use agent-browser headless and wait ~6s |
-| snipesusa.com | Cloudflare verification page | headed patchright verified 2026-08-30 (search + product pages incl. price/size/stock render fully; ~8s wait). agent-browser --headed untested |
-| adidas.com | bot page ("unable to give you access") | headed patchright verified 2026-08-31 (product page incl. price/description/reviews renders; ~8s wait). agent-browser --headed untested |
-| asics.com | Access Denied | headed patchright verified 2026-08-31 (Training category page renders fully, ~8s wait); quick checks: footlocker.com headless |
-| jdsports.com | empty JS shell (~670B) | headed patchright verified 2026-08-30 (product page with price/promo/size renders; ~6s wait) |
-| stockx.com | login-verify wall | headed patchright real-Chrome — see Last resort in SKILL.md (verified 2026-08-30); quote only the checkout total, not Ask + a memorized fee % |
-| streeteasy.com | access denied | `patchright-fetch --show` + user solves Press & Hold once, verified 2026-08-31; PX trust persists in the shared profile, later offscreen runs pass in ~6s. Fresh profile always re-triggers the wall. compass.com headless as the no-user fallback |
-| dickssportinggoods.com | 403 (WebFetch and httpie+UA) | headed patchright verified 2026-08-31 (search results with prices render; ~20s wait) |
-| pacsun.com | 403 (WebFetch, httpie+UA, headless agent-browser "Access to this page has been denied") | headed patchright verified 2026-09-02 (homepage promo banners render; ~25s wait) |
-| runningwarehouse.com | 406 Not Acceptable | httpie with browser UA (verified 2026-08-31; plain httpie untested). Headed patchright also works. A 404 on a Google-indexed descpage URL means the product was delisted, not a block |
-| devin.ai | 429 to WebFetch | httpie with a Chrome UA returns the full server-rendered Next.js page (verified 2026-09-12); a Safari UA returned a 1.4KB empty shell, so use a Chrome UA. cognition.com blog is fine via WebFetch |
-| shop.app | 429 to WebFetch | httpie with browser UA returns the full page; product title/price/vendor in embedded JSON (`rg '"name"|"price"'`). shop.app links are third-party Shopify stores — verify the seller before trusting a price |
-| westnyc.com (Shopify boutiques generally) | agent-browser headless returns near-empty shell | Shopify JSON endpoints via plain httpie: `/search/suggest.json?q=...&resources[type]=product` works; `/products/<handle>.json` and `/collections/<x>/products.json` may be disabled per store |
 
 ## Reddit
 
@@ -177,33 +93,6 @@ Gotchas:
 - **agent-browser headless anonymous gets the export view**: English title, USD prices (e.g. `.a-price .a-offscreen` → `USD26.29`). Fine for confirming an ASIN exists and what it is; wrong for JP prices. For an exact JP price, use `agent-browser --headed` with the user's session, or have the user check the page.
 - ASINs from search snippets are frequently hallucinated — always verify `/dp/<ASIN>` resolves to the expected product title before citing a link.
 
-## Zillow
-
-WebFetch 403s and headless browsers (agent-browser, headless Playwright) get a PerimeterX "Press & Hold" denial that never auto-clears. But plain httpie from this residential IP gets the full server-rendered page, no browser UA needed (verified 2026-07):
-
-- Property page (Zestimate, Rent Zestimate, specs): `http GET 'https://www.zillow.com/homedetails/<slug>/<zpid>_zpid/' --ignore-stdin`
-- Rental/for-sale search results (asking prices, addresses): `http GET 'https://www.zillow.com/<city-state-zip>/rentals/' --ignore-stdin`
-
-All data is JSON embedded in `__NEXT_DATA__`, but escaped (string-in-string), so quotes carry backslashes. Grep with patterns that tolerate `\"`:
-
-```bash
-rg -o '"zestimate\\?":[0-9]+|"rentZestimate\\?":[0-9]+' page.html | sort -u   # homedetails
-rg -o '"price":"\$[0-9,]+' page.html                                          # search results
-```
-
-Body is ~300-650KB — always save to a file and `rg`, never cat. PX rate-limits per-IP: ~15+ fetches in one day flipped this IP to captcha-blocked mid-session (observed 2026-07; cleared within a few hours, and a headed patchright Chrome got through even while blocked). When that happens, switch to trulia.com or redfin.com first (same MLS data, see table below) before escalating to a headed real-Chrome via patchright (`chromium.launch({channel: 'chrome-canary', headless: false})`, read `body` text after ~4s); headless never works, and headed agent-browser is unverified (Press & Hold needs a real interaction, unlike Cloudflare's auto-clear).
-
-### Other rental / real-estate listing sites (verified 2026-07)
-
-| Site | WebFetch | What works |
-|---|---|---|
-| trulia.com | 403 | plain httpie (Zillow-owned, same data; ~1.4MB bodies) |
-| redfin.com | 403 | httpie with browser UA (plain httpie 403s) |
-| zumper.com, craigslist (`sfbay.craigslist.org/search/apa`) | untested | plain httpie; craigslist bodies are small (~50KB), nicest to grep |
-| apartmentlist.com | untested | plain httpie on city pages (`/ca/san-francisco`); neighborhood URL guesses often 404 |
-| apartments.com | 403 | headed patchright verified 2026-08-31 (search results with listing prices render; ~8s wait); agent-browser --headed also an option |
-| hotpads.com | untested | httpie/WebFetch get an empty JS shell; headed patchright verified 2026-08-31 (listings with prices render; ~8s wait) |
-
 ## LinkedIn / Instagram
 
 Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section in the `agent-browser` skill (login flow, `/details/experience/` URLs).
@@ -212,91 +101,7 @@ Login-walled. `agent-browser --headed`; for LinkedIn follow the LinkedIn section
 
 `summarize <url>` (direct access is blocked for agents; see repo instructions). `--extract` prints the raw transcript instead of a summary (pipe to a file under `tmp/` when a subagent needs the full text); `--length short|medium|long|xl` and `--lang ja` control the summary. Don't hand-roll yt-dlp + VTT cleanup: summarize already does that (`--youtube yt-dlp` forces that source).
 
-## Airline award search (verified 2026-09-03)
-
-| Site | WebFetch / httpie | agent-browser headless | agent-browser --headed | patchright-fetch headed |
-|---|---|---|---|---|
-| aa.com | untested | Akamai "Access Denied" + `Reference #18.…` | same Access Denied (headed does NOT clear it) | works |
-| jal.co.jp | 403 to WebFetch and httpie+browser UA (2026-09-05) | untested | untested | works (`/jp/en/inter/service/economy/seat/A350-1000.html`; `/jp/en/aircraft/conf/A350-1000.html` is a dead URL, the aircraft page is `/conf/351.html`) |
-| starlinkflights.com | WebFetch 403; httpie+browser UA returns a 2.5KB JS shell, no content (2026-09-05) | untested | untested | untested (low value; travelsort.com Starlink roundup fetches fine via WebFetch) |
-| t-mobile.com | WebFetch 403; httpie+browser UA returns a 2KB JS shell (2026-09-05) | untested | untested | works on a live URL (`/benefits/travel/in-flight-wifi`); a dead URL renders nav only with an empty title, so check the title before calling the host blocked |
-| delta.com | untested | Akamai "Access Denied" + `Reference 0.…` | booking form renders and can be driven | page renders |
-| aircanada.com | untested | booking form renders and can be driven; the award **results** URL is Akamai "Access Denied" + `Reference #18.…` | not needed (headless drives the form) | booking page renders; award results URL redirects to `/clogin/pages/login` |
-| united.com | untested | `ERR_HTTP2_PROTOCOL_ERROR` on every path incl. the homepage | deeplink renders and can be driven | deeplink renders, but results stay on "Loading results…" |
-
-**aa.com** — the whole award search is URL-encodable, so no form driving is needed. One `patchright-fetch` on a deeplink returns the full results page as text:
-
-```bash
-patchright-fetch 'https://www.aa.com/booking/search?locale=en_US&pax=1&adult=1&type=OneWay&searchType=Award&slices=%5B%7B%22orig%22%3A%22JFK%22%2C%22origNearby%22%3Afalse%2C%22dest%22%3A%22HND%22%2C%22destNearby%22%3Afalse%2C%22date%22%3A%222027-03-15%22%7D%5D' --wait 45
-```
-
-It redirects to `/booking/choose-flights/1?sid=<uuid>`; that sid URL is session-bound, but the deeplink itself reproduces the search from cold. Rows read as text anchors: `One way Business <N>K + $<tax> for <ORIG> to <DEST>, departing at <time>`, plus `Not available` where the cabin has no award space.
-
-**delta.com** — headed agent-browser drives the Book a Flight form fine (Shop with Miles checkbox, airport pickers, calendar), but submitting fails: the award search returns in-page error `#SFAF052_444`, and the cash search navigates to `/flightsearch/search-results` which is a hard Akamai Access Denied. The results URL carries only `?cacheKeySuffix=<uuid>` and is session-bound — reopening it in patchright bounces back to `book-a-flight` with `#SFAF100826`. No verified path to Delta award results logged out.
-
-**delta.com deep link (verified 2026-09-03)** — the Book a Flight widget is an Angular app (`/flightsearch/8.0.31/main-*.js` + `chunk-*.js`). `chunk-XK7UNFV4.js` maps the page's query string onto the widget state, whitelisting exactly these names: `paxCount`, `originCity`, `destinationCity`, `tripType`, `flexAirport`, `datesFlexible`, `cabinFareClass`, `departureDate`, `awardTravel`, `returnDate`, `meetingEventCode`, `refundableFlightsOnly`. `originCity`/`destinationCity` are validated as 3-letter airport codes despite the name. `tripType` takes `ONE_WAY` / `ROUND_TRIP` / `MULTICITY`. Dates are split on `-` or `/` and read year-first when the first part is > 31, so `YYYY-MM-DD` works. `awardTravel` is compared against the string `"true"` and drives the Shop with Miles checkbox.
-
-```
-https://www.delta.com/flightsearch/book-a-flight?originCity=JFK&destinationCity=HND&departureDate=2027-03-15&tripType=ONE_WAY&paxCount=1&awardTravel=true
-```
-
-Confirmed in headed agent-browser: the widget renders `JFK | HND | One Way | Mar 15 | 1` with the `shopWithMiles` checkbox checked. Verdict: yes for prefill, no for results — the human still presses Find Flights, and the results hop is still the session-bound `search-results?cacheKeySuffix=<uuid>` Akamai wall above.
-
-**aircanada.com (Aeroplan)** — no bot wall on the booking page, but Aeroplan award results are **login-walled**. Headless agent-browser drives the US-edition form fine (checkbox "Book with Aeroplan points", One-way, JFK/HND, date typed as `DD/MM`); the form then shows "Please sign in to book with Aeroplan points." and Search is inert. Accepting the "you will be redirected to the Canadian edition" dialog (OK) navigates to a clean, fully URL-encoded deeplink:
-
-```
-https://www.aircanada.com/aeroplan/redeem/availability/outbound?org0=JFK&dest0=HND&departureDate0=2027-03-15&ADT=1&YTH=0&CHD=0&INF=0&INS=0&lang=en-CA&tripType=O&marketCode=INT
-```
-
-That URL is not session-bound, but neither rung reads it logged out: headless agent-browser gets the Akamai Access Denied, and `patchright-fetch '<url>' --wait 60` redirects to `https://www.aircanada.com/clogin/pages/login?gig_client_id=…` (Aeroplan sign-in). Guessed booking deeplinks on `/booking/flights?org0=…` are silently ignored — the params drop and the page lands on `/home/<ed>/en/aco/flights`. No verified path to Aeroplan award prices logged out.
-
-**united.com (MileagePlus)** — award results are **login-walled**, stated in-page: "We can show you flight results with money. You must be signed-in to see flight results with miles." The `/en/us/fsr/choose-flights` deeplink is honoured (origin, destination, date, pax, and `at=1` pre-selecting the "Show price in: Miles" dropdown):
-
-```
-https://www.united.com/en/us/fsr/choose-flights?f=JFK&t=HND&d=2027-03-15&tt=1&at=1&sc=3&px=1&taxng=1&newHP=True&clm=7&st=bestmatches&tqp=A
-```
-
-but the results pane never leaves "Loading results…" for patchright-fetch (`--wait 120`) or for headed agent-browser until you dismiss the cookie banner and the sign-in modal and press **Update**, which is when the sign-in requirement surfaces. Choosing "Show flights with money" flips the URL to `at=0` and returns "We're sorry, but united.com was unable to complete your request." — a generic error, not an Akamai block. Headless agent-browser can't reach united.com at all (`ERR_HTTP2_PROTOCOL_ERROR`, same signature as book.qantas.com). Use seats.aero for UA/AC award space.
-
-**qantas.com award search deep link (verified 2026-09-03)** — the search widget on qantas.com pages is a React app (`https://static.qantas.com/ams02/a974/38/prod/master/consider_widgets/current/app.js`, mapped from `https://www.qantas.com/scripts/sites/qcom/config/prod.js` under `widgets["flight-search"].scriptPath`). It renders `<form method="post">` with `action` = `https://book.qantas.com/pl/QFAward/wds/tripflow.redirect` for awards and `https://book.qantas.com/{languagePrefix}qf-booking/dyn/air/tripflow.redirect` for cash; posted field names include `depAirports`, `destAirports`, `travelDates`, `travelClass`, `numberOfAdults`, `numberOfYoungAdults`, `numberOfChildren`, `numberOfInfants`, `searchOption`, `isClassicSearch`, `isClassicOnly`, `client`, plus hidden `APPLICATION_NAME`, `ENTRY_POINT`, `PAGE_FROM`, `USER_LANG`, `USER_LOCALE`, `WDS_SERVICE_ID`, `FF_MEMBER_ID`, `FF_TOKEN`. So the results step is POST-only — no GET deep link to book.qantas.com.
-
-The widget itself *does* read a query string off its host page (`K.parse(window.location.search)` → `mapToReduxState`) and prefills when any of these are present: `departureAirportCode`, `arrivalAirportCode`, `departureDate`, `returnDate` (both `YYYY-M-D`, regex `^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$`), `tripType` (`O` one way / `R` return), `travelClass` (`ECO`/`PRM`/`BUS`/`FIR`/`ALL`), `usePoints`, `adults`, `youths`, `children`, `infants`. Candidate widget-prefill link (built only from observed names, **not** confirmed rendering):
-
-```
-https://www.qantas.com/us/en.html?departureAirportCode=JFK&arrivalAirportCode=HND&departureDate=2027-03-15&tripType=O&travelClass=BUS&adults=1&usePoints=true
-```
-
-Verdict: partial — prefill-the-widget yes, jump-to-results no; the human still has to press Search. Unverified in-browser because after one successful headed load `www.qantas.com` started returning `net::ERR_HTTP2_PROTOCOL_ERROR` to every subsequent navigation (same signature as united.com), while plain httpie still gets 200 on the same URL. Don't retry the browser rung on qantas.com in the same session.
-
-Qantas prefill link confirmed by hand (2026-09-03): `https://www.qantas.com/us/en/book-a-trip/flights.html?departureAirportCode=JFK&arrivalAirportCode=HND&departureDate=2027-3-15&tripType=O&travelClass=BUS&adults=1&usePoints=true` fills the widget; the `/us/en.html` host page and a zero-padded date do not.
-
-**robinhoodchain.blockscout.com (verified 2026-09-09)** — Cloudflare managed challenge on the httpie/curl path: both `/api/v2/*` and the HTML pages return 403 with the `cf_chl_opt` interstitial. **Headless `agent-browser` clears it on the first navigation** — no headed mode, no patchright needed. Read token stats off the rendered page (`agent-browser open https://robinhoodchain.blockscout.com/token/<addr>` then `eval` on `document.body.innerText`); the Details block carries Total supply / Holders / Transfers. Its ERC-721 "Holders" figure can be wrong (Project Mars Land reported 5,467 holders for a 5,000-item collection), so cross-check ownership against the chain. For raw numbers prefer the public RPC `https://rpc.mainnet.chain.robinhood.com` (`eth_call`, `eth_getBalance`) — it is not walled at all and needs no browser.
-
-**help.vulcan.xyz (checked 2026-09-10)** — dead host, not a bot wall: every path (root included) returns Cloudflare "CNAME Cross-User Banned" on WebFetch (403) and httpie+UA alike. Vulcan docs moved; `premint.gitbook.io/vulcan` 404s too. Live pages: `www.vulcan.xyz` and `vulcan.xyz/verify` (Token verification) via httpie+UA. Do not escalate the ladder for this host.
-
-**support.discord.com (verified 2026-09-10)** — Zendesk help center. WebFetch 403s; `http GET <url> --ignore-stdin` with a browser UA returns the full server-rendered article. Article IDs: guess-and-404 is a dead URL, not a block. Find real IDs via `https://support.discord.com/hc/en-us/search?query=<terms>` (httpie+UA) — result links are `/hc/en-us/search/click?data=<base64>`; the base64 payload contains the article URL (e.g. `articles/8458903738647-Pause-Invites-FAQ`). The `/api/v2/help_center/.../search.json` endpoint 404s.
-
 | archive.org (2026-09-10) | `archive.org/wayback/available` API 429s on the first call from httpie | `web.archive.org/web/<year>id_/<url>` via httpie `--ignore-stdin --follow` returned the archived page on the first try |
-| dnb.com (2026-09-11) | WebFetch untested; agent-browser headless = Cloudflare "Performing security verification" | agent-browser --headed clears the challenge in ~8s and renders the View/Update Company Information form. The form itself is reCAPTCHA-scored: filling it with `fill` and clicking Search returned "0 Search Results / An unexpected system error" — hand the search to the user in the headed window |
-| site.financialmodelingprep.com (2026-09-11) | WebFetch 403 | `http GET <url> --ignore-stdin` with a browser UA returns the full page (Next.js, pricing table is div-based and ~750KB; the plan matrix is easier to read from per-endpoint doc pages than from the compare table) |
-| tealhq.com (2026-09-11) | WebFetch 403 | `http GET <url> --ignore-stdin` with a browser UA reaches the site (homepage 200); a job page returning 410 is a removed listing, not a block |
-| infinex.xyz (2026-09-11) | WebFetch returns `HTTP 429 Too Many Requests` on the first call (no prior requests that session), incl. `/changelog/*` | `http GET <url> --ignore-stdin User-Agent:"Mozilla/5.0 …"` returns the full server-rendered Next.js page (~300KB); strip tags with python3. `support.infinex.xyz` (Intercom) and `proposals.infinex.xyz` are NOT blocked - plain WebFetch works there |
-| base-rpc.publicnode.com (2026-09-11) | not blocked: JSON-RPC endpoint, plain POST from viem/httpie works | the detect hook fired on unrelated git output in the same command; no ladder needed |
-| defillama.com (2026-09-12) | WebFetch 403 on `/protocol/<slug>`; the `api.llama.fi` `derivatives` dimension (`/overview/derivatives`, `/summary/derivatives/...`) is paywalled with HTTP 402 "Upgrade to the paid API plan" | `http GET https://defillama.com/protocol/<slug> --ignore-stdin -b --follow User-Agent:"Mozilla/5.0 …"` returns the full Next.js page (~160KB); grep the inlined JSON for `"total24h"`, `"total30d"`, `"openInterest"`, `"activeUsers"`. Free `api.llama.fi` endpoints that do work without a key: `/overview/dexs`, `/overview/fees`, `/overview/open-interest`, `/tvl/<slug>` |
-| rubyhome.com (2026-09-14) | WebFetch 403 | `http GET <url> --ignore-stdin -b --follow User-Agent:"Mozilla/5.0 …"` returns the full listing page (~335KB, MLS number and prices inline); the word "captcha" in the body is a form script, not a challenge. For SF MLS listing data, compass.com homedetails via plain WebFetch carries the same fields with less work |
-| realtyhop.com (2026-09-14) | Cloudflare "Just a moment..." on every lower rung: WebFetch 403, httpie + browser UA 403, agent-browser headless and `--headed` (8s wait) both stuck on the challenge | Don't use it. `patchright-fetch <url> --wait 25` passes, but compass.com homedetails via plain WebFetch carries the same list/pending/sold/prior-sale data at a fraction of the cost. Its data is also stale: on a sampled SF condo page, both the unit's Price History and the building's Past Sales table stopped at 2023-09, missing every 2026 listing and sale that Redfin showed for the building |
-| ana.co.jp (2026-09-15) | ETIMEDOUT with no block page, twice: `/en/jp/guide/amc/award/international/terms/` and `/en/us/amc/amex-membership-rewards-program/` | `http GET <url> --ignore-stdin -b --follow User-Agent:"Mozilla/5.0 …"` returns the full page (fuel-surcharge page ~384KB, Amex transfer page ~33KB); strip tags with python3 and grep. Award seat availability is on none of these: `cam.ana.co.jp` is AMC-login-walled and driven headed per the award-flights skill |
-| dydx.foundation (2026-09-12) | WebFetch 403 on `www.dydx.foundation/blog/*` | plain `http GET <url> --ignore-stdin -b` (no UA header needed) returns the full server-rendered Next.js page (~100KB); strip tags with python3. Note the prose wraps figures in `$$…$$` and italics in `///…///`. `dydx.xyz` and `docs.arcus.xyz`-style sibling hosts are not walled — plain WebFetch works there |
-| support.biltrewards.com (2026-09-16) | WebFetch 403 (Cloudflare) on `/hc/en-us/articles/*` (Zendesk help center) | plain `http GET <url> --ignore-stdin --body` returns the full article (~33KB), no UA header needed. The transfer-partner table renders as one text blob: `sed 's/<[^>]*>/\n/g'` then grep for `1:1` — `<td>`-based extraction finds nothing |
-| explorer.arc.io (2026-09-16) | Blockscout (Arc chain 5042) behind Cloudflare: `/api/v2/*` returns "Just a moment..." to httpie with a browser UA, and agent-browser headless and `--headed` both return an empty body on the JSON endpoints (`/api/v2/stats`, `/api/v2/blocks`) | `patchright-fetch <url> --wait 25` returns the JSON (stats 639 B in about 10 s, 2026-09-16). For chain data prefer the RPC (`rpc.mainnet.arc.io`, Alchemy `arc-mainnet`); WebFetch untested |
-
-
-**sourcify.dev (Royal Mechanica lookup)** — Direct public `/server/v2/contract/4663/<address>` returned a normal JSON 404 with null match for the queried NFT contract. No bot-wall response on this host; no browser escalation was needed. A combined fetch also queried robinhoodchain.blockscout.com, whose separate 403 Cloudflare response caused a misleading host attribution. That host passed headless agent-browser as documented above.
-| catalyst.markets (2026-09-22) | Site itself renders headless (Privy sign-in modal). The X OAuth consent page it redirects to (x.com/i/oauth2/authorize) answers HTTP 403 "Access to x.com was denied" in headless agent-browser | `scripts/x-act.ts authorize ... --headed` (headed agent-browser reaches the consent page; WebFetch and httpie untested, not needed) |
-| catapult.trade, docs.catapult.trade (2026-09-22) | WebFetch 403 | httpie + browser UA returns 200 (Next.js site with the chain in the page body; docs are GitBook) |
-| rarehoodfriends.xyz (2026-09-22) | no wall: plain httpie 200; the `/api/` 403 is a directory-listing deny | plain httpie; the early-access form posts to `/api/*.php` |
-| robinhoodchain.blockscout.com (2026-09-22) | httpie 403 Cloudflare "Just a moment" on the page and `/api/v2` | agent-browser headless 200, the API JSON renders as body text; `/api/v2/smart-contracts/<addr>` gives is_verified, source_code and additional_sources |
-
 ## IPFS gateways (2026-09-22)
 
 | host | httpie | httpie+UA | agent-browser headless | note |

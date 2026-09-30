@@ -1,13 +1,14 @@
 #!/bin/bash
 # Pre-hook: block WebFetch for domains that need a different access path.
 # Reads tool input JSON from stdin, checks URL hostname against
+# webfetch-blocked-domains.local.txt (gitignored, personal hosts) and then
 # webfetch-blocked-domains.txt. Line format:
 #   domain[|guidance]   block domain and subdomains; guidance is shown to the agent
 #   !domain             exception (allowed); must appear BEFORE the block it carves out
 # Full strategy map lives in the fetch-blocked skill.
 
 SCRIPT_DIR="$(dirname "$0")"
-BLOCKED_FILE="$SCRIPT_DIR/webfetch-blocked-domains.txt"
+BLOCKED_FILES=("$SCRIPT_DIR/webfetch-blocked-domains.local.txt" "$SCRIPT_DIR/webfetch-blocked-domains.txt")
 
 TOOL_INPUT=$(cat)
 URL=$(echo "$TOOL_INPUT" | jq -r '.tool_input.url')
@@ -34,6 +35,6 @@ while IFS= read -r line; do
     echo "$msg" >&2
     exit 2
   fi
-done <"$BLOCKED_FILE"
+done < <(cat "${BLOCKED_FILES[@]}" 2>/dev/null)
 
 exit 0
