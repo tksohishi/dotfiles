@@ -74,9 +74,11 @@ Write the document in the language the session was mostly conducted in. If the u
 
 ## After writing
 
-Tell the user exactly this, substituting nothing else in:
+Tell the user exactly this, in the language the conversation is in (the project's instructions or the user's own words decide it, never this skill's English; a Japanese session gets it in Japanese), substituting nothing else in and keeping the commands as they are:
 
 1. Run `/clear` (or open a new session in this directory)
 2. Start it with: `/handoff resume`
+
+The rest of the turn (the one-line summary of what the handoff covers) is in that language too.
 
 Resume mode re-grounds the handoff's claims, salvages durable facts to memory, and trashes the file. If the user starts with a plain "read the handoff" instead, the file's self-destruct header still directs the receiving session to trash it after ingesting.
