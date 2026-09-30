@@ -10,7 +10,7 @@ A 429 from a JSON API after a burst of calls is a quota, not a bot wall: do not 
 |---|---|---|
 | api.geckoterminal.com | free tier, about 30 requests/min | plain httpie 200; pace calls (2026-09-06) |
 | eth.blockscout.com `/api/v2` | 429 during a burst of log queries | plain httpie `GET /api/v2/addresses/<addr>` 200 after a pause; use an archive RPC for wide log ranges; WebFetch untested (2026-09-23) |
-| core-api.prod.blur.io (Blur API) | Cloudflare challenge: httpie 403 | `agent-browser --headed open .../v1/collections/<slug>` clears it and returns the JSON (floor, volume); agent-browser headless, WebFetch and patchright untested (2026-09-29) |
+| core-api.prod.blur.io (Blur API) | Cloudflare challenge: WebFetch 403, httpie 403 (`Cf-Mitigated: challenge`), agent-browser headless stays on "Just a moment..." | `agent-browser --headed open .../v1/collections/<slug>` clears it in a few seconds and returns the JSON; the clearance holds for later opens in the same session (60 s+, `__cf_bm` only). No wallet login needed for reads: `/v1/collections/<slug>/executable-bids?filters=<urlencoded {"criteria":{"type":"COLLECTION","value":{}}}>` is the bid book (priceLevels: price, executableSize, numberBidders), `/v1/collections/<slug>/prices`, `/tokens`, `/activity/event-filter`. patchright untested (2026-09-30) |
 
 ## General sites
 
