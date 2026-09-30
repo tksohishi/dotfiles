@@ -100,4 +100,5 @@ mas "The Unarchiver", id: 425424353
 # Manual install: Claude Code (claude install)
 cask "chatgpt"
 # Manual install: Kanary (scripts/install-kanary.sh)
+# Manual install: Muse by Meta (https://ai.meta.com/muse/download/)
 mas "Xcode", id: 497799835
