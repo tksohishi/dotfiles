@@ -100,5 +100,6 @@ mas "Telegram", id: 747648890
 mas "The Unarchiver", id: 425424353
 # Manual install: Claude Code (claude install)
 cask "chatgpt"
+# Manual install: Eika (self-built)
 # Manual install: Kanary (scripts/install-kanary.sh)
 mas "Xcode", id: 497799835
