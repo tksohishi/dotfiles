@@ -113,6 +113,21 @@ assert_silent() {
   assert_injects
 }
 
+@test "PostToolUseFailure WebFetch timeout injects and records the host" {
+  export HOME="$BATS_TEST_TMPDIR"
+  run "$HOOK" <<< "$(jq -n '{hook_event_name: "PostToolUseFailure", session_id: "s1", tool_name: "WebFetch", tool_input: {url: "https://www.uniqlo.com/us/en/products/E481040-000/00"}, error: "timeout of 60000ms exceeded"}')"
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.hookSpecificOutput.hookEventName == "PostToolUseFailure"' >/dev/null
+  echo "$output" | jq -e '.hookSpecificOutput.additionalContext | test("fetch-blocked")' >/dev/null
+  rg -q $'^uniqlo.com\tblocked\tWebFetch$' "$HOME/.cache/fetch-blocked/s1.tsv"
+}
+
+@test "PostToolUseFailure for a non-fetch Bash command stays silent" {
+  export HOME="$BATS_TEST_TMPDIR"
+  run "$HOOK" <<< "$(jq -n '{hook_event_name: "PostToolUseFailure", tool_name: "Bash", tool_input: {command: "bun test"}, error: "Exit code 1\nrequest timed out"}')"
+  assert_silent
+}
+
 @test "403 is never downgraded" {
   export HOME="$BATS_TEST_TMPDIR"
   run "$HOOK" <<< "$(hook_input Bash 'http GET https://example.com/x' 'http: warning: HTTP 403 FORBIDDEN')"

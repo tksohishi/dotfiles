@@ -1,5 +1,5 @@
 #!/bin/bash
-# Post-hook on WebFetch|Bash: when a fetch comes back with a bot-wall
+# PostToolUse + PostToolUseFailure hook on WebFetch|Bash: when a fetch comes back with a bot-wall
 # signature, inject the fetch-blocked escalation instruction right next to the
 # failing result. Fires in subagents too (hooks run for every tool call), so a
 # delegated researcher gets the ladder at the moment it hits the wall instead
@@ -50,7 +50,9 @@ fi
 
 HOST=$(printf '%s' "$URL" | sed -E 's#^https?://##; s#[/:?].*##; s#^www\.##')
 
-RESP=$(echo "$TOOL_INPUT" | jq -r '.tool_response | if type=="string" then . else tostring end' | head -c 20000)
+# PostToolUseFailure (timeouts, non-zero exits) carries the text in .error instead of .tool_response.
+RESP=$(echo "$TOOL_INPUT" | jq -r '[.tool_response, .error] | map(select(. != null) | if type=="string" then . else tostring end) | join("\n")' | head -c 20000)
+EVENT=$(echo "$TOOL_INPUT" | jq -r '.hook_event_name // "PostToolUse"')
 
 BLOCK_RE='Just a moment|__cf_chl_|challenges\.cloudflare\.com|cf-chl-|blocked by network security|Access Denied|Access to this page has been denied|Performing security verification|Pardon Our Interruption|Press (&|&amp;|and) Hold|unable to give you access|Humans only|verify (that )?you are (a )?human|Are you a robot|\b(403 Forbidden|406 Not Acceptable|429 Too Many Requests)\b|HTTP/[0-9.]+ (403|406|429)\b|status(Code)?["=: ]+(403|406|429)\b|unable to fetch|blocked-domains|timeout of [0-9]+ms exceeded|\b(ETIMEDOUT|ECONNRESET|ECONNREFUSED)\b|request timed out'
 BLOCKED=0
@@ -74,7 +76,7 @@ REGISTERED=0
 [ -n "$HOST" ] && rg -qiF "$HOST" "$SITES/sites.md" "$SITES/sites.local.md" 2>/dev/null && REGISTERED=1
 
 emit() {
-  jq -nc --arg ctx "$1" '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $ctx}}'
+  jq -nc --arg ctx "$1" --arg ev "$EVENT" '{hookSpecificOutput: {hookEventName: $ev, additionalContext: $ctx}}'
   exit 0
 }
 
