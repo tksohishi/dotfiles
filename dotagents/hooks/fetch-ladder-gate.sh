@@ -10,7 +10,7 @@
 # had said "just try it" several times before). A deterministic gate is the
 # only thing that holds.
 #
-# Escape hatch: record the host in references/sites.md (with the outcome,
+# Escape hatch: record the host in references/sites.local.md (with the outcome,
 # including a CAPTCHA hand-off) and the gate clears — that record is the
 # ladder's last rung anyway. Blocks at most twice per session so a genuinely
 # stuck flow cannot loop.
@@ -25,14 +25,14 @@ event=$(echo "$input" | jq -r '.hook_event_name // empty')
 subagent=0; [ "$event" = "SubagentStop" ] && subagent=1
 state="$HOME/.cache/fetch-blocked/$sid.tsv"
 [ -s "$state" ] || exit 0
-sites="$HOME/.claude/skills/fetch-blocked/references/sites.md"
+sites="$HOME/.claude/skills/fetch-blocked/references"
 counter="$HOME/.cache/fetch-blocked/$sid.gate"
 blocks=$(cat "$counter" 2>/dev/null || echo 0)
 [ "$blocks" -ge 2 ] && exit 0
 
 pending=""
 for host in $(cut -f1 "$state" | sort -u); do
-  rg -qiF "$host" "$sites" 2>/dev/null && continue
+  rg -qiF "$host" "$sites/sites.md" "$sites/sites.local.md" 2>/dev/null && continue
   rg -q "^$host	passed" "$state" && continue
   rg -q "^$host	blocked	patchright-fetch headed" "$state" && continue
   [ "$subagent" = 1 ] && rg -q "^$host	blocked	httpie" "$state" && continue
@@ -43,8 +43,8 @@ done
 
 echo $((blocks + 1)) > "$counter"
 if [ "$subagent" = 1 ]; then
-  msg="Fetch ladder not finished for:$pending Do not report these as blocked or unverified. Load the fetch-blocked skill and try the non-browser rungs now: httpie GET <url> --ignore-stdin with a browser User-Agent header, and any public endpoint the skill lists. If httpie passes, use the content and record the host in references/sites.md. If httpie also fails, say so in your report with the URL (\"needs a browser rung\"); do not run agent-browser or patchright-fetch yourself."
+  msg="Fetch ladder not finished for:$pending Do not report these as blocked or unverified. Load the fetch-blocked skill and try the non-browser rungs now: httpie GET <url> --ignore-stdin with a browser User-Agent header, and any public endpoint the skill lists. If httpie passes, use the content and record the host in references/sites.local.md. If httpie also fails, say so in your report with the URL (\"needs a browser rung\"); do not run agent-browser or patchright-fetch yourself."
 else
-  msg="Fetch ladder not finished for:$pending Do not report these as blocked or say what the next rung would be. Load the fetch-blocked skill and walk the remaining rungs now (agent-browser --headed, then patchright-fetch headed), then record the outcome in references/sites.md. A CAPTCHA hand-off counts as an outcome: record it and the gate clears."
+  msg="Fetch ladder not finished for:$pending Do not report these as blocked or say what the next rung would be. Load the fetch-blocked skill and walk the remaining rungs now (agent-browser --headed, then patchright-fetch headed), then record the outcome in references/sites.local.md. A CAPTCHA hand-off counts as an outcome: record it and the gate clears."
 fi
 jq -n --arg r "$msg" '{decision:"block", reason:$r}'

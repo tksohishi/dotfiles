@@ -44,8 +44,8 @@ assert_silent() {
   assert_silent
 }
 
-@test "httpie Bash fetch returning 429 injects" {
-  run "$HOOK" <<< "$(hook_input Bash "http GET https://example.com/x --ignore-stdin" 'HTTP/1.1 429 Too Many Requests')"
+@test "httpie Bash fetch returning an HTML 429 injects" {
+  run "$HOOK" <<< "$(hook_input Bash "http GET https://example.com/x --ignore-stdin" 'HTTP/1.1 429 Too Many Requests <html><body>slow down</body></html>')"
   assert_injects
 }
 
@@ -93,4 +93,28 @@ assert_silent() {
   run "$HOOK" <<< "$(hook_input WebFetch '' '403 Forbidden')"
   assert_injects
   echo "$output" | jq -r '.hookSpecificOutput.additionalContext' | rg -q 'not in the site map: recording the outcome in references/sites.local.md'
+}
+
+@test "httpie 429 with a JSON body (default --body output) is a quota, not a wall" {
+  export HOME="$BATS_TEST_TMPDIR"
+  run "$HOOK" <<< "$(hook_input Bash 'http GET https://api.example.com/v1/x' $'{"error":"rate limited"}\nhttp: warning: HTTP 429 TOO MANY REQUESTS')"
+  assert_silent
+}
+
+@test "httpie 429 with an empty body is a quota" {
+  export HOME="$BATS_TEST_TMPDIR"
+  run "$HOOK" <<< "$(hook_input Bash 'http GET https://api.example.com/v1/x' 'http: warning: HTTP 429 TOO MANY REQUESTS')"
+  assert_silent
+}
+
+@test "429 challenge page still injects" {
+  export HOME="$BATS_TEST_TMPDIR"
+  run "$HOOK" <<< "$(hook_input Bash 'http GET https://example.com/x' $'<!DOCTYPE html><title>Just a moment...</title>\nhttp: warning: HTTP 429 TOO MANY REQUESTS')"
+  assert_injects
+}
+
+@test "403 is never downgraded" {
+  export HOME="$BATS_TEST_TMPDIR"
+  run "$HOOK" <<< "$(hook_input Bash 'http GET https://example.com/x' 'http: warning: HTTP 403 FORBIDDEN')"
+  assert_injects
 }

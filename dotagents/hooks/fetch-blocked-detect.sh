@@ -55,6 +55,14 @@ RESP=$(echo "$TOOL_INPUT" | jq -r '.tool_response | if type=="string" then . els
 BLOCK_RE='Just a moment|__cf_chl_|challenges\.cloudflare\.com|cf-chl-|blocked by network security|Access Denied|Access to this page has been denied|Performing security verification|Pardon Our Interruption|Press (&|&amp;|and) Hold|unable to give you access|Humans only|verify (that )?you are (a )?human|Are you a robot|\b(403 Forbidden|406 Not Acceptable|429 Too Many Requests)\b|HTTP/[0-9.]+ (403|406|429)\b|status(Code)?["=: ]+(403|406|429)\b|unable to fetch|blocked-domains|timeout of [0-9]+ms exceeded|\b(ETIMEDOUT|ECONNRESET|ECONNREFUSED)\b|request timed out'
 BLOCKED=0
 printf '%s' "$RESP" | rg -qi "$BLOCK_RE" && BLOCKED=1
+# A 429 with no HTML (JSON error or empty body) is an API quota: pace and
+# retry, don't climb the ladder. Judged by body, not x-ratelimit-* headers,
+# because the httpie defaults (--body) never print headers. It stays a block
+# when the body is an HTML page or another signature is present.
+if [ "$BLOCKED" = 1 ] && printf '%s' "$RESP" | rg -q '\b429\b' \
+  && ! printf '%s' "$RESP" | rg -qi '<!doctype|<html|<title|<body'; then
+  printf '%s' "$RESP" | rg -v '\b429\b' | rg -qi "$BLOCK_RE" || BLOCKED=0
+fi
 
 SESSION=$(echo "$TOOL_INPUT" | jq -r '.session_id // empty')
 STATE_DIR="$HOME/.cache/fetch-blocked"

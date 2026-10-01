@@ -68,3 +68,17 @@ assert_silent() {
   run "$HOOK" <<< "$(stop_input)"
   assert_silent
 }
+
+@test "host recorded only in sites.local.md stays silent" {
+  printf '| example.org | 403 | httpie |\n' > "$HOME/.claude/skills/fetch-blocked/references/sites.local.md"
+  printf 'example.org\tblocked\thttpie\n' > "$STATE"
+  run "$HOOK" <<< "$(stop_input)"
+  assert_silent
+}
+
+@test "block message points at sites.local.md" {
+  printf 'example.org\tblocked\tWebFetch\n' > "$STATE"
+  run "$HOOK" <<< "$(stop_input)"
+  assert_blocks
+  echo "$output" | jq -r '.reason' | rg -q 'references/sites.local.md'
+}
