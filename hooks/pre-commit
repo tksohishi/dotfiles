@@ -3,6 +3,8 @@
 #   1. Bats coverage — a changed dotagents/hooks/*.sh must have a matching
 #      tests/hooks/<name>.bats, and `bats tests/hooks/` must pass.
 #   1b. Mods — a changed dotclaude/mods/<name>/ must pass `claude plugin test`.
+#   1c. install.sh — a change to it, scripts/, dotcodex/, editors/, or its test must pass
+#       `bats tests/install.bats`.
 #   2. Privacy — warn if staged public agent-config changes look like they
 #      contain personal/private info.
 # Escape hatch for either: git commit --no-verify.
@@ -42,6 +44,23 @@ for m in $changed_mods; do
         fail=1
     fi
 done
+
+# ── 1c. install.sh: changes to it, its helper scripts, or its test run tests/install.bats ─
+install_inputs=(install.sh scripts/ tests/install.bats dotcodex/ editors/)
+if git diff --cached --name-only -- "${install_inputs[@]}" | grep -q .; then
+    if ! git diff --quiet -- "${install_inputs[@]}"; then
+        # The test reads the working tree, so it must match what is committed.
+        echo "pre-commit: unstaged changes in install.sh inputs; stage or stash them so the test runs on the committed content." >&2
+        fail=1
+    elif ! command -v bats >/dev/null 2>&1; then
+        echo "pre-commit: bats not found (brew install bats-core) — cannot verify install.sh." >&2
+        fail=1
+    elif ! out=$(bats tests/install.bats 2>&1); then
+        echo "$out" >&2
+        echo "pre-commit: 'bats tests/install.bats' failed. Fix before committing." >&2
+        fail=1
+    fi
+fi
 
 # ── 2. Personal/private info scan in public agent-config dirs ─────────────
 SENSITIVE_DIRS="dotagents/ dotclaude/ dotcodex/"

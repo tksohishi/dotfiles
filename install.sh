@@ -95,8 +95,9 @@ if [ -d "$DOTFILES_DIR/bin" ]; then
 fi
 
 # ── dnsmasq ───────────────────────────────────────────────────
-if [ -d /opt/homebrew/etc/dnsmasq.d ]; then
-    target="/opt/homebrew/etc/dnsmasq.d/test.conf"
+brew_etc="${HOMEBREW_PREFIX:-/opt/homebrew}/etc"
+if [ -d "$brew_etc/dnsmasq.d" ]; then
+    target="$brew_etc/dnsmasq.d/test.conf"
     source="$DOTFILES_DIR/dnsmasq/test.conf"
     if [ -L "$target" ]; then
         rm "$target"
@@ -107,7 +108,7 @@ if [ -d /opt/homebrew/etc/dnsmasq.d ]; then
     echo "Linked dnsmasq/test.conf -> $target"
 
     # Enable conf-dir include if not already
-    dnsmasq_conf="/opt/homebrew/etc/dnsmasq.conf"
+    dnsmasq_conf="$brew_etc/dnsmasq.conf"
     if grep -q '^#conf-dir=/opt/homebrew/etc/dnsmasq.d/,\*\.conf' "$dnsmasq_conf" 2>/dev/null; then
         sed -i '' 's|^#conf-dir=/opt/homebrew/etc/dnsmasq.d/,\*\.conf|conf-dir=/opt/homebrew/etc/dnsmasq.d/,*.conf|' "$dnsmasq_conf"
         echo "Enabled conf-dir in dnsmasq.conf"
@@ -123,7 +124,7 @@ fi
 # ── caddy ─────────────────────────────────────────────────────
 if command -v caddy &>/dev/null; then
     local_caddy="$DOTFILES_DIR/.config/caddy/Caddyfile.local"
-    target="/opt/homebrew/etc/Caddyfile"
+    target="$brew_etc/Caddyfile"
     if [ -f "$local_caddy" ]; then
         if [ -L "$target" ]; then
             rm "$target"
