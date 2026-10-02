@@ -99,6 +99,7 @@ mas "Tailscale", id: 1475387142
 mas "Telegram", id: 747648890
 mas "The Unarchiver", id: 425424353
 # Manual install: Claude Code (claude install)
+# Manual install: CuaDriver (bundled with Claude desktop)
 cask "chatgpt"
 # Manual install: Eika (self-built)
 # Manual install: Kanary (scripts/install-kanary.sh)
