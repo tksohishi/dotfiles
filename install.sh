@@ -27,6 +27,7 @@ if [ "$SKIP_BREW" = false ]; then
     if ! command -v brew &>/dev/null; then
         echo "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
 
     # Install all packages, apps, and App Store apps (no upgrades)
@@ -154,6 +155,16 @@ bash "$DOTFILES_DIR/scripts/sync-editor-settings.sh"
 # ── Git hooks ─────────────────────────────────────────────────
 git -C "$DOTFILES_DIR" config core.hooksPath hooks
 echo "Configured git hooks from hooks/"
+
+# ── mise tools ────────────────────────────────────────────────
+# Before the agent section: bun and node come only from mise.
+# The node postinstall in mise config enables pnpm via corepack.
+if command -v mise &>/dev/null; then
+    echo ""
+    echo "Installing mise tools..."
+    mise install
+    eval "$(mise activate bash --shims)"
+fi
 
 # ── AI agent tool configs ─────────────────────────────────────
 echo ""
@@ -357,42 +368,6 @@ if [ -f "$skills_list" ] && command -v bunx &>/dev/null; then
             bunx skills add -g "$line" "${agent_flag[@]}" || echo "  Failed: $line"
         fi
     done < "$skills_list"
-fi
-
-# ── MCP servers ───────────────────────────────────────────────
-# Source of truth: [mcp_servers.*] in dotcodex/config.toml
-# Codex gets them via the merge above. Claude Code needs explicit `claude mcp add`.
-mcp_names=$(awk '/^\[mcp_servers\./ { gsub(/\[mcp_servers\./, ""); gsub(/\]/, ""); print }' "$DOTFILES_DIR/dotcodex/config.toml")
-if [ -n "$mcp_names" ] && command -v claude &>/dev/null; then
-    echo ""
-    echo "Setting up MCP servers for Claude Code..."
-    echo "$mcp_names" | while read -r name; do
-        cmd=$(awk -v s="[mcp_servers.$name]" '
-            $0 == s { found=1; next }
-            /^\[/ { found=0 }
-            found && /^command/ { gsub(/.*= *"/, ""); gsub(/"/, ""); print }
-        ' "$DOTFILES_DIR/dotcodex/config.toml")
-        args=$(awk -v s="[mcp_servers.$name]" '
-            $0 == s { found=1; next }
-            /^\[/ { found=0 }
-            found && /^args/ { gsub(/.*= *\[/, ""); gsub(/\]/, ""); gsub(/"/, ""); gsub(/, */, " "); print }
-        ' "$DOTFILES_DIR/dotcodex/config.toml")
-        if [ -n "$cmd" ]; then
-            claude mcp add --scope user "$name" -- $cmd $args 2>/dev/null && echo "  Added MCP server: $name" || echo "  MCP server already configured: $name"
-        fi
-    done
-elif [ -n "$mcp_names" ]; then
-    echo ""
-    echo "MCP servers to set up (install Claude Code first, then re-run):"
-    echo "$mcp_names" | while read -r name; do echo "  - $name"; done
-fi
-
-# Enable pnpm via corepack (requires mise-managed node)
-if command -v mise &>/dev/null; then
-    echo ""
-    echo "Setting up mise tools and pnpm..."
-    mise install
-    corepack enable pnpm
 fi
 
 echo ""
