@@ -13,3 +13,5 @@ alias tsource='tmux source ~/.tmux.conf'
 
 # Autojump muscle memory — z is zoxide's jump cmd
 alias j='z'
+
+alias opus='claude --model opus'
