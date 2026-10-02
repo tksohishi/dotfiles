@@ -1,6 +1,6 @@
 #!/bin/bash
 # Merge dotcodex/hooks.json -> ~/.codex/hooks.json.
-# Preserves hooks owned by Otty or other local tools.
+# Preserves hooks owned by apps or other local tools.
 
 set -euo pipefail
 
