@@ -22,6 +22,7 @@ brew "jq"
 brew "just"
 brew "kubo"
 brew "libusb"
+brew "libimobiledevice" # Tauri iOS builds (Lifelane)
 brew "mas"
 brew "miller"
 brew "mise"
