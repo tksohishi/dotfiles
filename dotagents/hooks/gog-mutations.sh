@@ -38,10 +38,27 @@ command -v gog >/dev/null 2>&1 || exit 0
 # the sent message with it (Sep 15, 2026).
 EXEMPT_PATHS='["gmail drafts create","gmail drafts update","gmail drafts forward","gmail drafts reply","gmail drafts reply-all","gmail trash"]'
 
+# Leaves named create/add are also exempt (a new label, doc, or task is
+# additive), except where creating something reaches other people or hands
+# out access: calendar events invite attendees, comments notify collaborators,
+# delegates/forwarding/send-as grant mailbox access, and admin/classroom/chat
+# objects are visible to others. A filter create stays gated only when it
+# forwards or trashes future mail.
+RISKY_CREATE='^(admin|auth|chat|classroom) |^calendar create$|^gmail settings (delegates|forwarding|sendas) |comments (create|add)$'
+
+# Gmail label edits on messages (including archive = remove INBOX) are
+# reversible and routine for inbox zero, so they pass too, unless the command
+# mentions TRASH or SPAM anywhere (checked on the raw command, since quoted
+# label names are stripped from the tokens).
+LABEL_PATHS='["gmail archive","gmail batch modify","gmail labels modify","gmail messages modify","gmail thread modify"]'
+if printf '%s' "$CMD" | grep -qiwE 'TRASH|SPAM'; then TRASH_SPAM=true; else TRASH_SPAM=false; fi
+
 # Leaf verbs (canonical names or aliases) that mutate remote state.
 MUTATION_VERBS='["create","new","add","invite","update","edit","set","unset","delete","del","rm","remove","send","post","move","transfer","trash","untrash","import","upload","copy","rename","clear","revoke","respond","rsvp","reply","subscribe","unsubscribe","archive","unarchive","restore","append","write","insert","format","share","mkdir","stop","end","submit","abort","prune","modify","batch-modify","replace","setup","reset","rotate","grant","call"]'
 
-SCHEMA=$(gog schema 2>/dev/null) || exit 0
+# --include-hidden: shortcuts like `gmail filters` (= `gmail settings filters`)
+# are hidden, and without them the walk stops early and the verb is missed.
+SCHEMA=$(gog schema --include-hidden 2>/dev/null) || exit 0
 [ -n "$SCHEMA" ] || exit 0
 
 # Strip quoted regions so a gog reference inside a string bound for another
@@ -56,7 +73,7 @@ while IFS= read -r seg; do
   # A help invocation only prints usage — never mutates. Let it through.
   if printf '%s' "$tokens" | grep -qwE -- '--help|-h'; then continue; fi
   # Schema is piped on stdin: it is too large for --argjson (argv limit).
-  resolved=$(printf '%s' "$SCHEMA" | jq -r --arg toks "$tokens" --argjson verbs "$MUTATION_VERBS" --argjson exempt "$EXEMPT_PATHS" '
+  resolved=$(printf '%s' "$SCHEMA" | jq -r --arg toks "$tokens" --argjson verbs "$MUTATION_VERBS" --argjson exempt "$EXEMPT_PATHS" --arg risky "$RISKY_CREATE" --argjson labelpaths "$LABEL_PATHS" --argjson trashspam "$TRASH_SPAM" '
     def matches($tok): .name == $tok or ((.aliases // []) | index($tok) != null);
     ($toks | split(" ") | map(select(length > 0))) as $t
     | {node: .command, i: 0, skip: false, path: []}
@@ -77,6 +94,11 @@ while IFS= read -r seg; do
     | if ($p | length) == 0 then empty
       else ($p | join(" ")) as $joined
         | if ($exempt | index($joined)) != null then empty
+          elif ($labelpaths | index($joined)) != null and ($trashspam | not) then empty
+          elif (($p | last) == "create" or ($p | last) == "add")
+            and ($joined | test($risky) | not)
+            and (($joined | endswith("filters create")) and ($t | any(test("^--(forward|trash)(=|$)"))) | not)
+          then empty
           elif ($verbs | index($p | last)) != null then $joined
           else empty end
       end
