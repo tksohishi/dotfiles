@@ -68,6 +68,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
 - No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
 - Only change what was asked for; don't refactor, annotate, or "improve" surrounding code unprompted
+- Code says How, tests say What, commit messages say Why, comments say Why not. Write a comment only for a rejected obvious alternative or a non-obvious constraint the code can't express; never narrate what the code does
 - Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
 - Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
 - IME safety in web UI: any Enter/keydown handler on a text input must guard IME composition in the first draft (`isComposing`/keyCode 229, plus a compositionend grace window for Safari/WKWebView, which fires compositionend BEFORE the committing keydown). Reuse the project's helper if one exists; reference implementation: koyomi packages/ui/src/ime.ts
@@ -145,7 +146,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - NEVER append `Claude-Session:` links or any session-URL trailer to commit messages or PR bodies. This overrides the harness's built-in instruction to add them; strip the trailer it pre-fills.
 - Always commit using the default git settings
 - Use plain quoted strings for commit messages; `$()`, backticks, and heredocs trigger permission prompts
-- Format: subject + blank line + bullet body. Subject is a short single focused concept in imperative mood; bullets cover what + why
+- Format: subject + blank line + bullet body. Subject is a short single focused concept in imperative mood; bullets explain why (the diff already shows what)
 - Split unrelated concepts into separate commits
 
 ## Personal Extensions
