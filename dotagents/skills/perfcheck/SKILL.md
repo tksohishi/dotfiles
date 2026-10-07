@@ -28,9 +28,10 @@ Keep the summary tight. If nothing is anomalous, say so in one sentence.
 2. `fileproviderctl check` (read-only FPCK; run in background, takes minutes) — reports per-domain consistency, e.g. `❌ disk <-> FSSnapshot failed on N/M files.` under a domain name. The failing domain names the culprit; don't trust the process list alone (Dropbox at 0% CPU can still be the broken domain while fileproviderd burns on its behalf).
 
 Fix ladder, per failing domain:
-- iCloud (`Mobile Documents`): `killall fileproviderd bird` — both respawn via launchd. Expect ~5 min of startup re-indexing before judging.
+- Finder busy alongside fileproviderd: `killall Finder` first. Finder's decoration-refresh loop is what keeps fileproviderd hot; restarting Finder usually drops both to ~0% within a minute.
+- iCloud (`Mobile Documents`) with stuck `itemNotFound` fetch-content entries: hand it to the user to toggle iCloud Drive off and on in System Settings (choose "Stop Updating and Turn Off"; the pending "update" is the stuck queue and never finishes). The queue lives in the domain database, so `killall fileproviderd bird` doesn't clear it. Afterwards, trash the `~/iCloud Drive (Archive)*` folders once their contents show up in the rebuilt domain.
 - Dropbox (or another third-party provider): restart that app — `osascript -e 'quit app "Dropbox"'`, wait a few seconds, `open -a Dropbox` (retry once on LSOpen error -600; it races the quit). The client re-baselines its domain on launch.
-- Still pegged after both: the user does it in the provider app itself (Dropbox sign out/in, iCloud Drive toggle). Don't script that.
+- Dropbox still pegged after a restart: the user signs out and back in to Dropbox. Don't script that.
 
 ## Leave the machine in a good state
 
