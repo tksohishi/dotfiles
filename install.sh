@@ -30,6 +30,11 @@ if [ "$SKIP_BREW" = false ]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
 
+    # Homebrew refuses to load formulae from third-party taps until they are trusted
+    for tap in $(sed -n 's/^tap "\([^"]*\)".*/\1/p' "$DOTFILES_DIR/Brewfile"); do
+        brew tap "$tap" && brew trust --tap "$tap"
+    done
+
     # Install all packages, apps, and App Store apps (no upgrades)
     echo "Installing packages from Brewfile..."
     HOMEBREW_BUNDLE_FILE="$DOTFILES_DIR/Brewfile" brew bundle --no-upgrade || echo "Some packages failed to install (see above). Continuing..."
