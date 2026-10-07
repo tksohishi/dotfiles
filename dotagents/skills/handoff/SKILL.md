@@ -12,13 +12,16 @@ Two modes: **write** (default) creates `tmp/handoff.md`; **resume** (argument is
 
 1. Read `tmp/handoff.md`. If absent, say so and stop.
 2. Re-ground before acting — the file is point-in-time, not live state. Check `git log`/`git status` since the file's mtime and re-run any verify commands it lists. Anything it calls open or broken may since be done; fresh evidence wins over the file, always.
-3. Salvage: any still-true fact future sessions can't derive (from code, git, or existing memory) goes to project memory now.
-4. Delete the file (`trash tmp/handoff.md`) — before starting the work, not after, so an interrupted session can't leave it behind.
-5. Continue with the handoff's next step, corrected by what re-grounding found.
+3. Salvage: any still-true fact future sessions can't derive (from code, git, or existing memory) goes to project memory now, as a topic memory (one durable fact per file), never as a dated "open threads" / session-state memory.
+4. Clean the memory the handoff supersedes: every session-state memory (`open-threads-<date>`, "state on <date>", a body made of caps, PIDs, pending approvals and next steps) is deleted together with its `MEMORY.md` line, once its still-true non-derivable facts have moved into topic memories. The handoff is the session state; a memory that duplicates it rots within a day (a cap it recorded was quoted as current after two changes).
+5. Delete the file (`trash tmp/handoff.md`) — before starting the work, not after, so an interrupted session can't leave it behind.
+6. Continue with the handoff's next step, corrected by what re-grounding found.
 
 ## Write mode
 
 The reason this exists instead of `/compact`: generic summaries drop exactly the state that makes long debugging arcs expensive to resume — what was already ruled out, and the evidence that ruled it out. Write those sections with the most care.
+
+The handoff is the only place session state goes. Do not also write an "open threads" / "state on <date>" memory: durable facts (a lesson with its evidence, a service quirk, a user decision not in docs) go to topic memories, and everything dated, pending or numeric stays in the handoff, where the resume deletes it.
 
 ## Ground everything
 
