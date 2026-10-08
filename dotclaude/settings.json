@@ -838,7 +838,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/handoff-stale.sh",
+            "command": "$HOME/.claude/hooks/handoff-load.sh",
             "timeout": 5
           },
           {
