@@ -83,6 +83,16 @@ emit() {
 if [ "$BLOCKED" = 1 ]; then
   [ -n "$HOST" ] && printf '%s\tblocked\t%s\n' "$HOST" "$METHOD" >> "$STATE"
   MSG="Bot-wall signature detected in this fetch result. Do not retry the same method, do not switch to mirrors or search engines, and do not report the site as unreachable. Load the \`fetch-blocked\` skill with the Skill tool now, look the hostname up in its site map, and walk its escalation ladder in order to the last rung (\`patchright-fetch <url>\` headed). Only after that rung fails on a known-good URL may the host be reported as blocked, listing every rung tried."
+  # Quote the site-map entry inline: a pointer to the skill can be skipped as
+  # "not worth it" (2026-10-08, health.ny.gov reported as 403 while its row
+  # said httpie + Chrome UA works). Boundary match so health.ny.gov doesn't
+  # pull in nystateofhealth.ny.gov.
+  if [ -n "$HOST" ] && [ "$REGISTERED" = 1 ]; then
+    HOST_RE=$(printf '%s' "$HOST" | sed 's/\./\\./g')
+    ROWS=$(rg -i --no-filename "(^|[|[:space:]/.])$HOST_RE\b" "$SITES/sites.md" "$SITES/sites.local.md" 2>/dev/null | head -5)
+    [ -n "$ROWS" ] && MSG="$HOST already has a verified path in the fetch-blocked site map; use it before anything else:
+$ROWS"
+  fi
   if [ -n "$HOST" ] && [ "$REGISTERED" = 0 ]; then
     if [ "$METHOD" = "patchright-fetch headed" ]; then
       FAILED=$(rg "^$HOST\tblocked" "$STATE" | cut -f3 | sort -u | paste -sd, -)
