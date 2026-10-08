@@ -18,7 +18,7 @@ setup() {
 
 @test "after /clear loads the handoff into context and trashes the file" {
   mkdir -p tmp
-  printf '# Handoff\n\n## Next step\nShip "it"\n' > tmp/handoff.md
+  printf '# Handoff — topic (2026-01-02 13:04)\n\n## Goal\nGet it out.\n\nDetail\n\n## Next step\nShip "it"\n\n## Pointers\n- p\n' > tmp/handoff.md
   touch -t 202601021304 tmp/handoff.md
   run "$HOOK" <<< '{"source":"clear"}'
   [ "$status" -eq 0 ]
@@ -26,6 +26,11 @@ setup() {
   ctx=$(jq -r '.hookSpecificOutput.additionalContext' <<< "$output")
   [[ "$ctx" == *'2026-01-02 13:04'* ]]
   [[ "$ctx" == *'Ship "it"'* ]]
+  msg=$(jq -r '.systemMessage' <<< "$output")
+  [[ "$msg" == *'Handoff — topic'* ]]
+  [[ "$msg" == *'Goal: Get it out.'* ]]
+  [[ "$msg" == *'Next step: Ship "it"'* ]]
+  [[ "$msg" != *'Detail'* && "$msg" != *'- p'* ]]
   [ ! -e tmp/handoff.md ]
 }
 
