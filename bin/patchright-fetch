@@ -13,6 +13,7 @@
 //   is stable and no challenge marker is on screen.
 // - Bun auto-installs the pinned patchright below into its global cache on first run;
 //   needs Chrome Canary installed.
+import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 // @ts-expect-error bun resolves versioned specifiers via auto-install
 import { chromium } from 'patchright@1.60.0'
@@ -60,6 +61,21 @@ if (existsSync(lockFile)) {
 }
 writeFileSync(lockFile, String(process.pid))
 
+// Chrome activates itself on launch even with the window offscreen, stealing keyboard
+// focus from whatever the user is typing in. Hand focus back, but only while Canary is
+// still in front, so a deliberate app switch by the user is never undone.
+// (lsappinfo setfront would avoid the re-activation flash but returns permErr.)
+const frontBundle = () => {
+  try {
+    const info = execFileSync('lsappinfo', ['info', execFileSync('lsappinfo', ['front']).toString().trim()]).toString()
+    return info.match(/bundleID="([^"]+)"/)?.[1]
+  } catch {}
+}
+const userApp = show ? undefined : frontBundle()
+const restoreFocus = () => {
+  if (userApp && frontBundle() === 'com.google.Chrome.canary') execFileSync('open', ['-b', userApp])
+}
+
 const CHALLENGE = /press & hold|press and hold|verify you are|just a moment|checking your browser|are you a robot/i
 
 try {
@@ -68,6 +84,7 @@ try {
     headless: false,
     args: show ? [] : ['--window-position=-2400,-2400'],
   })
+  restoreFocus()
   try {
     const page = ctx.pages()[0] ?? (await ctx.newPage())
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
@@ -97,6 +114,7 @@ try {
     console.log(text.slice(0, 2500))
   } finally {
     await ctx.close()
+    restoreFocus()
   }
 } catch (err) {
   const msg = err instanceof Error ? err.message.split('\n')[0] : String(err)
