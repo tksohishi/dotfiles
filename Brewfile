@@ -100,4 +100,6 @@ mas "The Unarchiver", id: 425424353
 cask "chatgpt"
 # Manual install: Eika (self-built)
 # Manual install: Kanary (scripts/install-kanary.sh)
+# Manual install: Lifelane Beta (https://github.com/blossomlink/lifelane/releases)
+# Manual install: ScreenStory (https://github.com/blossomlink/screenstory-releases/releases)
 mas "Xcode", id: 497799835

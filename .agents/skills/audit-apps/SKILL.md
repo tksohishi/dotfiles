@@ -10,7 +10,7 @@ Follow these steps:
 1. **Homebrew packages:**
    - Run `brew bundle cleanup` to list packages not in the Brewfile
    - Run `brew bundle check --verbose` to list packages in the Brewfile that aren't installed
-   - For packages that need updates (not truly missing), note them as needing `brew upgrade`
+   - Drop outdated entries from the report: self-updating GUI casks catch up on next launch and `/update-apps` owns upgrades. Report only packages that are truly missing
 
 2. **GUI apps:**
    - Run `ls /Applications/` and cross-check against casks and MAS entries in the Brewfile
@@ -38,7 +38,7 @@ Follow these steps:
 
    **🟢 OK** — things that are in sync, no action needed. Keep brief (one-liners).
 
-   **🟡 Warning** — minor drift or potential issues, not urgent. E.g. packages needing upgrade, Python versions kept as brew dependencies.
+   **🟡 Warning** — minor drift or potential issues, not urgent. E.g. Python versions kept as brew dependencies.
 
    **🔴 Action Needed** — things that require a decision. E.g. untracked apps, missing packages, stale rules. List each with a suggested action.
 
