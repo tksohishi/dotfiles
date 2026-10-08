@@ -1,8 +1,14 @@
 #!/bin/bash
-# SessionStart: flag a lingering tmp/handoff.md so it can't feed stale facts.
-# Handoffs are one-shot (see the handoff skill); a surviving file means it was
-# never consumed and its contents must not be treated as current state.
+# SessionStart: load tmp/handoff.md (written by the handoff skill) into a
+# session started fresh after /clear or launch, then trash it so the one-shot
+# handoff can't be loaded twice. Resume, compact and fork keep their own
+# history, so they leave the file alone.
 f="tmp/handoff.md"
 [ -f "$f" ] || exit 0
-mtime=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$f" 2>/dev/null || echo "unknown date")
-printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"tmp/handoff.md exists (written %s). Handoffs are one-shot: run /handoff resume to ingest it (re-ground every claim against git/live state first) and then delete it. If its work is already done, salvage still-true non-derivable facts to memory and delete it. Do NOT cite its contents as current state."}}\n' "$mtime"
+case "$(jq -r '.source // empty' 2>/dev/null)" in
+  clear | startup) ;;
+  *) exit 0 ;;
+esac
+mtime=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$f")
+jq -n --rawfile doc "$f" --arg mtime "$mtime" '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("Handoff from the previous session (tmp/handoff.md, written \($mtime); the file is now in the Trash). Before answering the first prompt: re-ground its claims against git log/status and live state (fresh evidence wins over the file); move still-true facts that code, git or memory cannot supply into topic memories; delete any session-state memory it supersedes (open-threads or state-on-date files) with its MEMORY.md line; then continue with its next step.\n\n" + $doc)}}'
+trash "$f"
