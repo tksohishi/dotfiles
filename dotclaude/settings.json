@@ -655,11 +655,6 @@
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/bg-timeout.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "$HOME/.claude/hooks/env-io-in-scripts.sh",
             "timeout": 5
           }
