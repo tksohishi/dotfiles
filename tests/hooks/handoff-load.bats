@@ -53,3 +53,13 @@ setup() {
   done
   [ -f tmp/handoff.md ]
 }
+
+@test "a dated tmp/handoff-<date>.md is loaded when tmp/handoff.md is missing" {
+  mkdir -p tmp
+  printf '# Handoff — dated (2026-10-09 12:55)\n\n## Goal\nG\n\n## Next step\nN\n' > tmp/handoff-2026-10-09.md
+  run "$HOOK" <<< '{"source":"clear"}'
+  [ "$status" -eq 0 ]
+  msg=$(jq -r '.systemMessage' <<< "$output")
+  [[ "$msg" == *'tmp/handoff-2026-10-09.md'* ]]
+  [ ! -e tmp/handoff-2026-10-09.md ]
+}

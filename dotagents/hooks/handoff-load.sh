@@ -4,7 +4,10 @@
 # handoff can't be loaded twice. Resume, compact and fork keep their own
 # history, so they leave the file alone.
 f="tmp/handoff.md"
-[ -f "$f" ] || exit 0
+# A session that wrote the file by hand may have dated the name
+# (tmp/handoff-2026-10-09.md, 10/9): fall back to the newest tmp/handoff*.md.
+[ -f "$f" ] || f=$(ls -t tmp/handoff*.md 2>/dev/null | head -1)
+[ -n "$f" ] && [ -f "$f" ] || exit 0
 case "$(jq -r '.source // empty' 2>/dev/null)" in
   clear | startup) ;;
   *) exit 0 ;;
@@ -25,5 +28,5 @@ summary=$(awk '
     printf "%s: %s\n", sec, $0; grab = 0
   }
 ' "$f")
-jq -n --rawfile doc "$f" --arg mtime "$mtime" --arg summary "$summary" '{systemMessage: ("Handoff loaded (tmp/handoff.md, \($mtime), now in the Trash)\n" + $summary), hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("Handoff from the previous session (tmp/handoff.md, written \($mtime); the file is now in the Trash). Before answering the first prompt: re-ground its claims against git log/status and live state (fresh evidence wins over the file); move still-true facts that code, git or memory cannot supply into topic memories; delete any session-state memory it supersedes (open-threads or state-on-date files) with its MEMORY.md line; then continue with its next step.\n\n" + $doc)}}'
+jq -n --rawfile doc "$f" --arg f "$f" --arg mtime "$mtime" --arg summary "$summary" '{systemMessage: ("Handoff loaded (\($f), \($mtime), now in the Trash)\n" + $summary), hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("Handoff from the previous session (\($f), written \($mtime); the file is now in the Trash). Before answering the first prompt: re-ground its claims against git log/status and live state (fresh evidence wins over the file); move still-true facts that code, git or memory cannot supply into topic memories; delete any session-state memory it supersedes (open-threads or state-on-date files) with its MEMORY.md line; then continue with its next step.\n\n" + $doc)}}'
 trash "$f"
