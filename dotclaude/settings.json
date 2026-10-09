@@ -815,6 +815,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/context-size-nudge.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/skill-in-prompt.sh",
+            "timeout": 5
           }
         ]
       },
