@@ -104,6 +104,16 @@ $ROWS"
   emit "$MSG"
 fi
 
+# A client-rendered page reaches WebFetch as an empty JS shell, and its
+# summarizer says so in prose that no wall signature matches (2026-10-10,
+# arliai.com model list: the ladder was offered to the user instead of walked).
+# Nudge only, never recorded or gated: a page that merely lacks the asked-for
+# detail can read the same.
+SHELL_RE="(does not|doesn't) (contain|include|display|show) (any |the )?(actual|detailed|specific)|only (shows|contains|includes) (the )?(navigation|structural)|not (been )?fully loaded|(requires|rendered (by|with|via)|loaded (by|with|via)) JavaScript|\b(listed|found|shown): 0\b"
+if [ "$METHOD" = "WebFetch" ] && printf '%s' "$RESP" | rg -qi "$SHELL_RE"; then
+  emit "This WebFetch summary reads like an empty client-rendered (JS) shell. If the page should hold the content, treat it as a failed fetch, not an answer: load the \`fetch-blocked\` skill and continue its ladder now (agent-browser headless, \`wait\`, then \`get text body\`) instead of offering it to the user. Ignore this if the page genuinely lacks the detail."
+fi
+
 # Passed. Worth a note only if this host was blocked earlier this session and is unrecorded.
 [ -z "$HOST" ] && exit 0
 [ "$REGISTERED" = 1 ] && exit 0

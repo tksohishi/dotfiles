@@ -133,3 +133,24 @@ assert_silent() {
   run "$HOOK" <<< "$(hook_input Bash 'http GET https://example.com/x' 'http: warning: HTTP 403 FORBIDDEN')"
   assert_injects
 }
+
+@test "WebFetch summary of an empty JS shell nudges toward the ladder" {
+  run "$HOOK" <<< "$(hook_input WebFetch '' 'The page shows only navigation and structural elements. **Total models listed: 0** (no model details were provided)')"
+  assert_injects
+  echo "$output" | jq -e '.hookSpecificOutput.additionalContext | test("JS\\) shell")' >/dev/null
+}
+
+@test "WebFetch summary saying the page does not contain detailed info nudges" {
+  run "$HOOK" <<< "$(hook_input WebFetch '' 'I cannot list them because the page does not contain detailed model information.')"
+  assert_injects
+}
+
+@test "WebFetch summary that answers with a plain 'no mention' stays silent" {
+  run "$HOOK" <<< "$(hook_input WebFetch '' 'There is no mention of this model being available on the ArliAI API.')"
+  assert_silent
+}
+
+@test "Bash output with shell-like prose is not treated as a JS shell" {
+  run "$HOOK" <<< "$(hook_input Bash 'http GET https://example.com' 'Total models listed: 0')"
+  assert_silent
+}
