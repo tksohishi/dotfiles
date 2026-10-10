@@ -44,8 +44,10 @@ fi
 
 # Detect headed mode. Seed from the env, then let CLI flags override it.
 headed=0
+explicit=0
 case "${AGENT_BROWSER_HEADED:-}" in
-    true|1|TRUE|True) headed=1 ;;
+    true|1|TRUE|True) headed=1; explicit=1 ;;
+    false|0|FALSE|False) explicit=1 ;;
 esac
 
 i=1
@@ -68,6 +70,7 @@ while [ $i -le $# ]; do
             fi
             ;;
         --headed)
+            explicit=1
             j=$((i + 1))
             if [ $j -le $# ]; then
                 case "${!j}" in
@@ -79,6 +82,7 @@ while [ $i -le $# ]; do
             fi
             ;;
         --headed=*)
+            explicit=1
             case "${arg#--headed=}" in
                 false|0|FALSE|False) headed=0 ;;
                 *) headed=1 ;;
@@ -87,15 +91,6 @@ while [ $i -le $# ]; do
     esac
     i=$((i + 1))
 done
-
-# Mute Chrome audio in headless mode. The new headless mode (--headless=new)
-# routes page audio to the system; --mute-audio silences it. Headed sessions
-# keep sound so a watching human hears playback. Prepend so any caller-set
-# AGENT_BROWSER_ARGS is preserved. A CLI --args flag overrides the env and
-# would drop the mute, but that is rare in practice.
-if [ "$headed" -eq 0 ]; then
-    export AGENT_BROWSER_ARGS="--mute-audio${AGENT_BROWSER_ARGS:+,$AGENT_BROWSER_ARGS}"
-fi
 
 # Serialize invocations per project. Concurrent agents driving one daemon
 # fight over the shared tab: each contested `open` re-navigates the other's
@@ -111,6 +106,32 @@ lock_key() {
     fi
     printf '%s' "$(printf '%s' "$PWD" | cksum | cut -d' ' -f1)"
 }
+
+# Sticky headed mode. Agents launch with --headed and then forget it on the
+# next snapshot/click; the mismatch hides and re-shows the window, stealing
+# the user's focus each time; skill text alone didn't stop it. Remember
+# headed per project until `close`, and drop the marker once no headed Chrome
+# for Testing is running so a dead daemon doesn't make the next launch headed.
+HEADED_STATE="${TMPDIR:-/tmp}/agent-browser-$(lock_key).headed"
+if [ -f "$HEADED_STATE" ] && ! pgrep -lf "Google Chrome for Testing" | grep -v -e crashpad -e Helper -e headless >/dev/null; then
+    rm -f "$HEADED_STATE"
+fi
+if [ "$explicit" -eq 1 ]; then
+    if [ "$headed" -eq 1 ]; then touch "$HEADED_STATE"; else rm -f "$HEADED_STATE"; fi
+elif [ -f "$HEADED_STATE" ]; then
+    headed=1
+    export AGENT_BROWSER_HEADED=true
+fi
+[ "${1:-}" = "close" ] && rm -f "$HEADED_STATE"
+
+# Mute Chrome audio in headless mode. The new headless mode (--headless=new)
+# routes page audio to the system; --mute-audio silences it. Headed sessions
+# keep sound so a watching human hears playback. Prepend so any caller-set
+# AGENT_BROWSER_ARGS is preserved. A CLI --args flag overrides the env and
+# would drop the mute, but that is rare in practice.
+if [ "$headed" -eq 0 ]; then
+    export AGENT_BROWSER_ARGS="--mute-audio${AGENT_BROWSER_ARGS:+,$AGENT_BROWSER_ARGS}"
+fi
 
 LOCK="${TMPDIR:-/tmp}/agent-browser-$(lock_key).lock"
 
