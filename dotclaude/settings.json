@@ -865,6 +865,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/fetch-ladder-gate.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/subagent-reaper.sh",
+            "timeout": 10
           }
         ]
       }
