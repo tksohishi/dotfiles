@@ -16,7 +16,7 @@ mtime=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$f")
 # additionalContext is model-only; systemMessage shows the user the title plus
 # one line each for Goal and Next step, cut to 80 chars: Claude Code prefixes
 # every systemMessage line with "SessionStart:clear says:", so it stays short.
-export LC_ALL=en_US.UTF-8
+# The cut is in jq, not awk: macOS awk counts bytes and splits a Japanese char.
 summary=$(awk '
   NR == 1 && /^# / { sub(/^# /, ""); print; next }
   /^## (Goal|Next step)$/ { sec = substr($0, 4); grab = 1; next }
@@ -24,9 +24,8 @@ summary=$(awk '
   grab && /^$/ { next }
   grab {
     sub(/^[0-9]+\. /, "")
-    if (length($0) > 80) $0 = substr($0, 1, 80) "…"
     printf "%s: %s\n", sec, $0; grab = 0
   }
 ' "$f")
-jq -n --rawfile doc "$f" --arg f "$f" --arg mtime "$mtime" --arg summary "$summary" '{systemMessage: ("Handoff loaded (\($f), \($mtime), now in the Trash)\n" + $summary), hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("Handoff from the previous session (\($f), written \($mtime); the file is now in the Trash). Before answering the first prompt: re-ground its claims against git log/status and live state (fresh evidence wins over the file); move still-true facts that code, git or memory cannot supply into topic memories; delete any session-state memory it supersedes (open-threads or state-on-date files) with its MEMORY.md line; then continue with its next step.\n\n" + $doc)}}'
+jq -n --rawfile doc "$f" --arg f "$f" --arg mtime "$mtime" --arg summary "$summary" '($summary | split("\n") | map(if length > 80 then .[0:80] + "…" else . end) | join("\n")) as $summary | {systemMessage: ("Handoff loaded (\($f), \($mtime), now in the Trash)\n" + $summary), hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("Handoff from the previous session (\($f), written \($mtime); the file is now in the Trash). Before answering the first prompt: re-ground its claims against git log/status and live state (fresh evidence wins over the file); move still-true facts that code, git or memory cannot supply into topic memories; delete any session-state memory it supersedes (open-threads or state-on-date files) with its MEMORY.md line; then continue with its next step.\n\n" + $doc)}}'
 trash "$f"
