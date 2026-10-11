@@ -576,10 +576,7 @@
     ]
   },
   "model": "fable",
-  "availableModels": [
-    "fable",
-    "opus"
-  ],
+  "availableModels": ["fable", "opus"],
   "enforceAvailableModels": true,
   "disableClaudeAiConnectors": true,
   "deniedMcpServers": [
