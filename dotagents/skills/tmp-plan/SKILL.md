@@ -1,6 +1,6 @@
 ---
 name: tmp-plan
-description: Write a PRD-style markdown brief into a project's tmp/ capturing what this session researched and discussed, weighted toward verified facts and research results rather than solutions. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
+description: Write a PRD-style markdown brief into a project's tmp/ capturing the goal, problems to solve, and what this session researched and discussed, weighted toward verified facts and research results rather than solutions. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
 disable-model-invocation: true
 ---
 
@@ -31,13 +31,14 @@ Write in the language the session was conducted in. Times in the user's local zo
 Sections, in this order, dropping any that would be empty:
 
 1. **Goal**: what the user is trying to achieve and why, in their terms. Two to four lines.
-2. **Facts**: verified findings, each with its source (file:line, command, URL, measurement file) and, for anything time-sensitive, when it was observed. Exact identifiers, numbers and units; no rounding that loses meaning.
-3. **Research results**: measurements and experiments, each with method (where it ran, sample size, conditions), result (min/p50/p90 or the raw counts) and the file holding the raw output. A one-line reading of what the numbers imply may follow each.
-4. **Ruled out**: paths considered and dropped, each with the evidence that ruled it out, so nobody retries them.
-5. **Decisions and constraints**: what the user decided or required during the session, stated as plain facts.
-6. **Open questions**: what is still unknown, each with what would settle it.
-7. **Options** (brief): directions mentioned, unranked unless the user ranked them, one or two lines each. No implementation detail.
-8. **References**: files, scripts, URLs, commits the reader should open.
+2. **Problems to solve**: the concrete problems standing between now and the goal, each stated as an observable symptom or gap with its impact (what breaks, how often, what it costs), not as a fix. Numbered so later sections and sessions can refer to them.
+3. **Facts**: verified findings, each with its source (file:line, command, URL, measurement file) and, for anything time-sensitive, when it was observed. Exact identifiers, numbers and units; no rounding that loses meaning.
+4. **Research results**: measurements and experiments, each with method (where it ran, sample size, conditions), result (min/p50/p90 or the raw counts) and the file holding the raw output. A one-line reading of what the numbers imply may follow each.
+5. **Ruled out**: paths considered and dropped, each with the evidence that ruled it out, so nobody retries them.
+6. **Decisions and constraints**: what the user decided or required during the session, stated as plain facts.
+7. **Open questions**: what is still unknown, each with what would settle it and which problem it bears on.
+8. **Options** (brief): directions mentioned, unranked unless the user ranked them, one or two lines each, tagged with the problem number they address. No implementation detail.
+9. **References**: files, scripts, URLs, commits the reader should open.
 
 Label anything not verified this session as unverified and name what would settle it; don't present inference as fact.
 
