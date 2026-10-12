@@ -5,6 +5,5 @@
 [tools]
 node = { version = "lts", postinstall = "corepack enable pnpm" }
 bun = "latest"
-deno = "latest"
 "npm:@ticktick/ticktick-cli" = "latest"
 "npm:@alchemy/cli" = "latest"
