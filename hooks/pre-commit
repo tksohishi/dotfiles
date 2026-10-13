@@ -29,7 +29,9 @@ if [ -n "$changed_hooks" ] || [ -n "$changed_hook_tests" ]; then
     if ! command -v bats >/dev/null 2>&1; then
         echo "pre-commit: bats not found (brew install bats-core) — cannot verify hook tests." >&2
         fail=1
-    elif ! bats tests/hooks/ >/dev/null 2>&1; then
+    # A `git commit -- <path>` exports a temporary GIT_INDEX_FILE; tests that
+    # build scratch repos would otherwise write into it and fail.
+    elif ! env -u GIT_INDEX_FILE bats tests/hooks/ >/dev/null 2>&1; then
         echo "pre-commit: 'bats tests/hooks/' failed. Run it and fix before committing." >&2
         fail=1
     fi
@@ -55,7 +57,7 @@ if git diff --cached --name-only -- "${install_inputs[@]}" | grep -q .; then
     elif ! command -v bats >/dev/null 2>&1; then
         echo "pre-commit: bats not found (brew install bats-core) — cannot verify install.sh." >&2
         fail=1
-    elif ! out=$(bats tests/install.bats 2>&1); then
+    elif ! out=$(env -u GIT_INDEX_FILE bats tests/install.bats 2>&1); then
         echo "$out" >&2
         echo "pre-commit: 'bats tests/install.bats' failed. Fix before committing." >&2
         fail=1
