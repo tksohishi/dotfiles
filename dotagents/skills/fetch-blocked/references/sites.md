@@ -24,6 +24,8 @@ A 429 from a JSON API after a burst of calls is a quota, not a bot wall: do not 
 | imdb.com | empty (WAF challenge) | GraphQL endpoint for star rating; suggestion endpoint for IDs — see IMDb section below |
 | 5ch.net | 403 | plain httpie |
 | quora.com | 403 | agent-browser --headed only (403 even to httpie with browser UA) |
+| walmart.com | n/a (not tried) | httpie+UA 403; agent-browser headless AND headed both land on PerimeterX "Robot or human?" Press & Hold (hard stop, do not solve); `patchright-fetch <url> --wait 35` headed returns the full product page including price block (2026-09-07) and search results (2026-10-12). Grep the saved body for "Current price is" — the price sits ~line 600, far below sponsored-recommendation prices near the top |
+| target.com (search `/s?searchTerm=`) | n/a (WebFetch fine on help pages) | httpie+UA 200 but search results are client-rendered (only the query echo in the HTML); redsky search API 435; agent-browser headless renders "We couldn't find a match" even for "toothpaste", and headed gave the same on a query patchright then found 321 results for; `patchright-fetch <url> --wait 30` headed returns the full result list with prices and ship dates (2026-10-12) |
 | facebook.com, tiktok.com | empty JS/login shell | agent-browser --headed + login; usually not worth it |
 
 ## Reddit
