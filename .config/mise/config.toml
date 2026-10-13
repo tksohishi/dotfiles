@@ -7,3 +7,4 @@ node = { version = "lts", postinstall = "corepack enable pnpm" }
 bun = "latest"
 "npm:@ticktick/ticktick-cli" = "latest"
 "npm:@alchemy/cli" = "latest"
+"github:moznion/cccc" = "latest"
