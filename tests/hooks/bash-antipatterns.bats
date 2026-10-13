@@ -477,3 +477,18 @@ bash_input() {
   [[ "$output" == *'"permissionDecision":"deny"'* ]]
   [[ "$output" == *'Codex hooks cannot prompt'* ]]
 }
+
+@test "denies perl in-place edits, alone or bundled" {
+  for cmd in "perl -i -pe 's/a/b/' f.ts" "perl -pi -e 's/a/b/' f.ts" "perl -0pi -e 's/a\nb/c/s' f.ts" "perl -i.bak -pe 's/a/b/' f.ts" "rg -l a | xargs perl -pi -e 's/a/b/'"; do
+    run "$HOOK" <<< "$(bash_input "$cmd")"
+    [[ "$output" == *'"permissionDecision":"deny"'* ]]
+    [[ "$output" == *'Edit tool'* ]]
+  done
+}
+
+@test "allows read-only perl and -M/-I flags" {
+  for cmd in "perl -ne 'print if /x/' f.txt" "perl -MList::Util=sum -le 'print 1'" "perl -Ilib -e 'print 1'" "git log | perl -pe 's/a/b/'"; do
+    run "$HOOK" <<< "$(bash_input "$cmd")"
+    [ -z "$output" ]
+  done
+}

@@ -1,8 +1,8 @@
 #!/bin/bash
 # Pre-hook: block Bash commands that read secrets out of .env / .dev.vars files,
 # ask before a read out of a secret store (keychain, 1Password, cloud secret
-# managers, Vault), and deny rg invocations using short -r ("recursive" typo;
-# it's actually --replace).
+# managers, Vault), deny in-place `perl -i` edits (use Edit), and deny rg
+# invocations using short -r ("recursive" typo; it's actually --replace).
 #
 # This is the sole surviving rule from a larger anti-pattern hook. The rest
 # (cd-chain, loops, $(...), head/sed reads, bunx, backslash-whitespace, etc.)
@@ -225,6 +225,25 @@ if [[ "$CMD" =~ $SECRET_STORE_READ_RE ]]; then
   }'
   exit 0
 fi
+
+# `perl -i` (alone or bundled: -pi, -0pi, -i.bak) edits files in place. Agents
+# reach for it on multi-line rewrites, where escaping old text, new text and
+# shell quoting at once fails often and every retry resends the whole script;
+# Edit takes exact strings. Read-only perl (-ne filters) stays allowed. The
+# flag class skips -M/-I so `-MList::Util` or `-Ilib` is not read as -i.
+# Matched anywhere in the segment so `xargs perl -pi` is caught.
+while IFS= read -r seg; do
+  if [[ "$seg" =~ (^|[[:space:]])perl[[:space:]] ]] && [[ "$seg" =~ [[:space:]]-[0-9a-hj-zA-HJ-LN-Z]*i ]]; then
+    jq -nc --arg reason "perl -i (in-place edit) is blocked: multi-line perl substitutions break on escaping and cost a full resend per retry. Use the Edit tool for file changes. For a one-line replacement across many files, use: rg -l <pattern> | xargs sed -i '' 's/old/new/g'" '{
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: $reason
+      }
+    }'
+    exit 0
+  fi
+done < <(printf '%s\n' "$CMD_BARE" | sed -E 's/(;|&&|\|\||\|)/\n/g')
 
 # `rg` with short -r (alone or bundled, e.g. -rn): almost always a "recursive"
 # typo — rg is recursive by default and -r is --replace, which silently rewrites
