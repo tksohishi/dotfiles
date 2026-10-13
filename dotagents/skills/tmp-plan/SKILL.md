@@ -5,7 +5,7 @@ description: Write a PRD-style markdown brief into a project's tmp/ capturing th
 
 # tmp-plan
 
-Writes `<project>/tmp/<YYYY-MM-DD>-<slug>.md`. The document is the input to a later decision or implementation session, often in a fresh context, so it has to stand on its own: whoever reads it was not in this conversation.
+Writes `<project>/tmp/<YYYY-MM-DD>-<slug>.md`. The document is the input to a later decision or implementation session, often in a fresh context, so it has to stand on its own: whoever reads it was not in this conversation. Its frontmatter is what `/prioritize` ranks it by.
 
 The weight is on what is known, not what to build. Solutions get the least space: a session's proposed fix is the part most likely to be wrong and the easiest to redo, while a measurement, a ruled-out path or a user decision is expensive to rediscover.
 
@@ -22,6 +22,28 @@ Write from evidence, not recollection:
 - Review the whole session: what was asked, what was measured or read, what was tried and dropped, what the user decided. Decisions made in conversation exist nowhere else.
 - Re-open the sources a fact rests on (output files under `tmp/`, code paths, docs, URLs already fetched) where they are still at hand, and copy numbers from them rather than from memory.
 - If the transcript and a re-check disagree, the re-check wins; note the discrepancy if it matters.
+
+## Frontmatter
+
+The file opens with a YAML block that holds its state. A later `/prioritize` run reads this block and `git log` on the paths it names and nothing else, so everything that decides whether the brief is done, half done, open or waiting, and where it ranks, has to be here, not only in the body.
+
+```yaml
+---
+status: open            # open | partial | waiting | done
+goal: <one line: what the brief is for and why it matters to the project's goal>
+touches: [scripts/foo/main.ts, lib/bar.ts]   # the code paths the open work would change; git log on these is the shipped check
+open:
+  - <one line per item still to do, concrete enough to start from; numbered like the body's problems>
+waiting: <only with status waiting: the event, date or user decision it waits on>
+shipped: []             # <hash> <what it covered>, filled in as work lands
+---
+```
+
+Rules:
+- `touches` names real paths at the granularity of the work (a file when one file changes, a directory when the work spans it). A brief about a decision with no code yet names the paths the decision would land in. Verify each path exists (`ls`).
+- `open` is the list a fresh session could start from: one item per line, an action with its object, not a question. Questions go in the body's Open questions. A brief with nothing startable is `waiting`, with the trigger named.
+- `goal` is written against the project's stated goal (its AGENTS.md or CLAUDE.md), so the ranking does not have to re-derive the link.
+- A new brief is never `done` or `partial`; those are set by `/prioritize` or by the session that ships the work.
 
 ## Content
 
