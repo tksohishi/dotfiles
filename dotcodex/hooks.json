@@ -36,6 +36,10 @@
           {
             "type": "command",
             "command": "$HOME/.codex/hooks/env-example-secrets.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/git-explicit-paths.sh"
           }
         ]
       }
