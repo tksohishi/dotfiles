@@ -20,15 +20,11 @@ Read the project's goal once, from the overview or goal section of its instructi
 
 ## 2. Read the state, cheaply
 
-For every brief in scope:
+Run `~/.agents/skills/prioritize/scripts/state.sh [project-root]` once. It prints each brief's frontmatter and the number of commits on its `touches` paths since the brief's date, and never a body.
 
-```
-sed -n '1{/^---$/!q;};2,/^---$/p' tmp/<file>.md     # the frontmatter alone; prints nothing when line 1 is not a fence
-```
-
-- Empty output means no frontmatter: put it on the retrofit list.
-- A frontmatter with `status: done` is a leftover from a run that did not finish: trash it now.
-- For the rest, check what shipped on its paths since its date (the date is the filename prefix): `git log --oneline --since=<date> -- <touches>`, subjects only. Zero commits on the touched paths and `status: open` means still open; no further reading. Any commit means the `open` items may have moved: put the brief on the recheck list.
+- `no-frontmatter`: put it on the retrofit list.
+- `status: done` is a leftover from a run that did not finish: trash it now.
+- `commits-since: 0` with `status: open` means still open; no further reading. Any commit means the `open` items may have moved: put the brief on the recheck list. `n/a` (no `touches`) goes to the retrofit list.
 
 Never read a brief's body in the main session. The body is facts and measurements for whoever implements it; the frontmatter is the state, and if the state is wrong the fix is a retrofit, not a read.
 
@@ -38,14 +34,14 @@ Hand the retrofit and recheck lists to subagents, about eight briefs each, all l
 
 - the list of briefs and today's date;
 - read-only rules: `cat`, `sed`, `rg`, `fd`, `git log`, `git show`; no edits, no commits, no scripts that touch a network;
-- the job per brief: read it whole, find what shipped (`git log --oneline --since=<date> -- <paths it names>`, plus a subject search on its keywords, plus the current code at the symbols it names), and write one file per brief into the session scratchpad holding the frontmatter fields (`status`, `goal`, `touches`, `shipped`, `open`, `waiting`) plus an `evidence:` line with the file:line or hash behind the status;
+- the job per brief: read it whole, find what shipped (commits since its date on the paths it names, a subject search on its keywords, and the current code at the symbols it names), and write one file per brief into the session scratchpad holding the frontmatter fields (`status`, `goal`, `touches`, `shipped`, `open`, `waiting`) plus an `evidence:` line with the file:line or hash behind the status;
 - a reply under 200 words: one line per brief and anything it was unsure about.
 
-Integrate from the files, not the replies. Spot-check before applying: every hash an agent calls shipped exists (`git cat-file -e <hash>^{commit}`; a hash from another repo, such as dotfiles, is checked there) and its subject matches the claim; a `done` verdict gets one `rg` on the doc's main symbol. An agent that could not decide leaves the brief `open` with a note; a wrong `done` loses a brief, a wrong `open` costs one more read next time.
+Integrate from the files, not the replies. Spot-check before applying: every hash an agent calls shipped exists (in its own repo, which may not be this one) and its subject matches the claim; a `done` verdict gets one search for the doc's main symbol. An agent that could not decide leaves the brief `open` with a note; a wrong `done` loses a brief, a wrong `open` costs one more read next time.
 
 ## 4. Clean up
 
-- `done`: `trash tmp/<file>.md`. The findings live in the commits it named; if a body holds a measurement nothing else records (a probe result, a ruled-out path with its evidence), move that paragraph to the project's docs or a memory first, then trash.
+- `done`: trash it (`trash`, not `rm`). The findings live in the commits it named; if a body holds a measurement nothing else records (a probe result, a ruled-out path with its evidence), move that paragraph to the project's docs or a memory first, then trash.
 - `partial`, `open`, `waiting`: write the frontmatter (replace the old block or insert one above the title) with the new `status`, `shipped` and `open` lists. The body stays; it is history and evidence. Edit a body line only where it now contradicts the frontmatter in a way that would mislead the implementer (an item the body still proposes that a commit ruled out).
 - A brief whose `open` items are all covered by another brief is folded: its unique facts move into the other, and it is trashed. An item that two briefs both list is kept in one and the other points at it.
 - A handoff left in `tmp/` by a previous session (the kind the `handoff` skill writes) is not a plan: its open items become a brief if they would otherwise be lost, then it is trashed.
