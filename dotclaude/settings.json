@@ -1018,5 +1018,5 @@
       "routine under scripts/, dotclaude/, dotagents/, dotcodex/ prefixes within /Users/takeshi/.dotfiles is standard maintenance work for this repo"
     ]
   },
-  "autoCompactWindow": 400000
+  "idleCompaction": false
 }
