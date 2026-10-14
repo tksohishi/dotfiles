@@ -234,7 +234,7 @@ fi
 # Matched anywhere in the segment so `xargs perl -pi` is caught.
 while IFS= read -r seg; do
   if [[ "$seg" =~ (^|[[:space:]])perl[[:space:]] ]] && [[ "$seg" =~ [[:space:]]-[0-9a-hj-zA-HJ-LN-Z]*i ]]; then
-    jq -nc --arg reason "perl -i (in-place edit) is blocked: multi-line perl substitutions break on escaping and cost a full resend per retry. Use the Edit tool for file changes. For a one-line replacement across many files, use: rg -l <pattern> | xargs sed -i '' 's/old/new/g'" '{
+    jq -nc --arg reason "perl -i (in-place edit) is blocked: multi-line perl substitutions break on escaping and cost a full resend per retry. Use the Edit tool for file changes. For a one-line replacement across many files, use gsed (GNU sed: \\b and \\w work, -i takes no ''): rg -l <pattern> | xargs gsed -i 's/\\bold\\b/new/g'. BSD sed silently ignores \\b." '{
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
         permissionDecision: "deny",

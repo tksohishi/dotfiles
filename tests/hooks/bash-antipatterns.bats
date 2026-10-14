@@ -483,6 +483,7 @@ bash_input() {
     run "$HOOK" <<< "$(bash_input "$cmd")"
     [[ "$output" == *'"permissionDecision":"deny"'* ]]
     [[ "$output" == *'Edit tool'* ]]
+    [[ "$output" == *'xargs gsed -i'* ]]
   done
 }
 
