@@ -26,6 +26,6 @@ for f in "$root"/tmp/[0-9][0-9][0-9][0-9]-*.md; do
   date=$(basename "$f" | cut -c1-10)
   # word splitting on $touches is intended: one path per word
   # shellcheck disable=SC2086
-  n=$(git -C "$root" log --oneline --since="$date" -- $touches | wc -l | tr -d ' ')
+  n=$(git -C "$root" log --oneline --since="$date 00:00" -- $touches | wc -l | tr -d ' ')
   echo "commits-since: $n"
 done
