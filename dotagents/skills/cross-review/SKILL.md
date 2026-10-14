@@ -1,6 +1,6 @@
 ---
 name: cross-review
-description: Shell out to the OTHER LLM agent for an adversarial second-opinion review of work the current session has produced. From Claude → invoke OpenAI Codex (`codex exec`); from Codex → invoke Claude (`claude -p`). The prompt is composed fresh per invocation — project context, the user's actual goal, what was produced, and risk categories specific to this project's domain. Use when the user says "/cross-review", "/codex-review", "/claude-review", "cross review", "コーデックスでチェック", "クロードでチェック", "別の LLM で review", or before committing/publishing work where errors are costly (financial claims, security-sensitive code, API contracts, public-facing copy, anything irreversible). The reviewer's job is to catch errors from first principles, not rubber-stamp "done".
+description: Shell out to the OTHER LLM agent for an adversarial second-opinion review of work the current session has produced. From Claude → invoke OpenAI Codex (`codex exec`); from Codex → invoke Claude (`claude -p`). The prompt is composed fresh per invocation — project context, the user's actual goal, what was produced, and risk categories specific to this project's domain. Every review challenges the design direction against alternatives, hunts edge cases, and audits test coverage, aiming at the details earlier agents missed. Use when the user says "/cross-review", "/codex-review", "/claude-review", "cross review", "コーデックスでチェック", "クロードでチェック", "別の LLM で review", or before committing/publishing work where errors are costly (financial claims, security-sensitive code, API contracts, public-facing copy, anything irreversible). The reviewer's job is to catch errors from first principles, not rubber-stamp "done".
 ---
 
 # Cross Review
@@ -56,9 +56,17 @@ For UI / visual / generated-image work, **point to the rendered artifact** (PNG,
 
 For long outputs (drafts, specs, posts), do not paste the whole content into the prompt — tell the reviewer the path and have it `Read` the file itself. Pasting bloats the prompt and the reviewer's read of the live file is more authoritative anyway.
 
+Also list what has already been reviewed or verified this session (subagent reviews, `/code-review`, tests run, sources fetched). The reviewer skips that ground and digs for what those passes missed.
+
 ### Step 3 — Pick risk categories
 
-Pick the **2-5** most relevant categories for this project. Don't enumerate all of them — a 7-section adversarial prompt produces a 5000-word review that wastes context. Tailor.
+Three lenses go into every prompt; they are the reason to bring in a second model:
+
+- **Design direction and alternatives**: is this the right approach at all? Name 1-2 concrete alternatives (simpler, more conventional, or already used elsewhere in the repo) and say when each beats the chosen one. Question the premise: does the change solve the stated problem, or a symptom of it?
+- **Edge cases**: empty / huge / malformed input, concurrency and re-entry, partial failure and retries, first run vs. upgrade, platform and locale differences, interactions with existing features. Each one names the concrete input or state and the resulting behavior.
+- **Test coverage**: which behaviors of the change have no test, which tests would still pass if the code were wrong, which edge cases above lack a test. Name the missing test cases, not just "add tests".
+
+Add **1-3** project-specific categories on top. Don't enumerate all of them — a 7-section adversarial prompt produces a 5000-word review that wastes context. Tailor.
 
 Common categories (pick what fits):
 
@@ -67,7 +75,6 @@ Common categories (pick what fits):
 - **Factual accuracy** — claims about products / prices / rates / specs / API behavior. Demand source citations (issuer page > aggregator > blog).
 - **API contracts** — breaking changes vs prior version, schema drift, missing migration, version skew
 - **Performance** — O(n²) hot paths, N+1 queries, memory leaks, unnecessary network calls, missing pagination
-- **Tests** — missing coverage of the change, brittle/over-mocked tests, tests that pass when the code is wrong
 - **Documentation** — stale docs, README mismatches code, missing examples, undocumented breaking change
 - **Style / convention** — code patterns inconsistent with rest of the codebase (read 2-3 sibling files first)
 - **UX** — error messages, edge cases, accessibility, regressions in the golden path
@@ -80,7 +87,7 @@ If the project has known historical failure modes (past incidents, recurring bug
 
 ### Step 4 — Assemble the prompt
 
-Use this skeleton. Substitute the bracketed sections with what you found in Steps 1-3. Keep the whole prompt under ~2KB; long prompts dilute the reviewer's focus. The Run section passes it to the reviewer via a quoted heredoc — no intermediate file.
+Use this skeleton. Substitute the bracketed sections with what you found in Steps 1-3. Keep the whole prompt under ~3KB; long prompts dilute the reviewer's focus. The Run section passes it to the reviewer via a quoted heredoc — no intermediate file.
 
 ```
 You are auditing work produced by another AI assistant ({CURRENT_ASSISTANT}) for the {PROJECT_NAME} project.
@@ -106,8 +113,25 @@ would {COST WHAT — readers' money, security incident, broken API consumers,
 regulatory fine, etc.}. Be adversarial. If a claim cannot be verified from
 the cited source, flag it.
 
-{2-5 RISK SECTIONS picked in Step 3, each with 3-6 specific things to check.
-Tailor wording to project — do not copy generic boilerplate.}
+## Already reviewed
+{What earlier passes covered (subagent reviews, /code-review, tests run,
+verified sources). Do not repeat their findings; look for what they missed,
+especially in the details.}
+
+## Design direction and alternatives
+{Is this the right approach? Name 1-2 concrete alternatives and when each
+would win. Does the change fix the actual problem or a symptom?}
+
+## Edge cases
+{3-6 project-specific edge cases to probe. For each issue found, give the
+concrete input/state and the resulting wrong behavior.}
+
+## Test coverage
+{Which changed behaviors and edge cases have no test; which tests would pass
+if the code were wrong. Name the missing test cases.}
+
+{1-3 project-specific RISK SECTIONS from Step 3, each with 3-6 specific
+things to check. Tailor wording to project — do not copy generic boilerplate.}
 
 ## Known traps for this project
 {Optional. List historical failures if AGENTS.md or commit history surfaces them.
