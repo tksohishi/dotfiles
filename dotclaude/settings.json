@@ -1017,5 +1017,6 @@
       "**Org-specific CLIs**: None configured — repo uses personal-workflow CLIs (gog, hermes, tg, agent-browser, ctx7, mise, trash, fd, http/httpie, bats) per CLAUDE.md conventions, not org-internal tools",
       "routine under scripts/, dotclaude/, dotagents/, dotcodex/ prefixes within /Users/takeshi/.dotfiles is standard maintenance work for this repo"
     ]
-  }
+  },
+  "autoCompactWindow": 400000
 }
