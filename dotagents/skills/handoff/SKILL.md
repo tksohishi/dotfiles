@@ -35,7 +35,7 @@ TaskStop is Claude Code only; in Codex, record the tasks without stopping them.
 
 ## Keep it compact
 
-The next session pays for every line, and so does the session writing it. One line per fact, no prose paragraphs, no restating what a pointer already holds. Quote only the decisive line of an error or command output, not the whole dump. Compact does not mean dropping entries: every ruled-out hypothesis still gets its line.
+The next session pays for every line, and so does the session writing it. One line per fact, never hard-wrapped mid-sentence, no prose paragraphs, no restating what a pointer already holds. Quote only the decisive line of an error or command output, not the whole dump. Compact does not mean dropping entries: every ruled-out hypothesis still gets its line.
 
 ## Document structure
 
