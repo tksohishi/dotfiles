@@ -1,18 +1,18 @@
 ---
 name: prioritize
-description: Rank the plan documents under a project's tmp/ (the tmp-plan briefs) against what has shipped since and the project's stated goal, clean up the ones that are done or half done, and present the user one ranked list of what to decide or start next. Use when the user runs /prioritize [project], asks 次何やる / 優先順位をつけて / tmp の plan を整理して, or asks which of the pending plans to pick up.
+description: Rank the plan documents under a project's tmp/plans/ (the tmp-plan briefs) against what has shipped since and the project's stated goal, clean up the ones that are done or half done, and present the user one ranked list of what to decide or start next. Use when the user runs /prioritize [project], asks 次何やる / 優先順位をつけて / tmp の plan を整理して, or asks which of the pending plans to pick up.
 ---
 
 # prioritize
 
-Reads `tmp/<YYYY-MM-DD>-<slug>.md` (the briefs `tmp-plan` writes), decides for each whether it is done, half done, open or waiting, cleans up accordingly, and ranks what is left. The output is a decision aid for the user, not a plan of record: nothing is started.
+Reads `tmp/plans/<YYYY-MM-DD>-<slug>.md` (the briefs `tmp-plan` writes), decides for each whether it is done, half done, open or waiting, cleans up accordingly, and ranks what is left. The output is a decision aid for the user, not a plan of record: nothing is started.
 
 The cost driver is reading. A brief carries its state in a frontmatter block (the schema is in `tmp-plan`), so the main session reads frontmatter and git subjects only; a brief without one is retrofitted by a subagent once and then costs the same as the rest.
 
 ## Where it runs
 
 - No argument: the current project root (`git rev-parse --show-toplevel`, else cwd). Argument: a path, or a bare name under `~/work/<name>`. If it does not resolve, ask.
-- Scope is `tmp/[0-9][0-9][0-9][0-9]-*.md`. Other files under `tmp/` (scripts, outputs, traces, handoffs) are not plans; they are read only when a frontmatter names one as evidence.
+- Scope is `tmp/plans/*.md`. Other files under `tmp/` (scripts, outputs, traces, handoffs) are not plans; they are read only when a frontmatter names one as evidence.
 
 ## 1. The goal
 

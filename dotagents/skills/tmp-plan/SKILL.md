@@ -1,19 +1,19 @@
 ---
 name: tmp-plan
-description: Write a PRD-style markdown brief into a project's tmp/ capturing the goal, problems to solve, and what this session researched and discussed, weighted toward verified facts and research results rather than solutions. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
+description: Write a PRD-style markdown brief into a project's tmp/plans/ capturing the goal, problems to solve, and what this session researched and discussed, weighted toward verified facts and research results rather than solutions. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
 ---
 
 # tmp-plan
 
-Writes `<project>/tmp/<YYYY-MM-DD>-<slug>.md`. The document is the input to a later decision or implementation session, often in a fresh context, so it has to stand on its own: whoever reads it was not in this conversation. Its frontmatter is what `/prioritize` ranks it by.
+Writes `<project>/tmp/plans/<YYYY-MM-DD>-<slug>.md`. The document is the input to a later decision or implementation session, often in a fresh context, so it has to stand on its own: whoever reads it was not in this conversation. Its frontmatter is what `/prioritize` ranks it by.
 
 The weight is on what is known, not what to build. Solutions get the least space: a session's proposed fix is the part most likely to be wrong and the easiest to redo, while a measurement, a ruled-out path or a user decision is expensive to rediscover.
 
 ## Where it goes
 
-- No project argument: `tmp/` under the current working directory's project root (`git rev-parse --show-toplevel`, else cwd).
+- No project argument: `tmp/plans/` under the current working directory's project root (`git rev-parse --show-toplevel`, else cwd).
 - Project argument: an absolute or relative path, or a bare name resolved under `~/work/<name>`. If it doesn't resolve to an existing directory, ask rather than guess.
-- Create `tmp/` if missing (it is globally gitignored). Filename: `date +%F` plus a short kebab-case slug of the topic. If that file exists, pick a different slug; never overwrite.
+- Create `tmp/plans/` if missing (`tmp/` is globally gitignored). Filename: `date +%F` plus a short kebab-case slug of the topic. If that file exists, pick a different slug; never overwrite.
 
 ## Ground it first
 
@@ -63,7 +63,7 @@ Sections, in this order, dropping any that would be empty:
 
 Label anything not verified this session as unverified and name what would settle it; don't present inference as fact.
 
-Load the `humanizer` skill before drafting and apply it. No em dashes.
+No em dashes.
 
 ## After writing
 
