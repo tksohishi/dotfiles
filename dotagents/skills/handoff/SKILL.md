@@ -48,29 +48,22 @@ One-shot handoff: re-ground claims against git/live state before acting on them;
 What the overall task is and what "done" looks like.
 
 ## Current state
-Verified working-tree state (from git status/diff), what works, what is
-confirmed broken. Note uncommitted changes explicitly.
+Verified working-tree state (from git status/diff), what works, what is confirmed broken. Note uncommitted changes explicitly.
 
 ## Ruled out
-Each hypothesis already tried, with the evidence that killed it —
-verbatim error messages, not paraphrases. This is the section whose loss
-makes a fresh session re-try dead ends; be exhaustive here.
+Each hypothesis already tried, with the evidence that killed it: the decisive error line verbatim, not a paraphrase. This is the section whose loss makes a fresh session re-try dead ends; be exhaustive here.
 
 ## Repro / verify
-Exact commands to reproduce the problem or verify progress, with their
-current output.
+Exact commands to reproduce the problem or verify progress, with their current output.
 
 ## Background tasks
-Stopped tasks with their restart command; tasks left running with task id
-and output file.
+Stopped tasks with their restart command; tasks left running with task id and output file.
 
 ## Next step
-The single concrete next action, plus any decisions the user already made
-that constrain it.
+The single concrete next action, plus any decisions the user already made that constrain it.
 
 ## Pointers
-Related artifacts by path or URL (plan files, issues, PRs, design docs).
-Reference, don't duplicate — content already captured elsewhere stays there.
+Related artifacts by path or URL (plan files, issues, PRs, design docs). Reference, don't duplicate; content already captured elsewhere stays there.
 ```
 
 Omit sections that genuinely don't apply (e.g. "Ruled out" for a non-debugging handoff), but never thin out "Ruled out" when it does apply.
