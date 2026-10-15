@@ -24,6 +24,19 @@ Write from verified state, not recollection. Before writing:
 
 If the transcript's memory of something conflicts with what these show, the commands win.
 
+## Background tasks
+
+Background tasks (`run_in_background` Bash, Monitor, Agent) survive `/clear`, and their notifications wake the next session, which has no context for them. List every running task and for each either:
+
+- TaskStop it and record the command that restarts it, or
+- leave it running only when the next session needs its result, and record its task id and output file so the notification is expected.
+
+TaskStop is Claude Code only; in Codex, record the tasks without stopping them.
+
+## Keep it compact
+
+The next session pays for every line, and so does the session writing it. One line per fact, no prose paragraphs, no restating what a pointer already holds. Quote only the decisive line of an error or command output, not the whole dump. Compact does not mean dropping entries: every ruled-out hypothesis still gets its line.
+
 ## Document structure
 
 ```markdown
@@ -46,6 +59,10 @@ makes a fresh session re-try dead ends; be exhaustive here.
 ## Repro / verify
 Exact commands to reproduce the problem or verify progress, with their
 current output.
+
+## Background tasks
+Stopped tasks with their restart command; tasks left running with task id
+and output file.
 
 ## Next step
 The single concrete next action, plus any decisions the user already made
