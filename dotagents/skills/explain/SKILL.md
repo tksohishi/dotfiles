@@ -25,7 +25,6 @@ Do not explain from memory of the topic name. Read the actual thing:
 - Write captions and prose "80% of the way to ASD-STE100" (Simplified Technical English): short sentences (about 20 words max), one idea per sentence, active voice, present tense, one meaning per word, common words over rare ones. Skip the spec's strict approved-word list.
 - Tone: direct, a little casual, no "fellow kids" energy, no exclamation-mark enthusiasm.
 - Few words per screen. A paragraph past four lines gets cut or turned into a picture.
-- The body explains how the thing works. Supporting facts, numbers, sources and how decisions were reached go in collapsed `<details>` blocks or footnotes, not inline.
 
 ## Step 3: format
 

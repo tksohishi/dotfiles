@@ -41,7 +41,6 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
 - No self-attribution stamps: never mark facts or decisions that came from the user with name/date attributions like "(Name, Aug 2026)" or "(Name's drafts, Jul 21)" in any file (instruction files, prep docs, notes). State them as plain facts. Attribute only external sources where provenance matters (e.g. "(Source: <person>, Jul 16 call)").
 - Keep documents current-state: describe things as they are now, with no or minimal historical context. No "previously", "as of <date>", "since X changed", "updated <date>" clauses, no changelog narration inside docs; history lives in git. Exception: documents whose subject IS history (retros, incident timelines, transcripts, dated logs).
-- Artifacts and other pages for humans: the body explains how the thing works (the mechanism, the flow, what to do). Supporting facts, numbers, sources and how decisions were reached go in collapsed `<details>` blocks or footnotes, not inline.
 
 ## 日本語の注意点
 - 人称は一人称「私」、二人称（you）「あなた」で統一
