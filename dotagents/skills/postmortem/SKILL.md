@@ -39,7 +39,7 @@ The session that caused the incident is the worst narrator of it. Build the time
 2. **Prevent**: stop recurrence. Follow the enforcement hierarchy: a deterministic fix first (PreToolUse hook, permission rule, wrapper script, pre-commit check, test, config constraint), then a skill or command edit, and memory or AGENTS.md only when the behavior has no detectable signature. Say why a softer option was chosen when it is.
 3. **Detect**: make a recurrence visible sooner (a check in a recurring skill, a test, a statusline or log signal), for the case where prevention misses.
 
-Every item names the file or system it changes, and where possible a `check` shell command that exits 0 while the item is still unresolved, so its state can be re-verified later without rereading the document.
+Every item names the file or system it changes.
 
 ## Document
 
@@ -51,8 +51,6 @@ Frontmatter:
 ---
 date: 2026-10-16          # when the incident happened
 severity: medium          # high: data loss, security, or effect outside the machine; medium: broken workflow needing manual recovery; low: near miss, caught before harm
-status: open              # done once every action item is done
-touches: [dotagents/hooks/foo.sh]   # paths the action items change; verify each exists or is to be created
 ---
 ```
 
@@ -64,7 +62,7 @@ Sections, in order, dropping empty ones:
 4. **Root cause**: the why chain, ending at the changeable cause.
 5. **Contributing factors**
 6. **What went well / where we got lucky**
-7. **Action items**: a table with phase, action, where, check, status (`open`, or `done <hash>`).
+7. **Action items**: a table with phase, action, where, and the commit hash when it landed in this session.
 8. **References**: commits, logs, files, transcript paths.
 
 ## Review
@@ -73,4 +71,4 @@ For medium or high severity, run `/cross-review` on the root cause and action it
 
 ## After writing
 
-Reply with the clickable path (`[name](file:///abs/path)`), the one-line root cause and the open action items, then ask which to implement now. Don't implement prevent or detect items before the user picks. Commit the document per the project's commit rules. When an item lands, set its status to `done <hash>`, and set the frontmatter `status: done` once none are open.
+The document is a record, not a tracker: it is not reopened to tick items off. Reply with the clickable path (`[name](file:///abs/path)`), the one-line root cause and the action items, then ask which to implement now. Don't implement prevent or detect items before the user picks. Items implemented in this session get their commit hash in the table before the document is committed (per the project's commit rules). Work left for later goes to a `/tmp-plan` brief, which is where to-do work is tracked and then removed.
