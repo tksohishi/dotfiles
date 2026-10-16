@@ -204,6 +204,7 @@ When the reviewer returns:
 5. **Verify reviewer-cited URLs before accepting them.** Either model can hallucinate sources. If the reviewer says "the issuer page says X", fetch the page and confirm. If the URL 404s or doesn't say what was cited, treat that finding as uncertain.
 6. If BLOCKERs are valid, fix before reporting the work as done. Do not commit / publish until resolved.
 7. If you disagree with the reviewer, say why — don't auto-capitulate. The reviewer's verdict is not the last word; you remain responsible for the output.
+8. Apply findings you agree with that fix a detail (an edge case, a missing test, a wrong number) without asking, one summary line each. Put a finding to the user only when it is contentious: you disagree with it, or it would change the direction, design or scope rather than a detail. Ask with AskUserQuestion (Codex: a plain question), one question per contentious finding: quote the reviewer's point verbatim, then your position and the trade-off, with the reviewer's fix and yours as the options. A reviewer who misread the plan is the case this catches, so don't paraphrase their point into agreement.
 
 ## Notes
 
