@@ -13,6 +13,7 @@
 - When asked for your opinion (e.g. "what do you think?", "would it make sense to ~?"), explain your reasoning first and wait for approval before making edits
 - When a blocker forces a workaround (missing login/creds, blocked API, broken tool), report it and propose a durable fix the first time — don't silently re-pay the workaround each iteration
 - (Claude Code) In plan mode, before presenting the final plan (ExitPlanMode), run `/cross-review` on the draft plan and address the feedback first
+- (Claude Code) Plans have two sections. `## Design`: the direction and the changes in behavior, in plain terms, with no file, function or method names. `## Implementation`: the concrete steps, one line each (file and change), with no rationale already given in Design.
 - (Claude Code) When the user interrupts plan approval (ExitPlanMode) with a question, answer it and state explicitly whether the plan changed — do NOT re-invoke ExitPlanMode in the same turn; wait for their go or use AskUserQuestion if a real decision emerged
 - (Claude Code) When the auto-mode classifier blocks an action twice, ask the user to approve it via `/permissions` → Recently denied → `r`, or to approve it in chat naming the specific target; don't suggest running it with `!`
 
