@@ -151,8 +151,17 @@ if [ -n "$model" ]; then
   [ -n "$effort" ] && model_part+=" ${dim}${effort}${reset}"
 fi
 
+# -- Next /loop wakeup (written by hooks/loop-wakeup-state.sh) --
+wake_part=""
+wake_file="$HOME/.claude/state/wakeups/$(echo "$input" | jq -r '.session_id // empty')"
+if [ -f "$wake_file" ]; then
+  wake_at=$(cat "$wake_file")
+  [ "$wake_at" -gt "$now" ] 2>/dev/null && wake_part="⏰ $(date -r "$wake_at" +%H:%M)"
+fi
+
 # -- Assemble --
 sections=()
+[ -n "$wake_part" ] && sections+=("$wake_part")
 [ -n "$git_part" ] && sections+=("$git_part")
 [ -n "$ctx_part" ] && sections+=("$ctx_part")
 [ -n "$rate_part" ] && sections+=("$rate_part")

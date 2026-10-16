@@ -736,6 +736,16 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "ScheduleWakeup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/loop-wakeup-state.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
