@@ -1,6 +1,6 @@
 ---
 name: tmp-plan
-description: Write a PRD-style markdown brief into a project's tmp/plans/ capturing the goal, problems to solve, and what this session researched and discussed, weighted toward verified facts and research results rather than solutions. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
+description: Write a PRD-style markdown brief into a project's tmp/plans/ (updating a relevant existing brief instead when one exists, and trashing relevant ones already done) capturing the goal, problems to solve, and what this session researched and discussed, weighted toward verified facts and research results rather than solutions. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
 model: opus
 ---
 
@@ -15,6 +15,18 @@ The weight is on what is known, not what to build. Solutions get the least space
 - No project argument: `tmp/plans/` under the current working directory's project root (`git rev-parse --show-toplevel`, else cwd).
 - Project argument: an absolute or relative path, or a bare name resolved under `~/work/<name>`. If it doesn't resolve to an existing directory, ask rather than guess.
 - Create `tmp/plans/` if missing (`tmp/` is globally gitignored). Filename: `date +%F` plus a short kebab-case slug of the topic. If that file exists, pick a different slug; never overwrite.
+
+## Find existing briefs first
+
+A new brief is the last resort. Two briefs on one topic split the facts and leave `/prioritize` ranking the same work twice.
+
+1. Read only the frontmatter of every brief in `tmp/plans/` (`goal`, `status`, `touches`, `open`), not the bodies.
+2. A brief is relevant when its `goal` covers the same problem or its `touches` overlap the paths this session's work would change.
+3. Relevant and still open: update that brief in place instead of writing a new one. Merge this session's facts, results and decisions into its sections, rewrite `open` to match what is still to do, and keep its filename. Read its body now, since you are editing it.
+4. Relevant but done (`status: done`, or every `open` item covered by commits on its `touches` since its date, per `git log`): trash it (`trash`, not `rm`). If its body holds a measurement or ruled-out path nothing else records, carry it into the brief being written first.
+5. Write a new brief only when no relevant open brief exists, or when this session's topic is a separate goal that would make an existing brief about two things.
+
+Leave unrelated briefs alone; sweeping the whole directory is `/prioritize`'s job.
 
 ## Ground it first
 
@@ -68,4 +80,4 @@ No em dashes.
 
 ## After writing
 
-Reply with the clickable path (`[name](file:///abs/path)`) and a one-line summary of what it covers. Don't paste the document into the chat.
+Reply with the clickable path (`[name](file:///abs/path)`), whether it was created or updated, a one-line summary of what it covers, and any brief trashed with the reason in a few words. Don't paste the document into the chat.
