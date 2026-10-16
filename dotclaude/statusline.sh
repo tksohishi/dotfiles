@@ -161,11 +161,11 @@ fi
 
 # -- Assemble --
 sections=()
-[ -n "$wake_part" ] && sections+=("$wake_part")
 [ -n "$git_part" ] && sections+=("$git_part")
 [ -n "$ctx_part" ] && sections+=("$ctx_part")
 [ -n "$rate_part" ] && sections+=("$rate_part")
 [ -n "$model_part" ] && sections+=("$model_part")
+[ -n "$wake_part" ] && sections+=("$wake_part")
 
 out=""
 for i in "${!sections[@]}"; do
