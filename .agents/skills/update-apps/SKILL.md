@@ -1,6 +1,7 @@
 ---
 name: update-apps
 description: Update all Homebrew packages and casks, and check for Mac App Store updates
+model: opus
 ---
 
 ## Run state

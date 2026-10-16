@@ -1,6 +1,7 @@
 ---
 name: gmail-draft
 description: Create Gmail drafts via gog using an HTML body to avoid plain-text wrapping at ~78 chars that breaks lines mid-sentence. Use when drafting any Gmail message (reply or new) with multi-paragraph or bulleted content. Always drafts for user review; does not send.
+model: opus
 ---
 
 # Gmail Draft

@@ -1,6 +1,7 @@
 ---
 name: examine-video
 description: Examine a video file (screen recording, demo, capture) by splitting it into frames and visually reviewing them against the user's question. Use whenever asked to check, review, verify, or describe the contents of a video file.
+model: opus
 ---
 # Examine a video
 

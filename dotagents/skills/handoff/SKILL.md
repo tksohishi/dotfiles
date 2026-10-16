@@ -1,6 +1,7 @@
 ---
 name: handoff
 description: Write a one-shot handoff file (tmp/handoff.md) capturing session state so the user can /clear and continue in a fresh session without losing debugging progress. Use when the user runs /handoff or asks to hand off, wrap up for a fresh session, or preserve state before clearing. Optional argument describes what the next session will focus on.
+model: opus
 disable-model-invocation: true
 ---
 

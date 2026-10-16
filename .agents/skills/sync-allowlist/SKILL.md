@@ -1,6 +1,7 @@
 ---
 name: sync-allowlist
 description: Sync command allowlist from Claude Code into Codex
+model: opus
 ---
 
 Sync command allowlist from `~/.dotfiles/dotclaude/settings.json` into Codex.

@@ -1,6 +1,7 @@
 ---
 name: create-project-skill
 description: Scaffold a project-local skill at .agents/skills/<name>/ (the cross-agent canonical location) and symlink it into .claude/skills/<name> so both Codex (native .agents discovery) and Claude Code (the symlink) find it. Use when adding a new project-scoped skill.
+model: opus
 ---
 
 # create-project-skill

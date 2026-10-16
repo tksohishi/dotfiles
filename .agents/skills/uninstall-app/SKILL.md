@@ -1,6 +1,7 @@
 ---
 name: uninstall-app
 description: Uninstall an app via Homebrew and remove it from the Brewfile
+model: opus
 ---
 
 The user wants to uninstall: $ARGUMENTS

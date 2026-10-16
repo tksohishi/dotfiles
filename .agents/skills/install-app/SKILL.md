@@ -1,6 +1,7 @@
 ---
 name: install-app
 description: Install an app via Homebrew and add it to the Brewfile
+model: opus
 ---
 
 The user wants to install: $ARGUMENTS

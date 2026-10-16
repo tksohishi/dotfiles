@@ -1,6 +1,7 @@
 ---
 name: audit-apps
 description: Audit installed apps against the Brewfile and suggest changes
+model: opus
 ---
 
 Audit the current machine's installed packages against the Brewfile at `~/.dotfiles/Brewfile`.

@@ -1,6 +1,7 @@
 ---
 name: tmp-plan
 description: Write a PRD-style markdown brief into a project's tmp/plans/ capturing the goal, problems to solve, and what this session researched and discussed, weighted toward verified facts and research results rather than solutions. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
+model: opus
 ---
 
 # tmp-plan

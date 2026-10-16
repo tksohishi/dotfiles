@@ -1,6 +1,7 @@
 ---
 name: command-permissions
 description: Manage Claude Code Bash permissions (allow, ask, deny) for a given command
+model: opus
 ---
 
 The user wants to manage permissions for: $ARGUMENTS

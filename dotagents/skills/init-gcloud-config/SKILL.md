@@ -1,6 +1,7 @@
 ---
 name: init-gcloud-config
 description: Give the current project its own isolated gcloud config directory (account, project, zone) selected automatically by mise via CLOUDSDK_CONFIG. Use when the user runs /init-gcloud-config, asks to set up gcloud for this project, or wants gcloud to use a specific Google account, project, or VM here without affecting other directories.
+model: opus
 ---
 
 ## What this does

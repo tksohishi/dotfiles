@@ -1,6 +1,7 @@
 ---
 name: install-skill
 description: Discover and install an agent skill via bunx skills add -g, then track it in dotagents/skills.txt for new-machine reproducibility
+model: opus
 ---
 
 The user wants to install a skill, given: $ARGUMENTS

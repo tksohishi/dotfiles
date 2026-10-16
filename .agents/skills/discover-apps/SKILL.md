@@ -1,6 +1,7 @@
 ---
 name: discover-apps
 description: Find new Mac tools worth installing
+model: opus
 ---
 
 Search the web for new and trending Mac tools, with a focus on developer tools used alongside AI coding agents (Claude Code, Codex, etc.). Filter out what's already installed and present the top 3 worth trying.

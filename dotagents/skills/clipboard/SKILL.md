@@ -1,6 +1,7 @@
 ---
 name: "clipboard"
 description: "Copy text to clipboard"
+model: opus
 ---
 
 Use this skill when the user asks to run `/clipboard`.

@@ -1,6 +1,7 @@
 ---
 name: keepalive
 description: Keep the current session's prompt cache warm through the end of the day (or an earlier deadline) by scheduling minimal pings on a 50-minute interval. Use when the user runs /keepalive [duration|until HH:MM|stop], or says "keep the session alive", "keep the cache warm", "I'll be back in N hours". Claude Code only (uses /loop); refuses when the transcript shows a 5-minute cache TTL (usage credits).
+model: opus
 ---
 
 Cache economics: a ping re-reads the cached prefix at the cache-read price and refreshes the 1-hour TTL; letting it expire costs a full cache write on the next real message (80x a read on Fable 5.1, 20x on Fable 5). Worth it only when the user will actually come back, and only on the 1-hour TTL.

@@ -1,6 +1,7 @@
 ---
 name: init-agents
 description: Initialize a new project with AGENTS.md. Use when the user runs /init-agents or asks to bootstrap a project's agent instructions file from scratch (templates for both empty projects and existing codebases, plus linter setup for code-based projects and the initial commit).
+model: opus
 ---
 
 # init-agents

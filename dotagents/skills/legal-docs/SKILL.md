@@ -1,6 +1,7 @@
 ---
 name: legal-docs
 description: Prepare Terms of Use, Privacy Policy, and related legal documents for the current project if not present yet, using the CC0 General-Legal/legal-templates as the base and a scope interview before drafting. Use when the user asks for terms of service/use, privacy policy, cookie notice, NDA, DPA, or "legal docs" for a project or product launch.
+model: opus
 ---
 
 # legal-docs

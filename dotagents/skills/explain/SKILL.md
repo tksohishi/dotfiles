@@ -1,6 +1,7 @@
 ---
 name: explain
 description: Explain a topic, piece of code, error, or decision to a smart 15-year-old as a visual HTML artifact with big pictures and few words. Use when the user runs /explain <topic>, or asks for an ELI15 / plain-language / intuitive explanation, "break this down", "dumb it down", or "explain this to me like I'm new to this".
+model: opus
 ---
 
 Explain the subject in `$ARGUMENTS` (or, with no argument, the thing this session has been working on) to a curious 15-year-old: smart, reads quickly, knows nothing about this field. No prior jargon assumed; no condescension either.

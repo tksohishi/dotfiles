@@ -1,6 +1,7 @@
 ---
 name: launchd-setup
 description: Set up a macOS launchd LaunchAgent for unattended scheduled jobs that must run on a specific Mac (residential IP, local cookies/credentials, logged-in CLI sessions, locally-installed tools). NOT for in-session reminders (use CronCreate) and NOT for cloud-hosted recurring agents (use built-in /schedule). Use when the job needs an always-on Mac and its environment intact.
+model: opus
 ---
 
 # launchd-setup

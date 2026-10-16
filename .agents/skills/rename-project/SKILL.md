@@ -1,6 +1,7 @@
 ---
 name: rename-project
 description: Rename another project completely — folder, GitHub repo, and all local agent state keyed to its old path or name (Claude Code project dir and memory, ~/.claude.json, Codex trust, mise trust, agent-browser session, in-repo name references). Run from this dotfiles session, never from a session inside the target project. Use when the user asks to rename a project, repo, or project folder.
+model: opus
 ---
 
 The user wants to rename: $ARGUMENTS
