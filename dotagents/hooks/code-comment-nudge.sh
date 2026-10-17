@@ -16,7 +16,7 @@ esac
 PRAGMA='^[[:space:]]*(#!|# -\*-|# (noqa|type:|shellcheck|pyright:|pragma|fmt:)|// ?(@ts-|eslint|biome-ignore|prettier-ignore|swiftlint:|go:|nolint|/ ?<reference))'
 
 NEW=$(echo "$TOOL_INPUT" | jq -r '.tool_input.new_string // .tool_input.content // empty')
-OLD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.old_string // empty')
+OLD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.old_string // .tool_response.originalFile // empty')
 
 full_count() {
   local block=''

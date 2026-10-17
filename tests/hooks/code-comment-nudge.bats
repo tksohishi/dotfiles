@@ -46,6 +46,12 @@ write_input() {
   [ -z "$output" ]
 }
 
+@test "Write overwrite counts against the original file" {
+  input=$(jq -n '{tool_name: "Write", tool_input: {file_path: "/p/a.ts", content: "// one\n// two\nconst a = 2;\n"}, tool_response: {type: "update", originalFile: "// one\n// two\nconst a = 1;\n"}}')
+  run "$HOOK" <<< "$input"
+  [ -z "$output" ]
+}
+
 @test "ignores shebang and pragmas" {
   run "$HOOK" <<< "$(write_input /p/a.sh $'#!/bin/bash\n# shellcheck disable=SC2034\nx=1\n')"
   [ -z "$output" ]
