@@ -1,10 +1,10 @@
 #!/bin/sh
-# Print each tmp/ brief's frontmatter and the commit count on its `touches`
+# Print each tmp/plans/ brief's frontmatter and the commit count on its `touches`
 # paths since the brief's date, without ever printing a body.
 set -eu
 root=${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}
 
-for f in "$root"/tmp/[0-9][0-9][0-9][0-9]-*.md; do
+for f in "$root"/tmp/plans/[0-9][0-9][0-9][0-9]-*.md; do
   [ -e "$f" ] || continue
   echo "== ${f#"$root"/}"
   fm=$(sed -n '1{/^---$/!q;};2,/^---$/p' "$f" | sed '$d')
