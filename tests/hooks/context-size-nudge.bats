@@ -8,10 +8,26 @@ setup() {
   : > "$T"
 }
 
-# append an assistant message whose context totals $1 tokens
+# append an assistant message on model $2 (default Fable) whose context totals $1 tokens
 turn() {
   printf '{"type":"user","message":{"content":"hi"}}\n' >> "$T"
-  printf '{"type":"assistant","message":{"usage":{"input_tokens":10,"cache_read_input_tokens":%d,"cache_creation_input_tokens":0}}}\n' "$(($1 - 10))" >> "$T"
+  printf '{"type":"assistant","message":{"model":"%s","usage":{"input_tokens":10,"cache_read_input_tokens":%d,"cache_creation_input_tokens":0}}}\n' "${2:-claude-fable-5-1}" "$(($1 - 10))" >> "$T"
+}
+
+@test "silent past 300K on a non-Fable model" {
+  turn 350000 claude-opus-5-5
+  prompt o1
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "fires after a /model switch from Opus to Fable" {
+  turn 350000 claude-opus-5-5
+  prompt o2
+  [ -z "$output" ]
+  turn 360000
+  prompt o2
+  jq -e '.systemMessage | test("360K")' <<< "$output"
 }
 
 prompt() {

@@ -1,18 +1,21 @@
 #!/bin/bash
-# UserPromptSubmit: once the main context passes 300K tokens, and again at each
+# UserPromptSubmit: once a Fable main context passes 300K tokens, and again at each
 # further 100K, show the user its size and have the agent offer a /handoff into
 # a fresh session at the next task boundary. Every request re-reads the whole
 # context, so a long session pays its full size on every turn. Size is the last
 # assistant message's input + cache read + cache write tokens. The band resets
 # when the context shrinks (compaction), so re-growing past 300K fires again.
+# The model check runs before the band is stored so a /model switch to Fable fires.
 
 INPUT=$(cat)
 T=$(echo "$INPUT" | jq -r '.transcript_path // empty')
 SID=$(echo "$INPUT" | jq -r '.session_id // empty')
 [ -f "$T" ] && [ -n "$SID" ] || exit 0
 
-ctx=$(tail -n 200 "$T" | jq -r 'select(.type == "assistant" and .message.usage) | .message.usage | (.input_tokens // 0) + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0)' 2>/dev/null | tail -n 1)
-[ -n "$ctx" ] || exit 0
+last=$(tail -n 200 "$T" | jq -r 'select(.type == "assistant" and .message.usage) | "\(.message.model // "") \(.message.usage | (.input_tokens // 0) + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0))"' 2>/dev/null | tail -n 1)
+model=${last% *}
+ctx=${last##* }
+[ -n "$ctx" ] && [[ "$model" == *fable* ]] || exit 0
 
 band=$((ctx / 100000))
 state="$TMPDIR/claude-context-nudge-$SID"
