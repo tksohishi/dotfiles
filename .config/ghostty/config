@@ -16,3 +16,6 @@ shell-integration-features = cursor,sudo,no-title
 # Shift+Enter for Claude Code inside tmux (Ghostty native support skips /terminal-setup)
 keybind = shift+enter=text:\x1b\r
 
+
+# Never use fullscreen; let Cmd+Enter reach the app instead
+keybind = super+enter=unbind
