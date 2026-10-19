@@ -35,7 +35,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 - Never add personal or machine-specific info (device names/UDIDs, signing teams, one user's install workflow, quirks of this Mac). Litmus test: would the line hold for a collaborator on another machine? If not, it goes to project memory, not AGENTS.md.
 
 ## Writing Style
-- Before writing any prose document for humans (docs, reports, README sections, emails, announcements; not code or commit messages), load the `humanizer` skill and apply it while drafting; don't ship a first draft with AI tells (inflated openers, rule-of-three, negative parallelisms, "delve"-class vocabulary, vague attributions)
+- Before writing any prose document for humans (docs, reports, README sections, PR descriptions, emails, announcements; not code, commit messages or chat replies), load the `prose` skill and apply it while drafting; don't ship a first draft with AI tells
 - Avoid using emdashes in writing
 - Avoid using the section sign `§` in writing meant for humans; it reads as an AI artifact. Use the word "Section", "see", or drop the marker.
 - Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)

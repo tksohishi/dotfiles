@@ -43,7 +43,7 @@ Every item names the file or system it changes.
 
 ## Document
 
-Load the `humanizer` skill before drafting. Write in the language the session was conducted in. This is a history document, so dated narration is expected. No em dashes.
+Load the `prose` skill before drafting. Write in the language the session was conducted in. This is a history document, so dated narration is expected. No em dashes.
 
 Frontmatter:
 
