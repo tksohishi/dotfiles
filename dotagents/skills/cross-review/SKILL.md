@@ -142,6 +142,11 @@ Skip if nothing specific.}
 - Do not retry the same URL more than 2 times. If a source 403s twice, note
   the failure and move on.
 - Do not re-verify facts already labeled VERIFIED in this prompt.
+- Read narrowly; every byte of command output fills your context. Start
+  diffs with `git diff --stat`, then `git diff -- <path>` per file. Read
+  files in ranges (`sed -n 'A,Bp'`, ~80 lines at a time) found via
+  `rg -n`, never `cat` or `nl -ba` several files at once. Bound searches
+  with `rg -l`, `-m N`, `--max-columns 200`, or `| head`.
 
 ## Output format
 
