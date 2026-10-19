@@ -9,6 +9,12 @@ for arg in "$@"; do
     case "$arg" in
         --skip-brew) SKIP_BREW=true ;;
         --skip-macos) SKIP_MACOS=true ;;
+        -h|--help)
+            echo "Usage: $(basename "$0") [--skip-brew] [--skip-macos]"
+            echo "  --skip-brew   skip Homebrew install and Brewfile bundle"
+            echo "  --skip-macos  skip macOS defaults (macos.sh)"
+            exit 0
+            ;;
     esac
 done
 
