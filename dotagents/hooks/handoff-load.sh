@@ -1,17 +1,26 @@
 #!/bin/bash
-# SessionStart: load tmp/handoff.md (written by the handoff skill) into a
+# SessionStart: load the handoff file (written by the handoff skill) into a
 # session started fresh after /clear or launch, then trash it so the one-shot
 # handoff can't be loaded twice. Resume, compact and fork keep their own
 # history, so they leave the file alone.
-f="tmp/handoff.md"
-# A session that wrote the file by hand may have dated the name
-# (tmp/handoff-2026-10-09.md, 10/9): fall back to the newest tmp/handoff*.md.
-[ -f "$f" ] || f=$(ls -t tmp/handoff*.md 2>/dev/null | head -1)
-[ -n "$f" ] && [ -f "$f" ] || exit 0
 case "$(jq -r '.source // empty' 2>/dev/null)" in
   clear | startup) ;;
   *) exit 0 ;;
 esac
+# The skill names the file tmp/handoff-<CLAUDE_PID>.md, and /clear keeps the
+# same claude process, so several sessions in one directory each get their own.
+f="tmp/handoff-$CLAUDE_PID.md"
+if [ -z "$CLAUDE_PID" ] || [ ! -f "$f" ]; then
+  # A handoff whose writer is still running belongs to that session's /clear.
+  f=""
+  for c in $(ls -t tmp/handoff*.md 2>/dev/null); do
+    pid=$(basename "$c" .md | sed -n 's/^handoff-\([0-9][0-9]*\)$/\1/p')
+    [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null && continue
+    f="$c"
+    break
+  done
+fi
+[ -n "$f" ] && [ -f "$f" ] || exit 0
 mtime=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$f")
 # additionalContext is model-only; systemMessage shows the user the title plus
 # one line each for Goal and Next step, cut to 80 chars: Claude Code prefixes

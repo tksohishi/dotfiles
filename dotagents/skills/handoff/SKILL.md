@@ -1,13 +1,13 @@
 ---
 name: handoff
-description: Write a one-shot handoff file (tmp/handoff.md) capturing session state so the user can /clear and continue in a fresh session without losing debugging progress. Use when the user runs /handoff or asks to hand off, wrap up for a fresh session, or preserve state before clearing. Optional argument describes what the next session will focus on.
+description: Write a one-shot handoff file (tmp/handoff-<CLAUDE_PID>.md) capturing session state so the user can /clear and continue in a fresh session without losing debugging progress. Use when the user runs /handoff or asks to hand off, wrap up for a fresh session, or preserve state before clearing. Optional argument describes what the next session will focus on.
 model: opus
 disable-model-invocation: true
 ---
 
 # Handoff
 
-Writes `tmp/handoff.md` (project-local `tmp/`, globally gitignored — never the OS temp dir). Loading is not this skill's job: the `handoff-load.sh` SessionStart hook injects the file into the next session started by `/clear` or a fresh launch, trashes it, and tells that session to re-ground, salvage memory and continue.
+Writes `tmp/handoff-$CLAUDE_PID.md` (project-local `tmp/`, globally gitignored — never the OS temp dir); run `echo $CLAUDE_PID` to get the number. The PID survives `/clear`, so parallel sessions in one directory each load only their own file. Codex has no `CLAUDE_PID`: write `tmp/handoff.md` there. Loading is not this skill's job: the `handoff-load.sh` SessionStart hook injects the file into the next session started by `/clear` or a fresh launch, trashes it, and tells that session to re-ground, salvage memory and continue.
 
 The reason this exists instead of `/compact`: generic summaries drop exactly the state that makes long debugging arcs expensive to resume — what was already ruled out, and the evidence that ruled it out. Write those sections with the most care.
 
@@ -43,7 +43,7 @@ The next session pays for every line, and so does the session writing it. One li
 ```markdown
 # Handoff — <one-line topic> (<YYYY-MM-DD HH:MM>)
 
-One-shot handoff: re-ground claims against git/live state before acting on them; if this file is still on disk, trash it (`trash tmp/handoff.md`) after reading.
+One-shot handoff: re-ground claims against git/live state before acting on them; if this file is still on disk, trash it (`trash <this file>`) after reading.
 
 ## Goal
 What the overall task is and what "done" looks like.
