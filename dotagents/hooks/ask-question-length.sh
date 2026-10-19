@@ -3,7 +3,7 @@
 # background goes in the response body and the dialog carries only the choice.
 # Previews are exempt: mockups and code comparisons are meant to be long.
 
-MAX=150
+MAX=100
 
 LONG=$(jq -r --argjson max "$MAX" '
   [.tool_input.questions[]? |
