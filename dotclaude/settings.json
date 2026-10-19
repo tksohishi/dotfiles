@@ -742,6 +742,15 @@
           }
         ],
         "matcher": "ExitPlanMode"
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/ask-question-length.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
