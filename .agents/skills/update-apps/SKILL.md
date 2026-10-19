@@ -32,7 +32,7 @@ After printing the report, write the exact same markdown to `.cache/update-apps/
 
 Run every update operation inside a subagent so the verbose command output stays out of the main context. The main session only reads/writes state, runs the `open_items` checks, picks the "new & noteworthy" entries, and assembles the report from the summaries the subagents return.
 
-Launch the four subagents below as unnamed one-shot Agent calls **in a single message** so they run concurrently — they touch disjoint tools. Subagents can't see this skill, so copy each block's instructions (including the rationale text) into its prompt verbatim, and tell each to return only a bounded summary: the lists the report needs plus any errors verbatim, never full command output.
+Launch the five subagents below as unnamed one-shot Agent calls **in a single message** so they run concurrently — they touch disjoint tools. Subagents can't see this skill, so copy each block's instructions (including the rationale text) into its prompt verbatim, and tell each to return only a bounded summary: the lists the report needs plus any errors verbatim, never full command output.
 
 ### Homebrew subagent
 
@@ -84,6 +84,12 @@ Cover new features, breaking changes, settings/hooks schema changes, and notable
 
 Run `mas outdated`. Return pending updates (app id, name, current → new version), or "none". If any exist, the main session reports them in the `### 🍎 Mac App Store` section with a note to run `mas upgrade` (it requires a password). Informational only — never add them to `open_items`; if the user leaves one pending, the next run's `mas outdated` will surface it again on its own.
 
+### prose upstream subagent
+
+The `prose` skill is a hand-distilled merge of upstream skills, so their improvements don't arrive by install. Include the repository root path in its prompt. It reads the table in `dotagents/skills/prose/UPSTREAM.md` (repo, distilled paths, synced commit) and, for each row, compares the synced commit with `git ls-remote <repo> HEAD`. For each repo that moved, it clones into `tmp/prose-upstream/<repo-name>` with `--filter=blob:none` (or fetches if already there) and reads `git diff <synced>..origin/HEAD -- <paths>`. Return per repo either "unchanged" or, in under 200 words, the changes that would matter to a distilled copy: new or removed patterns, changed rules, new exceptions that prevent over-editing, plus the new HEAD commit. Skip wording-only edits, version bumps, tests, and scripts.
+
+The main session reports moved repos in `### ✍️ prose upstream` as 🟡 items, ending with a note to say "prose に取り込んで" to integrate. Never add them to `open_items`; an unsynced repo resurfaces on its own next run. Integrating means editing `dotagents/skills/prose/` by hand and setting the row's synced commit and date to the reviewed HEAD; when the user reviews the changes and declines them, still advance the row so they aren't reported again.
+
 ## What to report
 
 Brewfile packages only. Transitive deps are omitted unless they had a **major version bump**, in which case surface them as informational. Also report Brewfile entries that were newly installed because they were missing locally. For each upgraded package, briefly note any notable changes (deprecations, breaking changes, new features) from the Homebrew subagent's summary. Warn that upgraded GUI apps may need a relaunch if they were running.
@@ -104,6 +110,7 @@ Structure the report as sections with the emojis below. Section headers are orga
 - `### ⚙️ mise tools` — mise-managed tool upgrades
 - `### 🤖 Claude Code` — include current version in the header, e.g. `### 🤖 Claude Code (2.1.148)`
 - `### 🍎 Mac App Store` — pending mas updates (informational; never persisted to `open_items`)
+- `### ✍️ prose upstream` — upstream changes to humanizer/yomiyasu not yet distilled into `prose`
 - `### 🧹 Cleanup` — cache pruning and `brew cleanup` results
 - `### ✨ New & noteworthy` — interesting new formulae/casks
 
