@@ -64,6 +64,15 @@ if git diff --cached --name-only -- "${install_inputs[@]}" | grep -q .; then
     fi
 fi
 
+# ── 1d. prose skill size budget: each file stays at 150 lines or fewer ────
+for f in $(git diff --cached --name-only --diff-filter=ACM -- dotagents/skills/prose/ | grep '\.md$' | grep -v 'UPSTREAM\.md$'); do
+    lines=$(git show ":$f" | wc -l | tr -d ' ')
+    if [ "$lines" -gt 150 ]; then
+        echo "pre-commit: $f has $lines lines (cap 150). Merge or cut an existing item before adding one." >&2
+        fail=1
+    fi
+done
+
 # ── 2. Personal/private info scan in public agent-config dirs ─────────────
 SENSITIVE_DIRS="dotagents/ dotclaude/ dotcodex/"
 

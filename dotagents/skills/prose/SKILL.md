@@ -1,6 +1,6 @@
 ---
 name: prose
-description: Rules for writing and editing prose meant for human readers, in English or Japanese, so it reads as plain human writing without AI tells and without changing what it says. Use before drafting or revising any docs, reports, README sections, PR descriptions, emails, announcements or Google Docs, and when asked to review text for AI tells, humanize it, 推敲して, AIっぽさを消して or 自然な日本語に直して. Not for code, code comments, commit messages, or conversational chat replies.
+description: Rules for writing and editing prose meant for human readers, in English or Japanese, so it reads as plain human writing without AI tells and without changing what it says. Use before drafting or revising any docs, reports, README sections, PR descriptions, emails, Slack posts, announcements or Google Docs, and when asked to review text for AI tells, humanize it, 推敲して, AIっぽさを消して or 自然な日本語に直して. Not for code, code comments, commit messages, or conversational chat replies.
 ---
 
 # prose
@@ -14,6 +14,8 @@ Two jobs share one set of rules: drafting new text, and editing text someone els
 - Mixed text: read both, and apply each to its own language.
 
 Read only what applies. The patterns are signs to check, not a ban list: a pattern only justifies an edit when it actually hurts the sentence in front of you.
+
+The Writing Style and 日本語の注意点 sections of the global AGENTS.md also apply, and win on conflict. The patterns target the user's own writing (docs, reports, PRs, emails, Slack); there are no rules for fiction or promotional copy.
 
 ### Preserve meaning on four axes
 
@@ -41,7 +43,7 @@ The only sources are the original text, the request, provided material, and the 
 Over-editing is the main failure mode. Fix only the spots where you can name the problem.
 
 - Keep idioms that predate AI (if you'd find the phrase in pre-2022 human writing, it stays).
-- Keep deliberate writer voice: an essay's metaphors, a novel's rhythm, a promo piece's enthusiasm.
+- Keep deliberate writer voice: a metaphor whose point is clear, a rhythm the writer chose.
 - Keep lists whose items are genuinely parallel (independent changes, steps, owner/result pairs). Don't flatten them into paragraphs just because lists look AI-ish.
 - Keep negations that carry meaning (correcting a likely misreading).
 - Keep the register: plain/polite (常体/敬体) and formal/casual don't change unless asked.
@@ -62,3 +64,17 @@ Editing someone's text:
 4. Add at most 2 questions for things you couldn't resolve (an unclear referent, an unknown source, a claim you left as written because fixing it would change its meaning).
 
 Never put editorial notes inside the text itself: no "(needs confirmation)", 【要確認】, or inline comments. Notes go in the list after the text. If the user asked for the text only, return just the text.
+
+### Second opinion
+
+When the user asks for one, or the text is public-facing and a meaning change would be costly, run the `cross-review` skill. Give the reviewer the source text, the result, and the path of the language file you used, and ask for three things: meaning changes on the four axes, AI tells that remain, and edits that weren't needed.
+
+### Learning from corrections
+
+When the user rejects an edit, rewrites your text, or points out an AI tell you missed, update this skill in the same turn, not memory:
+
+- A missed tell becomes a pattern, or a line under an existing one.
+- A rejected edit becomes a 残す/keep exception under the pattern that caused it.
+- A preference that isn't about AI tells goes to the global AGENTS.md instead; propose it there.
+
+Write one line with a short example rewritten in generic terms (no real names or data). Each file in this skill except `UPSTREAM.md` stays at 150 lines or fewer, enforced by the repo's pre-commit hook. At the cap, merge or generalize an existing item before adding one; a narrow exception that never recurred is the first thing to cut.
