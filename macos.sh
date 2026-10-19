@@ -65,6 +65,10 @@ defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
 # even during an Amphetamine session — system stays awake, display doesn't.
 defaults write com.if.Amphetamine "Allow Display Sleep" -bool true
 
+# ── QLMarkdown ───────────────────────────────────────────────
+# Settings live in the App Group suite, not ~/Library/Preferences
+defaults write "$HOME/Library/Group Containers/group.org.sbarex.qlmarkdown/Library/Preferences/group.org.sbarex.qlmarkdown" baseFontSize -float 10
+
 # ── Text cursor input source indicator ───────────────────────
 # Disable the floating "あ/A" badge that appears next to the cursor when
 # switching input source (added in macOS 14 Sonoma, still present in Tahoe).
