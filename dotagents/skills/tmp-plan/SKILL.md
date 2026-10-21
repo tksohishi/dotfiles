@@ -1,6 +1,6 @@
 ---
 name: tmp-plan
-description: Write a PRD-style markdown brief into a project's tmp/plans/ (updating a relevant existing brief instead when one exists, and trashing relevant ones already done) capturing the goal, problems to solve, and what this session researched and discussed, weighted toward verified facts and research results rather than solutions. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
+description: Write a short problem brief into a project's tmp/plans/ (updating a relevant existing brief instead when one exists, and trashing relevant ones already done) holding the goal, the problems, what was measured or considered about each (or the doc that already has it) and a one-line direction per problem, with no implementation detail and no code references. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
 model: opus
 ---
 
@@ -8,7 +8,7 @@ model: opus
 
 Writes `<project>/tmp/plans/<YYYY-MM-DD>-<slug>.md`. The document is the input to a later decision or implementation session, often in a fresh context, so it has to stand on its own: whoever reads it was not in this conversation. Its frontmatter is what `/prioritize` ranks it by.
 
-The weight is on what is known, not what to build. Solutions get the least space: a session's proposed fix is the part most likely to be wrong and the easiest to redo, while a measurement, a ruled-out path or a user decision is expensive to rediscover.
+The weight is on what is known, not what to build. Solutions get the least space: a session's proposed fix is the part most likely to be wrong and the easiest to redo, while a measurement, a ruled-out path or a user decision is expensive to rediscover. The brief is short: problems, the evidence on each, a direction. Implementation detail and code references are not in it (see Content).
 
 ## Where it goes
 
@@ -62,19 +62,23 @@ Rules:
 
 Write in the language the session was conducted in. Times in the user's local zone (e.g. `10/12 13:30 EDT`). Title states the question or topic, with the date.
 
+The brief is a problem statement with its evidence, not a design. It holds three things: the problems, what was measured or considered about each (or a pointer to the doc that already holds it), and a one-line direction per problem. The implementation (which function, which file, which line, how the change is built, what the tests cover) is left out entirely: it is the implementing session's to work out from the code, and it is the part most often wrong by the time the brief is picked up. Code is referenced only by behaviour ("the plan refuses a trip whose worst loss passes the cap"), never by path or line; the `touches` list in the frontmatter is the one place a code path appears.
+
+Length: a brief is read before a decision, so it fits on one screen or two, about 40 lines of body and under 600 words. When the material is larger, the measurements go to a file under `tmp/<topic>/` or a `docs/` page and the brief carries the figures that decide and a pointer. A fact already in `docs/` is a one-line reference to that doc, not a restatement.
+
 Sections, in this order, dropping any that would be empty:
 
-1. **Goal**: what the user is trying to achieve and why, in their terms. Two to four lines.
-2. **Problems to solve**: the concrete problems standing between now and the goal, each stated as an observable symptom or gap with its impact (what breaks, how often, what it costs), not as a fix. Numbered so later sections and sessions can refer to them.
-3. **Facts**: verified findings, each with its source (file:line, command, URL, measurement file) and, for anything time-sensitive, when it was observed. Exact identifiers, numbers and units; no rounding that loses meaning.
-4. **Research results**: measurements and experiments, each with method (where it ran, sample size, conditions), result (min/p50/p90 or the raw counts) and the file holding the raw output. A one-line reading of what the numbers imply may follow each.
-5. **Ruled out**: paths considered and dropped, each with the evidence that ruled it out, so nobody retries them.
-6. **Decisions and constraints**: what the user decided or required during the session, stated as plain facts.
-7. **Open questions**: what is still unknown, each with what would settle it and which problem it bears on.
-8. **Options** (brief): directions mentioned, unranked unless the user ranked them, one or two lines each, tagged with the problem number they address. No implementation detail.
-9. **References**: files, scripts, URLs, commits the reader should open.
+1. **Goal**: what the user is trying to achieve and why, in their terms. One to three lines.
+2. **Problems**: the concrete problems standing between now and the goal, each one or two lines stating the observable symptom and its impact (what breaks, how often, what it costs), not a fix. Numbered so later sections refer to them.
+3. **What was measured and considered**: per problem, the measurements (method in a clause, the deciding figures, the raw file) and the paths considered and dropped with the evidence that dropped them, each a line or two. A fact that lives in a doc is its reference. Time-sensitive readings carry when they were observed.
+4. **Decisions and constraints**: what the user decided or required, as plain facts. One line each.
+5. **Open questions**: what is still unknown, with what would settle it and the problem it bears on. One line each.
+6. **Direction**: one or two lines per problem on the way forward, unranked unless the user ranked them, tagged with the problem number. No mechanism, no code.
+7. **References**: the docs, raw files, URLs and commits the reader should open. Not code paths.
 
 Label anything not verified this session as unverified and name what would settle it; don't present inference as fact.
+
+Before writing, cut: any sentence that explains how the code works today, any sentence that describes how a fix would be built, any file:line, any number that does not change a decision, and any restatement of something a doc already says.
 
 No em dashes.
 
