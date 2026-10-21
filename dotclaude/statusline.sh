@@ -159,6 +159,60 @@ if [ -f "$wake_file" ]; then
   [ "$wake_at" -gt "$now" ] 2>/dev/null && wake_part="⏰ $(date -r "$wake_at" +%H:%M)"
 fi
 
+# -- Next cron fire (written by hooks/cron-state.sh) --
+cron_part=""
+cron_next=""
+cron_rep=""
+cron_jobs=0
+for f in "$HOME/.claude/state/crons/$(echo "$input" | jq -r '.session_id // empty')"/*; do
+  [ -f "$f" ] || continue
+  read -r fire recurring created offset minutes < "$f"
+  next=""
+  if [ "$recurring" = "true" ]; then
+    [ $(( created + 7 * 86400 )) -gt "$now" ] || continue
+    if [ "$fire" -gt "$now" ]; then
+      next=$fire
+    elif [ -n "$minutes" ]; then
+      base=$(( now - offset ))
+      in_hour=$(( base % 3600 ))
+      m_next=""
+      for m in $minutes; do
+        [ $(( m * 60 )) -gt "$in_hour" ] && { m_next=$m; break; }
+      done
+      [ -n "$m_next" ] || m_next=$(( ${minutes%% *} + 60 ))
+      next=$(( base - in_hour + m_next * 60 + offset ))
+    fi
+  else
+    [ "$fire" -gt "$now" ] || continue
+    next=$fire
+  fi
+  cron_jobs=$(( cron_jobs + 1 ))
+  if [ -n "$next" ] && { [ -z "$cron_next" ] || [ "$next" -lt "$cron_next" ]; }; then
+    cron_next=$next
+    cron_rep=""
+    if [ "$recurring" = "true" ]; then
+      cron_rep="↻"
+      set -- $minutes
+      if [ $# -gt 0 ]; then
+        gap=$(( ${2:-$(( $1 + 60 ))} - $1 ))
+        prev=$1 even=1
+        for m in "$@"; do
+          [ "$m" -ne "$prev" ] && [ $(( m - prev )) -ne "$gap" ] && even=0
+          prev=$m
+        done
+        [ $(( $1 + 60 - prev )) -ne "$gap" ] && [ $# -gt 1 ] && even=0
+        [ "$even" = 1 ] && { [ "$gap" -eq 60 ] && cron_rep+="1h" || cron_rep+="${gap}m"; }
+      fi
+    fi
+  fi
+done
+if [ "$cron_jobs" -gt 0 ]; then
+  cron_part="🕐 "
+  [ -n "$cron_next" ] && cron_part+="$(date -r "$cron_next" +%H:%M)" || cron_part+="↻"
+  [ -n "$cron_rep" ] && cron_part+=" ${dim}${cron_rep}${reset}"
+  [ "$cron_jobs" -gt 1 ] && cron_part+=" ${dim}+$(( cron_jobs - 1 ))${reset}"
+fi
+
 # -- Assemble --
 sections=()
 [ -n "$git_part" ] && sections+=("$git_part")
@@ -166,6 +220,7 @@ sections=()
 [ -n "$rate_part" ] && sections+=("$rate_part")
 [ -n "$model_part" ] && sections+=("$model_part")
 [ -n "$wake_part" ] && sections+=("$wake_part")
+[ -n "$cron_part" ] && sections+=("$cron_part")
 
 out=""
 for i in "${!sections[@]}"; do

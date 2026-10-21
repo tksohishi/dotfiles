@@ -775,6 +775,16 @@
         ]
       },
       {
+        "matcher": "CronCreate|CronDelete",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/cron-state.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
