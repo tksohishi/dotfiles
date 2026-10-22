@@ -208,7 +208,7 @@ jq -Rsc '{event:"user",message:{content:[{type:"text",text:.}]}}' tmp/cross-revi
   > tmp/cross-review/argon.ndjson
 ```
 
-4. Read the result with `jq -r 'select(.event=="result") | .result | .status, .response' tmp/cross-review/argon.ndjson`. An empty `response` is a failed run even when `status` is `SUCCESS` (a refused tool call ends the turn silently); check `select(.event=="step_update") | .step_update | select(.state=="ERROR")` for the cause and report it, don't retry blindly.
+4. Read the result with `jq -r 'select(.event=="result") | .result | .status, .response' tmp/cross-review/argon.ndjson`. An empty `response` is a failed run even when `status` is `SUCCESS` (a refused tool call ends the turn silently); check `select(.event=="step_update") | .step_update | select(.state=="ERROR")` for the cause and report it, don't retry blindly. Re-run the step 1 quota check; the drop is `argon_quota_used` for the step 9 log.
 
 ### Branch-agnostic guardrails (apply to both)
 
@@ -228,6 +228,11 @@ When the reviewer returns:
 6. If BLOCKERs are valid, fix before reporting the work as done. Do not commit / publish until resolved. A BLOCKER whose fix would change the direction, design or scope goes to the user first, per step 8.
 7. If you disagree with the reviewer, say why — don't auto-capitulate. The reviewer's verdict is not the last word; you remain responsible for the output.
 8. Apply findings you agree with that fix a detail (an edge case, a missing test, a wrong number) without asking, one summary line each. Put a finding to the user only when it is contentious: you disagree with it, or it would change the direction, design or scope rather than a detail. Steps 2-4 go out as reply text first, listing every contentious finding with its evidence and your position; a question never stands in for that list, since the user cannot pick between options whose findings they have not seen. Then ask with AskUserQuestion (Codex: a plain question), one question per contentious finding (AskUserQuestion takes at most 4 per call): quote the reviewer's point verbatim, then your position and the trade-off, with the reviewer's fix and yours as the options. A reviewer who misread the plan is the case this catches, so don't paraphrase their point into agreement.
+9. Log one line per reviewer to `~/.local/state/cross-review/log.jsonl` (create the directory if missing) once findings are settled, after the user's answers to any step 8 questions, so reviewers can be compared across projects later. Counts come from your step 4 judgments; `unique_accepted` is accepted findings no other reviewer raised (the strongest signal, since you are grading reviews whose fixes you own), `user_overrode` is step 8 answers where the user sided against your position. Leave `argon_quota_used` null for other reviewers.
+
+```bash
+jq -nc '{date: (now | todate), project: "<repo dir name>", reviewer: "codex", model: "<model>", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, unique_accepted: 0, user_overrode: 0, seconds: 0, argon_quota_used: null}' >> ~/.local/state/cross-review/log.jsonl
+```
 
 ## Notes
 
