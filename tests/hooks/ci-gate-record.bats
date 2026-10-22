@@ -27,6 +27,7 @@ make_input() { jq -nc --arg cwd "$REPO" --arg cmd "$1" '{session_id:"sid-1",cwd:
   [ "$status" -eq 0 ]
   [ "$(jq -r .sha "$CLAUDE_CI_GATE_DIR/sid-1.json")" = "$SHA" ]
   [ "$(jq -r .blocks "$CLAUDE_CI_GATE_DIR/sid-1.json")" = "0" ]
+  [ "$(jq -r '.pushedAt | type' "$CLAUDE_CI_GATE_DIR/sid-1.json")" = "number" ]
 }
 
 @test "matches a push inside a && chain" {

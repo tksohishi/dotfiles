@@ -8,6 +8,12 @@ setup() {
   export PATH="$BATS_TEST_TMPDIR/bin:$PATH"
   export CI_GATE_WAIT_INTERVAL=0 CI_GATE_WAIT_MAX=0
   MARKER="$CLAUDE_CI_GATE_DIR/sid-1.json"
+  fake_actions_status operational
+}
+
+fake_actions_status() {
+  printf '#!/usr/bin/env bash\necho %s\n' "'{\"components\":[{\"name\":\"Actions\",\"status\":\"$1\"}]}'" > "$BATS_TEST_TMPDIR/bin/curl"
+  chmod +x "$BATS_TEST_TMPDIR/bin/curl"
 }
 
 # Fake gh: each `gh run list` call prints the next argument; the last one repeats.
@@ -26,7 +32,7 @@ SH
   chmod +x "$BATS_TEST_TMPDIR/bin/gh"
 }
 gh_calls() { wc -l < "$BATS_TEST_TMPDIR/gh-calls" | tr -d ' '; }
-make_marker() { jq -nc --arg cwd "$BATS_TEST_TMPDIR" --argjson blocks "${1:-0}" '{cwd:$cwd,sha:"abc1234def",blocks:$blocks}' > "$MARKER"; }
+make_marker() { jq -nc --arg cwd "$BATS_TEST_TMPDIR" --argjson blocks "${1:-0}" --argjson at "${2:-$(date +%s)}" '{cwd:$cwd,sha:"abc1234def",blocks:$blocks,pushedAt:$at}' > "$MARKER"; }
 push_workflow() { mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"; printf 'on:\n  push:\n' > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"; }
 input() { echo '{"session_id":"sid-1","stop_hook_active":false}'; }
 
@@ -40,12 +46,30 @@ RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"fa
   [ -z "$output" ]
 }
 
-@test "no runs yet past the wait bound: blocks and keeps the marker" {
+@test "no run past the wait bound: reports CI did not run once and clears the marker" {
   make_marker; push_workflow; fake_gh '[]'
   run "$HOOK" <<< "$(input)"
   [[ "$output" == *'"decision": "block"'* ]]
-  [[ "$output" == *'no Actions runs found yet'* ]]
-  [ -f "$MARKER" ]
+  [[ "$output" == *'GitHub created no Actions run'* ]]
+  [ ! -e "$MARKER" ]
+  run "$HOOK" <<< "$(input)"
+  [ -z "$output" ]
+}
+
+@test "no run long after the push: stops waiting before the wait bound" {
+  make_marker 0 $(( $(date +%s) - 600 )); push_workflow; fake_gh '[]'
+  export CI_GATE_WAIT_MAX=60
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'GitHub created no Actions run'* ]]
+  [ "$(gh_calls)" = "1" ]
+}
+
+@test "no run while Actions is degraded: stops waiting and names the status" {
+  make_marker; push_workflow; fake_gh '[]'; fake_actions_status degraded_performance
+  export CI_GATE_WAIT_MAX=60
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'githubstatus Actions: degraded_performance'* ]]
+  [ "$(gh_calls)" = "1" ]
 }
 
 @test "no runs and no push-triggered workflow: clears the marker silently without waiting" {

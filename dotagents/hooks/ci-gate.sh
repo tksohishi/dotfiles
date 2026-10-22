@@ -52,15 +52,25 @@ if [ "$(echo "$runs" | jq 'length')" = "0" ] && ! has_push_workflow "$cwd"; then
 # pending) or the wait bound is reached. The bound must stay under the hook's
 # timeout in settings.json, or the harness kills the hook and nothing is checked.
 deadline=$(( $(date +%s) + ${CI_GATE_WAIT_MAX:-480} ))
+# No run CI_GATE_NORUN_MAX seconds after the push, or while githubstatus says Actions
+# is not operational, ends the gate with one report: the agent cannot make GitHub create a run.
+pushed_at=$(jq -r '.pushedAt // empty' "$marker"); pushed_at=${pushed_at:-$(stat -f %m "$marker")}
+norun_deadline=$(( pushed_at + ${CI_GATE_NORUN_MAX:-120} ))
+actions_status=$(curl -s -m 5 https://www.githubstatus.com/api/v2/components.json | jq -r '.components[] | select(.name=="Actions") | .status' 2>/dev/null || true)
 while :; do
   [ "$(echo "$runs" | jq 'length')" != "0" ] && [ -z "$(pending_of "$runs")" ] && break
   [ "$(date +%s)" -ge "$deadline" ] && break
+  if [ "$(echo "$runs" | jq 'length')" = "0" ]; then
+    [ "$(date +%s)" -ge "$norun_deadline" ] && break
+    [ -n "$actions_status" ] && [ "$actions_status" != operational ] && break
+  fi
   sleep "${CI_GATE_WAIT_INTERVAL:-15}"
   runs=$(fetch_runs)
 done
 
 if [ "$(echo "$runs" | jq 'length')" = "0" ]; then
-  block "CI gate: no Actions runs found yet for pushed commit $short. Wait ~15s (sleep is blocked; use gh run list --commit $sha) and end the turn again."
+  rm -f "$marker"
+  block "CI gate: GitHub created no Actions run for pushed commit $short in $(( $(date +%s) - pushed_at )) s (githubstatus Actions: ${actions_status:-unknown}). The gate will not wait again for this SHA. Tell the user CI did not run for $short and that the push is unverified by CI; do not poll for it."
 fi
 pending=$(pending_of "$runs")
 if [ -n "$pending" ]; then

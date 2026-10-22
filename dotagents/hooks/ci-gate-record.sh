@@ -42,4 +42,4 @@ if ! git -C "$cwd" branch -r --contains "$sha" 2>/dev/null | grep -q .; then
   [ -f "$dir/$sid.json" ] && [ "$(jq -r '.sha' "$dir/$sid.json")" = "$sha" ] && rm -f "$dir/$sid.json"
   exit 0
 fi
-jq -nc --arg cwd "$cwd" --arg sha "$sha" '{cwd:$cwd, sha:$sha, blocks:0}' > "$dir/$sid.json"
+jq -nc --arg cwd "$cwd" --arg sha "$sha" --argjson at "$(date +%s)" '{cwd:$cwd, sha:$sha, blocks:0, pushedAt:$at}' > "$dir/$sid.json"
