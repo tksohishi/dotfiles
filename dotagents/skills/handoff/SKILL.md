@@ -78,6 +78,6 @@ Write the document in the language the session was mostly conducted in. If the u
 
 ## After writing
 
-Reply with the file path only, in one line. No summary and no `/clear` instructions; the user knows the flow.
+Reply in the conversation's language with two lines: that the handoff was written (with its path), and a one-line summary of what it covers. No `/clear` instructions; the user knows the flow.
 
 The hook is Claude Code only. In Codex, the file's header still directs a session told to "read the handoff" to re-ground and trash it.
