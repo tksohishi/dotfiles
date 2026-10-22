@@ -2,6 +2,7 @@
 name: sync-project-skills
 description: Migrate a project's skills to the cross-agent layout — move each .claude/skills/<name>/ real directory into .agents/skills/<name>/ and replace it with a symlink, so both Codex (native .agents discovery) and Claude Code (the .claude symlink) find them. Also reconciles already-migrated skills. Companion to create-project-skill.
 model: opus
+context: fork
 ---
 
 # sync-project-skills

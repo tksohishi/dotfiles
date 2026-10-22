@@ -2,6 +2,7 @@
 name: agent-browser-init
 description: Initialize agent-browser in the current project with an isolated session and profile directory
 model: opus
+context: fork
 ---
 
 ## What this does
