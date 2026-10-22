@@ -207,9 +207,9 @@ When the reviewer returns:
 3. Group findings: BLOCKERs first, then CONCERNs, then NITs.
 4. For each finding, state whether you agree.
 5. **Verify reviewer-cited URLs before accepting them.** Either model can hallucinate sources. If the reviewer says "the issuer page says X", fetch the page and confirm. If the URL 404s or doesn't say what was cited, treat that finding as uncertain.
-6. If BLOCKERs are valid, fix before reporting the work as done. Do not commit / publish until resolved.
+6. If BLOCKERs are valid, fix before reporting the work as done. Do not commit / publish until resolved. A BLOCKER whose fix would change the direction, design or scope goes to the user first, per step 8.
 7. If you disagree with the reviewer, say why — don't auto-capitulate. The reviewer's verdict is not the last word; you remain responsible for the output.
-8. Apply findings you agree with that fix a detail (an edge case, a missing test, a wrong number) without asking, one summary line each. Put a finding to the user only when it is contentious: you disagree with it, or it would change the direction, design or scope rather than a detail. Ask with AskUserQuestion (Codex: a plain question), one question per contentious finding: quote the reviewer's point verbatim, then your position and the trade-off, with the reviewer's fix and yours as the options. A reviewer who misread the plan is the case this catches, so don't paraphrase their point into agreement.
+8. Apply findings you agree with that fix a detail (an edge case, a missing test, a wrong number) without asking, one summary line each. Put a finding to the user only when it is contentious: you disagree with it, or it would change the direction, design or scope rather than a detail. Steps 2-4 go out as reply text first, listing every contentious finding with its evidence and your position; a question never stands in for that list, since the user cannot pick between options whose findings they have not seen. Then ask with AskUserQuestion (Codex: a plain question), one question per contentious finding (AskUserQuestion takes at most 4 per call): quote the reviewer's point verbatim, then your position and the trade-off, with the reviewer's fix and yours as the options. A reviewer who misread the plan is the case this catches, so don't paraphrase their point into agreement.
 
 ## Notes
 
