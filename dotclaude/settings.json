@@ -1025,7 +1025,7 @@
     },
     "claude-opus-5-5": {
       "effortLevel": "medium",
-      "autoCompactWindow": 400000
+      "autoCompactWindow": 500000
     }
   },
   "showClearContextOnPlanAccept": true,
