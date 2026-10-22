@@ -12,7 +12,7 @@ The skill is symmetric:
 - **You are Claude Code** → invoke **OpenAI Codex** via `codex exec`.
 - **You are OpenAI Codex CLI** → invoke **Claude** via `claude -p`.
 
-Either side can add **Gemini 4 Argon** via `agy` as a parallel reviewer (see [Argon](#optional-gemini-4-argon-as-a-parallel-reviewer)).
+Either side can add **Gemini 4 Argon** via `agy` as a parallel reviewer (see [Argon](#optional--gemini-4-argon-as-a-parallel-reviewer)).
 
 You (the agent reading this skill) know which side you are. Pick the matching branch in [Run](#run) below. Everything outside Run — when to use, prompt construction, output format, reporting — is identical for both branches.
 
