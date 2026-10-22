@@ -1,7 +1,6 @@
 ---
 name: tmp-plan
 description: Write a short problem brief into a project's tmp/plans/ (updating a relevant existing brief instead when one exists, and trashing relevant ones already done) holding the goal, the problems, what was measured or considered about each (or the doc that already has it) and a one-line direction per problem, with no implementation detail and no code references. Use when the user runs /tmp-plan [project] [topic], or asks to write up the session's findings as a plan/brief doc in tmp/.
-model: opus
 ---
 
 # tmp-plan

@@ -1,7 +1,6 @@
 ---
 name: postmortem
 description: Write a blameless postmortem into the affected project's docs/postmortems/ covering what happened, why it happened, and the phased fixes (mitigate, prevent, detect), grounded in the session transcript, logs and git rather than recollection. Use when the user runs /postmortem [topic], or asks for a postmortem, incident review, root-cause write-up, ポストモーテム or 振り返り on something that broke, whether a real system incident (outage, data loss, bad deploy) or an agent session that went wrong.
-model: opus
 ---
 
 # postmortem

@@ -1,7 +1,6 @@
 ---
 name: handoff
 description: Write a one-shot handoff file (tmp/handoff-<CLAUDE_PID>.md) capturing session state so the user can /clear and continue in a fresh session without losing debugging progress. Use when the user runs /handoff or asks to hand off, wrap up for a fresh session, or preserve state before clearing. Optional argument describes what the next session will focus on.
-model: opus
 disable-model-invocation: true
 ---
 
@@ -79,11 +78,6 @@ Write the document in the language the session was mostly conducted in. If the u
 
 ## After writing
 
-Tell the user exactly this, in the language the conversation is in (the project's instructions or the user's own words decide it, never this skill's English; a Japanese session gets it in Japanese), substituting nothing else in and keeping the commands as they are:
-
-1. Run `/clear` (or open a new session in this directory)
-2. Send any message; the handoff loads automatically
-
-The rest of the turn (the one-line summary of what the handoff covers) is in that language too.
+Reply with the file path only, in one line. No summary and no `/clear` instructions; the user knows the flow.
 
 The hook is Claude Code only. In Codex, the file's header still directs a session told to "read the handoff" to re-ground and trash it.
