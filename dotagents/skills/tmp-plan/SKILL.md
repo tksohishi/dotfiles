@@ -83,4 +83,4 @@ No em dashes.
 
 ## After writing
 
-Reply with the clickable path (`[name](file:///abs/path)`), whether it was created or updated, a one-line summary of what it covers, and any brief trashed with the reason in a few words. Don't paste the document into the chat.
+Reply with the path in backticks, whether it was created or updated, a one-line summary of what it covers, and any brief trashed with the reason in a few words. Don't paste the document into the chat.

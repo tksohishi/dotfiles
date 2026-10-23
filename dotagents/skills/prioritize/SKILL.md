@@ -73,7 +73,7 @@ Cost is the attribute: for a decision, what the user has to read first; for a ch
 
 Write in the language the user is using. One list, one row per brief, one screen:
 
-- rank; brief (clickable `[name](file:///abs/path)`); who (the user, or a session); the first step in one line: the question to answer when a decision is pending, else the first item to do; tier and urgency (the deadline with its weekday and what the lead time is for, or bleed); cost.
+- rank; brief (its name, no link); who (the user, or a session); the first step in one line: the question to answer when a decision is pending, else the first item to do; tier and urgency (the deadline with its weekday and what the lead time is for, or bleed); cost.
 - A brief with several open items ranks on its best item; the rest ride along and are not listed.
 - Below the list: what the cleanup did (trashed with why in a few words, rewritten with the new status, folded) and anything a spot-check contradicted, with the agent's claim and the evidence. Briefs already `waiting` on a trigger that has not fired are listed in one line each, trigger included, after the ranking.
 
