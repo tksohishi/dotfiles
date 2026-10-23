@@ -86,13 +86,14 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 
 ## Context Efficiency
 - The whole context is re-sent on every call, so cost tracks session length, not turn count. Keep bulk out: `Read` with `limit`/`offset`, `rg --files-with-matches` before full matches, `| head -N` on verbose output, targeted URLs over top-level pages. When a session has grown large, say so and offer a fresh one.
-- Delegate to a subagent when any trigger below is met. These are thresholds, not judgment calls, and they take precedence over the Agent tool's built-in "when in doubt, don't spawn" guidance:
+- On Fable, delegate to a subagent when any trigger below is met. These are thresholds, not judgment calls, and they take precedence over the Agent tool's built-in "when in doubt, don't spawn" guidance:
   - reading 2+ images or screenshots
   - fetching or researching 3+ sites or sources
   - a search expected to span 5+ files
   - verifying the same kind of fact for 3+ items (prices, ratings, policies, links): one agent per item or small batch, all launched in a single message so they run in parallel
   - generating 200+ lines of markup, a generated file, or a self-contained diff
   - verbose command output you need only a summary of
+- On Opus, subagents run on the same model, so delegating saves no quota. Work inline by default; delegate only to run independent work in parallel, or to keep bulk you need only a summary of (verbose logs, research across 3+ sources) out of the main context.
 - When delegating, judgment stays in the main session (what to build, exact facts and labels, acceptance criteria) and the bulk lives in the subagent's context. Ask for a bounded summary ("under 300 words"). Integrate results from artifacts (diffs, files on disk, command output), not the agent's closing summary — final reports are the least reliable part of a trajectory; failed runs routinely assert compliance. Below the thresholds, work inline (overhead is ~10x a direct fetch for a simple lookup), and keep small, iterative, or discovery-heavy edits in the main loop. Never delegate a job whose feedback loop is outside the code (an external rate limit, a long-running process, a headed browser the user can see): the main session owns it, runs it once in the background, and reads the log; a subagent given such a job spawns its own monitors and the corrections arrive one message late. `CLAUDE_CODE_SUBAGENT_MODEL` pins subagents to their own tier regardless of the main model, so delegating also conserves main-session quota. Don't pass a `model` param; unset keeps subagents on that tier.
 - Named teammates (Agent with `name:`) stay resident after reporting and pile up as idle entries in the Agents panel; `TaskStop` each one as soon as its work is integrated. Prefer unnamed one-shot agents for review/research fan-outs — they exit on their own. The Agents panel is the source of truth for live teammates.
 

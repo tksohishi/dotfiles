@@ -43,3 +43,21 @@ payload() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+transcript_with() {
+  jq -nc --arg m "$1" '{type:"assistant",message:{model:$m}}' > "$BATS_TEST_TMPDIR/t.jsonl"
+}
+LARGE='1. Edit apps/api/src/index.ts. 2. Edit apps/web/src/App.tsx. 3. Update packages/ui/src/WeeklyReview.tsx.'
+
+@test "large plan in an Opus session passes without annotations" {
+  transcript_with claude-opus-5-5
+  run "$HOOK" <<< "$(jq -nc --arg plan "$LARGE" --arg t "$BATS_TEST_TMPDIR/t.jsonl" '{tool_name:"ExitPlanMode",tool_input:{plan:$plan},transcript_path:$t}')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "large plan in a Fable session is still denied" {
+  transcript_with claude-fable-5-1
+  run "$HOOK" <<< "$(jq -nc --arg plan "$LARGE" --arg t "$BATS_TEST_TMPDIR/t.jsonl" '{tool_name:"ExitPlanMode",tool_input:{plan:$plan},transcript_path:$t}')"
+  echo "$output" | jq -e '.hookSpecificOutput.permissionDecision == "deny"'
+}

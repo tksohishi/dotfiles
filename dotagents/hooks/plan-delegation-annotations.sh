@@ -14,6 +14,13 @@ plan=$(jq -r '.tool_input.plan // ""' <<<"$input")
 
 [ -z "$plan" ] && exit 0
 
+# Delegation saves quota only when subagents run below the main model (Fable).
+transcript=$(jq -r '.transcript_path // empty' <<<"$input")
+if [ -f "$transcript" ]; then
+    model=$(tail -n 200 "$transcript" | jq -r 'select(.type == "assistant") | .message.model // empty' 2>/dev/null | tail -n 1)
+    [ -n "$model" ] && [[ "$model" != *fable* ]] && exit 0
+fi
+
 # Already annotated or explicitly opted out → pass.
 if grep -qiE '\[(subagent|inline)\]|^[[:space:]]*delegation:' <<<"$plan"; then
     exit 0
