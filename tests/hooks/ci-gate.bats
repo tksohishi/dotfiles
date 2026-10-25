@@ -134,3 +134,23 @@ RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"fa
   [ -z "$output" ]
   [ ! -e "$MARKER" ]
 }
+
+@test "no runs and the pushed branch is outside push.branches: clears the marker silently" {
+  jq -nc --arg cwd "$BATS_TEST_TMPDIR" '{cwd:$cwd,sha:"abc1234def",branches:["feature"],blocks:0,pushedAt:0}' > "$MARKER"
+  mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"
+  printf 'on:\n  push:\n    branches: [main]\n' > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"
+  fake_gh '[]'
+  run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ ! -e "$MARKER" ]
+}
+
+@test "no runs and the pushed branch is in push.branches: still reports CI did not run" {
+  jq -nc --arg cwd "$BATS_TEST_TMPDIR" '{cwd:$cwd,sha:"abc1234def",branches:["main"],blocks:0,pushedAt:0}' > "$MARKER"
+  mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"
+  printf 'on:\n  push:\n    branches: [main]\n' > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"
+  fake_gh '[]'
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'GitHub created no Actions run'* ]]
+}

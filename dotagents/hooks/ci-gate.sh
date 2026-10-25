@@ -23,30 +23,71 @@ block() { jq -n --arg r "$1" '{decision:"block", reason:$r}'; exit 0; }
 fetch_runs() { (cd "$cwd" && gh run list --commit "$sha" --json databaseId,workflowName,status,conclusion 2>/dev/null) || echo '[]'; }
 pending_of() { echo "$1" | jq -r '[.[] | select(.status != "completed")] | map("\(.workflowName) (\(.databaseId))") | join(", ")'; }
 
-# Second line of defense behind ci-gate-record.sh: a marker for a repo with no
-# push/pull_request-triggered workflow can never resolve, so drop it instead of
-# blocking. Same parser as ci-gate-record.sh; keep them in sync.
-has_push_workflow() {
-  local f
-  for f in "$1"/.github/workflows/*.yml "$1"/.github/workflows/*.yaml; do
+# Whether a workflow in $1 runs for a push of the SHA to any branch named in the
+# remaining arguments; with no branch names, any push or pull_request trigger
+# counts. Reads push.branches / branches-ignore / tags (a tags-only push filter
+# never fires for a branch); pull_request counts only when the branch has an
+# open PR. Same function in ci-gate.sh and ci-gate-record.sh; keep them in sync.
+workflow_targets() {
+  local dir=$1 f spec br kind pat neg hit; shift
+  for f in "$dir"/.github/workflows/*.yml "$dir"/.github/workflows/*.yaml; do
     [ -f "$f" ] || continue
-    awk '
-      /^[[:space:]]*#/ { next }
-      /^("on"|'"'"'on'"'"'|on)[[:space:]]*:/ {
-        inon = 1; v = $0; sub(/^[^:]*:[[:space:]]*/, "", v)
-        if (v ~ /(^|[^a-z_])(push|pull_request)([^a-z_]|$)/) { found = 1; exit }
+    spec=$(awk '
+      function strip(s) { gsub(/^[[:space:]"\047]+|[[:space:]"\047]+$/, "", s); return s }
+      function emit(k, s,   n, a, i) { gsub(/[][]/, "", s); n = split(s, a, ","); for (i = 1; i <= n; i++) if (strip(a[i]) != "") print k, strip(a[i]) }
+      function endpush() { if (ev == "push" && !filt) print "any"; ev = "" }
+      /^[[:space:]]*(#|$)/ { next }
+      /^("on"|\047on\047|on)[[:space:]]*:/ {
+        inon = 1; evind = 0; v = $0; sub(/^[^:]*:[[:space:]]*/, "", v)
+        if (v ~ /(^|[^a-z_])push([^a-z_]|$)/) print "any"
+        if (v ~ /(^|[^a-z_])pull_request([^a-z_]|$)/) print "pr"
         next
       }
-      inon && /^[^[:space:]#]/ { inon = 0 }
-      inon && /^[[:space:]]+(-[[:space:]]*)?(push|pull_request)[[:space:]]*(:|$)/ { found = 1; exit }
-      END { exit !found }
-    ' "$f" && return 0
+      !inon { next }
+      /^[^[:space:]]/ { endpush(); inon = 0; next }
+      {
+        match($0, /^[[:space:]]*/); ind = RLENGTH
+        s = substr($0, ind + 1); sub(/[[:space:]]+#.*/, "", s)
+        if (!evind) evind = ind
+        if (ind <= evind) {
+          endpush(); sub(/^-[[:space:]]*/, "", s); key = s; sub(/[[:space:]]*:.*/, "", key)
+          if (key == "push") { ev = "push"; filt = 0; lk = "" }
+          else if (key == "pull_request") print "pr"
+          next
+        }
+        if (ev != "push") next
+        if (s ~ /^-/) { if (lk != "") emit(lk, substr(s, 2)); next }
+        key = s; sub(/[[:space:]]*:.*/, "", key); val = s; sub(/^[^:]*:[[:space:]]*/, "", val)
+        lk = ""
+        if (key == "branches") lk = "b"; else if (key == "branches-ignore") lk = "i"
+        if (key ~ /^(branches|branches-ignore|tags|tags-ignore)$/) filt = 1
+        if (lk != "" && val != "") emit(lk, val)
+      }
+      END { endpush() }
+    ' "$f")
+    [ -n "$spec" ] || continue
+    [ $# -eq 0 ] && return 0
+    grep -qx any <<< "$spec" && return 0
+    for br in "$@"; do
+      if grep -qx pr <<< "$spec"; then
+        [ "$(cd "$dir" && gh pr list --head "$br" --state open --json number --jq length 2>/dev/null)" != 0 ] && return 0
+      fi
+      grep -qE '^[bi] ' <<< "$spec" || continue
+      if grep -q '^b ' <<< "$spec"; then hit=0; else hit=1; fi
+      while read -r kind pat; do
+        neg=0; [[ $pat == '!'* ]] && { neg=1; pat=${pat#!}; }
+        [[ $br == $pat ]] || continue
+        if [ "$kind" = b ]; then hit=$((1 - neg)); else hit=$neg; fi
+      done < <(grep -E '^[bi] ' <<< "$spec")
+      [ "$hit" = 1 ] && return 0
+    done
   done
   return 1
 }
 
 runs=$(fetch_runs)
-if [ "$(echo "$runs" | jq 'length')" = "0" ] && ! has_push_workflow "$cwd"; then rm -f "$marker"; exit 0; fi
+# Second line of defense behind ci-gate-record.sh: a marker no workflow can resolve is dropped instead of blocking.
+if [ "$(echo "$runs" | jq 'length')" = "0" ] && ! workflow_targets "$cwd" $(jq -r '.branches // [] | .[]' "$marker"); then rm -f "$marker"; exit 0; fi
 
 # Poll until every run has completed (runs that have not appeared yet count as
 # pending) or the wait bound is reached. The bound must stay under the hook's
