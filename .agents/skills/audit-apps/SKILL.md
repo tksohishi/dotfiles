@@ -12,6 +12,7 @@ Follow these steps:
    - Run `brew bundle cleanup` to list packages not in the Brewfile
    - Run `brew bundle check --verbose` to list packages in the Brewfile that aren't installed
    - Drop outdated entries from the report: self-updating GUI casks catch up on next launch and `/update-apps` owns upgrades. Report only packages that are truly missing
+   - Before suggesting removal of an untracked formula, search for its binaries (`brew list <name> | rg '/bin/'`) across `~/Work` and `~/.dotfiles` with `rg -l -w`. If a project's scripts or docs use one, recommend adding it to the Brewfile and name the project. whisper.cpp was removed as untracked while ccm's scripts called `whisper-cli`.
 
 2. **GUI apps:**
    - Run `ls /Applications/` and cross-check against casks and MAS entries in the Brewfile
