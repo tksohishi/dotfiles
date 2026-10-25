@@ -23,7 +23,7 @@ Before rewriting a sentence, note these four things; after rewriting, check that
 
 1. Claim: what it says, and the logical relations (cause, contrast, condition, sequence). Don't swap one concept for a neighbor ("the core of X" is not "the goal of X").
 2. Relative weight: what is foregrounded and what is minor. Don't turn a negated item into an added one ("not A but B" into "A and also B") or reorder a ranking. Keep the terms of a comparison.
-3. Assertion strength: an assertion stays asserted, a guess stays a guess. Don't strengthen or weaken hedges.
+3. Assertion strength: an assertion stays asserted, a guess stays a guess. Don't strengthen or weaken hedges. Permission (may), ability (can), obligation (must) and guarantee (always, guarantees) count too; in a spec the difference is the spec. Don't turn "may include" into "can include" or "includes", drop "in some cases", or add "always".
 4. Sentence function: fact, opinion, request, rule, plan, hypothesis, hearsay, figure of speech. None of them may change type. Hearsay doesn't become fact, an opinion doesn't become a flat claim, a request doesn't become a description, a completed change doesn't read as a plan.
 
 If a sentence can't be fixed without changing one of these, leave it as written and ask instead.
@@ -61,7 +61,7 @@ Editing someone's text:
 1. Rewrite.
 2. Re-read source and result side by side for the four meaning axes, and check that nothing was added.
 3. Return the rewritten text, then a short "What changed" list (変えたところ in Japanese), one line per change.
-4. Add at most 2 questions for things you couldn't resolve (an unclear referent, an unknown source, a claim you left as written because fixing it would change its meaning).
+4. Add at most 3 questions for things you couldn't resolve (an unclear referent, an unknown source, a claim you left as written because fixing it would change its meaning). Pick the ones whose answer changes the text, misreadings of the claim or of who does what first; don't add questions to fill the count. If spots were left out, end with "N more spots" (ほかに N か所).
 
 Never put editorial notes inside the text itself: no "(needs confirmation)", 【要確認】, or inline comments. Notes go in the list after the text. If the user asked for the text only, return just the text.
 
