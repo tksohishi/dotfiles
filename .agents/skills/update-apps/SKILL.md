@@ -134,8 +134,9 @@ Each 🔴 item gets an entry in `open_items`: a stable `id` (kebab-case, reused 
 Each run, in order:
 
 1. Run every stored item's `check`. Non-zero exit means the user fixed it: drop it from `open_items` and note it once, in the `🧹 Cleanup` section, as resolved (routine, no emoji). An item with no `check` can't be auto-resolved, so it stays until the user says it is done.
-2. Report the surviving items plus any new ones in `### 🔴 Action required`, each with the concrete command or edit that clears it. Annotate carried-over ones with `(open since <first_seen>)` so a stale item is visibly stale.
-3. Write the merged list back to `open_items`.
+2. Run `test -L ~/.claude/settings.json`. A non-zero exit means something (usually `moshi-hook install` or `doctor`, which rewrite it as a plain file) replaced the symlink to `dotclaude/settings.json`: add a `claude-settings-symlink` item telling the user to merge the new hook entries into `dotclaude/settings.json` and relink with `ln -sfn`, check `test ! -L ~/.claude/settings.json`. When the symlink is intact, say nothing about it.
+3. Report the surviving items plus any new ones in `### 🔴 Action required`, each with the concrete command or edit that clears it. Annotate carried-over ones with `(open since <first_seen>)` so a stale item is visibly stale.
+4. Write the merged list back to `open_items`.
 
 Write a `check` wherever one exists — an unresolvable item nags forever, which is the failure mode this is meant to prevent. Examples: a settings migration is an `rg -q` for the stale key in the config file; a stale binary is a `--version` piped to `rg -q`.
 
