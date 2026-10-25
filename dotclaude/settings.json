@@ -672,6 +672,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/git-explicit-paths.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/session-trailer.sh",
+            "timeout": 5
           }
         ]
       },
