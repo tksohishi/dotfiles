@@ -796,6 +796,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/bash-verify-reminder.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/ci-gate-record.sh",
+            "timeout": 5
           }
         ]
       },
@@ -935,6 +940,15 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/idle-teammates.sh",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/ci-gate.sh",
+            "timeout": 540
           }
         ]
       },

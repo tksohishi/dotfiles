@@ -37,6 +37,7 @@ push_workflow() { mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"; printf 'on:\n 
 input() { echo '{"session_id":"sid-1","stop_hook_active":false}'; }
 
 IN_PROGRESS='[{"databaseId":42,"workflowName":"CI","status":"in_progress","conclusion":""}]'
+QUEUED='[{"databaseId":42,"workflowName":"CI","status":"queued","conclusion":""}]'
 GREEN='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"success"}]'
 RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"failure"}]'
 
@@ -90,6 +91,38 @@ RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"fa
   [[ "$output" == *'"decision": "block"'* ]]
   [[ "$output" == *'gh run watch <id> --exit-status (ids: 42)'* ]]
   [ "$(jq -r .blocks "$MARKER")" = "1" ]
+}
+
+@test "in-progress run while Actions is degraded: reports unverified once and clears the marker" {
+  make_marker; fake_gh "$IN_PROGRESS"; fake_actions_status degraded_performance
+  export CI_GATE_WAIT_MAX=60
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'unverified'* ]]
+  [[ "$output" == *'githubstatus Actions: degraded_performance'* ]]
+  [ ! -e "$MARKER" ]
+  [ "$(gh_calls)" = "1" ]
+}
+
+@test "runs still queued long after the push: reports unverified once and clears the marker" {
+  make_marker 0 $(( $(date +%s) - 600 )); fake_gh "$QUEUED"
+  export CI_GATE_WAIT_MAX=60
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'unverified'* ]]
+  [ ! -e "$MARKER" ]
+  [ "$(gh_calls)" = "1" ]
+}
+
+@test "queued run shortly after the push: keeps waiting and keeps the marker" {
+  make_marker; fake_gh "$QUEUED"
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'gh run watch <id> --exit-status (ids: 42)'* ]]
+  [ "$(jq -r .blocks "$MARKER")" = "1" ]
+}
+
+@test "red run while Actions is degraded: still reports red" {
+  make_marker; fake_gh "$RED"; fake_actions_status major_outage
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'CI is RED'* ]]
 }
 
 @test "in-progress run that finishes within the wait bound: polls, then passes silently" {
