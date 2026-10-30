@@ -8,6 +8,7 @@ setup() {
   export PATH="$BATS_TEST_TMPDIR/bin:$PATH"
   export CI_GATE_WAIT_INTERVAL=0 CI_GATE_WAIT_MAX=0
   MARKER="$CLAUDE_CI_GATE_DIR/sid-1.json"
+  unset CLAUDE_CODE_ENTRYPOINT
   fake_actions_status operational
 }
 
@@ -101,6 +102,22 @@ RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"fa
   [[ "$output" == *'githubstatus Actions: degraded_performance'* ]]
   [ ! -e "$MARKER" ]
   [ "$(gh_calls)" = "1" ]
+}
+
+@test "unhealthy Actions in the CLI: shows a systemMessage without blocking" {
+  make_marker; push_workflow; fake_gh '[]'; fake_actions_status degraded_performance
+  export CLAUDE_CODE_ENTRYPOINT=cli
+  run "$HOOK" <<< "$(input)"
+  [ "$(echo "$output" | jq -r '.systemMessage')" != null ]
+  [ "$(echo "$output" | jq -r '.decision')" = null ]
+  [ ! -e "$MARKER" ]
+}
+
+@test "red run in the CLI: still blocks" {
+  make_marker; fake_gh "$RED"
+  export CLAUDE_CODE_ENTRYPOINT=cli
+  run "$HOOK" <<< "$(input)"
+  [ "$(echo "$output" | jq -r '.decision')" = block ]
 }
 
 @test "runs still queued long after the push: reports unverified once and clears the marker" {

@@ -20,6 +20,11 @@ jq -c '.blocks += 1' "$marker" > "$marker.tmp" && mv "$marker.tmp" "$marker"
 
 short=${sha:0:7}
 block() { jq -n --arg r "$1" '{decision:"block", reason:$r}'; exit 0; }
+# The desktop app does not render systemMessage, so outside the CLI the agent relays the notice.
+unverified() {
+  [ "${CLAUDE_CODE_ENTRYPOINT:-}" = cli ] || block "$1 The gate will not wait again for this SHA. Tell the user CI is unverified for $short; do not poll for it."
+  jq -n --arg m "$1" '{systemMessage:$m}'; exit 0
+}
 fetch_runs() { (cd "$cwd" && gh run list --commit "$sha" --json databaseId,workflowName,status,conclusion 2>/dev/null) || echo '[]'; }
 pending_of() { echo "$1" | jq -r '[.[] | select(.status != "completed")] | map("\(.workflowName) (\(.databaseId))") | join(", ")'; }
 
@@ -117,12 +122,12 @@ done
 
 if [ "$(echo "$runs" | jq 'length')" = "0" ]; then
   rm -f "$marker"
-  block "CI gate: GitHub created no Actions run for pushed commit $short in $(( $(date +%s) - pushed_at )) s (githubstatus Actions: ${actions_status:-unknown}). The gate will not wait again for this SHA. Tell the user CI did not run for $short and that the push is unverified by CI; do not poll for it."
+  unverified "CI gate: GitHub created no Actions run for pushed commit $short in $(( $(date +%s) - pushed_at )) s (githubstatus Actions: ${actions_status:-unknown}). The push is unverified by CI."
 fi
 pending=$(pending_of "$runs")
 if [ -n "$pending" ] && { degraded || stalled; }; then
   rm -f "$marker"
-  block "CI gate: Actions runs for $short have not finished and GitHub Actions looks unhealthy (githubstatus Actions: ${actions_status:-unknown}; pending: $pending). The gate will not wait again for this SHA. Tell the user CI for $short is unverified because Actions is degraded or not starting jobs; do not poll for it."
+  unverified "CI gate: Actions runs for $short did not finish and GitHub Actions looks unhealthy (githubstatus Actions: ${actions_status:-unknown}; pending: $pending). The push is unverified by CI."
 fi
 if [ -n "$pending" ]; then
   ids=$(echo "$runs" | jq -r '[.[] | select(.status != "completed") | .databaseId] | join(" ")')
