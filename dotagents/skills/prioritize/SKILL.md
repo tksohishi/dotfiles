@@ -5,7 +5,7 @@ description: Rank the plan documents under a project's tmp/plans/ (the tmp-plan 
 
 # prioritize
 
-Reads `tmp/plans/<YYYY-MM-DD>-<slug>.md` (the briefs `tmp-plan` writes), decides for each whether it is done, half done, open or waiting, cleans up accordingly, and ranks what is left. The output is a decision aid for the user, not a plan of record: nothing is started.
+Reads `tmp/plans/<YYYY-MM-DD>-<slug>.md` (the briefs `tmp-plan` writes), decides for each whether it is done, open or blocked, cleans up accordingly, and ranks what is left. The output is a decision aid for the user, not a plan of record: nothing is started.
 
 The cost driver is reading. A brief carries its state in a frontmatter block (the schema is in `tmp-plan`), so the main session reads frontmatter and git subjects only; a brief without one is retrofitted by a subagent once and then costs the same as the rest.
 
@@ -22,9 +22,10 @@ Read the project's goal once, from the overview or goal section of its instructi
 
 Run `~/.agents/skills/prioritize/scripts/state.sh [project-root]` once. It prints each brief's frontmatter and the number of commits on its `touches` paths since the brief's date, and never a body.
 
-- `no-frontmatter`: put it on the retrofit list.
-- `status: done` is a leftover from a run that did not finish: trash it now.
-- `commits-since: 0` with `status: open` means still open; no further reading. Any commit means the `open` items may have moved: put the brief on the recheck list. `n/a` (no `touches`) goes to the retrofit list.
+- `no-frontmatter`, or an old schema (a `status`, `shipped`, `open` or `waiting` key): put it on the retrofit list.
+- Empty `todo` and empty `blocked` is a done brief left by a run that did not finish: trash it now.
+- `commits-since: 0` means `todo` stands; no further reading. Any commit means the `todo` items may have moved: put the brief on the recheck list. `n/a` (no `touches`) goes to the retrofit list.
+- A `blocked` line whose trigger names a date that has passed, or a count the session can see has accrued, goes on the recheck list too; a trigger that waits on the user is asked about in the presentation, not rechecked.
 
 Never read a brief's body in the main session. The body is facts and measurements for whoever implements it; the frontmatter is the state, and if the state is wrong the fix is a retrofit, not a read.
 
@@ -34,23 +35,25 @@ Hand the retrofit and recheck lists to subagents, about eight briefs each, all l
 
 - the list of briefs and today's date;
 - read-only rules: `cat`, `sed`, `rg`, `fd`, `git log`, `git show`; no edits, no commits, no scripts that touch a network;
-- the job per brief: read it whole, find what shipped (commits since its date on the paths it names, a subject search on its keywords, and the current code at the symbols it names), and write one file per brief into the session scratchpad holding the frontmatter fields (`status`, `goal`, `touches`, `shipped`, `open`, `waiting`) plus an `evidence:` line with the file:line or hash behind the status;
+- the job per brief: read it whole, find what shipped (commits since its date on the paths it names, a subject search on its keywords, and the current code at the symbols it names), and write one file per brief into the session scratchpad holding the frontmatter fields (`goal`, `touches`, `done`, `todo`, `blocked`, in the schema `tmp-plan` gives, keeping each `todo` line's priority tag) plus an `evidence:` line with the file:line or hash behind each item moved to `done` or out of `blocked`;
 - a reply under 200 words: one line per brief and anything it was unsure about.
 
-Integrate from the files, not the replies. Spot-check before applying: every hash an agent calls shipped exists (in its own repo, which may not be this one) and its subject matches the claim; a `done` verdict gets one search for the doc's main symbol. An agent that could not decide leaves the brief `open` with a note; a wrong `done` loses a brief, a wrong `open` costs one more read next time.
+Integrate from the files, not the replies. Spot-check before applying: every hash an agent calls shipped exists (in its own repo, which may not be this one) and its subject matches the claim; a `done` verdict gets one search for the doc's main symbol. An agent that could not decide leaves the item in `todo` with a note; a wrong `done` loses work, a wrong `todo` costs one more read next time.
 
 ## 4. Clean up
 
-- `done`: trash it (`trash`, not `rm`). The findings live in the commits it named; if a body holds a measurement nothing else records (a probe result, a ruled-out path with its evidence), move that paragraph to the project's docs or a memory first, then trash.
-- `partial`, `open`, `waiting`: write the frontmatter (replace the old block or insert one above the title) with the new `status`, `shipped` and `open` lists. The body stays; it is history and evidence. Edit a body line only where it now contradicts the frontmatter in a way that would mislead the implementer (an item the body still proposes that a commit ruled out).
-- A brief whose `open` items are all covered by another brief is folded: its unique facts move into the other, and it is trashed. An item that two briefs both list is kept in one and the other points at it.
+- Done (empty `todo` and `blocked`): trash it (`trash`, not `rm`). The findings live in the commits it named; if a body holds a measurement nothing else records (a probe result, a ruled-out path with its evidence), move that paragraph to the project's docs or a memory first, then trash.
+- Open or blocked: write the frontmatter (replace the old block or insert one above the title) with the new `done`, `todo` and `blocked` lists. Shipped items move to `done`; a `blocked` item whose trigger fired moves to `todo` as P2 unless the user ranked it; `todo` is renumbered in priority order and references to changed numbers are rewritten, as `tmp-plan` says. The body stays; it is history and evidence. Edit a body line only where it now contradicts the frontmatter in a way that would mislead the implementer (an item the body still proposes that a commit ruled out, an item number that changed).
+- A brief whose `todo` and `blocked` items are all covered by another brief is folded: its unique facts move into the other, and it is trashed. An item that two briefs both list is kept in one and the other points at it.
 - A handoff left in `tmp/` by a previous session (the kind the `handoff` skill writes) is not a plan: its open items become a brief if they would otherwise be lost, then it is trashed.
 
 One tool call per file. `tmp/` is gitignored, so there is nothing to commit; say so if the user asks.
 
 ## 5. Rank
 
-Two axes and one attribute. Whether the work can start now is not an axis: it only says who acts, the user with a minute of judgment or a session with hours of work. A decision the user owes is ranked on the same scale as a change a session would make, and the user answers at once by default; when they cannot, they say so, the brief goes `waiting` with the trigger named, and it leaves the ranking until the trigger fires.
+Two axes and one attribute. Whether the work can start now is not an axis: it only says who acts, the user with a minute of judgment or a session with hours of work. A decision the user owes is ranked on the same scale as a change a session would make, and the user answers at once by default; when they cannot, they say so, the item goes to `blocked` with the trigger named, and it leaves the ranking until the trigger fires.
+
+The user's tags come first: P0 items rank above everything, then P1, then P2. The tiers below order items within a tag, and only P2 is ranked by them alone. A tag changes only on the user's word.
 
 **Importance** (what the result moves), four tiers:
 - S: an irreversible loss at stake (money on a path that sends, data, an account), a loss not bounded, a guard missing.
@@ -73,8 +76,8 @@ Cost is the attribute: for a decision, what the user has to read first; for a ch
 
 Write in the language the user is using. One list, one row per brief, one screen:
 
-- rank; brief (its name, no link); who (the user, or a session); the first step in one line: the question to answer when a decision is pending, else the first item to do; tier and urgency (the deadline with its weekday and what the lead time is for, or bleed); cost.
-- A brief with several open items ranks on its best item; the rest ride along and are not listed.
-- Below the list: what the cleanup did (trashed with why in a few words, rewritten with the new status, folded) and anything a spot-check contradicted, with the agent's claim and the evidence. Briefs already `waiting` on a trigger that has not fired are listed in one line each, trigger included, after the ranking.
+- rank; brief (its name, no link); who (the user, or a session); the first step in one line: the question to answer when a decision is pending, else the first `todo` item (its number and tag); tier and urgency (the deadline with its weekday and what the lead time is for, or bleed); cost.
+- A brief with several `todo` items ranks on its best item; the rest ride along and are not listed.
+- Below the list: what the cleanup did (trashed with why in a few words, items moved to `done` or out of `blocked`, folded) and anything a spot-check contradicted, with the agent's claim and the evidence. Blocked briefs (empty `todo`) whose triggers have not fired are listed in one line each, trigger included, after the ranking.
 
 Then stop. Ask nothing; the user picks. Do not start the top item, do not commit, do not write a handoff.

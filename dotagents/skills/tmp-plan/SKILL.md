@@ -19,10 +19,10 @@ The weight is on what is known, not what to build. Solutions get the least space
 
 A new brief is the last resort. Two briefs on one topic split the facts and leave `/prioritize` ranking the same work twice.
 
-1. Read only the frontmatter of every brief in `tmp/plans/` (`goal`, `status`, `touches`, `open`), not the bodies.
+1. Read only the frontmatter of every brief in `tmp/plans/` (`goal`, `touches`, `todo`, `blocked`), not the bodies.
 2. A brief is relevant when its `goal` covers the same problem or its `touches` overlap the paths this session's work would change.
-3. Relevant and still open: update that brief in place instead of writing a new one. Merge this session's facts, results and decisions into its sections, rewrite `open` to match what is still to do, and keep its filename. Read its body now, since you are editing it.
-4. Relevant but done (`status: done`, or every `open` item covered by commits on its `touches` since its date, per `git log`): trash it (`trash`, not `rm`). If its body holds a measurement or ruled-out path nothing else records, carry it into the brief being written first.
+3. Relevant and still open or blocked: update that brief in place instead of writing a new one. Merge this session's facts, results and decisions into its sections, rewrite `todo` and `blocked` to match what is still to do, add what this session shipped to `done`, and keep its filename. Read its body now, since you are editing it.
+4. Relevant but done (`todo` and `blocked` both empty, or every item in them covered by commits on its `touches` since its date, per `git log`): trash it (`trash`, not `rm`). If its body holds a measurement or ruled-out path nothing else records, carry it into the brief being written first.
 5. Write a new brief only when no relevant open brief exists, or when this session's topic is a separate goal that would make an existing brief about two things.
 
 Leave unrelated briefs alone; sweeping the whole directory is `/prioritize`'s job.
@@ -37,25 +37,29 @@ Write from evidence, not recollection:
 
 ## Frontmatter
 
-The file opens with a YAML block that holds its state. A later `/prioritize` run reads this block and `git log` on the paths it names and nothing else, so everything that decides whether the brief is done, half done, open or waiting, and where it ranks, has to be here, not only in the body.
+The file opens with a YAML block that holds its state. A later `/prioritize` run reads this block and `git log` on the paths it names and nothing else, so everything that decides whether the brief is done, open or blocked, and where it ranks, has to be here, not only in the body.
 
 ```yaml
 ---
-status: open            # open | partial | waiting | done
-goal: <one line: what the brief is for and why it matters to the project's goal>
+goal: "<one line: what the brief is for and why it matters to the project's goal>"
 touches: [scripts/foo/main.ts, lib/bar.ts]   # the code paths the open work would change; git log on these is the shipped check
-open:
-  - <one line per item still to do, concrete enough to start from; numbered like the body's problems>
-waiting: <only with status waiting: the event, date or user decision it waits on>
-shipped: []             # <hash> <what it covered>, filled in as work lands
+done: []                # "<hash> <what it covered>", filled in as work lands
+todo:
+  - "1. [P0] <one line per item startable now, concrete enough to start from>"
+  - "2. [P2] <...>"
+blocked:
+  - "<item text> — trigger: <one line: the measurement, event or user decision that unblocks it>"
 ---
 ```
 
+There is no `status` key; the state is derived. Empty `todo` and empty `blocked`: done. Empty `todo` with items in `blocked`: blocked. Otherwise open.
+
 Rules:
 - `touches` names real paths at the granularity of the work (a file when one file changes, a directory when the work spans it). A brief about a decision with no code yet names the paths the decision would land in. Verify each path exists (`ls`).
-- `open` is the list a fresh session could start from: one item per line, an action with its object, not a question. Questions go in the body's Open questions. A brief with nothing startable is `waiting`, with the trigger named.
+- `todo` is the list a fresh session could start from: one item per line, an action with its object, not a question. Questions go in the body's Open questions. Each line is `"<n>. [P<0|1|2>] <text>"`, ordered P0, P1, P2 and numbered 1, 2, 3... in that order. P0 and P1 come only from the user's ranking; any other item is P2. When the list changes, renumber it and rewrite every reference to a changed number (`todo N`) in the brief's lines, note and body and in other briefs that point at it.
+- `blocked` holds the items that wait on a measurement still to accrue, an outside event or a user decision, each followed by ` — trigger: ` and what unblocks it. An item goes there only when no part of it can start now; when its trigger fires it moves to `todo` with a priority.
 - `goal` is written against the project's stated goal (its AGENTS.md or CLAUDE.md), so the ranking does not have to re-derive the link.
-- A new brief is never `done` or `partial`; those are set by `/prioritize` or by the session that ships the work.
+- Strings are double-quoted YAML. A new brief's `done` is empty; it is filled by the session that ships the work or by `/prioritize`.
 
 ## Content
 
