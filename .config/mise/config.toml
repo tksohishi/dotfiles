@@ -3,7 +3,7 @@
 # ignores the setting ("ignored for security reasons"). Trust lives in mise's
 # state store instead: run `mise trust ~/.dotfiles` once; `mise trust --show`.
 [tools]
-node = { version = "lts", postinstall = "corepack enable pnpm" }
+node = { version = "lts", postinstall = "npm install -g corepack && corepack enable pnpm" }
 bun = "latest"
 "npm:@ticktick/ticktick-cli" = "latest"
 "npm:@alchemy/cli" = "latest"
