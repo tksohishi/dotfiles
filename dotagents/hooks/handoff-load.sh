@@ -36,5 +36,8 @@ summary=$(awk '
     printf "%s: %s\n", sec, $0; grab = 0
   }
 ' "$f")
-jq -n --rawfile doc "$f" --arg f "$f" --arg mtime "$mtime" --arg summary "$summary" '($summary | split("\n") | map(if length > 80 then .[0:80] + "…" else . end) | join("\n")) as $summary | {systemMessage: ("Handoff loaded (\($f), \($mtime), now in the Trash)\n" + $summary), hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("Handoff from the previous session (\($f), written \($mtime); the file is now in the Trash). Before answering the first prompt: re-ground its claims against git log/status and live state (fresh evidence wins over the file); move still-true facts that code, git or memory cannot supply into topic memories; delete any session-state memory it supersedes (open-threads or state-on-date files) with its MEMORY.md line; then continue with its next step.\n\n" + $doc)}}'
+# The desktop app does not render systemMessage, so the model announces the load.
+announce=" Open your first reply with one line naming this handoff by its file and title."
+[ "${CLAUDE_CODE_ENTRYPOINT:-}" = cli ] && announce=""
+jq -n --rawfile doc "$f" --arg f "$f" --arg mtime "$mtime" --arg summary "$summary" --arg announce "$announce" '($summary | split("\n") | map(if length > 80 then .[0:80] + "…" else . end) | join("\n")) as $summary | {systemMessage: ("Handoff loaded (\($f), \($mtime), now in the Trash)\n" + $summary), hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("Handoff from the previous session (\($f), written \($mtime); the file is now in the Trash).\($announce) Before answering the first prompt: re-ground its claims against git log/status and live state (fresh evidence wins over the file); move still-true facts that code, git or memory cannot supply into topic memories; delete any session-state memory it supersedes (open-threads or state-on-date files) with its MEMORY.md line; then continue with its next step.\n\n" + $doc)}}'
 trash "$f"

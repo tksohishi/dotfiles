@@ -20,18 +20,29 @@ setup() {
   mkdir -p tmp
   printf '# Handoff — topic (2026-01-02 13:04)\n\n## Goal\nGet it out.\n\nDetail\n\n## Next step\nShip "it"\n\n## Pointers\n- p\n' > tmp/handoff.md
   touch -t 202601021304 tmp/handoff.md
-  run "$HOOK" <<< '{"source":"clear"}'
+  CLAUDE_CODE_ENTRYPOINT=claude-desktop run "$HOOK" <<< '{"source":"clear"}'
   [ "$status" -eq 0 ]
   jq -e '.hookSpecificOutput.hookEventName == "SessionStart"' <<< "$output"
   ctx=$(jq -r '.hookSpecificOutput.additionalContext' <<< "$output")
   [[ "$ctx" == *'2026-01-02 13:04'* ]]
   [[ "$ctx" == *'Ship "it"'* ]]
+  [[ "$ctx" == *'Open your first reply with one line naming this handoff'* ]]
   msg=$(jq -r '.systemMessage' <<< "$output")
   [[ "$msg" == *'Handoff — topic'* ]]
   [[ "$msg" == *'Goal: Get it out.'* ]]
   [[ "$msg" == *'Next step: Ship "it"'* ]]
   [[ "$msg" != *'Detail'* && "$msg" != *'- p'* ]]
   [ ! -e tmp/handoff.md ]
+}
+
+@test "the CLI, which shows systemMessage, skips the first-reply announcement" {
+  mkdir -p tmp
+  echo "handoff" > tmp/handoff.md
+  CLAUDE_CODE_ENTRYPOINT=cli run "$HOOK" <<< '{"source":"clear"}'
+  [ "$status" -eq 0 ]
+  ctx=$(jq -r '.hookSpecificOutput.additionalContext' <<< "$output")
+  [[ "$ctx" == *'re-ground'* ]]
+  [[ "$ctx" != *'Open your first reply'* ]]
 }
 
 @test "a fresh launch loads the handoff too" {
