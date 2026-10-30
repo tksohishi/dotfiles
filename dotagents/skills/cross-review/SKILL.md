@@ -68,6 +68,10 @@ Three lenses go into every prompt; they are the reason to bring in a second mode
 - **Edge cases**: empty / huge / malformed input, concurrency and re-entry, partial failure and retries, first run vs. upgrade, platform and locale differences, interactions with existing features. Each one names the concrete input or state and the resulting behavior.
 - **Test coverage**: which behaviors of the change have no test, which tests would still pass if the code were wrong, which edge cases above lack a test. Name the missing test cases, not just "add tests".
 
+Add a fourth lens when the diff calls an external API (a library function, CLI flag, SDK method, platform or service endpoint, config key) the code didn't use before, or uses an existing one in a drastically different way (new arguments or options, a different calling context, relying on behavior it didn't rely on before):
+
+- **Official docs check**: list each such method by name in the prompt and have the reviewer check it against the official documentation: whether it exists in the version the project pins, its signature and defaults, its return and error behavior, deprecations, and documented caveats the code ignores. The reviewer cites the doc URL or `ctx7` result for every finding; a claim checked only against memory doesn't count. Picking the methods stays with you, since you know what the change introduced; the reviewer adds any you missed. Argon can't run shell commands, so `ctx7` is out of reach for it; leave this lens out of its prompt.
+
 Add **1-3** project-specific categories on top. Don't enumerate all of them — a 7-section adversarial prompt produces a 5000-word review that wastes context. Tailor.
 
 Common categories (pick what fits):
@@ -131,6 +135,15 @@ concrete input/state and the resulting wrong behavior.}
 ## Test coverage
 {Which changed behaviors and edge cases have no test; which tests would pass
 if the code were wrong. Name the missing test cases.}
+
+## Official docs check
+{Only when Step 3 adds this lens. List the new or drastically changed external
+methods (name, file:line, the version the project pins). Check each against its
+official documentation: `ctx7 library <name>` then `ctx7 docs <id> "<query>"`,
+plus `--help` for CLIs; fetch the vendor's docs only if ctx7 has no hit. Flag
+wrong signatures, unsupported options, behavior the docs contradict,
+deprecations, and caveats the code ignores. Cite the doc URL or ctx7 id for
+each. Add methods the list missed.}
 
 {1-3 project-specific RISK SECTIONS from Step 3, each with 3-6 specific
 things to check. Tailor wording to project — do not copy generic boilerplate.}
