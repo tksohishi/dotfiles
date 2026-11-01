@@ -45,10 +45,10 @@ goal: "<one line: what the brief is for and why it matters to the project's goal
 touches: [scripts/foo/main.ts, lib/bar.ts]   # the code paths the open work would change; git log on these is the shipped check
 done: []                # "<hash> <what it covered>", filled in as work lands
 todo:
-  - "1. [P0] <one line per item startable now, concrete enough to start from>"
-  - "2. [P2] <...>"
+  - "1. [P0] {short-slug} <one line per item startable now, concrete enough to start from>"
+  - "2. [P2] {other-slug} <...>"
 blocked:
-  - "<item text> — trigger: <one line: the measurement, event or user decision that unblocks it>"
+  - "{blocked-slug} <item text> — trigger: <one line: the measurement, event or user decision that unblocks it>"
 ---
 ```
 
@@ -56,7 +56,7 @@ There is no `status` key; the state is derived. Empty `todo` and empty `blocked`
 
 Rules:
 - `touches` names real paths at the granularity of the work (a file when one file changes, a directory when the work spans it). A brief about a decision with no code yet names the paths the decision would land in. Verify each path exists (`ls`).
-- `todo` is the list a fresh session could start from: one item per line, an action with its object, not a question. Questions go in the body's Open questions. Each line is `"<n>. [P<0|1|2>] <text>"`, ordered P0, P1, P2 and numbered 1, 2, 3... in that order. P0 and P1 come only from the user's ranking; any other item is P2. When the list changes, renumber it and rewrite every reference to a changed number (`todo N`) in the brief's lines, note and body and in other briefs that point at it.
+- `todo` is the list a fresh session could start from: one item per line, an action with its object, not a question. Questions go in the body's Open questions. Each line is `"<n>. [P<0|1|2>] {<slug>} <text>"`, ordered P0, P1, P2 and numbered 1, 2, 3... in that order. P0 and P1 come only from the user's ranking; any other item is P2. The number is the order only and changes on every renumber; the slug (2 to 4 English words, kebab-case, unique in the brief) is the item's name for good. Every reference to an item, in the brief and from other briefs, is its slug in braces (`{zone0-race-fill}`, or `<brief file> {slug}` from another brief), never `todo N`. A `blocked` item carries its slug in front, and an item that moves to `done` or `blocked` keeps it, so a reference still finds it. When the list changes, renumber it; a `todo N` reference met in an older brief is rewritten to the slug.
 - `blocked` holds the items that wait on a measurement still to accrue, an outside event or a user decision, each followed by ` — trigger: ` and what unblocks it. An item goes there only when no part of it can start now; when its trigger fires it moves to `todo` with a priority.
 - `goal` is written against the project's stated goal (its AGENTS.md or CLAUDE.md), so the ranking does not have to re-derive the link.
 - Strings are double-quoted YAML. A new brief's `done` is empty; it is filled by the session that ships the work or by `/prioritize`.
