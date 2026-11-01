@@ -85,7 +85,7 @@ If the project has known historical failure modes (past incidents, recurring bug
 
 ### Step 4 — Assemble the prompt
 
-Use this skeleton. Substitute the bracketed sections with what you found in Steps 1-3. Keep the whole prompt under ~3KB; long prompts dilute the reviewer's focus. The Run section passes it to the reviewer via a quoted heredoc — no intermediate file.
+Use this skeleton. Substitute the bracketed sections with what you found in Steps 1-3. Keep the whole prompt under ~3KB; long prompts dilute the reviewer's focus. Describe hostile input in plain code-review terms ("untrusted input", "a crafted request"): Codex refuses prompts that ask it to imagine a "malicious payload" or "adversarial payload" as a cyber request. The Run section passes it to the reviewer via a quoted heredoc — no intermediate file.
 
 ```
 You are auditing work produced by another AI assistant (Claude) for the {PROJECT_NAME} project.
