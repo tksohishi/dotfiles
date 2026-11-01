@@ -53,7 +53,7 @@ Relevant slugs: `terms-of-use`, `privacy-policy-us`, `privacy-policy-gdpr`, `coo
 
 ## Step 5: Cross-review
 
-After the drafts are complete (files written, placeholders filled), invoke the `cross-review` skill on them before reporting. Ask the other model to review from first principles as a skeptical legal reader: unfilled or mismatched placeholders, sections that contradict the product's actual data practices, jurisdiction gaps (GDPR/CCPA sections missing or misapplied), and clauses that don't fit the product (e.g. payment terms in a free product). Fold its findings into the drafts or into additional `[REVIEW: ...]` flags before the final report.
+After the drafts are complete (files written, placeholders filled), invoke the `impl-review` skill on them before reporting. Ask the other model to review from first principles as a skeptical legal reader: unfilled or mismatched placeholders, sections that contradict the product's actual data practices, jurisdiction gaps (GDPR/CCPA sections missing or misapplied), and clauses that don't fit the product (e.g. payment terms in a free product). Fold its findings into the drafts or into additional `[REVIEW: ...]` flags before the final report.
 
 ## Step 6: Output
 

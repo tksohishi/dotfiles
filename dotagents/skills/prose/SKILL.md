@@ -67,7 +67,7 @@ Never put editorial notes inside the text itself: no "(needs confirmation)", 【
 
 ### Second opinion
 
-When the user asks for one, or the text is public-facing and a meaning change would be costly, run the `cross-review` skill. Give the reviewer the source text, the result, and the path of the language file you used, and ask for three things: meaning changes on the four axes, AI tells that remain, and edits that weren't needed.
+When the user asks for one, or the text is public-facing and a meaning change would be costly, run the `impl-review` skill. Give the reviewer the source text, the result, and the path of the language file you used, and ask for three things: meaning changes on the four axes, AI tells that remain, and edits that weren't needed.
 
 ### Learning from corrections
 
