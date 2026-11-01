@@ -575,7 +575,7 @@
       "~/Library/Caches"
     ]
   },
-  "model": "fable",
+  "model": "opus",
   "availableModels": ["fable", "opus"],
   "enforceAvailableModels": true,
   "disableClaudeAiConnectors": true,
@@ -1026,10 +1026,10 @@
   "effortLevel": "medium",
   "modelSettings": {
     "claude-fable-5-1": {
-      "effortLevel": "medium"
+      "effortLevel": "high"
     },
     "claude-opus-5-5": {
-      "effortLevel": "medium",
+      "effortLevel": "high",
       "autoCompactWindow": 500000
     }
   },
