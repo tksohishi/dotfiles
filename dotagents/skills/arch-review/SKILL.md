@@ -1,6 +1,6 @@
 ---
-name: design-review
-description: Shell out to Claude Fable at xhigh effort (headless `claude -p`, read-only) for an adversarial review of the purpose, design and architecture of a plan or change: is it the right problem, does it serve the user's actual goal, what simpler or more conventional design would work, what it locks in, and what to cut. Implementation details (bugs, edge cases, tests, API usage) belong to /impl-review, not here. Use when the user says "/design-review", "design review", "Fable でレビュー", "設計をレビュー", before presenting a plan in plan mode, or before building anything whose direction would be costly to reverse (new architecture, data model, public interface, a new tool or service).
+name: arch-review
+description: Shell out to Claude Fable at xhigh effort (headless `claude -p`, read-only) for an adversarial review of the purpose, design and architecture of a plan or change: is it the right problem, does it serve the user's actual goal, what simpler or more conventional design would work, what it locks in, and what to cut. Implementation details (bugs, edge cases, tests, API usage) belong to /impl-review, not here. Use when the user says "/arch-review", "design review", "arch review", "Fable でレビュー", "設計をレビュー", before presenting a plan in plan mode, or before building anything whose direction would be costly to reverse (new architecture, data model, public interface, a new tool or service).
 ---
 
 # Design Review
@@ -16,7 +16,7 @@ Invoke when the user asks, in plan mode before presenting a plan, or proactively
 ## Prompt construction (do this every run)
 
 1. **Context paths.** List the files the reviewer should read: `AGENTS.md` / `CLAUDE.md`, `README.md`, `DESIGN.md` / `ARCHITECTURE.md` if present, and the 2-5 existing files the plan touches or competes with. The reviewer will not see this conversation.
-2. **The artifact.** A draft plan that only exists in the conversation goes to `tmp/design-review/plan.md` first; a change under review is a commit range or `git diff`. Point to it; don't paste long content.
+2. **The artifact.** A draft plan that only exists in the conversation goes to `tmp/arch-review/plan.md` first; a change under review is a commit range or `git diff`. Point to it; don't paste long content.
 3. **The user's goal.** Quote the user's request verbatim, plus any constraints they stated. Add the inferred intent in one sentence, labeled as inferred. Leave out the session's reasoning for the chosen design; the reviewer has to reach its own view from the artifact.
 4. **Already decided.** List decisions the user made explicitly, so the reviewer doesn't relitigate them. A reviewer who thinks one of them is wrong may say so once, as a CONCERN.
 
@@ -83,5 +83,5 @@ The prompt must come over stdin: `--disallowedTools` takes a variadic list and s
 4. Log one line once findings are settled; `user_overrode` counts answers where the user sided against your position.
 
 ```bash
-jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "design-review", reviewer: "claude", model: "claude-fable-5-1", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
+jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "arch-review", reviewer: "claude", model: "claude-fable-5-1", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
 ```

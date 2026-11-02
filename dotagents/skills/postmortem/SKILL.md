@@ -66,7 +66,7 @@ Sections, in order, dropping empty ones:
 
 ## Review
 
-For medium or high severity, run `/design-review` on the root cause and action items before finalizing, and fold in what holds up. Skip for low severity.
+For medium or high severity, run `/arch-review` on the root cause and action items before finalizing, and fold in what holds up. Skip for low severity.
 
 ## After writing
 

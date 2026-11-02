@@ -1,13 +1,13 @@
 ---
 name: impl-review
-description: Shell out to OpenAI Codex (GPT-6-Astra at xhigh, via `codex exec`) for an adversarial second-opinion review of the implementation details the current session produced. The prompt is composed fresh per invocation — project context, the user's actual goal, what was produced, and risk categories specific to this project's domain. Every review hunts correctness bugs and edge cases, audits test coverage, and checks newly used APIs against official docs, aiming at the details earlier agents missed. Purpose, design and architecture belong to /design-review, not here. Use when the user says "/impl-review", "impl review", "codex review", "Astra でチェック", "コーデックスでチェック", "別の LLM で review", or before committing/publishing work where errors are costly (financial claims, security-sensitive code, API contracts, public-facing copy, anything irreversible). The reviewer's job is to catch errors from first principles, not rubber-stamp "done".
+description: Shell out to OpenAI Codex (GPT-6-Astra at xhigh, via `codex exec`) for an adversarial second-opinion review of the implementation details the current session produced. The prompt is composed fresh per invocation — project context, the user's actual goal, what was produced, and risk categories specific to this project's domain. Every review hunts correctness bugs and edge cases, audits test coverage, and checks newly used APIs against official docs, aiming at the details earlier agents missed. Purpose, design and architecture belong to /arch-review, not here. Use when the user says "/impl-review", "impl review", "codex review", "Astra でチェック", "コーデックスでチェック", "別の LLM で review", or before committing/publishing work where errors are costly (financial claims, security-sensitive code, API contracts, public-facing copy, anything irreversible). The reviewer's job is to catch errors from first principles, not rubber-stamp "done".
 ---
 
 # Impl Review
 
 Shell out to **OpenAI Codex** so an independent model from another vendor audits the details of the current session's recent work. The reviewer reads the repo fresh — no memory of what the current session verified, no anchoring on its framing. That is the point: adversarial second-pair-of-eyes, not a peer reviewer who already trusts the author.
 
-This review takes the design as settled. Whether the work solves the right problem, the architecture, and the alternatives are `/design-review`'s job; run that first, on the plan, when the direction is still open.
+This review takes the design as settled. Whether the work solves the right problem, the architecture, and the alternatives are `/arch-review`'s job; run that first, on the plan, when the direction is still open.
 
 ## When to use
 
@@ -51,7 +51,7 @@ For UI / visual / generated-image work, **point to the rendered artifact** (PNG,
 
 For long outputs (drafts, specs, posts), do not paste the whole content into the prompt — tell the reviewer the path and have it `Read` the file itself. Pasting bloats the prompt and the reviewer's read of the live file is more authoritative anyway.
 
-Also list what has already been reviewed or verified this session (subagent reviews, `/design-review`, `/code-review`, tests run, sources fetched). The reviewer skips that ground and digs for what those passes missed.
+Also list what has already been reviewed or verified this session (subagent reviews, `/arch-review`, `/code-review`, tests run, sources fetched). The reviewer skips that ground and digs for what those passes missed.
 
 ### Step 3 — Pick risk categories
 
