@@ -25,6 +25,8 @@ A new brief is the last resort. Two briefs on one topic split the facts and leav
 4. Relevant but done (`todo` and `blocked` both empty, or every item in them covered by commits on its `touches` since its date, per `git log`): trash it (`trash`, not `rm`). If its body holds a measurement or ruled-out path nothing else records, carry it into the brief being written first.
 5. Write a new brief only when no relevant open brief exists, or when this session's topic is a separate goal that would make an existing brief about two things.
 
+An item is written in one brief only, the one that owns what the item changes; any other brief holds a one-line pointer `{id}（<brief file>）`. Before writing or updating an item, search the other briefs for the same change (`rg` on its slug and keywords) and update the owner instead of adding a copy.
+
 Leave unrelated briefs alone; sweeping the whole directory is `/prioritize`'s job.
 
 ## Ground it first
