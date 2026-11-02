@@ -32,6 +32,11 @@ while IFS= read -r line; do
     continue
   fi
   if [ "$HOST" = "$domain" ] || [[ "$HOST" == *.$domain ]]; then
+    rows=$(grep -hF "| $domain " "$SCRIPT_DIR"/../skills/fetch-blocked/references/sites*.md 2>/dev/null)
+    if [ "$msg" = "$DEFAULT_MSG" ] && [ -n "$rows" ]; then
+      msg="WebFetch blocked. Fetch via this path before citing the page:
+$rows"
+    fi
     echo "$msg" >&2
     exit 2
   fi
