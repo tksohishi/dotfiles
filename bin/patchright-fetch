@@ -81,6 +81,7 @@ const CHALLENGE = /press & hold|press and hold|verify you are|just a moment|chec
 try {
   const ctx = await chromium.launchPersistentContext(`${cacheDir}/${host}-profile`, {
     channel: 'chrome-canary',
+    chromiumSandbox: true,
     headless: false,
     args: show ? [] : ['--window-position=-2400,-2400'],
   })
