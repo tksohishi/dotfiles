@@ -1,0 +1,7 @@
+{
+  "name": "dotfiles",
+  "owner": { "name": "tksohishi" },
+  "plugins": [
+    { "name": "desktop-status", "source": "./desktop-status", "description": "Rate limits, next /loop wakeup and next cron fire above the prompt in Claude Desktop" }
+  ]
+}

@@ -579,7 +579,10 @@
     ]
   },
   "model": "opus",
-  "availableModels": ["fable", "opus"],
+  "availableModels": [
+    "fable",
+    "opus"
+  ],
   "enforceAvailableModels": true,
   "disableClaudeAiConnectors": true,
   "deniedMcpServers": [
@@ -1022,7 +1025,9 @@
     "type": "command",
     "command": "bash \"$HOME/.claude/statusline.sh\""
   },
-  "enabledPlugins": {},
+  "enabledPlugins": {
+    "desktop-status@dotfiles": true
+  },
   "outputStyle": "Concise",
   "feedbackDrafts": "off",
   "spinnerTipsEnabled": false,
@@ -1072,5 +1077,13 @@
       "routine under scripts/, dotclaude/, dotagents/, dotcodex/ prefixes within /Users/takeshi/.dotfiles is standard maintenance work for this repo"
     ]
   },
-  "idleCompaction": false
+  "idleCompaction": false,
+  "extraKnownMarketplaces": {
+    "dotfiles": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/takeshi/.dotfiles/dotclaude/plugins"
+      }
+    }
+  }
 }
