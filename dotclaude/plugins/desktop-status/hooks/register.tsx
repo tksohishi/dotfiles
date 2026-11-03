@@ -1,9 +1,9 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Limit, Schedule } from '../types'
+import type { Schedule } from '../types'
 
-const limits = atom({ plugin: 'desktop-status', key: 'limits' } as const, [])
+const monitors = atom({ plugin: 'desktop-status', key: 'monitors' } as const, [])
 const schedule = atom({ plugin: 'desktop-status', key: 'schedule' } as const, {
   wakeAt: null,
   cronNext: null,
@@ -14,17 +14,6 @@ const schedule = atom({ plugin: 'desktop-status', key: 'schedule' } as const, {
 const hhmm = (epoch: number) => {
   const d = new Date(epoch * 1000)
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
-
-const timeLeft = (secs: number) => {
-  if (secs <= 0) return 'resetting'
-  if (secs < 3600) return `${Math.floor(secs / 60)}m left`
-  if (secs < 86400) {
-    const h = Math.floor(secs / 3600)
-    const m = Math.floor((secs % 3600) / 60)
-    return m === 0 ? `${h}h left` : `${h}h ${m}m left`
-  }
-  return `${Math.floor(secs / 86400)}d left`
 }
 
 // Mirrors the cron section of dotclaude/statusline.sh, which reads the files
@@ -77,15 +66,14 @@ async function refresh($: EngineInterface) {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const result = await next(e)
-    await update($, limits, () => [])
     await refresh($)
     $.clock.every(30_000, () => void refresh($))
     return result
   })
 
-  on('session.measure', async ($, e, next) => {
-    const rates: Limit[] = e.rateLimits.map(r => ({ kind: r.kind, percentUsed: r.percentUsed, resetsAt: r.resetsAt }))
-    await update($, limits, () => rates)
+  on('classic.Stop', async ($, e, next) => {
+    const running = (e.background_tasks ?? []).filter(t => t.type === 'monitor').map(t => t.description)
+    await update($, monitors, () => running)
     await refresh($)
     return next(e)
   })
@@ -93,14 +81,7 @@ export const register: Register = on => {
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.surface !== 'desktop' || e.props.hasSurvey) return next(e)
 
-    const now = Math.floor((await $.clock.now()) / 1000)
     const parts: string[] = []
-    for (const kind of ['five_hour', 'seven_day']) {
-      const r = (await read($, limits)).find(l => l.kind === kind)
-      if (!r) continue
-      const left = r.resetsAt ? ` (${timeLeft(Math.floor(Date.parse(r.resetsAt) / 1000) - now)})` : ''
-      parts.push(`${Math.round(100 - r.percentUsed)}% ${kind === 'five_hour' ? '5h' : '7d'}${left}`)
-    }
     const s = await read($, schedule)
     if (s.wakeAt) parts.push(`⏰ ${hhmm(s.wakeAt)}`)
     if (s.cronJobs > 0) {
@@ -108,6 +89,11 @@ export const register: Register = on => {
       if (s.cronNext && s.cronRecurring) cron += ' ↻'
       if (s.cronJobs > 1) cron += ` +${s.cronJobs - 1}`
       parts.push(cron)
+    }
+    const watching = await read($, monitors)
+    const firstMonitor = watching[0]
+    if (firstMonitor !== undefined) {
+      parts.push(`👁 ${firstMonitor}${watching.length > 1 ? ` +${watching.length - 1}` : ''}`)
     }
     if (parts.length === 0) return next(e)
 
