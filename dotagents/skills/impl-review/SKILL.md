@@ -176,10 +176,13 @@ Be blunt. A false positive costs a minute; a false negative costs
 `codex` is on PATH via shell inheritance — call it directly, no `mise exec --` wrapper. Feed the Step 4 prompt over stdin via a quoted heredoc:
 
 ```bash
-codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh - <<'PROMPT'
+mkdir -p tmp/impl-review
+codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh -o tmp/impl-review/<stamp>.md - <<'PROMPT'
 {the assembled prompt from Step 4}
 PROMPT
 ```
+
+`<stamp>` is `date +%Y%m%d-%H%M%S`, run first and written literally into the path. `-o` saves the reviewer's final message (the findings, without tool-call traces) to the project's `tmp/`, because the background task's output file sits in a per-session temp directory that does not survive.
 
 The model and effort are pinned here because `~/.codex/config.toml` sets a different daily model at medium effort. The `-` arg tells `codex exec` to read the prompt from stdin. The heredoc ends at the delimiter, so EOF arrives and the call doesn't hang.
 
@@ -193,7 +196,7 @@ The model and effort are pinned here because `~/.codex/config.toml` sets a diffe
 
 When the reviewer returns:
 
-1. **Read findings only, not the whole transcript.** Reviewer output can be 100KB+ of tool-call traces. `grep -nE 'BLOCKER|CONCERN|NIT|VERDICT' <output-file>` first to find the findings section, then `Read` with `offset`/`limit`. Don't `cat` the whole file — wastes context on retry traces and tool noise.
+1. **Read the `-o` file, not the task output.** The task output holds 100KB+ of tool-call traces; the `-o` file holds only the findings. If the `-o` file is missing or empty (the run failed), check the tail of the task output for the error.
 2. Print the reviewer's VERDICT line.
 3. Group findings: BLOCKERs first, then CONCERNs, then NITs.
 4. For each finding, state whether you agree.

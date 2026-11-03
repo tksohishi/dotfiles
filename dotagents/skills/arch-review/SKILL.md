@@ -68,10 +68,13 @@ or
 ## Run
 
 ```bash
-claude -p --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" <<'PROMPT'
+mkdir -p tmp/arch-review
+claude -p --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" > tmp/arch-review/<stamp>.md <<'PROMPT'
 {the assembled prompt}
 PROMPT
 ```
+
+`<stamp>` is `date +%Y%m%d-%H%M%S`, run first and written literally into the path. The review lands in the project's `tmp/` because the background task's output file sits in a per-session temp directory that does not survive; read findings from the saved file.
 
 The prompt must come over stdin: `--disallowedTools` takes a variadic list and swallows a positional prompt as tool names. `dontAsk` denies any tool call not already allowed by settings, so the reviewer can read and run allowed read-only commands but cannot write. Quote the delimiter and keep any body line from being exactly `PROMPT`. Run it with `run_in_background: true`; don't poll.
 
