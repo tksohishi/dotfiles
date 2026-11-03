@@ -55,9 +55,21 @@ codex_input() {
   [[ "$output" == *'"ask"'* ]]
 }
 
-@test "asks on api call (arbitrary methods)" {
-  run "$HOOK" <<< "$(bash_input 'gog api call gmail.users.messages.delete')"
+@test "asks on api call with --allow-write" {
+  run "$HOOK" <<< "$(bash_input 'gog api call gmail v1 users.messages.delete --allow-write --params "{}"')"
   [[ "$output" == *'"ask"'* ]]
+  [[ "$output" == *"gog api call"* ]]
+}
+
+@test "allows api call without --allow-write (gog refuses writes itself)" {
+  run "$HOOK" <<< "$(bash_input 'gog api call admin reports_v1 reports.userUsageReport.get --params "{\"userKey\":\"all\"}"')"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "allows api call with --allow-write only inside a quoted arg" {
+  run "$HOOK" <<< "$(bash_input 'gog api call gmail v1 users.labels.list --params "--allow-write"')"
+  [ -z "$output" ]
 }
 
 @test "allows gmail get (read)" {

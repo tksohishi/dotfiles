@@ -11,7 +11,8 @@
 # gog release; the schema ships with the installed binary.
 #
 # The resolved leaf's name+aliases are checked against MUTATION_VERBS below.
-# `gog api call` is included: it can invoke arbitrary write methods.
+# `gog api call` asks only with --allow-write: without it gog itself refuses
+# any method its read-only transport check rejects (internal/cmd/api.go).
 # Fail open: if gog or its schema is unavailable, exit silently — the command
 # itself will fail anyway, and a broken hook must not block unrelated work.
 #
@@ -54,7 +55,7 @@ LABEL_PATHS='["gmail archive","gmail batch modify","gmail labels modify","gmail 
 if printf '%s' "$CMD" | grep -qiwE 'TRASH|SPAM'; then TRASH_SPAM=true; else TRASH_SPAM=false; fi
 
 # Leaf verbs (canonical names or aliases) that mutate remote state.
-MUTATION_VERBS='["create","new","add","invite","update","edit","set","unset","delete","del","rm","remove","send","post","move","transfer","trash","untrash","import","upload","copy","rename","clear","revoke","respond","rsvp","reply","subscribe","unsubscribe","archive","unarchive","restore","append","write","insert","format","share","mkdir","stop","end","submit","abort","prune","modify","batch-modify","replace","setup","reset","rotate","grant","call"]'
+MUTATION_VERBS='["create","new","add","invite","update","edit","set","unset","delete","del","rm","remove","send","post","move","transfer","trash","untrash","import","upload","copy","rename","clear","revoke","respond","rsvp","reply","subscribe","unsubscribe","archive","unarchive","restore","append","write","insert","format","share","mkdir","stop","end","submit","abort","prune","modify","batch-modify","replace","setup","reset","rotate","grant"]'
 
 # --include-hidden: shortcuts like `gmail filters` (= `gmail settings filters`)
 # are hidden, and without them the walk stops early and the verb is missed.
@@ -93,7 +94,9 @@ while IFS= read -r seg; do
     | .path as $p
     | if ($p | length) == 0 then empty
       else ($p | join(" ")) as $joined
-        | if ($exempt | index($joined)) != null then empty
+        | if $joined == "api call" then
+            (if ($t | any(test("^--allow-write(=|$)"))) then $joined else empty end)
+          elif ($exempt | index($joined)) != null then empty
           elif ($labelpaths | index($joined)) != null and ($trashspam | not) then empty
           elif (($p | last) == "create" or ($p | last) == "add")
             and ($joined | test($risky) | not)
