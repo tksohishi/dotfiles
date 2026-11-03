@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# Wrapper around the TickTick CLI (mise npm:@ticktick/ticktick-cli). Fixes
+# argument shapes the CLI accepts but silently mishandles:
+#   task search  defaults to --status 0; completed tasks otherwise read as open.
+#   task create  turns --items '["a","b"]' into [{"title":...}] (a string array
+#                is dropped with only a warning) and refuses a title that
+#                already exists as an open task in the same project.
+#   task update  adds the --id the CLI wants on top of the positional id, and
+#                re-sends --all-day for an all-day task (omitting it resets the
+#                task to timed).
+# Relies on ~/.local/bin preceding mise's tool dirs in PATH (.zshrc adds it
+# after `mise activate`). Bypass: TICKTICK_RAW=1 ticktick ...
+
+set -euo pipefail
+
+self=$(cd "$(dirname "$0")" && pwd -P)/$(basename "$0")
+REAL=""
+IFS=: read -ra dirs <<< "$PATH"
+for d in "${dirs[@]}"; do
+    c="$d/ticktick"
+    [ -x "$c" ] || continue
+    [ "$(cd "$(dirname "$c")" && pwd -P)/ticktick" = "$self" ] && continue
+    [ "$(readlink -f "$c")" = "$self" ] && continue
+    REAL=$c
+    break
+done
+[ -n "$REAL" ] || { echo "ticktick wrapper: real binary not found in PATH" >&2; exit 127; }
+
+if [ -n "${TICKTICK_RAW:-}" ] || [ "${1:-}" != task ]; then
+    exec "$REAL" "$@"
+fi
+
+sub=${2:-}
+args=("$@")
+
+opt() {
+    local name=$1 i
+    for ((i = 0; i < ${#args[@]}; i++)); do
+        case ${args[i]} in
+            "$name") echo "${args[i + 1]:-}"; return ;;
+            "$name="*) echo "${args[i]#*=}"; return ;;
+        esac
+    done
+}
+
+has() {
+    local a
+    for a in "${args[@]}"; do
+        case $a in "$1" | "$1="*) return 0 ;; esac
+    done
+    return 1
+}
+
+fix_items() {
+    local i v
+    for ((i = 0; i < ${#args[@]}; i++)); do
+        case ${args[i]} in
+            --items) v=${args[i + 1]:-} ;;
+            --items=*) v=${args[i]#*=}; args[i]=--items; args=("${args[@]:0:i+1}" "$v" "${args[@]:i+1}") ;;
+            *) continue ;;
+        esac
+        if printf '%s' "$v" | jq -e 'type == "array"' >/dev/null 2>&1; then
+            args[i + 1]=$(printf '%s' "$v" | jq -c 'map(if type == "string" then {title: .} else . end)')
+        fi
+        return
+    done
+}
+
+case $sub in
+    search)
+        has --status || args+=(--status 0)
+        ;;
+    create)
+        fix_items
+        title=$(opt --title)
+        project=$(opt --project)
+        if [ -n "$title" ]; then
+            dup=$("$REAL" task search "$title" --status 0 --json 2>/dev/null | jq -r --arg t "$title" --arg p "$project" '
+                .[] | select(.title == $t)
+                | select($p == "" or .projectId == $p or ($p == "inbox" and (.projectId | startswith("inbox"))))
+                | .id' | head -n 1) || dup=""
+            if [ -n "$dup" ]; then
+                echo "ticktick wrapper: open task with this title already exists: $dup (not created; TICKTICK_RAW=1 to force)" >&2
+                exit 3
+            fi
+        fi
+        ;;
+    update)
+        fix_items
+        id=${3:-}
+        if [ -n "$id" ] && [ "${id#-}" = "$id" ]; then
+            has --id || args+=(--id "$id")
+            project=$(opt --project)
+            if ! has --all-day && [ -n "$project" ]; then
+                allday=$("$REAL" task get "$project" "$id" --json 2>/dev/null | jq -r '.isAllDay // false') || allday=false
+                [ "$allday" = true ] && args+=(--all-day)
+            fi
+        fi
+        ;;
+esac
+
+exec "$REAL" "${args[@]}"

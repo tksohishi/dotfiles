@@ -3,7 +3,6 @@
 # PATH
 [ -d /opt/homebrew/bin ] && export PATH=/opt/homebrew/bin:$PATH
 [ -d $HOME/.bun/bin ] && export PATH=$HOME/.bun/bin:$PATH
-[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
 [ -d /opt/homebrew/opt/rustup/bin ] && export PATH=/opt/homebrew/opt/rustup/bin:$PATH
 [ -d $HOME/.cargo/bin ] && export PATH=$HOME/.cargo/bin:$PATH
 [ -d $HOME/.orbstack/bin ] && export PATH=$HOME/.orbstack/bin:$PATH
@@ -71,5 +70,7 @@ fi
 # Tool initialization
 command -v direnv >/dev/null && eval "$(direnv hook zsh)"
 command -v mise >/dev/null && eval "$(mise activate zsh)"
+# After mise activate: wrappers here (bin/ticktick) must shadow mise tool bins.
+[ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
 command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
 command -v starship >/dev/null && eval "$(starship init zsh)"
