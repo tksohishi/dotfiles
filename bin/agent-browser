@@ -146,6 +146,11 @@ if [ "$headed" -eq 0 ]; then
     export AGENT_BROWSER_ARGS="--mute-audio${AGENT_BROWSER_ARGS:+,$AGENT_BROWSER_ARGS}"
 fi
 
+# OmniboxEverywhere is a server-enabled field trial that adds a "Search from
+# anywhere" icon to the Mac menu bar. Chrome keeps only the last
+# --disable-features, so this repeats agent-browser's own Translate entry.
+export AGENT_BROWSER_ARGS="--disable-features=Translate,OmniboxEverywhere${AGENT_BROWSER_ARGS:+,$AGENT_BROWSER_ARGS}"
+
 LOCK="${TMPDIR:-/tmp}/agent-browser-$(lock_key).lock"
 
 # Daemon ownership. A launcher that must keep its daemon alive (a headed window
