@@ -19,6 +19,7 @@ Invoke when the user asks, in plan mode before presenting a plan, or proactively
 2. **The artifact.** A draft plan that only exists in the conversation goes to `<root>/tmp/arch-review/plan.md` first; a change under review is a commit range or `git diff`. Point to it; don't paste long content.
 3. **The user's goal.** Quote the user's request verbatim, plus any constraints they stated. Add the inferred intent in one sentence, labeled as inferred. Leave out the session's reasoning for the chosen design; the reviewer has to reach its own view from the artifact.
 4. **Already decided.** List decisions the user made explicitly, so the reviewer doesn't relitigate them. A reviewer who thinks one of them is wrong may say so once, as a CONCERN.
+5. **The user's note.** When the user adds one (`/arch-review` followed by text), pass it verbatim under its own heading, labeled as the user's.
 
 Keep the prompt under ~2KB. Skeleton:
 
@@ -69,22 +70,42 @@ or
 
 ```bash
 mkdir -p <root>/tmp/arch-review
-claude -p --add-dir <root> --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" > <root>/tmp/arch-review/<stamp>.md <<'PROMPT'
+claude -p --session-id <uuid> --add-dir <root> --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" > <root>/tmp/arch-review/<stamp>.md <<'PROMPT'
 {the assembled prompt}
 PROMPT
 ```
 
-`<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S`; run both first and write them literally into the path. The review lands in the project's `tmp/` because the background task's output file sits in a per-session temp directory that does not survive; read findings from the saved file. `--add-dir <root>` lets Fable read the project even when the session started elsewhere; it does not move relative paths, so every path in the prompt is absolute under `<root>`.
+`<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo), `<stamp>` is `date +%Y%m%d-%H%M%S` and `<uuid>` is `uuidgen | tr A-Z a-z`; run all three first and write them literally into the path. The review lands in the project's `tmp/` because the background task's output file sits in a per-session temp directory that does not survive; read findings from the saved file. `--add-dir <root>` lets Fable read the project even when the session started elsewhere; it does not move relative paths, so every path in the prompt is absolute under `<root>`.
 
 The prompt must come over stdin: `--disallowedTools` takes a variadic list and swallows a positional prompt as tool names. `dontAsk` denies any tool call not already allowed by settings, so the reviewer can read and run allowed read-only commands but cannot write. Quote the delimiter and keep any body line from being exactly `PROMPT`. Run it with `run_in_background: true`; don't poll.
 
-## Reporting back to the user
+## Rebuttal rounds
 
-1. Print the VERDICT line, then findings grouped BLOCKER, CONCERN, NIT, each with whether you agree and why. Don't auto-capitulate, and don't defend the plan by restating the reasoning the reviewer was not given; answer the point.
-2. Design findings change direction, design or scope, so they are the user's call, not yours. Apply only ones that are plainly a detail (a missing step, a wrong file). For the rest, list every one with your position in the reply first, then ask with AskUserQuestion (at most 4 per call): quote the reviewer's point verbatim, then your position and the trade-off, with the reviewer's alternative and the current plan as the options.
-3. Revise the plan with the user's answers before presenting it or building.
-4. Log one line once findings are settled; `user_overrode` counts answers where the user sided against your position.
+The first round stays a cold read; the follow-up is a conversation with the same reviewer, which keeps its own thread.
+
+Start one when you disagree with any BLOCKER or CONCERN, or when the user asks you to put a point to the reviewer. Send only what is new since the last round, each part labeled with who said it:
+
+- your rebuttal per disputed finding, quoting its title, answering the point with evidence (a file path, a measurement, a constraint the reviewer missed), not with the design reasoning withheld from round one
+- the user's words, verbatim, when they weighed in
+- paths to anything changed or newly relevant, never pasted content
+
+Ask the reviewer to answer each disputed finding with `HOLD` or `CONCEDE` and one line why.
 
 ```bash
-jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "arch-review", reviewer: "claude", model: "claude-fable-5-1", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
+claude -p --resume <uuid> --add-dir <root> --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" > <root>/tmp/arch-review/<stamp>-r2.md <<'PROMPT'
+{the rebuttal}
+PROMPT
+```
+
+At most two rebuttal rounds (`-r2`, `-r3`); after that, the remaining disagreement goes to the user.
+
+## Reporting back to the user
+
+1. Print the VERDICT line, then findings grouped BLOCKER, CONCERN, NIT, each with whether you agree and why. Don't auto-capitulate, and don't defend the plan by restating the reasoning the reviewer was not given; answer the point. After rebuttal rounds, list conceded findings as resolved, one line each.
+2. Design findings change direction, design or scope, so they are the user's call, not yours. Apply only ones that are plainly a detail (a missing step, a wrong file). For the rest, including every finding the reviewer held after rebuttal, list each with both positions in the reply first, then ask with AskUserQuestion (at most 4 per call): quote the reviewer's point verbatim, then your position and the trade-off, with the reviewer's alternative and the current plan as the options.
+3. Revise the plan with the user's answers before presenting it or building.
+4. Log one line once findings are settled; `user_overrode` counts answers where the user sided against your position, `conceded` the findings the reviewer dropped in rebuttal rounds.
+
+```bash
+jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "arch-review", reviewer: "claude", model: "claude-fable-5-1", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
 ```
