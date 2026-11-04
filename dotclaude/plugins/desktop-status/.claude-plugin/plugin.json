@@ -1,1 +1,0 @@
-{ "name": "desktop-status", "version": "0.1.0", "description": "Rate limits, next /loop wakeup and next cron fire above the prompt in Claude Desktop", "types": "./types/index.d.ts" }

@@ -1025,9 +1025,7 @@
     "type": "command",
     "command": "bash \"$HOME/.claude/statusline.sh\""
   },
-  "enabledPlugins": {
-    "desktop-status@dotfiles": true
-  },
+  "enabledPlugins": {},
   "outputStyle": "Concise",
   "feedbackDrafts": "off",
   "spinnerTipsEnabled": false,
@@ -1077,13 +1075,5 @@
       "routine under scripts/, dotclaude/, dotagents/, dotcodex/ prefixes within /Users/takeshi/.dotfiles is standard maintenance work for this repo"
     ]
   },
-  "idleCompaction": false,
-  "extraKnownMarketplaces": {
-    "dotfiles": {
-      "source": {
-        "source": "directory",
-        "path": "/Users/takeshi/.dotfiles/dotclaude/plugins"
-      }
-    }
-  }
+  "idleCompaction": false
 }
