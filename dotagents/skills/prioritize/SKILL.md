@@ -5,7 +5,7 @@ description: Rank the plan documents under a project's tmp/plans/ (the tmp-plan 
 
 # prioritize
 
-Reads `tmp/plans/<YYYY-MM-DD>-<slug>.md` (the briefs `tmp-plan` writes), decides for each whether it is done, open or blocked, cleans up accordingly, and ranks what is left. The output is a decision aid for the user, not a plan of record: nothing is started.
+Reads `tmp/plans/<YYYY-MM-DD>-<slug>.md` (the briefs `tmp-plan` writes), decides for each whether it is done, open or blocked, cleans up accordingly, and ranks what is left. The output puts in front of the user only what is theirs to decide, and hands the rest to sessions they start with a click: nothing starts without that click.
 
 The cost driver is reading. A brief carries its state in a frontmatter block (the schema is in `tmp-plan`), so the main session reads frontmatter and git subjects only; a brief without one is retrofitted by a subagent once and then costs the same as the rest.
 
@@ -76,11 +76,12 @@ Cost is the attribute: for a decision, what the user has to read first; for a ch
 
 ## 6. Present
 
-Write in the language the user is using. One list, one row per brief, one screen:
+Write in the language the user is using. Two ranked lists on one screen, one row per brief: "Your decisions" (rows whose next step is the user's: a question, a go, an account or a key) first, then "For sessions" (rows a session can do now). Each row:
 
-- rank; brief (its name, no link); who (the user, or a session); the first step in one line: the question to answer when a decision is pending, else the first `todo` item (its number and tag) at its latest next step, read from its last dated note and not its opening text, which is the plan as first written; when that note waits on the user, the row says so; tier and urgency (the deadline with its weekday and what the lead time is for, or bleed); cost.
+- rank; brief (its name, no link); the first step in one line: the question to answer when a decision is pending, else the first `todo` item (its number and tag) at its latest next step, read from its last dated note and not its opening text, which is the plan as first written; when that note waits on the user, the row goes to "Your decisions"; tier and urgency (the deadline with its weekday and what the lead time is for, or bleed); cost.
 - An item is in progress when a commit named in the item, or a commit on its `touches` whose subject matches its slug keywords, is within the last 48 hours. An in-progress item whose latest next step leaves no code to write now (it waits on a measurement, a race, a deploy's read or the user) leaves the ranking for an "In progress" section above it, one line each with what it waits on; one with code still to write stays ranked, marked in progress.
 - A brief with several `todo` items ranks on its best item; the rest ride along and are not listed, except that a P1 or P2 item of a brief that also holds P0 items gets its own row when it outranks the briefs whose best item has its tag.
-- Below the list: what the cleanup did (trashed with why in a few words, items moved to `done` or out of `blocked`, folded) and anything a spot-check contradicted, with the agent's claim and the evidence. Blocked briefs (empty `todo`) whose triggers have not fired are listed in one line each, trigger included, after the ranking.
+- Below the list: what the cleanup did (trashed with why in a few words, items moved to `done` or out of `blocked`, folded) and anything a spot-check contradicted, with the agent's claim and the evidence. Blocked briefs (empty `todo`) whose triggers have not fired are listed in one line each, trigger included, after the ranking. An item with no step anyone can take now is `blocked` with its trigger, never a ranked row marked on hold.
+- "For sessions" is grouped into lanes: rows whose `touches` share a file go in one lane, in rank order, since two sessions writing the same file overwrite each other.
 
-Then stop. Ask nothing; the user picks. Do not start the top item, do not commit, do not write a handoff.
+Then propose the first row of each of the top lanes as a session card (`start_session`, initiation `own_initiative`, context `fresh`), three at most: the brief names the brief file, the item's slug, its latest next step, and done as the project's instruction file defines it for that kind of change (its reviews, tests, dry run, and the deploy go left to the user). Ask nothing else; the user decides the rows in "Your decisions" and starts the cards. Do not start an item yourself, do not commit, do not write a handoff.
