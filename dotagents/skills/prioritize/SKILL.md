@@ -36,6 +36,7 @@ Hand the retrofit and recheck lists to subagents, about eight briefs each, all l
 - the list of briefs and today's date;
 - read-only rules: `cat`, `sed`, `rg`, `fd`, `git log`, `git show`; no edits, no commits, no scripts that touch a network;
 - the job per brief: read it whole, find what shipped (commits since its date on the paths it names, a subject search on its keywords, and the current code at the symbols it names), and write one file per brief into the session scratchpad holding the frontmatter fields (`goal`, `touches`, `done`, `todo`, `blocked`, in the schema `tmp-plan` gives, keeping each `todo` line's priority tag) plus an `evidence:` line with the file:line or hash behind each item moved to `done` or out of `blocked`;
+- for each `todo` item, its latest dated note: whether what it waits on still holds (a deploy: compare the commit with the host's deployed-commit record where the project keeps one, e.g. `git merge-base --is-ancestor <hash> <deployed>`; a measurement or trigger: whether it has accrued, from sources it can read without a network); a next step that no longer holds is rewritten, and the evidence line says so;
 - a reply under 200 words: one line per brief and anything it was unsure about.
 
 Integrate from the files, not the replies. Spot-check before applying: every hash an agent calls shipped exists (in its own repo, which may not be this one) and its subject matches the claim; a `done` verdict gets one search for the doc's main symbol. An agent that could not decide leaves the item in `todo` with a note; a wrong `done` loses work, a wrong `todo` costs one more read next time.
@@ -77,8 +78,9 @@ Cost is the attribute: for a decision, what the user has to read first; for a ch
 
 Write in the language the user is using. One list, one row per brief, one screen:
 
-- rank; brief (its name, no link); who (the user, or a session); the first step in one line: the question to answer when a decision is pending, else the first `todo` item (its number and tag); tier and urgency (the deadline with its weekday and what the lead time is for, or bleed); cost.
-- A brief with several `todo` items ranks on its best item; the rest ride along and are not listed.
+- rank; brief (its name, no link); who (the user, or a session); the first step in one line: the question to answer when a decision is pending, else the first `todo` item (its number and tag) at its latest next step, read from its last dated note and not its opening text, which is the plan as first written; when that note waits on the user, the row says so; tier and urgency (the deadline with its weekday and what the lead time is for, or bleed); cost.
+- A row is marked in progress when a commit named in the item, or a commit on its `touches` whose subject matches its slug keywords, is within the last 48 hours.
+- A brief with several `todo` items ranks on its best item; the rest ride along and are not listed, except that a P1 or P2 item of a brief that also holds P0 items gets its own row when it outranks the briefs whose best item has its tag.
 - Below the list: what the cleanup did (trashed with why in a few words, items moved to `done` or out of `blocked`, folded) and anything a spot-check contradicted, with the agent's claim and the evidence. Blocked briefs (empty `todo`) whose triggers have not fired are listed in one line each, trigger included, after the ranking.
 
 Then stop. Ask nothing; the user picks. Do not start the top item, do not commit, do not write a handoff.
