@@ -176,19 +176,19 @@ Be blunt. A false positive costs a minute; a false negative costs
 `codex` is on PATH via shell inheritance — call it directly, no `mise exec --` wrapper. Feed the Step 4 prompt over stdin via a quoted heredoc:
 
 ```bash
-mkdir -p tmp/impl-review
-codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh -o tmp/impl-review/<stamp>.md - <<'PROMPT'
+mkdir -p <root>/tmp/impl-review
+codex exec -C <root> -m gpt-6-astra -c model_reasoning_effort=xhigh -o <root>/tmp/impl-review/<stamp>.md - <<'PROMPT'
 {the assembled prompt from Step 4}
 PROMPT
 ```
 
-`<stamp>` is `date +%Y%m%d-%H%M%S`, run first and written literally into the path. `-o` saves the reviewer's final message (the findings, without tool-call traces) to the project's `tmp/`, because the background task's output file sits in a per-session temp directory that does not survive.
+`<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S`; run both first and write them literally into the path. `-o` saves the reviewer's final message (the findings, without tool-call traces) to the project's `tmp/`, because the background task's output file sits in a per-session temp directory that does not survive. `-C <root>` makes the project the reviewer's working root wherever the session started; still give every path in the prompt as an absolute path under `<root>`.
 
 The model and effort are pinned here because `~/.codex/config.toml` sets a different daily model at medium effort. The `-` arg tells `codex exec` to read the prompt from stdin. The heredoc ends at the delimiter, so EOF arrives and the call doesn't hang.
 
 **Don't combine `codex exec review --uncommitted` with a custom prompt.** Those flags are mutually exclusive (`error: the argument '--uncommitted' cannot be used with '[PROMPT]'`). Use plain `codex exec` with a custom prompt — the project-specific adversarial framing is the value-add. The built-in `review` mode is fine for generic code review but skips everything Steps 1-3 composed.
 
-**Heredoc hygiene.** Quote the delimiter (`<<'PROMPT'`) so nothing in the prompt body is shell-expanded, and make sure no line of the body is exactly `PROMPT`. If the prompt is unusually long or you want it inspectable/re-runnable after the fact, writing it to `tmp/impl-review/prompt.md` and redirecting (`< tmp/impl-review/prompt.md`) still works.
+**Heredoc hygiene.** Quote the delimiter (`<<'PROMPT'`) so nothing in the prompt body is shell-expanded, and make sure no line of the body is exactly `PROMPT`. If the prompt is unusually long or you want it inspectable/re-runnable after the fact, writing it to `<root>/tmp/impl-review/prompt.md` and redirecting (`< <root>/tmp/impl-review/prompt.md`) still works.
 
 **Run in the background.** Reviews take 1-5 minutes. Use `run_in_background: true` on the Bash tool call and continue with other work; you'll be notified on completion. Don't poll, don't sleep.
 

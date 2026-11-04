@@ -11,7 +11,7 @@ An independent model audits a piece of writing or analysis the session produced.
 
 The reviewer never sees this conversation; everything it needs comes from the prompt and the files it names.
 
-1. **Context.** List the paths it must read first: the project's `AGENTS.md`, the files a project skill names as context (user profile, org notes), the draft itself, and the primary sources the draft relies on (thread files, data, images, linked docs). Give paths; don't paste content.
+1. **Context.** List the paths it must read first: the project's `AGENTS.md`, the files a project skill names as context (user profile, org notes), the draft itself, and the primary sources the draft relies on (thread files, data, images, linked docs). Give absolute paths under `<root>`, never relative ones, so the reviewers read the same files whatever directory they start in; don't paste content.
 2. **Goal.** Quote the user's request verbatim, then state who reads the result and what decision it feeds (a vote, a reply, a purchase).
 3. **Already verified.** List what this session already checked against sources, so the reviewer spends its effort elsewhere.
 4. **Lenses.** Always include these three:
@@ -38,13 +38,13 @@ End with one line: VERDICT: Ready | Fix first
 
 ## Run
 
-`<stamp>` is `date +%Y%m%d-%H%M%S`, run first and written literally into every path below. Write the assembled prompt to `tmp/cross-review/<stamp>-prompt.md`, then:
+`<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S`; run both first and write them literally into every path below. Write the assembled prompt to `<root>/tmp/cross-review/<stamp>-prompt.md`, then:
 
 ```bash
-codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh -s read-only -o tmp/cross-review/<stamp>-codex.md - < tmp/cross-review/<stamp>-prompt.md
+codex exec -C <root> -m gpt-6-astra -c model_reasoning_effort=xhigh -s read-only -o <root>/tmp/cross-review/<stamp>-codex.md - < <root>/tmp/cross-review/<stamp>-prompt.md
 ```
 
-`-o` saves only the reviewer's final message to the project's `tmp/`; the background task's own output sits in a per-session temp directory that does not survive. `-s read-only` keeps the reviewer from editing; web search still works for sources outside the repo. Run with `run_in_background: true`; don't poll.
+`-C` and `--add-dir` give each reviewer the project root whatever directory the session started in. `-o` saves only the reviewer's final message to the project's `tmp/`; the background task's own output sits in a per-session temp directory that does not survive. `-s read-only` keeps the reviewer from editing; web search still works for sources outside the repo. Run with `run_in_background: true`; don't poll.
 
 ### Extra reviewers, only when asked
 
@@ -53,7 +53,7 @@ Add a reviewer only when the user names it (`/cross-review fable`, `/cross-revie
 **Fable at xhigh.** Worth it on high-stakes analysis; from a Claude session it is a deeper reading by the same model family, not a different lineage.
 
 ```bash
-claude -p --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" < tmp/cross-review/<stamp>-prompt.md > tmp/cross-review/<stamp>-fable.md
+claude -p --add-dir <root> --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" < <root>/tmp/cross-review/<stamp>-prompt.md > <root>/tmp/cross-review/<stamp>-fable.md
 ```
 
 The prompt must come over stdin: `--disallowedTools` takes a variadic list and swallows a positional prompt as tool names. `dontAsk` denies any tool not already allowed by settings; `WebSearch` and `WebFetch` are on the allow list, so Fable checks web sources itself.
@@ -65,12 +65,12 @@ The prompt must come over stdin: `--disallowedTools` takes a variadic list and s
 3. `-p` ignores stdin, so pipe the prompt in as stream-json:
 
 ```bash
-jq -Rsc '{event:"user",message:{content:[{type:"text",text:.}]}}' tmp/cross-review/<stamp>-prompt.md |
-  agy --model gemini-4-argon-high --mode plan --input-format stream-json --output-format stream-json -p "" \
-  > tmp/cross-review/<stamp>-argon.ndjson
+jq -Rsc '{event:"user",message:{content:[{type:"text",text:.}]}}' <root>/tmp/cross-review/<stamp>-prompt.md |
+  agy --add-dir <root> --model gemini-4-argon-high --mode plan --input-format stream-json --output-format stream-json -p "" \
+  > <root>/tmp/cross-review/<stamp>-argon.ndjson
 ```
 
-4. Read it with `jq -r 'select(.event=="result") | .result | .status, .response' tmp/cross-review/<stamp>-argon.ndjson`. An empty `response` is a failed run even when `status` is `SUCCESS`; check `select(.event=="step_update") | .step_update | select(.state=="ERROR")` for the cause and report it rather than retrying blindly.
+4. Read it with `jq -r 'select(.event=="result") | .result | .status, .response' <root>/tmp/cross-review/<stamp>-argon.ndjson`. An empty `response` is a failed run even when `status` is `SUCCESS`; check `select(.event=="step_update") | .step_update | select(.state=="ERROR")` for the cause and report it rather than retrying blindly.
 
 ## Report back
 
