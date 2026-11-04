@@ -66,11 +66,12 @@ RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"fa
   [ "$(gh_calls)" = "1" ]
 }
 
-@test "no run while Actions is degraded: stops waiting and names the status" {
+@test "no run while Actions is degraded: stops waiting silently and clears the marker" {
   make_marker; push_workflow; fake_gh '[]'; fake_actions_status degraded_performance
   export CI_GATE_WAIT_MAX=60
   run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'githubstatus Actions: degraded_performance'* ]]
+  [ -z "$output" ]
+  [ ! -e "$MARKER" ]
   [ "$(gh_calls)" = "1" ]
 }
 
@@ -94,19 +95,18 @@ RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"fa
   [ "$(jq -r .blocks "$MARKER")" = "1" ]
 }
 
-@test "in-progress run while Actions is degraded: reports unverified once and clears the marker" {
+@test "in-progress run while Actions is degraded: stops waiting silently and clears the marker" {
   make_marker; fake_gh "$IN_PROGRESS"; fake_actions_status degraded_performance
   export CI_GATE_WAIT_MAX=60
   run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'unverified'* ]]
-  [[ "$output" == *'githubstatus Actions: degraded_performance'* ]]
+  [ -z "$output" ]
   [ ! -e "$MARKER" ]
   [ "$(gh_calls)" = "1" ]
 }
 
-@test "unhealthy Actions in the CLI: shows a systemMessage without blocking" {
-  make_marker; push_workflow; fake_gh '[]'; fake_actions_status degraded_performance
-  export CLAUDE_CODE_ENTRYPOINT=cli
+@test "stalled runs in the CLI: shows a systemMessage without blocking" {
+  make_marker 0 $(( $(date +%s) - 600 )); fake_gh "$QUEUED"
+  export CLAUDE_CODE_ENTRYPOINT=cli CI_GATE_WAIT_MAX=60
   run "$HOOK" <<< "$(input)"
   [ "$(echo "$output" | jq -r '.systemMessage')" != null ]
   [ "$(echo "$output" | jq -r '.decision')" = null ]

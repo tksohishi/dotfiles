@@ -22,6 +22,7 @@ short=${sha:0:7}
 block() { jq -n --arg r "$1" '{decision:"block", reason:$r}'; exit 0; }
 # The desktop app does not render systemMessage, so outside the CLI the agent relays the notice.
 unverified() {
+  degraded && exit 0
   [ "${CLAUDE_CODE_ENTRYPOINT:-}" = cli ] || block "$1 The gate will not wait again for this SHA. Tell the user CI is unverified for $short; do not poll for it."
   jq -n --arg m "$1" '{systemMessage:$m}'; exit 0
 }
