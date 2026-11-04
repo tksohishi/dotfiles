@@ -56,7 +56,7 @@ Add a reviewer only when the user names it (`/cross-review fable`, `/cross-revie
 claude -p --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" < tmp/cross-review/<stamp>-prompt.md > tmp/cross-review/<stamp>-fable.md
 ```
 
-The prompt must come over stdin: `--disallowedTools` takes a variadic list and swallows a positional prompt as tool names. `dontAsk` denies any tool not already allowed by settings, so Fable reads the repo but may not reach the web; give it local copies of web sources where they exist.
+The prompt must come over stdin: `--disallowedTools` takes a variadic list and swallows a positional prompt as tool names. `dontAsk` denies any tool not already allowed by settings; `WebSearch` and `WebFetch` are on the allow list, so Fable checks web sources itself.
 
 **Gemini 4 Argon.** The Google AI Pro allowance is small (a full review uses several percent of the weekly bucket).
 
