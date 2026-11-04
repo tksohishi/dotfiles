@@ -177,10 +177,12 @@ Be blunt. A false positive costs a minute; a false negative costs
 
 ```bash
 mkdir -p <root>/tmp/impl-review
-codex exec -C <root> -m gpt-6-astra -c model_reasoning_effort=xhigh -o <root>/tmp/impl-review/<stamp>.md - <<'PROMPT'
+codex exec --json -C <root> -m gpt-6-astra -c model_reasoning_effort=xhigh -o <root>/tmp/impl-review/<stamp>.md - > <root>/tmp/impl-review/<stamp>.jsonl <<'PROMPT'
 {the assembled prompt from Step 4}
 PROMPT
 ```
+
+`--json` writes the run's events to the `.jsonl` file; its first line, `thread.started`, carries the `thread_id` that rebuttal rounds resume.
 
 `<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S`; run both first and write them literally into the path. `-o` saves the reviewer's final message (the findings, without tool-call traces) to the project's `tmp/`, because the background task's output file sits in a per-session temp directory that does not survive. `-C <root>` makes the project the reviewer's working root wherever the session started; still give every path in the prompt as an absolute path under `<root>`.
 
@@ -192,11 +194,23 @@ The model and effort are pinned here because `~/.codex/config.toml` sets a diffe
 
 **Run in the background.** Reviews take 1-5 minutes. Use `run_in_background: true` on the Bash tool call and continue with other work; you'll be notified on completion. Don't poll, don't sleep.
 
+## Rebuttal rounds
+
+The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, or when the user asks you to put a point to the reviewer. Send only what is new since the last round, each part labeled with who said it: your rebuttal per disputed finding (quote its title; answer with evidence such as a test run, a file path or a doc link), the user's words verbatim when they weighed in, and paths to anything changed since. Ask the reviewer to answer each disputed finding with `HOLD` or `CONCEDE` and one line why.
+
+```bash
+codex exec resume <thread_id> -m gpt-6-astra -c model_reasoning_effort=xhigh -c sandbox_mode='"read-only"' -o <root>/tmp/impl-review/<stamp>-r2.md - > /dev/null <<'PROMPT'
+{the rebuttal}
+PROMPT
+```
+
+`<thread_id>` comes from `jq -r 'select(.type=="thread.started") | .thread_id' <root>/tmp/impl-review/<stamp>.jsonl`. `resume` takes no `-C` or `-s`, so the sandbox goes through `-c` and every path stays absolute. At most two rebuttal rounds (`-r2`, `-r3`); after that, the remaining disagreement goes to the user. Conceded findings are listed as resolved, one line each; held ones go to the user with both positions, per step 8 below.
+
 ## Reporting back to the user
 
 When the reviewer returns:
 
-1. **Read the `-o` file, not the task output.** The task output holds 100KB+ of tool-call traces; the `-o` file holds only the findings. If the `-o` file is missing or empty (the run failed), check the tail of the task output for the error.
+1. **Read the `-o` file, not the event log.** The `.jsonl` file holds every tool call; the `-o` file holds only the findings. If the `-o` file is missing or empty (the run failed), check the tail of the `.jsonl` file for the error.
 2. Print the reviewer's VERDICT line.
 3. Group findings: BLOCKERs first, then CONCERNs, then NITs.
 4. For each finding, state whether you agree.
@@ -207,7 +221,7 @@ When the reviewer returns:
 9. Log one line to `~/.local/state/review/log.jsonl` (create the directory if missing) once findings are settled, after the user's answers to any step 8 questions, so reviewers can be compared across projects later. Counts come from your step 4 judgments (a "noted, not fixed" finding is accepted); `user_overrode` is step 8 answers where the user sided against your position.
 
 ```bash
-jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "impl-review", reviewer: "codex", model: "gpt-6-astra", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
+jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "impl-review", reviewer: "codex", model: "gpt-6-astra", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
 ```
 
 ## Notes
