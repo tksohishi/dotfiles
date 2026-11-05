@@ -979,6 +979,15 @@
       {
         "hooks": [
           {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/one-command-per-reply.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
             "async": true,
             "command": "'/opt/homebrew/bin/moshi-hook' claude-hook",
             "type": "command"
