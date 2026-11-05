@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Print the public parts of ~/.ssh for agents, which are denied direct reads of
+# the directory. Takes no arguments so it can never be pointed at a private key.
+
+set -euo pipefail
+
+dir="$HOME/.ssh"
+
+section() { printf '\n== %s ==\n' "$1"; }
+
+section "files"
+ls -l "$dir"
+
+for pub in "$dir"/*.pub; do
+    [[ -f "$pub" ]] || continue
+    section "${pub##*/}"
+    cat "$pub"
+    ssh-keygen -lf "$pub"
+done
+
+if [[ -f "$dir/authorized_keys" ]]; then
+    section "authorized_keys"
+    cat "$dir/authorized_keys"
+    ssh-keygen -lf "$dir/authorized_keys"
+fi
+
+if [[ -f "$dir/known_hosts" ]]; then
+    section "known_hosts"
+    echo "$(wc -l < "$dir/known_hosts" | tr -d ' ') entries; look up one host with: ssh-keygen -F <host>"
+fi
+
+if [[ -f "$dir/config" ]]; then
+    section "config"
+    cat "$dir/config"
+fi
