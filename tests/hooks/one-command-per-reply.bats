@@ -44,3 +44,17 @@ two=$'First:\n\n```bash\njust aws-login\n```\n\nThen:\n\n```bash\njust secret aw
   CLAUDE_CODE_ENTRYPOINT=claude-desktop run "$HOOK" <<< "$(input true)"
   [ -z "$output" ]
 }
+
+@test "one block followed by an ask to report back: blocks" {
+  for ask in '済んだら知らせてください。' '出力を貼ってください。' 'Let me know when it is done.'; do
+    transcript $'Run:\n\n```bash\njust secret aws sandbox\n```\n\n'"$ask"
+    CLAUDE_CODE_ENTRYPOINT=claude-desktop run "$HOOK" <<< "$(input)"
+    [[ "$output" == *'report back'* ]]
+  done
+}
+
+@test "an ask before the block, or none after it: passes" {
+  transcript $'済んだら次へ進みます。\n\n```bash\njust secret aws sandbox\n```\n\nThis sends the key.'
+  CLAUDE_CODE_ENTRYPOINT=claude-desktop run "$HOOK" <<< "$(input)"
+  [ -z "$output" ]
+}

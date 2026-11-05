@@ -18,6 +18,11 @@ last=$(jq -rs 'map(select(.type == "assistant") | .message.content
 
 n=$(printf '%s\n' "$last" | grep -Ec '^[[:space:]]*```(bash|sh|shell|zsh|console)[[:space:]]*$' || true)
 if [ "${n:-0}" -ge 2 ]; then
-  jq -n --arg n "$n" '{decision:"block", reason:("The reply hands the user " + $n + " shell code blocks. In the Claude app give one command at a time: the user runs it, reports the result, and the next command follows from that. Rewrite the reply with only the first command and say what comes after it in words.")}'
+  jq -n --arg n "$n" '{decision:"block", reason:("The reply hands the user " + $n + " shell code blocks. In the Claude app give one command at a time: the user runs it, its output comes back as the next turn, and the next command follows from that. Rewrite the reply with only the first command and say what comes after it in words.")}'
+  exit 0
+fi
+after=$(printf '%s\n' "$last" | awk '/^[[:space:]]*```/ { fence = NR } { line[NR] = $0 } END { for (i = fence + 1; i <= NR; i++) print line[i] }')
+if [ "${n:-0}" -eq 1 ] && printf '%s\n' "$after" | grep -Eiq '済んだら|終わったら|知らせて|貼って|教えてください|let me know|tell me when|paste (the|its) output'; then
+  jq -n '{decision:"block", reason:"The reply asks the user to report back after the command. In the Claude app its output comes back as the next turn by itself: drop the ask and end with the command."}'
 fi
 exit 0
