@@ -60,6 +60,7 @@ files=(
     .config/aube/config.toml
     .config/zed/settings.json
     .config/httpie/config.json
+    .config/herdr/config.toml
 )
 
 echo ""
