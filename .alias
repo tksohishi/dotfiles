@@ -13,14 +13,3 @@ alias tsource='tmux source ~/.tmux.conf'
 
 # Autojump muscle memory — z is zoxide's jump cmd
 alias j='z'
-
-cb() {
-  local id
-  if [[ $# -eq 0 ]]; then
-    id=$(claude agents --json --cwd "$PWD" | jq -r --arg d "$PWD" 'map(select(.kind == "background" and .cwd == $d)) | .[0].id // empty')
-  fi
-  if [[ -z $id ]]; then
-    id=$(claude --bg "$@" | sed -n 's/^backgrounded · \([0-9a-f]*\).*/\1/p')
-  fi
-  [[ -n $id ]] && claude attach "$id"
-}
