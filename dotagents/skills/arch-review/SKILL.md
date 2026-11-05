@@ -47,9 +47,14 @@ Under review: {plan path or commit range}
 - Lock-in: what does it make hard to reverse or change later (data shapes,
   interfaces, dependencies, naming)?
 - Scope: what should be cut, deferred, or is missing for the goal?
+- External dependencies: for each library, API or service the plan integrates,
+  read its official docs (`ctx7 library` then `ctx7 docs`, else the vendor's
+  site). Does the design follow the documented integration model, or fight it
+  (a built-in feature it reimplements, a deprecated path, a limit or pricing
+  rule that breaks it)?
 
-Out of scope: bugs, edge cases, tests, style, API correctness. Mention one only
-if it proves the design wrong.
+Out of scope: bugs, edge cases, tests, style, per-call API correctness. Mention
+one only if it proves the design wrong.
 
 ## Constraints
 - Output ≤ 500 words. Read narrowly: `rg -l`, `git diff --stat`, file ranges.
