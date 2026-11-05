@@ -127,6 +127,7 @@ When proposing a fix, name the deterministic option first, note the tradeoffs (f
 
 ## Secrets
 - Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), `.dev.vars`, or `.prod.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
+- `~/.ssh` is denied to direct reads. Run `ssh-info` to see public keys, `authorized_keys`, `config` and the `known_hosts` entry count; `ssh-keygen -F <host>` checks one known host.
 
 ## Google Workspace
 - Use the `gog` CLI for all Google services (Gmail, Calendar, Drive, Docs, Sheets, ...), not the MCP Google tools. MCP is the fallback only when `gog` lacks the account or capability. Run `gog <service> --help` before concluding an operation isn't supported.
