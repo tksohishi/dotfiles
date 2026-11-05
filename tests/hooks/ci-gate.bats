@@ -6,7 +6,9 @@ setup() {
   export CLAUDE_CI_GATE_DIR="$BATS_TEST_TMPDIR/ci-gate"
   mkdir -p "$CLAUDE_CI_GATE_DIR" "$BATS_TEST_TMPDIR/bin"
   export PATH="$BATS_TEST_TMPDIR/bin:$PATH"
-  export CI_GATE_WAIT_INTERVAL=0 CI_GATE_WAIT_MAX=0
+  export CI_GATE_WAIT_INTERVAL=0 CI_GATE_WAIT_MAX=0 CI_GATE_WATCH_MAX=0
+  printf '#!/usr/bin/env bash\necho "$*" >> "%s"\n' "$BATS_TEST_TMPDIR/notified" > "$BATS_TEST_TMPDIR/bin/osascript"
+  chmod +x "$BATS_TEST_TMPDIR/bin/osascript"
   MARKER="$CLAUDE_CI_GATE_DIR/sid-1.json"
   unset CLAUDE_CODE_ENTRYPOINT
   fake_actions_status operational
@@ -87,12 +89,81 @@ RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"fa
   [ "$(gh_calls)" = "1" ]
 }
 
-@test "in-progress run past the wait bound: blocks with the run id and keeps the marker" {
+@test "in-progress run past the wait bound in the CLI: ends the turn with a notice and goes async" {
+  make_marker; fake_gh "$IN_PROGRESS"
+  export CLAUDE_CODE_ENTRYPOINT=cli
+  run "$HOOK" <<< "$(input)"
+  [ "$(echo "$output" | jq -r '.decision')" = null ]
+  [[ "$(echo "$output" | jq -r '.systemMessage')" == *'still in progress'* ]]
+  [ "$(jq -r .async "$MARKER")" = true ]
+}
+
+@test "in-progress run past the wait bound outside the CLI: blocks once to relay, then lets the turn end" {
   make_marker; fake_gh "$IN_PROGRESS"
   run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'"decision": "block"'* ]]
-  [[ "$output" == *'gh run watch <id> --exit-status (ids: 42)'* ]]
-  [ "$(jq -r .blocks "$MARKER")" = "1" ]
+  [[ "$output" == *'do not call it green'* ]]
+  run "$HOOK" <<< "$(input)"
+  [ -z "$output" ]
+  [ -e "$MARKER" ]
+}
+
+prompt_input() { echo '{"session_id":"sid-1","hook_event_name":"UserPromptSubmit"}'; }
+make_async_marker() { make_marker; jq -c '.async = true' "$MARKER" > "$MARKER.tmp" && mv "$MARKER.tmp" "$MARKER"; }
+
+@test "next prompt after async, still running: says not green and keeps the marker" {
+  make_async_marker; fake_gh "$IN_PROGRESS"
+  run "$HOOK" <<< "$(prompt_input)"
+  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *'still running'* ]]
+  [ -e "$MARKER" ]
+}
+
+@test "next prompt after async, red: reports red and clears the marker" {
+  make_async_marker; fake_gh "$RED"
+  run "$HOOK" <<< "$(prompt_input)"
+  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *'CI is RED'* ]]
+  [ ! -e "$MARKER" ]
+}
+
+@test "next prompt after async, green: reports passed and clears the marker" {
+  make_async_marker; fake_gh "$GREEN"
+  run "$HOOK" <<< "$(prompt_input)"
+  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *'passed'* ]]
+  [ ! -e "$MARKER" ]
+}
+
+@test "next prompt after async, no runs visible: stays unverified, never green" {
+  make_async_marker; fake_gh '[]'
+  run "$HOOK" <<< "$(prompt_input)"
+  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *'unverified'* ]]
+}
+
+@test "prompt with a marker still in the Stop phase: silent, no gh call" {
+  make_marker; fake_gh "$IN_PROGRESS"
+  run "$HOOK" <<< "$(prompt_input)"
+  [ -z "$output" ]
+  [ "$(gh_calls)" = "0" ]
+}
+
+@test "watch: red run posts a CI RED notification" {
+  make_async_marker; fake_gh "$IN_PROGRESS" "$RED"
+  export CI_GATE_WATCH_MAX=60
+  run "$HOOK" --watch "$MARKER"
+  [[ "$(cat "$BATS_TEST_TMPDIR/notified")" == *'CI RED'* ]]
+}
+
+@test "watch: green run posts a CI green notification" {
+  make_async_marker; fake_gh "$GREEN"
+  run "$HOOK" --watch "$MARKER"
+  [[ "$(cat "$BATS_TEST_TMPDIR/notified")" == *'CI green'* ]]
+}
+
+@test "watch: a newer push replacing the marker stops the watcher silently" {
+  make_async_marker; fake_gh "$IN_PROGRESS"
+  export CI_GATE_WATCH_MAX=60
+  ( sleep 0.2; jq -c '.sha = "fff0000"' "$MARKER" > "$MARKER.tmp" && mv "$MARKER.tmp" "$MARKER" ) &
+  CI_GATE_WAIT_INTERVAL=0.1 run "$HOOK" --watch "$MARKER"
+  [ "$status" -eq 0 ]
+  [ ! -e "$BATS_TEST_TMPDIR/notified" ]
 }
 
 @test "in-progress run while Actions is degraded: stops waiting silently and clears the marker" {
@@ -129,11 +200,11 @@ RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"fa
   [ "$(gh_calls)" = "1" ]
 }
 
-@test "queued run shortly after the push: keeps waiting and keeps the marker" {
+@test "queued run shortly after the push: goes async and keeps the marker" {
   make_marker; fake_gh "$QUEUED"
   run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'gh run watch <id> --exit-status (ids: 42)'* ]]
-  [ "$(jq -r .blocks "$MARKER")" = "1" ]
+  [[ "$output" == *'still in progress'* ]]
+  [ "$(jq -r .async "$MARKER")" = true ]
 }
 
 @test "red run while Actions is degraded: still reports red" {

@@ -1,33 +1,73 @@
 #!/usr/bin/env bash
-# Stop hook: after a push recorded by ci-gate-record.sh, refuse to end the turn
+# Stop hook: after a push recorded by ci-gate-record.sh, hold the end of the turn
 # until every Actions run for that SHA has completed. The hook does the waiting
 # itself: it polls `gh run list` until the runs finish or CI_GATE_WAIT_MAX
-# seconds pass, so the common case (CI finishes within a few minutes) ends the
+# seconds pass, so the common case (CI finishes within a minute or two) ends the
 # turn with no visible block. Green clears the marker silently; red blocks once
 # with an explicit "report it red" instruction and then clears, so a failure can
-# be relayed without looping. Runs still pending past the wait bound block
-# (bounded by the retry count) so the agent waits with `gh run watch` instead
-# of reporting from a background task's exit status.
+# be relayed without looping. Runs still pending past the wait bound go async:
+# the turn ends with a "still running" notice, a detached `--watch` copy of this
+# script posts a macOS notification when CI finishes, and the UserPromptSubmit
+# invocation hands the result to the agent on the next prompt.
 set -eu
+dir="${CLAUDE_CI_GATE_DIR:-$HOME/.claude/state/ci-gate}"
+
+if [ "${1:-}" = --watch ]; then
+  marker=$2; cwd=$(jq -r '.cwd' "$marker"); sha=$(jq -r '.sha' "$marker")
+  deadline=$(( $(date +%s) + ${CI_GATE_WATCH_MAX:-7200} ))
+  while :; do
+    [ -f "$marker" ] && [ "$(jq -r '.sha' "$marker")" = "$sha" ] || exit 0
+    runs=$( (cd "$cwd" && gh run list --commit "$sha" --json status,conclusion 2>/dev/null) || echo '[]')
+    [ "$(echo "$runs" | jq 'length > 0 and all(.status == "completed")')" = true ] && break
+    [ "$(date +%s)" -ge "$deadline" ] && exit 0
+    sleep "${CI_GATE_WAIT_INTERVAL:-15}"
+  done
+  if [ "$(echo "$runs" | jq 'all(.conclusion == "success")')" = true ]; then
+    osascript -e "display notification \"$(basename "$cwd") ${sha:0:7} passed\" with title \"CI green\""
+  else
+    osascript -e "display notification \"$(basename "$cwd") ${sha:0:7} failed\" with title \"CI RED\" sound name \"Basso\""
+  fi
+  exit 0
+fi
+
 input=$(cat)
 sid=$(echo "$input" | jq -r '.session_id')
-marker="${CLAUDE_CI_GATE_DIR:-$HOME/.claude/state/ci-gate}/$sid.json"
+marker="$dir/$sid.json"
 [ -f "$marker" ] || exit 0
 
-cwd=$(jq -r '.cwd' "$marker"); sha=$(jq -r '.sha' "$marker"); blocks=$(jq -r '.blocks' "$marker")
+cwd=$(jq -r '.cwd' "$marker"); sha=$(jq -r '.sha' "$marker"); short=${sha:0:7}
+fetch_runs() { (cd "$cwd" && gh run list --commit "$sha" --json databaseId,workflowName,status,conclusion 2>/dev/null) || echo '[]'; }
+pending_of() { echo "$1" | jq -r '[.[] | select(.status != "completed")] | map("\(.workflowName) (\(.databaseId))") | join(", ")'; }
+red_of() { echo "$1" | jq -r '[.[] | select(.conclusion != "success")] | map("\(.workflowName) (\(.databaseId)): \(.conclusion)") | join(", ")'; }
+
+if [ "$(jq -r '.async // false' "$marker")" = true ]; then
+  [ "$(echo "$input" | jq -r '.hook_event_name // empty')" = UserPromptSubmit ] || exit 0
+  runs=$(fetch_runs)
+  context() { jq -n --arg c "$1" '{hookSpecificOutput:{hookEventName:"UserPromptSubmit", additionalContext:$c}}'; exit 0; }
+  [ "$(echo "$runs" | jq 'length')" = 0 ] && context "CI gate: no Actions runs visible for $short; CI is unverified. Do not call CI green."
+  pending=$(pending_of "$runs")
+  [ -n "$pending" ] && context "CI gate: Actions runs for $short are still running ($pending). Do not call CI green."
+  red=$(red_of "$runs")
+  rm -f "$marker"
+  [ -n "$red" ] && context "CI gate: runs for $short did NOT all pass: $red. Tell the user CI is RED, show the failing step via gh run view <id> --log-failed, and either fix it or state plainly that it is unfixed."
+  context "CI gate: all Actions runs for $short passed."
+fi
+[ "$(echo "$input" | jq -r '.hook_event_name // empty')" = UserPromptSubmit ] && exit 0
+
+blocks=$(jq -r '.blocks' "$marker")
 if [ "$blocks" -ge 12 ]; then rm -f "$marker"; exit 0; fi
 jq -c '.blocks += 1' "$marker" > "$marker.tmp" && mv "$marker.tmp" "$marker"
 
-short=${sha:0:7}
 block() { jq -n --arg r "$1" '{decision:"block", reason:$r}'; exit 0; }
 # The desktop app does not render systemMessage, so outside the CLI the agent relays the notice.
-unverified() {
-  degraded && exit 0
-  [ "${CLAUDE_CODE_ENTRYPOINT:-}" = cli ] || block "$1 The gate will not wait again for this SHA. Tell the user CI is unverified for $short; do not poll for it."
+notice() {
+  [ "${CLAUDE_CODE_ENTRYPOINT:-}" = cli ] || block "$1 $2"
   jq -n --arg m "$1" '{systemMessage:$m}'; exit 0
 }
-fetch_runs() { (cd "$cwd" && gh run list --commit "$sha" --json databaseId,workflowName,status,conclusion 2>/dev/null) || echo '[]'; }
-pending_of() { echo "$1" | jq -r '[.[] | select(.status != "completed")] | map("\(.workflowName) (\(.databaseId))") | join(", ")'; }
+unverified() {
+  degraded && exit 0
+  notice "$1" "The gate will not wait again for this SHA. Tell the user CI is unverified for $short; do not poll for it."
+}
 
 # Whether a workflow in $1 runs for a push of the SHA to any branch named in the
 # remaining arguments; with no branch names, any push or pull_request trigger
@@ -98,7 +138,7 @@ if [ "$(echo "$runs" | jq 'length')" = "0" ] && ! workflow_targets "$cwd" $(jq -
 # Poll until every run has completed (runs that have not appeared yet count as
 # pending) or the wait bound is reached. The bound must stay under the hook's
 # timeout in settings.json, or the harness kills the hook and nothing is checked.
-deadline=$(( $(date +%s) + ${CI_GATE_WAIT_MAX:-480} ))
+deadline=$(( $(date +%s) + ${CI_GATE_WAIT_MAX:-90} ))
 # No run CI_GATE_NORUN_MAX seconds after the push, no pending run started CI_GATE_QUEUED_MAX
 # seconds after it, or githubstatus saying Actions is not operational ends the gate with one
 # report: the agent cannot make GitHub create or start a run.
@@ -131,10 +171,11 @@ if [ -n "$pending" ] && { degraded || stalled; }; then
   unverified "CI gate: Actions runs for $short did not finish and GitHub Actions looks unhealthy (githubstatus Actions: ${actions_status:-unknown}; pending: $pending). The push is unverified by CI."
 fi
 if [ -n "$pending" ]; then
-  ids=$(echo "$runs" | jq -r '[.[] | select(.status != "completed") | .databaseId] | join(" ")')
-  block "CI gate: runs still in progress for $short: $pending. Run in the FOREGROUND, one per id, and read each exit code: gh run watch <id> --exit-status (ids: $ids). Then end the turn again."
+  jq -c '.async = true' "$marker" > "$marker.tmp" && mv "$marker.tmp" "$marker"
+  nohup "$0" --watch "$marker" > /dev/null 2>&1 &
+  notice "CI gate: runs for $short still in progress ($pending); a notification follows when they finish." "Tell the user CI is still running for $short and do not call it green; the result arrives with the next prompt. Do not poll for it."
 fi
-red=$(echo "$runs" | jq -r '[.[] | select(.conclusion != "success")] | map("\(.workflowName) (\(.databaseId)): \(.conclusion)") | join(", ")')
+red=$(red_of "$runs")
 rm -f "$marker"
 if [ -n "$red" ]; then
   block "CI gate: runs for $short did NOT all pass: $red. Tell the user CI is RED (do not say green), show the failing step via gh run view <id> --log-failed, and either fix it or state plainly that it is unfixed."

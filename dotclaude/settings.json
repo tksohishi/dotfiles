@@ -885,6 +885,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/skill-in-prompt.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/ci-gate.sh",
+            "timeout": 15
           }
         ]
       },
@@ -954,7 +959,7 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/ci-gate.sh",
-            "timeout": 540
+            "timeout": 150
           }
         ]
       },
