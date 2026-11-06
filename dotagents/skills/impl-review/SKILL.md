@@ -184,7 +184,7 @@ PROMPT
 
 `--json` writes the run's events to the `.jsonl` file; its first line, `thread.started`, carries the `thread_id` that rebuttal rounds resume.
 
-`<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S`; run both first and write them literally into the path. `-o` saves the reviewer's final message (the findings, without tool-call traces) to the project's `tmp/`, because the background task's output file sits in a per-session temp directory that does not survive. `-C <root>` makes the project the reviewer's working root wherever the session started; still give every path in the prompt as an absolute path under `<root>`.
+`<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S` followed by `-<topic>` (a 2-4 word kebab-case slug of the task, e.g. `20261106-104931-ci-gate-paths`), so parallel sessions never share a file; run both first and write them literally into the path. `-o` saves the reviewer's final message (the findings, without tool-call traces) to the project's `tmp/`, because the background task's output file sits in a per-session temp directory that does not survive. `-C <root>` makes the project the reviewer's working root wherever the session started; still give every path in the prompt as an absolute path under `<root>`.
 
 The model and effort are pinned here because `~/.codex/config.toml` sets a different daily model at medium effort. The `-` arg tells `codex exec` to read the prompt from stdin. The heredoc ends at the delimiter, so EOF arrives and the call doesn't hang.
 
