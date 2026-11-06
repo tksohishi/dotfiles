@@ -73,7 +73,25 @@ unverified() {
 # remaining arguments; with no branch names, any push or pull_request trigger
 # counts. Reads push.branches / branches-ignore / tags (a tags-only push filter
 # never fires for a branch); pull_request counts only when the branch has an
-# open PR. Same function in ci-gate.sh and ci-gate-record.sh; keep them in sync.
+# open PR. push.paths / paths-ignore are matched against CI_GATE_FILES (the
+# push's changed files, one per line); with none known, every path counts.
+# Same functions in ci-gate.sh and ci-gate-record.sh; keep them in sync.
+paths_hit() {
+  local f kind pat neg inc
+  grep -qE '^[px] ' <<< "$1" || return 0
+  [ -n "${CI_GATE_FILES:-}" ] || return 0
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    if grep -q '^p ' <<< "$1"; then inc=0; else inc=1; fi
+    while read -r kind pat; do
+      neg=0; [[ $pat == '!'* ]] && { neg=1; pat=${pat#!}; }
+      [[ $f == $pat ]] || continue
+      if [ "$kind" = p ]; then inc=$((1 - neg)); else inc=$neg; fi
+    done < <(grep -E '^[px] ' <<< "$1")
+    [ "$inc" = 1 ] && return 0
+  done <<< "$CI_GATE_FILES"
+  return 1
+}
 workflow_targets() {
   local dir=$1 f spec br kind pat neg hit; shift
   for f in "$dir"/.github/workflows/*.yml "$dir"/.github/workflows/*.yaml; do
@@ -106,6 +124,7 @@ workflow_targets() {
         key = s; sub(/[[:space:]]*:.*/, "", key); val = s; sub(/^[^:]*:[[:space:]]*/, "", val)
         lk = ""
         if (key == "branches") lk = "b"; else if (key == "branches-ignore") lk = "i"
+        else if (key == "paths") lk = "p"; else if (key == "paths-ignore") lk = "x"
         if (key ~ /^(branches|branches-ignore|tags|tags-ignore)$/) filt = 1
         if (lk != "" && val != "") emit(lk, val)
       }
@@ -113,7 +132,7 @@ workflow_targets() {
     ' "$f")
     [ -n "$spec" ] || continue
     [ $# -eq 0 ] && return 0
-    grep -qx any <<< "$spec" && return 0
+    grep -qx any <<< "$spec" && paths_hit "$spec" && return 0
     for br in "$@"; do
       if grep -qx pr <<< "$spec"; then
         [ "$(cd "$dir" && gh pr list --head "$br" --state open --json number --jq length 2>/dev/null)" != 0 ] && return 0
@@ -125,13 +144,14 @@ workflow_targets() {
         [[ $br == $pat ]] || continue
         if [ "$kind" = b ]; then hit=$((1 - neg)); else hit=$neg; fi
       done < <(grep -E '^[bi] ' <<< "$spec")
-      [ "$hit" = 1 ] && return 0
+      [ "$hit" = 1 ] && paths_hit "$spec" && return 0
     done
   done
   return 1
 }
 
 runs=$(fetch_runs)
+CI_GATE_FILES=$(jq -r '.files // [] | .[]' "$marker")
 # Second line of defense behind ci-gate-record.sh: a marker no workflow can resolve is dropped instead of blocking.
 if [ "$(echo "$runs" | jq 'length')" = "0" ] && ! workflow_targets "$cwd" $(jq -r '.branches // [] | .[]' "$marker"); then rm -f "$marker"; exit 0; fi
 

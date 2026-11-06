@@ -275,3 +275,42 @@ make_async_marker() { make_marker; jq -c '.async = true' "$MARKER" > "$MARKER.tm
   run "$HOOK" <<< "$(input)"
   [[ "$output" == *'GitHub created no Actions run'* ]]
 }
+
+paths_marker() { jq -nc --arg cwd "$BATS_TEST_TMPDIR" --argjson files "$1" '{cwd:$cwd,sha:"abc1234def",branches:["main"],files:$files,blocks:0,pushedAt:0}' > "$MARKER"; }
+paths_workflow() { mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"; printf 'on:\n  push:\n    branches: [main]\n%s\n' "$1" > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"; }
+
+@test "no runs and every changed file is under push.paths-ignore: clears the marker silently" {
+  paths_marker '["docs/a.md","docs/projects/b.md"]'
+  paths_workflow "    paths-ignore: ['docs/**']"
+  fake_gh '[]'
+  run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ ! -e "$MARKER" ]
+}
+
+@test "no runs and a changed file outside push.paths-ignore: still reports CI did not run" {
+  paths_marker '["docs/a.md","lib/x.ts"]'
+  paths_workflow "    paths-ignore: ['docs/**']"
+  fake_gh '[]'
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'GitHub created no Actions run'* ]]
+}
+
+@test "no runs and no changed file under push.paths (list form): clears the marker silently" {
+  paths_marker '["README.md"]'
+  paths_workflow "    paths:
+      - 'src/**'"
+  fake_gh '[]'
+  run "$HOOK" <<< "$(input)"
+  [ -z "$output" ]
+  [ ! -e "$MARKER" ]
+}
+
+@test "no runs, push.paths-ignore and no changed files recorded: still reports CI did not run" {
+  paths_marker '[]'
+  paths_workflow "    paths-ignore: ['docs/**']"
+  fake_gh '[]'
+  run "$HOOK" <<< "$(input)"
+  [[ "$output" == *'GitHub created no Actions run'* ]]
+}
