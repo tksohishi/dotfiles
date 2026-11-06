@@ -20,5 +20,5 @@ If a read fails with an auth error, run `tg auth status` to confirm, then ask th
 
 ## Caveats
 
-- Read-only by design: there is no send/post path, so drafting a Telegram reply means giving the user text to paste, not a command.
+- Read-only by design: there is no send/post path, so drafting a Telegram reply means giving the user text to paste, not a command. A reply in a one-to-one chat reads as chat: one to three short sentences, questions inline, no numbered list, no recap of what the other side already said.
 - Public channels also go through `tg`, not the web: t.me / web.telegram.org are blocked for WebFetch by hook, and agent-browser scraping of them is off-limits by convention.
