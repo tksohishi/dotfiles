@@ -30,7 +30,8 @@ if [ "$TOOL" = "Bash" ]; then
   CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command // empty')
   # File edits that mention a fetch tool by name (sed into sites.md, git) are not fetches.
   printf '%s' "$CMD" | rg -q '^\s*(sed|git|grep|rg|cat|printf|echo)\b' && exit 0
-  printf '%s' "$CMD" | rg -q 'https?://|\bhttps? (GET|POST|HEAD)\b|agent-browser|patchright-fetch|\bcurl\b|\bwget\b' || exit 0
+  # A fetch tool counts only where it runs as a command, not when its name is an argument (rg over sites.md, wc on the script).
+  printf '%s' "$CMD" | rg -q 'https?://|(^|[;&|(]|\b(do|then))\s*(\S*/)?(https?|curl|wget|agent-browser|patchright-fetch)\b' || exit 0
   # An Authorization header means an authenticated API call: a 401/403/429 there
   # is an auth or quota error, not a bot wall, and the ladder can't fix it.
   printf '%s' "$CMD" | rg -qi 'Authorization:' && exit 0
@@ -54,7 +55,7 @@ HOST=$(printf '%s' "$URL" | sed -E 's#^https?://##; s#[/:?].*##; s#^www\.##')
 RESP=$(echo "$TOOL_INPUT" | jq -r '[.tool_response, .error] | map(select(. != null) | if type=="string" then . else tostring end) | join("\n")' | head -c 20000)
 EVENT=$(echo "$TOOL_INPUT" | jq -r '.hook_event_name // "PostToolUse"')
 
-BLOCK_RE='Just a moment|__cf_chl_|challenges\.cloudflare\.com|cf-chl-|blocked by network security|Access Denied|Access to this page has been denied|Performing security verification|Pardon Our Interruption|Press (&|&amp;|and) Hold|unable to give you access|Humans only|verify (that )?you are (a )?human|Are you a robot|\b(403 Forbidden|406 Not Acceptable|429 Too Many Requests)\b|HTTP/[0-9.]+ (403|406|429)\b|status(Code)?["=: ]+(403|406|429)\b|unable to fetch|blocked-domains|timeout of [0-9]+ms exceeded|\b(ETIMEDOUT|ECONNRESET|ECONNREFUSED)\b|request timed out'
+BLOCK_RE='Just a moment|__cf_chl_|challenges\.cloudflare\.com|cf-chl-|blocked by network security|Access Denied|Access to this page has been denied|Performing security verification|Pardon Our Interruption|Press (&|&amp;|and) Hold|unable to give you access|Humans only|verify (that )?you are (a )?human|Are you a robot|Checking (to see )?if you.?re a bot|Checking your browser|Vercel Security Checkpoint|\b(403 Forbidden|406 Not Acceptable|429 Too Many Requests)\b|HTTP/[0-9.]+ (403|406|429)\b|status(Code)?["=: ]+(403|406|429)\b|unable to fetch|blocked-domains|timeout of [0-9]+ms exceeded|\b(ETIMEDOUT|ECONNRESET|ECONNREFUSED)\b|request timed out'
 BLOCKED=0
 printf '%s' "$RESP" | rg -qi "$BLOCK_RE" && BLOCKED=1
 # A 429 with no HTML (JSON error or empty body) is an API quota: pace and

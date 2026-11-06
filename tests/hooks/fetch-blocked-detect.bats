@@ -154,3 +154,29 @@ assert_silent() {
   run "$HOOK" <<< "$(hook_input Bash 'http GET https://example.com' 'Total models listed: 0')"
   assert_silent
 }
+
+@test "agent-browser output with a 'Checking to see if you're a bot' page injects" {
+  run "$HOOK" <<< "$(hook_input Bash 'cd /p && agent-browser -q open https://www.example.com/trade/x' "✓ Example
+Checking to see if you're a bot…")"
+  assert_injects
+}
+
+@test "Vercel Security Checkpoint page injects" {
+  run "$HOOK" <<< "$(hook_input WebFetch '' '<title>Vercel Security Checkpoint</title>')"
+  assert_injects
+}
+
+@test "agent-browser after && with no URL is still a fetch" {
+  run "$HOOK" <<< "$(hook_input Bash 'cd /p && agent-browser get text body' 'Just a moment...')"
+  assert_injects
+}
+
+@test "fetch tool named only as an argument is not a fetch" {
+  run "$HOOK" <<< "$(hook_input Bash 'wc -l bin/patchright-fetch; sed -n 1,99p bin/patchright-fetch' 'const CHALLENGE = /just a moment|checking your browser/i')"
+  assert_silent
+}
+
+@test "rg pattern mentioning agent-browser after an assignment is not a fetch" {
+  run "$HOOK" <<< "$(hook_input Bash "f=sites.local.md; rg '^\\| ' \$f | rg -i 'agent-browser headed'" '| x.com | 403 | agent-browser headless stuck on Just a moment |')"
+  assert_silent
+}
