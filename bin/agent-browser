@@ -195,14 +195,16 @@ fi
 # and retry the same call once. Stderr goes through a file so it can be
 # inspected, then is replayed.
 errf="${TMPDIR:-/tmp}/agent-browser-$$.err"
-"$REAL" "$@" 2> "$errf"
-rc=$?
-cat "$errf" >&2
+rc=0
+"$REAL" "$@" 2> "$errf" || rc=$?
+# session/profile reach agent-browser as env vars above, so its warning that
+# ./agent-browser.json was ignored is false here and misleads agents.
+grep -v 'unsupported settings from ./agent-browser.json' "$errf" >&2 || true
 if grep -q "daemon may be busy or unresponsive" "$errf"; then
     echo "agent-browser wrapper: daemon unresponsive; closing session and retrying once" >&2
     "$REAL" close >/dev/null 2>&1 || true
-    "$REAL" "$@"
-    rc=$?
+    rc=0
+    "$REAL" "$@" || rc=$?
 fi
 rm -f "$errf"
 exit $rc
