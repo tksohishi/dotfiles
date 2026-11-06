@@ -1,16 +1,18 @@
 #!/usr/bin/env bun
-// Fetch a bot-walled page with headed patchright real-Chrome (see fetch-blocked skill).
+// Fetch bot-walled pages with headed patchright real-Chrome (see fetch-blocked skill).
 //
-// Usage: patchright-fetch <url> [--wait <seconds>] [--show]
+// Usage: patchright-fetch <url>... [--wait <seconds>] [--show]
 //
+// - Every URL must be on one host: they are read in sequence in a single Chrome
+//   launch, so the focus switch at launch is paid once, not per page.
 // - Headed only: headless is detected even on a trusted profile. The window opens
 //   offscreen by default so it doesn't take over the screen; --show puts it onscreen
 //   (needed when a captcha/Press & Hold must be solved by hand).
 // - Per-host persistent profile under ~/.cache/patchright-fetch/, shared across
-//   projects so a PX-class wall solved once is trusted everywhere; body text is
-//   saved to ~/.cache/patchright-fetch/<host>.txt.
-// - --wait is a cap, not a fixed sleep: polls every 2s and returns once the body text
-//   is stable and no challenge marker is on screen.
+//   projects so a PX-class wall solved once is trusted everywhere; each page's body
+//   text is saved to ~/.cache/patchright-fetch/<host>/<path>.txt.
+// - --wait is a per-page cap, not a fixed sleep: polls every 2s and moves on once the
+//   body text is stable and no challenge marker is on screen.
 // - Bun auto-installs the pinned patchright below into its global cache on first run;
 //   needs Chrome Canary installed.
 import { execFileSync } from 'node:child_process'
@@ -18,28 +20,34 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 // @ts-expect-error bun resolves versioned specifiers via auto-install
 import { chromium } from 'patchright@1.60.0'
 
+const usage = 'usage: patchright-fetch <url>... [--wait <seconds>] [--show]'
 const args = process.argv.slice(2)
 const showIdx = args.indexOf('--show')
 const show = showIdx >= 0
 if (show) args.splice(showIdx, 1)
 const waitIdx = args.indexOf('--wait')
 const waitSec = waitIdx >= 0 ? Number(args.splice(waitIdx, 2)[1]) : 20
-const url = args[0]
-if (!url || Number.isNaN(waitSec)) {
-  console.error('usage: patchright-fetch <url> [--wait <seconds>] [--show]')
+if (args.length === 0 || Number.isNaN(waitSec)) {
+  console.error(usage)
   process.exit(1)
 }
 
-let host = ''
+let urls: URL[] = []
 try {
-  host = new URL(url).hostname.replace(/^www\./, '')
+  urls = args.map((a) => new URL(a))
 } catch {
-  console.error(`not a valid URL: ${url}`)
+  console.error(`not a valid URL among: ${args.join(' ')}`)
+  process.exit(1)
+}
+const hostOf = (u: URL) => u.hostname.replace(/^www\./, '')
+const host = hostOf(urls[0])
+if (urls.some((u) => hostOf(u) !== host)) {
+  console.error(`all URLs must be on one host (${host}); run once per host`)
   process.exit(1)
 }
 
 const cacheDir = `${process.env.XDG_CACHE_HOME ?? `${process.env.HOME}/.cache`}/patchright-fetch`
-mkdirSync(cacheDir, { recursive: true })
+mkdirSync(`${cacheDir}/${host}`, { recursive: true })
 
 // One run per host profile: a second Chrome on the same profile dies on
 // Chrome's SingletonLock with a cryptic error. Stale locks (crashed run)
@@ -77,6 +85,11 @@ const restoreFocus = () => {
 }
 
 const CHALLENGE = /press & hold|press and hold|verify you are|just a moment|checking your browser|are you a robot/i
+const outPath = (u: URL) => {
+  const slug = `${u.pathname}${u.search}`.replace(/^\/+|\/+$/g, '').replace(/[^A-Za-z0-9._-]+/g, '_')
+  const name = slug || 'index'
+  return `${cacheDir}/${host}/${/\.(txt|md)$/.test(name) ? name : `${name}.txt`}`
+}
 
 try {
   const ctx = await chromium.launchPersistentContext(`${cacheDir}/${host}-profile`, {
@@ -88,31 +101,40 @@ try {
   restoreFocus()
   try {
     const page = ctx.pages()[0] ?? (await ctx.newPage())
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
-    const deadline = Date.now() + waitSec * 1000
-    let text = ''
-    let prev = -1
-    while (Date.now() < deadline) {
-      await page.waitForTimeout(2000)
-      text = await page.innerText('body').catch(() => '')
-      // Length within 2% of the previous poll counts as settled: dynamic pages
-      // (ads, lazy-loaded listings) never reach exact text equality.
-      const settled = text.length > 0 && prev >= 0 && Math.abs(text.length - prev) <= prev * 0.02
-      if (settled && !CHALLENGE.test(text)) break
-      prev = text.length
+    for (const url of urls) {
+      try {
+        const res = await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 45000 })
+        const html = (res?.headers()['content-type'] ?? 'text/html').includes('html')
+        const deadline = Date.now() + waitSec * 1000
+        let text = ''
+        let prev = -1
+        while (Date.now() < deadline) {
+          await page.waitForTimeout(2000)
+          text = await page.innerText('body').catch(() => '')
+          // Length within 2% of the previous poll counts as settled: dynamic pages
+          // (ads, lazy-loaded listings) never reach exact text equality.
+          const settled = text.length > 0 && prev >= 0 && Math.abs(text.length - prev) <= prev * 0.02
+          if (settled && !CHALLENGE.test(text)) break
+          prev = text.length
+        }
+        const title = await page.title()
+        const out = outPath(url)
+        await Bun.write(out, text)
+        console.log('URL:', page.url())
+        console.log('TITLE:', title)
+        console.log('LEN:', text.length, '→', out)
+        if (CHALLENGE.test(text)) {
+          console.error('challenge unsolved at --wait cap; rerun with --show to solve it by hand')
+          process.exitCode = 1
+        } else if ((html && !title.trim()) || text.length < 1000) {
+          console.error('WARN: empty title or body under 1KB — likely a dead URL, not a bot wall. Re-check with a URL known to be live before recording the host as blocked')
+        }
+        if (urls.length === 1) console.log(`---\n${text.slice(0, 2500)}`)
+      } catch (err) {
+        console.error('ERROR:', url.href, err instanceof Error ? err.message.split('\n')[0] : String(err))
+        process.exitCode = 1
+      }
     }
-    if (CHALLENGE.test(text)) console.error('challenge unsolved at --wait cap; rerun with --show to solve it by hand')
-    const title = await page.title()
-    const out = `${cacheDir}/${host}.txt`
-    await Bun.write(out, text)
-    if (!title.trim() || text.length < 1000) {
-      console.error('WARN: empty title or body under 1KB — likely a dead URL, not a bot wall. Re-check with a URL known to be live before recording the host as blocked')
-    }
-    console.log('TITLE:', title)
-    console.log('URL:', page.url())
-    console.log('LEN:', text.length, '→', out)
-    console.log('---')
-    console.log(text.slice(0, 2500))
   } finally {
     await ctx.close()
     restoreFocus()
