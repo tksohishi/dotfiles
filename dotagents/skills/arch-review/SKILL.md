@@ -57,10 +57,17 @@ Out of scope: bugs, edge cases, tests, style, per-call API correctness. Mention
 one only if it proves the design wrong.
 
 ## Constraints
-- Output ≤ 500 words. Read narrowly: `rg -l`, `git diff --stat`, file ranges.
+- Output ≤ 650 words. Read narrowly: `rg -l`, `git diff --stat`, file ranges.
 
 ## Output format
-For each finding:
+Start with this section, written before judging anything:
+    ## Understanding
+    - Current structure: how the parts this touches work today (2-3 lines)
+    - The plan: what it changes, in your own words (2-3 lines)
+    - Expected shape: what a design for this goal should look like (2-3 lines)
+
+Then, for each finding, tie it to that section (e.g. "adds a second store
+where the expected shape has one"):
     [BLOCKER | CONCERN | NIT] <one-line title>
     <2-4 lines: what is wrong with the direction, and the alternative>
     Location: <plan section or path>
@@ -106,7 +113,7 @@ At most two rebuttal rounds (`-r2`, `-r3`); after that, the remaining disagreeme
 
 ## Reporting back to the user
 
-1. Print the VERDICT line, then findings grouped BLOCKER, CONCERN, NIT, each with whether you agree and why. Don't auto-capitulate, and don't defend the plan by restating the reasoning the reviewer was not given; answer the point. After rebuttal rounds, list conceded findings as resolved, one line each.
+1. Print the reviewer's Understanding section first, flagging any line where it misread the plan or the codebase (a misread puts the findings that rest on it in doubt). Then print the VERDICT line, then findings grouped BLOCKER, CONCERN, NIT, each with whether you agree and why. Don't auto-capitulate, and don't defend the plan by restating the reasoning the reviewer was not given; answer the point. After rebuttal rounds, list conceded findings as resolved, one line each.
 2. Design findings change direction, design or scope, so they are the user's call, not yours. Apply only ones that are plainly a detail (a missing step, a wrong file). For the rest, including every finding the reviewer held after rebuttal, list each with both positions in the reply first, then ask with AskUserQuestion (at most 4 per call): quote the reviewer's point verbatim, then your position and the trade-off, with the reviewer's alternative and the current plan as the options.
 3. Revise the plan with the user's answers before presenting it or building.
 4. Log one line once findings are settled; `user_overrode` counts answers where the user sided against your position, `conceded` the findings the reviewer dropped in rebuttal rounds.
