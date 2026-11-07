@@ -28,4 +28,4 @@ When the user's request already says what to send, send it. When it leaves the c
 
 ## After sending
 
-Tell the user the session it went to and one line on what was asked. Never predict or invent the receiver's answer; a reply arrives as a message in this session when it comes.
+Tell the user the session it went to and one line on what was asked, nothing more: the delivery state (in the inbox, unread, the receiver busy) is not reported, and the send is not checked again with ListAgents. A delivery notice that the session held or refused the message is the exception and is reported. Never predict or invent the receiver's answer; a reply arrives as a message in this session when it comes.
