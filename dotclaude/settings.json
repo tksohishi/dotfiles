@@ -763,6 +763,15 @@
             "command": "$HOME/.claude/hooks/ask-question-length.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/replace-dollar.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
