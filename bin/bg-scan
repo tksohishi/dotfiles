@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# Scan background work left by agent sessions (see the bg-check skill). Read-only.
+#
+# Usage: bg-scan [--repo <path>]
+#
+# With no argument: every session on the machine, plus the claude daemon and
+# long-running agent processes. With --repo: only sessions started in that repo
+# or its Claude worktrees, and that repo's leftover worktrees.
+set -uo pipefail
+
+repo=""
+if [ "${1:-}" = "--repo" ]; then
+  repo=$(cd "${2:-.}" && git rev-parse --show-toplevel 2>/dev/null || pwd)
+fi
+# Claude Code names a project folder after its path with "/" and "." as "-";
+# worktree sessions get the repo's name plus a suffix, so a prefix match covers them.
+slug=$(printf '%s' "$repo" | tr '/.' '--')
+
+projects="$HOME/.claude/projects"
+tasks_root="/private/tmp/claude-$(id -u)"
+age() { ps -o etime= -p "$1" 2>/dev/null | tr -d ' '; }
+cmd() { ps -o command= -p "$1" 2>/dev/null | cut -c1-110; }
+local_time() {
+  local epoch
+  epoch=$(date -j -u -f '%Y-%m-%dT%H:%M:%S' "${1%%.*}" +%s 2>/dev/null) || return
+  TZ=America/New_York date -r "$epoch" '+%-m/%-d %H:%M'
+}
+# This scan's own Bash call writes a task output file too; skip its ancestors.
+self_tree=" $$ "
+p=$$
+while [ "${p:-1}" -gt 1 ]; do p=$(ps -o ppid= -p "$p" | tr -d ' '); self_tree+="$p "; done
+
+if [ -z "$repo" ]; then
+  echo "## claude daemon"
+  if pgrep -f 'claude daemon run' >/dev/null; then
+    claude daemon status 2>&1 | rg -i 'pid:|uptime|origin|workers' || true
+  else
+    echo "none"
+  fi
+  echo
+fi
+
+echo "## background shells (Bash run_in_background / Monitor) still running"
+found=0
+recent=$(find "$tasks_root"/"$slug"* -path '*/tasks/*.output' -mtime -3 2>/dev/null)
+while read -r pid file; do
+  [[ "$self_tree" == *" $pid "* ]] && continue
+  found=1
+  rel=${file#"$tasks_root"/}
+  echo "$(age "$pid")  pid=$pid  ${rel%%/*}  session=$(echo "$rel" | cut -d/ -f2 | cut -c1-8)  task=$(basename "$file" .output)  $(cmd "$pid")"
+done < <([ -n "$recent" ] && echo "$recent" | xargs lsof -Fpn 2>/dev/null | awk -v root="$tasks_root/" '/^p/{p=substr($0,2)} /^n/{f=substr($0,2); if (index(f, root)==1 && f ~ /\/tasks\/[^\/]+\.output$/) print p, f}' | sort -u -k2,2)
+[ "$found" = 0 ] && echo "none"
+
+echo
+echo "## CronCreate jobs never deleted (transcripts touched in the last 7 days; jobs die with their session)"
+found=0
+while IFS= read -r f; do
+  jobs=$(jq -rs '
+    [.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use" and .name=="CronCreate") | {id, prompt: .input.prompt, cron: .input.cron}] as $creates
+    | [.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use" and .name=="CronDelete") | .input.id] as $deleted
+    | [.[] | select(.type=="user") | {ts: .timestamp, c: (.message.content | if type=="string" then . else (map(.text? // (.content|tostring?) // "") | join(" ")) end)}] as $users
+    | $creates[] as $c
+    | ([.[] | select(.type=="user") | .message.content[]? | select(.type=="tool_result" and .tool_use_id==$c.id) | .content | tostring | capture("job (?<j>[0-9a-f]{8})")?.j] | first) as $job
+    | select($job != null and ($deleted | index($job) | not))
+    | ($users | map(select(.c == $c.prompt)) | last | .ts) as $last
+    | [$job, $c.cron, ($last // "never"), ($c.prompt | gsub("\n"; " ") | .[0:70])] | @tsv
+  ' "$f" 2>/dev/null)
+  [ -z "$jobs" ] && continue
+  found=1
+  proj=$(basename "$(dirname "$f")")
+  while IFS=$'\t' read -r job cron last prompt; do
+    [ "$last" != never ] && last="last fired $(local_time "$last")"
+    echo "$job  ($cron)  $proj  session=$(basename "$f" .jsonl | cut -c1-8) (transcript updated $(TZ=America/New_York date -r "$(stat -f %m "$f")" '+%-m/%-d %H:%M'))  $last  $prompt"
+  done <<< "$jobs"
+done < <(find "$projects"/"$slug"* -maxdepth 1 -name '*.jsonl' -mtime -7 2>/dev/null | xargs rg -l '"name":"CronCreate"' 2>/dev/null)
+[ "$found" = 0 ] && echo "none"
+
+if [ -z "$repo" ]; then
+  echo
+  echo "## long-running agent processes"
+  procs=$(for pid in $(pgrep -f 'patchright-fetch --serve|codex exec|claude -p |Google Chrome for Testing' 2>/dev/null); do
+    [[ "$self_tree" == *" $pid "* ]] && continue
+    case "$(cmd "$pid")" in *--type=*|*crashpad*|*Helper*|*pgrep*) continue ;; esac
+    echo "$(age "$pid")  pid=$pid  $(cmd "$pid")"
+  done | sort -u)
+  echo "${procs:-none}"
+fi
+
+echo
+echo "## leftover Claude worktrees"
+found=0
+if [ -n "$repo" ]; then wts=("$repo"/.claude/worktrees/*); else wts=("$HOME"/Work/*/.claude/worktrees/* "$HOME"/.dotfiles/.claude/worktrees/*); fi
+for wt in "${wts[@]}"; do
+  [ -d "$wt" ] || continue
+  found=1
+  dirty=$(git -C "$wt" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  ahead=$(git -C "$wt" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo "?")
+  echo "${wt#"$HOME"/}  last commit $(git -C "$wt" log -1 --format='%cd' --date=format-local:'%-m/%-d %H:%M' 2>/dev/null)  uncommitted=$dirty  unpushed=$ahead"
+done
+[ "$found" = 0 ] && echo "none"
+exit 0
