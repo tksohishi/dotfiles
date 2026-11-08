@@ -29,7 +29,7 @@ SITES="$HOME/.claude/skills/fetch-blocked/references"
 if [ "$TOOL" = "Bash" ]; then
   CMD=$(echo "$TOOL_INPUT" | jq -r '.tool_input.command // empty')
   # File edits that mention a fetch tool by name (sed into sites.md, git) are not fetches.
-  printf '%s' "$CMD" | rg -q '^\s*(sed|git|grep|rg|cat|printf|echo)\b' && exit 0
+  printf '%s' "$CMD" | rg -q '^\s*(g?sed|git|grep|rg|cat|printf|echo|bats|jq|wc|head|tail|ls)\b' && exit 0
   # A fetch tool counts only where it runs as a command, not when its name is an argument (rg over sites.md, wc on the script).
   printf '%s' "$CMD" | rg -q 'https?://|(^|[;&|(]|\b(do|then))\s*(\S*/)?(https?|curl|wget|agent-browser|patchright-fetch)\b' || exit 0
   # An Authorization header means an authenticated API call: a 401/403/429 there
@@ -49,7 +49,7 @@ else
   exit 0
 fi
 
-HOST=$(printf '%s' "$URL" | sed -E 's#^https?://##; s#[/:?].*##; s#^www\.##')
+HOST=$(printf '%s' "$URL" | sed -E 's#^https?://##; s#[/?#].*##; s#^[^@]*@##; s#:.*##; s#^www\.##' | tr '[:upper:]' '[:lower:]')
 
 # PostToolUseFailure (timeouts, non-zero exits) carries the text in .error instead of .tool_response.
 RESP=$(echo "$TOOL_INPUT" | jq -r '[.tool_response, .error] | map(select(. != null) | if type=="string" then . else tostring end) | join("\n")' | head -c 20000)

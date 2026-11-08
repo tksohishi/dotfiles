@@ -180,3 +180,8 @@ Checking to see if you're a bot…")"
   run "$HOOK" <<< "$(hook_input Bash "f=sites.local.md; rg '^\\| ' \$f | rg -i 'agent-browser headed'" '| x.com | 403 | agent-browser headless stuck on Just a moment |')"
   assert_silent
 }
+
+@test "gsed or bats commands that mention URLs are not fetches" {
+  run "$HOOK" <<< "$(hook_input Bash "gsed -i 's#https://www.linkedin.com#x#' t.bats && bats t.bats" 'ok 1 webfetch-blocked-domains denies linkedin')"
+  assert_silent
+}
