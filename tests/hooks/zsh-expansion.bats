@@ -36,3 +36,18 @@ bash_input() {
   run "$HOOK" <<< '{"tool_input":{"content":"${(f)x}"}}'
   [ "$status" -eq 0 ]
 }
+
+@test "ignores a JS template literal inside a heredoc body" {
+  run "$HOOK" <<< "$(bash_input "$(printf 'cat > x.ts <<%sEOF%s\nconst s = `${(a / b).toFixed(1)}`\nEOF\nbun x.ts' "'" "'")")"
+  [ "$status" -eq 0 ]
+}
+
+@test "ignores an expansion inside single quotes" {
+  run "$HOOK" <<< "$(bash_input "rg -n '\${(f)x}' file")"
+  [ "$status" -eq 0 ]
+}
+
+@test "still blocks an expansion after a heredoc ends" {
+  run "$HOOK" <<< "$(bash_input "$(printf 'cat > x <<EOF\nhi\nEOF\nbun x.ts ${=seed}')")"
+  [ "$status" -eq 2 ]
+}
