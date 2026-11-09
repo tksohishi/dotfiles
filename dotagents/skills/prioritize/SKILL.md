@@ -90,7 +90,7 @@ The prompt (under ~2KB) gives the goal quoted from the instruction file and the 
 - Ranking: against the goal, which rows are in the wrong tier or urgency, which duplicates or overlaps were missed, what is missing that the briefs show, and what the top three should be and why.
 - Output under 600 words: findings tagged `[VERDICT]` or `[RANK]`, each with the brief, the claim, the evidence (file:line or hash) and the change proposed.
 
-Judge each finding as `impl-review` does: check its evidence before taking it, apply what holds to the frontmatter and the draft, and say why for one you reject. A finding that would change a user's P tag is not applied: it goes to the user in the presentation. Log one line to `~/.local/state/review/log.jsonl` with `skill: "prioritize"`, `reviewer: "claude"`, `model: "claude-fable-5-1"` and the counts.
+Judge each finding as `impl-review` does: check its evidence before taking it, apply what holds to the frontmatter and the draft, and say why for one you reject. A finding that would change a user's P tag is not applied: it goes to the user in the presentation. Log one line to `~/.local/state/review/log.jsonl` with `skill: "prioritize"`, `reviewer: "claude"`, `model: "fable"` and the counts.
 
 ## 6. Present
 

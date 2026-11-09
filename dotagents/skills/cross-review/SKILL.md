@@ -93,7 +93,7 @@ claude -p --resume <uuid> --add-dir <root> --model fable --effort xhigh --permis
 2. Print each VERDICT line, then findings grouped BLOCKER, CONCERN, NIT, each with whether you agree. With several reviewers, merge duplicates and note which reviewers raised each finding; a point only one model raised still counts.
 3. Verify every source the reviewer cites before acting on it: open the file location or URL and confirm it says what the reviewer claims. A citation that doesn't hold up makes the finding uncertain, not accepted.
 4. Fix agreed BLOCKERs and CONCERNs in the draft before showing it. Where you disagree, say why; don't auto-capitulate. A finding that changes the draft's position or recommendation goes to the user with your view, since that is their call.
-5. Log one line per reviewer once findings are settled (`reviewer`/`model`: `codex`/`gpt-6-astra`, `claude`/`claude-fable-5-1`, or `agy`/`gemini-4-argon-high`):
+5. Log one line per reviewer once findings are settled (`reviewer`/`model`: `codex`/`gpt-6-astra`, `claude`/`fable`, or `agy`/`gemini-4-argon-high`):
 
 ```bash
 jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "cross-review", reviewer: "codex", model: "gpt-6-astra", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl

@@ -119,5 +119,5 @@ At most two rebuttal rounds (`-r2`, `-r3`); after that, the remaining disagreeme
 4. Log one line once findings are settled; `user_overrode` counts answers where the user sided against your position, `conceded` the findings the reviewer dropped in rebuttal rounds.
 
 ```bash
-jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "arch-review", reviewer: "claude", model: "claude-fable-5-1", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
+jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "arch-review", reviewer: "claude", model: "fable", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
 ```
