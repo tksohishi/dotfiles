@@ -37,13 +37,6 @@ while IFS= read -r line; do
       msg="WebFetch blocked. Fetch via this path before citing the page:
 $rows"
     fi
-    # A denied call never reaches PostToolUse, so fetch-blocked-detect.sh can't record it for fetch-ladder-gate.sh.
-    # Only ladder guidance is recorded: a route to another tool (tg, summarize, a login) has no rungs to finish.
-    sid=$(echo "$TOOL_INPUT" | jq -r '.session_id // empty')
-    if [ -n "$sid" ] && { [ "$msg" = "$DEFAULT_MSG" ] || [[ "$msg" == *httpie* ]]; }; then
-      mkdir -p "$HOME/.cache/fetch-blocked"
-      printf '%s\tblocked\tWebFetch\n' "${HOST#www.}" >> "$HOME/.cache/fetch-blocked/$sid.tsv"
-    fi
     echo "$msg" >&2
     exit 2
   fi

@@ -11,19 +11,11 @@
           },
           {
             "type": "command",
-            "command": "$HOME/.codex/hooks/git-commit-subject.sh"
-          },
-          {
-            "type": "command",
             "command": "$HOME/.codex/hooks/httpie-flag-order.sh"
           },
           {
             "type": "command",
             "command": "$HOME/.codex/hooks/gog-mutations.sh"
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.codex/hooks/cd-relative-paths.sh"
           },
           {
             "type": "command",
@@ -36,18 +28,6 @@
           {
             "type": "command",
             "command": "$HOME/.codex/hooks/git-explicit-paths.sh"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "_dotfiles": true,
-        "matcher": "^Bash$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.codex/hooks/fetch-blocked-detect.sh"
           }
         ]
       }

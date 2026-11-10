@@ -77,36 +77,3 @@ webfetch_input() {
   [ "$status" -eq 2 ]
 }
 
-@test "a deny records the host as a failed WebFetch rung for the ladder gate" {
-  export HOME="$BATS_TEST_TMPDIR"
-  run "$HOOK" <<< "$(jq -n '{session_id: "s1", tool_input: {url: "https://www.cooking.nytimes.com/r"}}')"
-  [ "$status" -eq 2 ]
-  [ "$(cat "$BATS_TEST_TMPDIR/.cache/fetch-blocked/s1.tsv")" = "$(printf 'cooking.nytimes.com\tblocked\tWebFetch')" ]
-}
-
-@test "an allowed fetch writes no state" {
-  export HOME="$BATS_TEST_TMPDIR"
-  run "$HOOK" <<< "$(jq -n '{session_id: "s1", tool_input: {url: "https://example.com/"}}')"
-  [ "$status" -eq 0 ]
-  [ ! -e "$BATS_TEST_TMPDIR/.cache/fetch-blocked/s1.tsv" ]
-}
-
-@test "a deny that routes to another tool is not recorded" {
-  export HOME="$BATS_TEST_TMPDIR"
-  run "$HOOK" <<< "$(jq -n '{session_id: "s1", tool_input: {url: "https://t.me/somechannel"}}')"
-  [ "$status" -eq 2 ]
-  [ ! -e "$BATS_TEST_TMPDIR/.cache/fetch-blocked/s1.tsv" ]
-}
-
-@test "deny then a passing httpie retry clears the Stop gate, whatever the host's case or userinfo" {
-  export HOME="$BATS_TEST_TMPDIR"
-  DIR="$BATS_TEST_DIRNAME/../../dotagents/hooks"
-  run "$HOOK" <<< "$(jq -n '{session_id: "s2", tool_input: {url: "https://WWW.Audit.NYTimes.com/x"}}')"
-  [ "$status" -eq 2 ]
-  run "$DIR/fetch-ladder-gate.sh" <<< '{"session_id":"s2","hook_event_name":"Stop"}'
-  [[ "$output" == *'audit.nytimes.com'* ]]
-  jq -n '{session_id:"s2", tool_name:"Bash", tool_input:{command:"http GET https://reader@www.AUDIT.nytimes.com/x --ignore-stdin"}, tool_response:"<html><title>Audit</title>ok</html>"}' | "$DIR/fetch-blocked-detect.sh" >/dev/null
-  rm -f "$BATS_TEST_TMPDIR/.cache/fetch-blocked/s2.gate"
-  run "$DIR/fetch-ladder-gate.sh" <<< '{"session_id":"s2","hook_event_name":"Stop"}'
-  [ -z "$output" ]
-}
