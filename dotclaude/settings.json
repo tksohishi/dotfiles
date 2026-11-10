@@ -594,15 +594,6 @@
   "hooks": {
     "PreToolUse": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/effort-baseline.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
         "matcher": "WebFetch",
         "hooks": [
           {
@@ -618,16 +609,6 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/outbound-private.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Read",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/image-read-delegate.sh",
             "timeout": 5
           }
         ]
@@ -653,11 +634,6 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/git-remote-ssh.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/bash-output-efficiency.sh",
             "timeout": 5
           },
           {
@@ -688,16 +664,6 @@
         ]
       },
       {
-        "matcher": "Write|Edit|Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/memory-gate.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
         "matcher": "Write|Edit|NotebookEdit",
         "hooks": [
           {
@@ -717,21 +683,6 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/env-example-secrets.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "ExitPlanMode",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/plan-delegation-annotations.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/plan-exit-effort-gate.sh",
-            "timeout": 5
           }
         ]
       },
@@ -756,15 +707,6 @@
         "matcher": "ExitPlanMode"
       },
       {
-        "matcher": "AskUserQuestion",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/ask-question-length.sh"
-          }
-        ]
-      },
-      {
         "matcher": "Bash|Write",
         "hooks": [
           {
@@ -784,16 +726,6 @@
       }
     ],
     "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/code-comment-nudge.sh",
-            "timeout": 5
-          }
-        ]
-      },
       {
         "matcher": "ScheduleWakeup",
         "hooks": [
@@ -819,11 +751,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/bash-verify-reminder.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "$HOME/.claude/hooks/ci-gate-record.sh",
             "timeout": 5
           },
@@ -832,16 +759,6 @@
             "command": "$HOME/.claude/hooks/ci-gate.sh",
             "asyncRewake": true,
             "timeout": 1800
-          }
-        ]
-      },
-      {
-        "matcher": "ExitPlanMode",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/plan-delegation-nudge.sh",
-            "timeout": 5
           }
         ]
       },
@@ -898,16 +815,6 @@
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/plan-effort-nudge.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/context-size-nudge.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "$HOME/.claude/hooks/skill-in-prompt.sh",
             "timeout": 5
           }
@@ -955,25 +862,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/fetch-ladder-gate.sh",
             "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/subagent-reaper.sh",
-            "timeout": 10
           }
         ]
       }
     ],
     "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/idle-teammates.sh",
-            "timeout": 5
-          }
-        ]
-      },
       {
         "hooks": [
           {
@@ -988,15 +881,6 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/no-bang-sudo.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/one-command-per-reply.sh",
             "timeout": 5
           }
         ]
@@ -1055,11 +939,6 @@
   "feedbackDrafts": "off",
   "spinnerTipsEnabled": false,
   "effortLevel": "medium",
-  "modelSettings": {
-    "claude-opus-5-5": {
-      "autoCompactWindow": 500000
-    }
-  },
   "showClearContextOnPlanAccept": true,
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
@@ -1099,6 +978,5 @@
       "**Org-specific CLIs**: None configured — repo uses personal-workflow CLIs (gog, hermes, tg, agent-browser, ctx7, mise, trash, fd, http/httpie, bats) per CLAUDE.md conventions, not org-internal tools",
       "routine under scripts/, dotclaude/, dotagents/, dotcodex/ prefixes within /Users/takeshi/.dotfiles is standard maintenance work for this repo"
     ]
-  },
-  "idleCompaction": false
+  }
 }

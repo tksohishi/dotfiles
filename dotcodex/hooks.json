@@ -19,10 +19,6 @@
           },
           {
             "type": "command",
-            "command": "$HOME/.codex/hooks/bash-output-efficiency.sh"
-          },
-          {
-            "type": "command",
             "command": "$HOME/.codex/hooks/gog-mutations.sh"
           },
           {
@@ -45,16 +41,6 @@
       }
     ],
     "PostToolUse": [
-      {
-        "_dotfiles": true,
-        "matcher": "^Bash$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.codex/hooks/bash-verify-reminder.sh"
-          }
-        ]
-      },
       {
         "_dotfiles": true,
         "matcher": "^Bash$",
