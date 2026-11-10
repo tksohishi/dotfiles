@@ -43,6 +43,7 @@ brew "rustup"
 brew "scribe"
 brew "seats"
 brew "sheets"
+brew "speedtest-cli"
 brew "starship"
 brew "summarize"
 brew "tailspin"
@@ -63,6 +64,7 @@ cask "antigravity-cli"
 cask "brave-browser"
 cask "claude"
 cask "codex"
+cask "coteditor"
 cask "discord"
 cask "dropbox"
 cask "firefox"
@@ -82,26 +84,24 @@ cask "ledger-wallet"
 cask "libreoffice"
 cask "logi-options+"
 cask "notion-calendar"
+cask "nordvpn" # Password prompt: pkg installer
 cask "notion-cli"
 cask "openusage"
 cask "qlmarkdown"
 cask "simple-comic"
 cask "slack"
 cask "spotify"
+cask "telegram"
+cask "the-unarchiver"
 cask "ticktick"
 cask "visual-studio-code" # Password prompt: shell command
 cask "zed"
 cask "zoom" # Password prompt: audio device
 
 mas "Amphetamine", id: 937984704
-mas "CotEditor", id: 1024640650
 mas "Keynote", id: 409183694
-mas "NordVPN", id: 905953485
 mas "Pages", id: 409201541
-mas "Speedtest", id: 1153157709
 mas "Tailscale", id: 1475387142
-mas "Telegram", id: 747648890
-mas "The Unarchiver", id: 425424353
 # Manual install: Claude Code (claude install)
 # Manual install: CuaDriver (bundled with Claude desktop)
 cask "chatgpt"
