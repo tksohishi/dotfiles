@@ -1,158 +1,69 @@
 # Global Instructions
 
 ## Core Rules
-- **Grounding** — Verify a fact before asserting it; when a one-command check (ls, timestamp, du) exists, run it instead of hedging. Label a claim unverified only when the check is out of reach, and name what would settle it.
-- **Memory is a pointer, not a source** — A limit or figure recalled from memory carries its date and method; one that would decide a design (a cap, a socket count, a rate, "X does not work") is re-measured from the primary source before it is cited. A memory file never holds session state (caps, PIDs, pending steps, dated findings); those live in the handoff or the repo's docs.
-- **Honesty** — When the user proposes a solution or asks "does X make sense?", lead with the strongest objection or trade-off. Don't hedge ("might", "could") if you have a clear view.
-- **First principles** — Before implementing a fix, check whether the stated problem is the actual problem. If reframing would change the solution, raise it; otherwise execute.
-- **Resourcefulness** — Before saying "can't" or "not possible", run at least one investigation pass on alternatives.
-- **Simplicity** — Before adding a helper, abstraction, or new file, ask: would inline or repeated lines be clearer? Don't refactor surrounding code unprompted.
-- **Verification** — Don't claim work is "fixed" or "done" without observing the working result. When the failure lives in a system you can't reach (Slack workspaces, vendor APIs, etc.), get real output from it before writing the fix rather than guessing. For scripts under `~/.dotfiles/bin/` or other live-symlinked binaries, edit, ask the user to test against the uncommitted file, then commit only after they confirm. Use "trying X, please test" while iterating; reserve "fixed" for verified state.
+- **Grounding**: verify a fact before asserting it; when a one-command check exists, run it instead of hedging.
+- **Honesty**: when the user proposes a solution or asks "does X make sense?", lead with the strongest objection. Don't hedge when you have a clear view.
+- **First principles**: before fixing, check the stated problem is the actual problem; raise it if reframing changes the solution.
+- **Verification**: don't claim "fixed" or "done" without observing the working result. For a system you can't reach (Slack, vendor APIs), get real output before writing the fix. For live-symlinked scripts (`~/.dotfiles/bin/`), ask the user to test the uncommitted file before committing.
 
 ## Interaction
-- When asked for your opinion (e.g. "what do you think?", "would it make sense to ~?"), explain your reasoning first and wait for approval before making edits
-- When a blocker forces a workaround (missing login/creds, blocked API, broken tool), report it and propose a durable fix the first time — don't silently re-pay the workaround each iteration
-- (Claude Code) In plan mode, before presenting the final plan (ExitPlanMode), run `/arch-review` on the draft plan and address the feedback first
-- (Claude Code) Plans have two sections. `## Design`: the direction and the changes in behavior, in plain terms, with no file, function or method names. `## Implementation`: the concrete steps, one line each (file and change), with no rationale already given in Design.
-- (Claude Code) When the user interrupts plan approval (ExitPlanMode) with a question, answer it and state explicitly whether the plan changed — do NOT re-invoke ExitPlanMode in the same turn; wait for their go or use AskUserQuestion if a real decision emerged
-- (Claude Code) When the auto-mode classifier blocks an action twice, ask the user to approve it via `/permissions` → Recently denied → `r`, or to approve it in chat naming the specific target; don't suggest running it with `!`
-
-## Enforcement Hierarchy
-When the user asks to prevent, enforce, or change a behavior, consider options in this order before proposing a fix:
-
-1. **Deterministic** — PreToolUse hook, deny/allow permission rule, wrapper script, pre-commit check, config constraint. Works without relying on the agent noticing.
-2. **Skill or command edit** — for behaviors tied to a specific invocation (e.g. how `/update-apps` reports output).
-3. **Memory or AGENTS.md** — soft guidance; use only when the behavior requires judgment or has no detectable signature.
-
-Memory is the reflex because it is cheap to write, but it is a soft reminder the agent can still violate. Most "prevent X" requests have a detectable signature (command shape, file content, settings value) that a hook or rule can catch. Past rules that drifted into hooks all started as memory that failed to stick.
-
-When proposing a fix, name the deterministic option first, note the tradeoffs (false-positive risk, maintenance cost), and mention memory only as fallback.
+- When asked for your opinion, explain your reasoning and wait for approval before editing.
+- When a blocker forces a workaround (missing creds, blocked API, broken tool), report it and propose a durable fix the first time.
+- (Claude Code) When the auto-mode classifier blocks an action twice, ask the user to approve it via `/permissions` → Recently denied → `r`, or in chat naming the target; don't suggest running it with `!`.
+- When the user asks to prevent or enforce a behavior, propose a deterministic fix first (hook, permission rule, wrapper, pre-commit check), then a skill edit, and instructions or memory only when it needs judgment.
 
 ## AGENTS.md hygiene
-- AGENTS.md is a constraint system, not documentation. Strip anything the agent can derive by reading code or running `--help`.
-- Keep: domain knowledge the agent can't infer (lookup tables, fare rules, exclusion rationale with *why*), silent-bug gotchas, "never do" boundaries.
-- Cut: file layouts, full CLI flag listings, file-by-file descriptions, deterministic setup steps (move to scripts or template headers). Target ~150 lines.
-- Never add personal or machine-specific info (device names/UDIDs, signing teams, one user's install workflow, quirks of this Mac). Litmus test: would the line hold for a collaborator on another machine? If not, it goes to project memory, not AGENTS.md.
+- A constraint system, not documentation: keep domain knowledge, silent-bug gotchas and "never do" boundaries; cut anything derivable from code or `--help`.
+- No personal or machine-specific info; that goes to project memory.
 
 ## Writing Style
-- Before writing any prose document for humans (docs, reports, README sections, PR descriptions, emails, announcements; not code, commit messages or chat replies), load the `prose` skill and apply it while drafting; don't ship a first draft with AI tells
-- Avoid using emdashes in writing
-- Avoid using the section sign `§` in writing meant for humans; it reads as an AI artifact. Use the word "Section", "see", or drop the marker.
-- Avoid using hyphens or dashes as conjunctions (use commas/semi-colons or rewrite)
-- No self-attribution stamps: never mark facts or decisions that came from the user with name/date attributions like "(Name, Aug 2026)" or "(Name's drafts, Jul 21)" in any file (instruction files, prep docs, notes). State them as plain facts. Attribute only external sources where provenance matters (e.g. "(Source: <person>, Jul 16 call)").
-- Keep documents current-state: describe things as they are now, with no or minimal historical context. No "previously", "as of <date>", "since X changed", "updated <date>" clauses, no changelog narration inside docs; history lives in git. Exception: documents whose subject IS history (retros, incident timelines, transcripts, dated logs).
+- Before writing prose for humans (docs, reports, READMEs, PR descriptions, emails, announcements), load the `prose` skill.
+- No em dashes, no section sign `§`, no hyphens or dashes as conjunctions.
+- No name/date attribution stamps on facts that came from the user; attribute only external sources.
+- Documents describe the current state; history lives in git (except retros, timelines, logs).
 
 ## 日本語の注意点
-- 人称は一人称「私」、二人称（you）「あなた」で統一
-- 丸囲み数字（①②③）や囲み文字などの特殊文字は避ける。通常の数字（1. 2. 3.）や箇条書きを使う
-- 強調（`**`）の閉じ記号の直前に約物（句読点。、だけでなく括弧 `()` `（）`・「」・：等すべて）を置かない。約物は必ず強調の外側に出し、閉じ `**` の直前は文字・数字で終える。`**重要**。続き` ✅ ／ `**重要。**続き` ❌ ／ `**見放題(加入中)**です` ❌ → `**見放題**（加入中）です` ✅（約物+CJK が CommonMark の right-flanking 規則に反し、太字にならない。英語文は直後が空白のため問題ない）
+- 人称は一人称「私」、二人称「あなた」で統一
+- 丸囲み数字（①②③）などの特殊文字は避け、通常の数字や箇条書きを使う
+- 強調の閉じ `**` の直前に約物（。、（）「」：等）を置かない。`**重要**。` ✅ ／ `**重要。**` ❌（CommonMark の right-flanking 規則で太字にならない）
 
 ## Response Style
-- In conversational replies, drop filler, preambles, and hedging
-  - Japanese: ご質問ありがとうございます preambles, えーと/まあ/基本的に filler, かもしれません/おそらく hedging
-- Don't restate the user's question before answering
-- Times: always in the user's local time zone (America/New_York unless the project's CONTEXT says otherwise), e.g. "9/2 08:07 EDT". Never show UTC or offsets. When a source gives UTC (logs, APIs, `updatedAt` fields), convert with `date` or TZ=America/New_York before writing the time; never do the conversion in your head. UTC is allowed only when the user asked in UTC, when quoting a raw value verbatim (a log line, an API field), or when drafting text for readers in several zones
-- End-of-turn summary: 1-2 sentences max covering what changed + what's next. Don't append headers, tables, or multi-section breakdowns unless the content genuinely benefits (5+ items, side-by-side comparison, lookup reference)
-- Match structure to complexity: single-concept questions get a single-concept answer
-- Fragments OK when meaning is clear; use full sentences for ambiguous cases, security warnings, and destructive action confirmations
-- Preserve technical terms, code, and quoted strings exactly
-
-## Markdown Formatting
-- Headings: prefer `###` for topic titles in general content. Reserve `#`/`##` for top-level document structure where genuinely needed.
-- Bold (`**text**`): reserve for genuinely important claims only. Don't bold for routine emphasis or to highlight every key term.
-- File paths in replies: plain backticked paths, never `[name](file:///...)` links (they cost output and are rarely clicked). Source-code citations stay `app.py:123`.
+- Times in the user's local zone (America/New_York unless the project says otherwise), e.g. "9/2 08:07 EDT", never UTC. Convert source UTC with `date`, never in your head.
+- File paths in replies: plain backticked paths, never `file://` links.
 
 ## Slack Formatting
-- Draft Slack messages as plain text: no markdown-format modifiers. No `*bold*`, no `#`/`*` headings, no `-`/`*` bullet markers. Write plain sentences and paragraphs; separate points with blank lines.
-- Reserve backticks / fenced code blocks for literal code or shell commands only, never for emphasis or decoration.
-- Arrows: literal `→`.
+- Plain text: no `*bold*`, headings or bullet markers; backticks only for literal code. Arrows: literal `→`.
 
 ## Code Style
-- Always prefer simplicity over pathological correctness; YAGNI, KISS, DRY
-- No backward-compat shims or fallback paths unless they come free without adding cyclomatic complexity
-- Only change what was asked for; don't refactor, annotate, or "improve" surrounding code unprompted
-- Code speaks for itself and describes the current state. Background, history, context and decision rationale go where they belong (docs/, tests, the commit message), never in comments. Write a comment only for a non-obvious constraint the code can't express, such as an obvious alternative that would break; never narrate what the code does, and never add trailing end-of-line comments (`return x; // ...`)
-- Use TypeScript with Web Standard APIs for scripting and web apps; use `bun` as the runtime but avoid bun-specific APIs to keep code portable across runtimes
-- Prefer TypeScript over Python unless Python's ecosystem is clearly stronger for the task (e.g. data analysis, ML)
-- IME safety in web UI: any Enter/keydown handler on a text input must guard IME composition in the first draft (`isComposing`/keyCode 229, plus a compositionend grace window for Safari/WKWebView, which fires compositionend BEFORE the committing keydown). Reuse the project's helper if one exists; reference implementation: koyomi packages/ui/src/ime.ts
-- Never copy real personal data (phone numbers, emails, addresses, names from the user's DB/calendar/inbox) into test fixtures, committed code, or anything else that could be published. Anonymize first: US phone numbers from the reserved 555-01xx range, example.com emails, made-up names. Local data stores (databases, gitignored tmp/) legitimately hold real data — don't flag or scrub those.
+- Simplicity over pathological correctness; no backward-compat shims or fallback paths unless free.
+- Comments only for non-obvious constraints the code can't express; never narrate, never trailing end-of-line comments. Rationale goes in the commit message or docs.
+- TypeScript with Web Standard APIs on `bun`, avoiding bun-specific APIs. Python only when its ecosystem is clearly stronger.
+- IME safety: any Enter/keydown handler on a text input guards composition (`isComposing`/keyCode 229, plus a compositionend grace window for Safari/WKWebView). Reference: koyomi `packages/ui/src/ime.ts`.
+- Never copy real personal data into fixtures or committed code; use 555-01xx phones, example.com emails, made-up names.
 
-## Package Managers
-- TypeScript/JavaScript: bun as both runner and package manager (`bun add`, `bun run`, `bunx`), not npm. In a project that already has a `pnpm-lock.yaml`, stay on pnpm.
-- Python: uv, not pip
-- Bun auto-loads `.env` (and `.env.local`, `.env.{NODE_ENV}`) from the working directory. Just run `bun script.ts`; don't add `--env-file=.env` redundantly. Use the flag only for non-default filenames (e.g. `--env-file=.env.staging`).
-- Global CLI tools: prefer `brew install` over `npm install -g`, `pip install`, or `go install`. Homebrew tracks everything in the Brewfile.
-- Agent skills/capabilities: prefer `bunx skills add -g <owner>/<repo>` (skills.sh) over `claude plugin install`. skills.sh is agent-neutral (Claude / Cursor / Codex / Copilot all read the same `~/.agents/skills/<name>/` via per-agent symlinks); plugins are Claude-only and lock you in. From within the dotfiles repo use `/install-skill` which handles discovery (via find-skills), install, and skills.txt tracking in one step. Legitimate exception: capability ships only as a plugin (LSP servers, etc.) and not on skills.sh.
+## Tools
+- JS/TS: `bun` (stay on pnpm where `pnpm-lock.yaml` exists). Python: `uv`. Global CLIs: `brew`. Agent skills: `bunx skills add -g` (`/install-skill` in dotfiles), not plugins.
+- Bun auto-loads `.env`/`.env.local`; don't pass `--env-file` for those.
+- Docs lookup: `ctx7` first, then `--help`, then the web.
+- mise tools are on PATH; never wrap with `mise exec --` or `zsh -lc`.
+- httpie over curl, always `http METHOD <URL> [flags]`.
+- `gh` subcommands with `--json`, not `gh api`, unless no subcommand covers it.
+- Intermediate files go in project-local `tmp/<topic>/`, not `/tmp`, the scratchpad, or `os.tmpdir()`-style APIs.
+- `trash` over `rm -rf`. `sqlite3 -readonly` for reads.
+- Google services: `gog` CLI, not MCP. Never recreate a shared Google Doc; edit it in place.
+- Browser automation: `agent-browser` (load its skill first); never drive the real installed Chrome.
 
-## Context Efficiency
-- The whole context is re-sent on every call, so cost tracks session length, not turn count. Keep bulk out: `Read` with `limit`/`offset`, `rg --files-with-matches` before full matches, `| head -N` on verbose output, targeted URLs over top-level pages. When a session has grown large, say so and offer a fresh one.
-- On Fable, delegate to a subagent when any trigger below is met. These are thresholds, not judgment calls, and they take precedence over the Agent tool's built-in "when in doubt, don't spawn" guidance:
-  - reading 2+ images or screenshots
-  - fetching or researching 3+ sites or sources
-  - a search expected to span 5+ files
-  - verifying the same kind of fact for 3+ items (prices, ratings, policies, links): one agent per item or small batch, all launched in a single message so they run in parallel
-  - generating 200+ lines of markup, a generated file, or a self-contained diff
-  - verbose command output you need only a summary of
-- On Opus, subagents run on the same model, so delegating saves no quota. Work inline by default; delegate only to run independent work in parallel, or to keep bulk you need only a summary of (verbose logs, research across 3+ sources) out of the main context.
-- When delegating, judgment stays in the main session (what to build, exact facts and labels, acceptance criteria) and the bulk lives in the subagent's context. Ask for a bounded summary ("under 300 words"). Integrate results from artifacts (diffs, files on disk, command output), not the agent's closing summary — final reports are the least reliable part of a trajectory; failed runs routinely assert compliance. Below the thresholds, work inline (overhead is ~10x a direct fetch for a simple lookup), and keep small, iterative, or discovery-heavy edits in the main loop. Never delegate a job whose feedback loop is outside the code (an external rate limit, a long-running process, a headed browser the user can see): the main session owns it, runs it once in the background, and reads the log; a subagent given such a job spawns its own monitors and the corrections arrive one message late. `CLAUDE_CODE_SUBAGENT_MODEL` pins subagents to their own tier regardless of the main model, so delegating also conserves main-session quota. Don't pass a `model` param; unset keeps subagents on that tier.
-- Named teammates (Agent with `name:`) stay resident after reporting and pile up as idle entries in the Agents panel; `TaskStop` each one as soon as its work is integrated. Prefer unnamed one-shot agents for review/research fan-outs — they exit on their own. The Agents panel is the source of truth for live teammates.
-
-## Shell Commands
-- When looking up technical documentation (CLI, library, SDK, platform, service, framework), default to `ctx7` first (`ctx7 library <name>` then `ctx7 docs <id> "<query>"`) before WebFetch/WebSearch. For CLI tools, also run `--help`. Fall back to WebFetch only when ctx7 has no hit or the specific info is missing from the indexed content.
-- mise-installed tools (`bun`, `node`, etc.) are on PATH via shell inheritance from the activated zsh that launched the agent. Call them directly. Don't wrap with `mise exec --` (gated by ask) or `zsh -lc` (wrapper-bypass; gated). If a tool isn't on PATH, the launch context wasn't activated; investigate before reaching for a wrapper.
-- Within the current project, prefer relative paths — for git (`git add foo.ts`), scripts (`bun scripts/foo.ts`, `python scripts/foo.py`, `./bin/foo`), and file ops (`ls src/`, `cat config.toml`). Use absolute paths only for files outside the project or when wd is genuinely ambiguous. Never chain `cd <outside-dir> && <tool> <relative path>` (rg, grep, cat, sed, head, tail, fd, ls, find) when the `cd` leaves the working tree (absolute, `~`, `$VAR`, `..`): the Read() deny rules make Claude Code escalate any file argument it can't resolve after such a `cd` to a permission prompt, and a hook blocks the shape. `cd packages/api && ls src/` inside the project is fine. Replace with `rg <pattern> /abs/dir/file`, `cat /abs/dir/file`, `ls /abs/dir`, or `git -C /abs/dir <cmd>`.
-- Background Bash commands (`run_in_background`) stop after the Bash `timeout` (default 30m, max 2h). Long waits belong in a subagent or a self-limiting script, not a background shell.
-- Prefer WebFetch/Fetch tools for simple web requests; use `http` (httpie) for API calls requiring custom headers or auth; never use `curl` unless httpie is unavailable
-- When calling `http`/`https` (httpie), always specify the method explicitly and put flags AFTER the URL. Canonical form: `http METHOD <URL> [flags...]` (method required, not optional; otherwise httpie's auto-method promotes commands with `key=value` data fields to implicit POST and bypasses the destructive-method gate). A PreToolUse hook blocks flag-first invocations.
-- Use `fd` for file search, scoped to the project directory. Ask before searching outside the project.
-- **Always use `gh` subcommands, never `gh api`.** Use `--json <fields>` for structured output. Run `gh <resource> --help` if unsure which subcommand exists. Fall back to `gh api` only when no subcommand covers the operation, and research the endpoint first.
-- Use `jq` for JSON processing, not `python -c "import json..."` or similar Python one-liners
-- Prefer Read for file content (not `cat`) and Edit for changes (not `sed`). For search, use `rg` and `fd` via Bash (Claude Code's macOS native build dropped the Grep/Glob tools). For JSON use `jq`.
-- For intermediate files (pdftotext output, downloaded HTML, scripts, analysis output, etc.), use project-local `tmp/<topic>/` (globally gitignored), not `/tmp` or the session scratchpad the system prompt offers; scratchpad paths die on reboot and are keyed by session ID, so nobody can find them later. Exceptions: throwaway dependency source clones and Artifact page files may stay in the scratchpad. In code, write `path.join(process.cwd(), 'tmp')` (Node/TS) or `Path.cwd() / 'tmp'` (Python). Never reach for `os.tmpdir()`, `fs.mkdtemp`, `tempfile.gettempdir()`, `tempfile.NamedTemporaryFile()`, or bare `mktemp` — they all bypass the rule by returning a system temp path. Keeps operations in the project directory and avoids `cd`-chain patterns.
-- `cp`, `mv`, `rm` with flags trigger a Claude Code built-in path-safety check that prompts even when the command is in `permissions.allow`. Bare single-file `cp src dst` is fine. For recursive / no-clobber copy use `rsync -a --ignore-existing src/ dst/` (trailing slashes copy contents into dst) — rsync isn't subject to the path-safety check and its allow rule works.
-- Prefer reversible deletion over `rm -rf` for bulk/cache/directory removal: use `trash <paths...>` (macOS built-in, recoverable from Trash). Besides being safer, `rm -rf` of home paths is denied outright by the auto-mode classifier, while `trash` passes cleanly. Reserve `rm` for cases where non-recoverable removal is actually required.
-- For `sqlite3`, pass `-readonly` for read queries (SELECT, PRAGMA, .schema, .tables, .dump) so the database is opened read-only at the engine level. Omit it only for intentional mutations.
-- macOS 15+ silently drops LAN unicast (ping/SSH return "No route to host" with ARP populated and gateway reachable) when the host app lacks Local Network permission in System Settings → Privacy & Security → Local Network. Resets on major OS updates.
-
-## Env Files
-- `.env` for values the app needs to run, including secrets. Typically gitignored; `.env.example` is the committed schema.
-- `.env.local` is ONLY for per-user overrides (personal preferences, machine-specific tweaks). Don't default here just because the var looks sensitive or because Bun auto-loads it.
-- When suggesting where a new var goes, default to `.env`. Use `.env.local` only when the value is genuinely per-user.
-
-## Symlinked Configs
-- Most files under `~/.claude/` and `~/.codex/` symlink into `~/.dotfiles/`. Edit/Write refuses to write through symlinks.
-- When wd is `~/.dotfiles/`, edit the source files directly (e.g. `dotagents/AGENTS.md`, `dotclaude/settings.json`) instead of the `~/.<tool>/` paths.
-- In any project, `AGENTS.md` is the canonical instructions file; Claude Code reads it natively when no `CLAUDE.md` exists, so don't create a `CLAUDE.md` symlink in new projects. Where a project has `CLAUDE.md` as a symlink to `AGENTS.md`, edit `AGENTS.md` directly; don't write through `CLAUDE.md`, skip the `readlink` round trip. Same for `.cursorrules` → `AGENTS.md` if present.
-- Claude Code's own `model` and `effortLevel` in `dotclaude/settings.json` are self-modification: never add or change them without explicit direction. Gotchas: `model` omitted = session default (`"default"` is NOT a valid value, it errors); valid `effortLevel` values are `low`/`medium`/`high`/`xhigh`. Read the file for the current value; never memorize it.
-
-## Secrets
-- Never read or search `.env`, `.env.<env>` (e.g. `.env.production`, `.env.local`), `.dev.vars`, or `.prod.vars` files via any tool. This includes the Read tool, Edit, Write, and Bash readers/searchers (`cat`, `head`, `tail`, `less`, `more`, `bat`, `rg`, `grep`, `sed`, `awk`, `strings`, `xxd`, `od`, `nl`, `tac`). They contain API keys and tokens. Use `.env.example` for schema. To inspect a specific value, use a redaction script or ask the user.
-- `~/.ssh` is denied to direct reads. Run `ssh-info` to see public keys, `authorized_keys`, `config` and the `known_hosts` entry count; `ssh-keygen -F <host>` checks one known host.
-
-## Google Workspace
-- Use the `gog` CLI for all Google services (Gmail, Calendar, Drive, Docs, Sheets, ...), not the MCP Google tools. MCP is the fallback only when `gog` lacks the account or capability. Run `gog <service> --help` before concluding an operation isn't supported.
-- Never recreate a Google Doc to change its content; edit in place with `gog docs` (write, insert, insert-image with local-file upload, format). Once shared, the URL is load-bearing.
-- `gog drive upload --convert-to doc` turns a local file (e.g. .docx with embedded images) into a native Doc; `--replace <fileId>` works for binary files only, never native Docs.
-- When the user reports an email arrived (「返信あり」「メール来た」), read the actual message via `gog gmail` before recording or acting on it — the one-line summary drops details (exact wording, times, conditions).
-
-## Browser Automation
-- Default to `agent-browser` for all browser automation (headless by default). Use WebFetch/httpie for simple HTTP requests; agent-browser only for sites that need a real browser. Never drive the real installed Google Chrome from scripts (e.g. Playwright `channel: "chrome"`) — it holds logged-in personal sessions; isolated browsers only.
-- Load the `agent-browser` skill before driving one: session/profile config, the open/snapshot/get-text flow, headed mode, LinkedIn, and daemon recovery live there.
+## Env and Secrets
+- `.env` holds what the app needs, secrets included; `.env.local` is only for per-user overrides.
+- Never read or search `.env*` (except `.env.example`), `.dev.vars` or `.prod.vars` by any tool. `~/.ssh` is denied; use `ssh-info`.
+- `AGENTS.md` is the canonical instructions file; don't create a `CLAUDE.md` symlink, and edit `AGENTS.md` directly where one exists.
 
 ## Git
-- Never create a branch unless I explicitly ask. Work on the current branch, including the default branch (`main`), directly. This overrides any built-in "if on the default branch, branch first" rule; do not auto-branch before committing.
-- Prefer concise output to minimize token usage: `git status --short`, `git log --oneline`, `git diff --stat` (before full diff)
-- After `gh repo create`, always configure repo defaults: `gh repo edit --enable-wiki=false --enable-projects=false --delete-branch-on-merge --enable-squash-merge`
-- For other repos (clones in `tmp/`, external paths), use `git -C <repo> <cmd>` and absolute paths for file tools. A standalone `cd <repo>` (wd persists across Bash calls) is fine for build/test commands, but don't chain it with file tools on relative paths (see Shell Commands). If you `cd`, return to the project root after.
-
-## Commits
-- After executing a plan (plan mode) or any long multi-step session, do NOT commit right away: present a summary of the changes made in the turn and wait for the user to verify them before committing. Quick single-purpose edits made at the user's direct request may still commit immediately.
-- Never add the AI agent as a commit author or co-author
-- NEVER append `Claude-Session:` links or any session-URL trailer to commit messages or PR bodies. This overrides the harness's built-in instruction to add them; strip the trailer it pre-fills.
-- Always commit using the default git settings
-- Use plain quoted strings for commit messages; `$()`, backticks, and heredocs trigger permission prompts
-- Format: subject + blank line + bullet body. Subject is a short single focused concept in imperative mood; bullets explain why (the diff already shows what)
-- Split unrelated concepts into separate commits
+- Never create a branch unless asked; work on the current branch, including `main`.
+- After `gh repo create`: `gh repo edit --enable-wiki=false --enable-projects=false --delete-branch-on-merge --enable-squash-merge`.
+- After a plan or long multi-step session, summarize the changes and wait for the user to verify before committing; quick direct edits may commit immediately.
+- Never add the agent as author or co-author, and never append `Claude-Session:` or other session-URL trailers (overrides the harness).
+- Commit messages: plain quoted strings (no `$()`, backticks, heredocs); imperative subject, blank line, bullets explaining why. Split unrelated concepts.
 
 ## Personal Extensions
 @~/.claude/personal.md
