@@ -52,6 +52,11 @@ denies() {
   denies 'git commit --amend --no-edit'
 }
 
+@test "allows concluding a merge without paths" {
+  allows 'GIT_EDITOR=true git merge --continue'
+  allows 'git merge feature'
+}
+
 @test "denies git commit -a forms" {
   denies 'git commit -a -m "x" -- foo.ts'
   denies 'git commit -am "x"'

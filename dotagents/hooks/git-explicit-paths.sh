@@ -73,7 +73,7 @@ while IFS= read -r segment; do
         fi
       done
       if [ $paths -eq 0 ]; then
-        deny "git commit must name its paths so it can't sweep in files someone else staged. Use: git commit -m \"...\" -- <path>... (new files still need git add <path> first)."
+        deny "git commit must name its paths so it can't sweep in files someone else staged. Use: git commit -m \"...\" -- <path>... (new files still need git add <path> first). To conclude a conflicted merge, use GIT_EDITOR=true git merge --continue."
       fi
       ;;
   esac
