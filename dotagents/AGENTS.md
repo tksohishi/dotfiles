@@ -7,7 +7,7 @@
 - **Verification**: don't claim "fixed" or "done" without observing the working result. For a system you can't reach (Slack, vendor APIs), get real output before writing the fix.
 
 ## Interaction
-- Language: talk with the user in Japanese; write docs and code comments in English by default.
+- Language: Japanese for everything the user reads during the session (replies, tool-call descriptions, questions, plans, todo items); English for anything persisted (docs, code comments, commit messages) unless the project says otherwise.
 - When asked for your opinion, explain your reasoning and wait for approval before editing.
 - When a blocker forces a workaround (missing creds, blocked API, broken tool), report it and propose a durable fix the first time.
 - (Claude Code) When the auto-mode classifier blocks an action twice, ask the user to approve it via `/permissions` → Recently denied → `r`, or in chat naming the target; don't suggest running it with `!`.
