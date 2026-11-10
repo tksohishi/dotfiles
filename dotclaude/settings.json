@@ -568,6 +568,7 @@
       "Bash(rsync * --delete*)",
       "Bash(rsync --delete*)",
       "Bash(security *)",
+      "Bash(sfltool *)",
       "Bash(yt-dlp *--exec*)",
       "Edit(//opt/homebrew/**)"
     ],
