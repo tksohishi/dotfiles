@@ -38,8 +38,13 @@ make_input() { jq -nc --arg cwd "$REPO" --arg cmd "$1" '{session_id:"sid-1",cwd:
   run "$HOOK" <<< "$(make_input "git push -q")"
   [ "$status" -eq 0 ]
   [ "$(jq -r .sha "$CLAUDE_CI_GATE_DIR/sid-1.json")" = "$SHA" ]
-  [ "$(jq -r .blocks "$CLAUDE_CI_GATE_DIR/sid-1.json")" = "0" ]
   [ "$(jq -r '.pushedAt | type' "$CLAUDE_CI_GATE_DIR/sid-1.json")" = "number" ]
+  [[ "$(jq -r .hookSpecificOutput.additionalContext <<< "$output")" == "CI gate: watching Actions runs for ${SHA:0:7}"*'Do not call CI green'* ]]
+}
+
+@test "says nothing when it records nothing" {
+  run "$HOOK" <<< "$(make_input "git status")"
+  [ -z "$output" ]
 }
 
 @test "matches a push inside a && chain" {
@@ -87,7 +92,7 @@ make_input() { jq -nc --arg cwd "$REPO" --arg cmd "$1" '{session_id:"sid-1",cwd:
 @test "drops a stale marker for the same unpushed SHA" {
   unpushed_commit
   mkdir -p "$CLAUDE_CI_GATE_DIR"
-  jq -nc --arg cwd "$REPO" --arg sha "$SHA" '{cwd:$cwd,sha:$sha,blocks:5}' > "$CLAUDE_CI_GATE_DIR/sid-1.json"
+  jq -nc --arg cwd "$REPO" --arg sha "$SHA" '{cwd:$cwd,sha:$sha}' > "$CLAUDE_CI_GATE_DIR/sid-1.json"
   run "$HOOK" <<< "$(make_input "git push")"
   [ ! -e "$CLAUDE_CI_GATE_DIR/sid-1.json" ]
 }
@@ -98,11 +103,6 @@ make_input() { jq -nc --arg cwd "$REPO" --arg cmd "$1" '{session_id:"sid-1",cwd:
   unpushed_commit
   run "$HOOK" <<< "$(make_input "git push")"
   [ "$(jq -r .sha "$CLAUDE_CI_GATE_DIR/sid-1.json")" = "$PUSHED" ]
-}
-
-@test "records the pushed branch" {
-  run "$HOOK" <<< "$(make_input "git push")"
-  [ "$(jq -c .branches "$CLAUDE_CI_GATE_DIR/sid-1.json")" = '["main"]' ]
 }
 
 @test "ignores a push to a branch outside push.branches" {

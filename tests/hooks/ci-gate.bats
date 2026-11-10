@@ -6,16 +6,13 @@ setup() {
   export CLAUDE_CI_GATE_DIR="$BATS_TEST_TMPDIR/ci-gate"
   mkdir -p "$CLAUDE_CI_GATE_DIR" "$BATS_TEST_TMPDIR/bin"
   export PATH="$BATS_TEST_TMPDIR/bin:$PATH"
-  export CI_GATE_WAIT_INTERVAL=0 CI_GATE_WAIT_MAX=0 CI_GATE_WATCH_MAX=0
-  printf '#!/usr/bin/env bash\necho "$*" >> "%s"\n' "$BATS_TEST_TMPDIR/notified" > "$BATS_TEST_TMPDIR/bin/osascript"
-  chmod +x "$BATS_TEST_TMPDIR/bin/osascript"
+  export CI_GATE_WAIT_INTERVAL=0 CI_GATE_MARKER_WAIT=1
+  REPO="$BATS_TEST_TMPDIR/repo"
+  git init -q -b main "$REPO"
+  git -C "$REPO" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m init
+  SHA=$(git -C "$REPO" rev-parse HEAD)
   MARKER="$CLAUDE_CI_GATE_DIR/sid-1.json"
-  unset CLAUDE_CODE_ENTRYPOINT
-  fake_actions_status operational
-}
-
-fake_actions_status() {
-  printf '#!/usr/bin/env bash\necho %s\n' "'{\"components\":[{\"name\":\"Actions\",\"status\":\"$1\"}]}'" > "$BATS_TEST_TMPDIR/bin/curl"
+  printf '#!/usr/bin/env bash\necho %s\n' "'{\"components\":[{\"name\":\"Actions\",\"status\":\"operational\"}]}'" > "$BATS_TEST_TMPDIR/bin/curl"
   chmod +x "$BATS_TEST_TMPDIR/bin/curl"
 }
 
@@ -35,282 +32,96 @@ SH
   chmod +x "$BATS_TEST_TMPDIR/bin/gh"
 }
 gh_calls() { wc -l < "$BATS_TEST_TMPDIR/gh-calls" | tr -d ' '; }
-make_marker() { jq -nc --arg cwd "$BATS_TEST_TMPDIR" --argjson blocks "${1:-0}" --argjson at "${2:-$(date +%s)}" '{cwd:$cwd,sha:"abc1234def",blocks:$blocks,pushedAt:$at}' > "$MARKER"; }
-push_workflow() { mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"; printf 'on:\n  push:\n' > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"; }
-input() { echo '{"session_id":"sid-1","stop_hook_active":false}'; }
+make_marker() { jq -nc --arg cwd "$REPO" --arg sha "${2:-$SHA}" --argjson at "${1:-$(date +%s)}" '{cwd:$cwd,sha:$sha,pushedAt:$at}' > "$MARKER"; }
+input() { jq -nc --arg cwd "$REPO" --arg cmd "${1:-git push}" '{session_id:"sid-1",cwd:$cwd,tool_input:{command:$cmd}}'; }
 
 IN_PROGRESS='[{"databaseId":42,"workflowName":"CI","status":"in_progress","conclusion":""}]'
 QUEUED='[{"databaseId":42,"workflowName":"CI","status":"queued","conclusion":""}]'
 GREEN='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"success"}]'
 RED='[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"failure"}]'
 
-@test "no marker: passes silently" {
-  run "$HOOK" <<< "$(input)"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-}
-
-@test "no run past the wait bound: reports CI did not run once and clears the marker" {
-  make_marker; push_workflow; fake_gh '[]'
-  run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'"decision": "block"'* ]]
-  [[ "$output" == *'GitHub created no Actions run'* ]]
-  [ ! -e "$MARKER" ]
-  run "$HOOK" <<< "$(input)"
-  [ -z "$output" ]
-}
-
-@test "no run long after the push: stops waiting before the wait bound" {
-  make_marker 0 $(( $(date +%s) - 600 )); push_workflow; fake_gh '[]'
-  export CI_GATE_WAIT_MAX=60
-  run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'GitHub created no Actions run'* ]]
-  [ "$(gh_calls)" = "1" ]
-}
-
-@test "no run while Actions is degraded: stops waiting silently and clears the marker" {
-  make_marker; push_workflow; fake_gh '[]'; fake_actions_status degraded_performance
-  export CI_GATE_WAIT_MAX=60
-  run "$HOOK" <<< "$(input)"
-  [ -z "$output" ]
-  [ ! -e "$MARKER" ]
-  [ "$(gh_calls)" = "1" ]
-}
-
-@test "no runs and no push-triggered workflow: clears the marker silently without waiting" {
-  make_marker; fake_gh '[]'
-  mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"
-  printf 'on:\n  issues:\n    types: [opened]\n' > "$BATS_TEST_TMPDIR/.github/workflows/issues.yml"
-  export CI_GATE_WAIT_MAX=5
-  run "$HOOK" <<< "$(input)"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-  [ ! -e "$MARKER" ]
-  [ "$(gh_calls)" = "1" ]
-}
-
-@test "in-progress run past the wait bound in the CLI: ends the turn with a notice and goes async" {
-  make_marker; fake_gh "$IN_PROGRESS"
-  export CLAUDE_CODE_ENTRYPOINT=cli
-  run "$HOOK" <<< "$(input)"
-  [ "$(echo "$output" | jq -r '.decision')" = null ]
-  [[ "$(echo "$output" | jq -r '.systemMessage')" == *'still in progress'* ]]
-  [ "$(jq -r .async "$MARKER")" = true ]
-}
-
-@test "in-progress run past the wait bound outside the CLI: blocks once to relay, then lets the turn end" {
-  make_marker; fake_gh "$IN_PROGRESS"
-  run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'do not call it green'* ]]
-  run "$HOOK" <<< "$(input)"
-  [ -z "$output" ]
-  [ -e "$MARKER" ]
-}
-
-prompt_input() { echo '{"session_id":"sid-1","hook_event_name":"UserPromptSubmit"}'; }
-make_async_marker() { make_marker; jq -c '.async = true' "$MARKER" > "$MARKER.tmp" && mv "$MARKER.tmp" "$MARKER"; }
-
-@test "next prompt after async, still running: says not green and keeps the marker" {
-  make_async_marker; fake_gh "$IN_PROGRESS"
-  run "$HOOK" <<< "$(prompt_input)"
-  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *'still running'* ]]
-  [ -e "$MARKER" ]
-}
-
-@test "next prompt after async, red: reports red and clears the marker" {
-  make_async_marker; fake_gh "$RED"
-  run "$HOOK" <<< "$(prompt_input)"
-  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *'CI is RED'* ]]
-  [ ! -e "$MARKER" ]
-}
-
-@test "next prompt after async, green: reports passed and clears the marker" {
-  make_async_marker; fake_gh "$GREEN"
-  run "$HOOK" <<< "$(prompt_input)"
-  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *'passed'* ]]
-  [ ! -e "$MARKER" ]
-}
-
-@test "next prompt after async, no runs visible: stays unverified, never green" {
-  make_async_marker; fake_gh '[]'
-  run "$HOOK" <<< "$(prompt_input)"
-  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *'unverified'* ]]
-}
-
-@test "prompt with a marker still in the Stop phase: silent, no gh call" {
-  make_marker; fake_gh "$IN_PROGRESS"
-  run "$HOOK" <<< "$(prompt_input)"
-  [ -z "$output" ]
-  [ "$(gh_calls)" = "0" ]
-}
-
-@test "watch: red run posts a CI RED notification" {
-  make_async_marker; fake_gh "$IN_PROGRESS" "$RED"
-  export CI_GATE_WATCH_MAX=60
-  run "$HOOK" --watch "$MARKER"
-  [[ "$(cat "$BATS_TEST_TMPDIR/notified")" == *'CI RED'* ]]
-}
-
-@test "watch: green run posts a CI green notification" {
-  make_async_marker; fake_gh "$GREEN"
-  run "$HOOK" --watch "$MARKER"
-  [[ "$(cat "$BATS_TEST_TMPDIR/notified")" == *'CI green'* ]]
-}
-
-@test "watch: a newer push replacing the marker stops the watcher silently" {
-  make_async_marker; fake_gh "$IN_PROGRESS"
-  export CI_GATE_WATCH_MAX=60
-  ( sleep 0.2; jq -c '.sha = "fff0000"' "$MARKER" > "$MARKER.tmp" && mv "$MARKER.tmp" "$MARKER" ) &
-  CI_GATE_WAIT_INTERVAL=0.1 run "$HOOK" --watch "$MARKER"
-  [ "$status" -eq 0 ]
-  [ ! -e "$BATS_TEST_TMPDIR/notified" ]
-}
-
-@test "in-progress run while Actions is degraded: stops waiting silently and clears the marker" {
-  make_marker; fake_gh "$IN_PROGRESS"; fake_actions_status degraded_performance
-  export CI_GATE_WAIT_MAX=60
-  run "$HOOK" <<< "$(input)"
-  [ -z "$output" ]
-  [ ! -e "$MARKER" ]
-  [ "$(gh_calls)" = "1" ]
-}
-
-@test "stalled runs in the CLI: shows a systemMessage without blocking" {
-  make_marker 0 $(( $(date +%s) - 600 )); fake_gh "$QUEUED"
-  export CLAUDE_CODE_ENTRYPOINT=cli CI_GATE_WAIT_MAX=60
-  run "$HOOK" <<< "$(input)"
-  [ "$(echo "$output" | jq -r '.systemMessage')" != null ]
-  [ "$(echo "$output" | jq -r '.decision')" = null ]
-  [ ! -e "$MARKER" ]
-}
-
-@test "red run in the CLI: still blocks" {
+@test "not a push: exits silently without calling gh" {
   make_marker; fake_gh "$RED"
-  export CLAUDE_CODE_ENTRYPOINT=cli
-  run "$HOOK" <<< "$(input)"
-  [ "$(echo "$output" | jq -r '.decision')" = block ]
+  run "$HOOK" <<< "$(input "git status")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ "$(gh_calls)" = 0 ]
 }
 
-@test "runs still queued long after the push: reports unverified once and clears the marker" {
-  make_marker 0 $(( $(date +%s) - 600 )); fake_gh "$QUEUED"
-  export CI_GATE_WAIT_MAX=60
+@test "push with no marker (no workflow runs for it): exits silently" {
+  fake_gh "$RED"
   run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'unverified'* ]]
-  [ ! -e "$MARKER" ]
-  [ "$(gh_calls)" = "1" ]
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  [ "$(gh_calls)" = 0 ]
 }
 
-@test "queued run shortly after the push: goes async and keeps the marker" {
-  make_marker; fake_gh "$QUEUED"
+@test "marker for another SHA: exits silently" {
+  make_marker "" deadbeef; fake_gh "$RED"
   run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'still in progress'* ]]
-  [ "$(jq -r .async "$MARKER")" = true ]
+  [ "$status" -eq 0 ]
+  [ "$(gh_calls)" = 0 ]
 }
 
-@test "red run while Actions is degraded: still reports red" {
-  make_marker; fake_gh "$RED"; fake_actions_status major_outage
-  run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'CI is RED'* ]]
-}
-
-@test "in-progress run that finishes within the wait bound: polls, then passes silently" {
-  make_marker; push_workflow; fake_gh '[]' "$IN_PROGRESS" "$GREEN"
-  export CI_GATE_WAIT_MAX=5
+@test "all green: exits 0 silently and clears the marker" {
+  make_marker; fake_gh "$GREEN"
   run "$HOOK" <<< "$(input)"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
   [ ! -e "$MARKER" ]
-  [ "$(gh_calls)" = "3" ]
 }
 
-@test "in-progress run that turns red within the wait bound: blocks with report-it-red" {
+@test "red: exits 2 with report-it-red and clears the marker" {
+  make_marker; fake_gh "$RED"
+  run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *'did NOT all pass: CI (42): failure'* ]]
+  [[ "$output" == *'CI is RED'* ]]
+  [ ! -e "$MARKER" ]
+}
+
+@test "in progress, then green: polls and exits 0" {
+  make_marker; fake_gh '[]' "$QUEUED" "$IN_PROGRESS" "$GREEN"
+  run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 0 ]
+  [ "$(gh_calls)" = 4 ]
+}
+
+@test "in progress, then red: exits 2" {
   make_marker; fake_gh "$IN_PROGRESS" "$RED"
-  export CI_GATE_WAIT_MAX=5
   run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 2 ]
   [[ "$output" == *'CI is RED'* ]]
+}
+
+@test "no run long after the push: exits 2 unverified with the Actions status" {
+  make_marker $(( $(date +%s) - 600 )); fake_gh '[]'
+  run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *'GitHub created no Actions run'*'githubstatus Actions: operational'*'unverified'* ]]
   [ ! -e "$MARKER" ]
 }
 
-@test "all green: passes silently and clears the marker" {
-  make_marker; fake_gh '[{"databaseId":42,"workflowName":"CI","status":"completed","conclusion":"success"},{"databaseId":43,"workflowName":"Deploy","status":"completed","conclusion":"success"}]'
+@test "runs still queued long after the push: exits 2 unverified" {
+  make_marker $(( $(date +%s) - 600 )); fake_gh "$QUEUED"
+  run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *'never started (CI (42))'* ]]
+}
+
+@test "in progress past the wait bound: exits 2 unverified" {
+  make_marker; fake_gh "$IN_PROGRESS"
+  CI_GATE_WAIT_MAX=0 run "$HOOK" <<< "$(input)"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *'still running after'* ]]
+}
+
+@test "a newer push replacing the marker stops the watcher silently" {
+  make_marker; fake_gh "$IN_PROGRESS"
+  printf '#!/usr/bin/env bash\njq -c ".sha = \\"newer\\"" "%s" > "%s.tmp" && mv "%s.tmp" "%s"\necho %s\n' \
+    "$MARKER" "$MARKER" "$MARKER" "$MARKER" "'$IN_PROGRESS'" > "$BATS_TEST_TMPDIR/bin/gh"
   run "$HOOK" <<< "$(input)"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
-  [ ! -e "$MARKER" ]
-}
-
-@test "red run: blocks once with report-it-red and clears the marker" {
-  make_marker; fake_gh "$RED"
-  run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'CI is RED'* ]]
-  [[ "$output" == *'CI (42): failure'* ]]
-  [ ! -e "$MARKER" ]
-  run "$HOOK" <<< "$(input)"
-  [ -z "$output" ]
-}
-
-@test "bounded: after 12 blocks the marker is dropped and the turn may end" {
-  make_marker 12; fake_gh "$IN_PROGRESS"
-  run "$HOOK" <<< "$(input)"
-  [ -z "$output" ]
-  [ ! -e "$MARKER" ]
-}
-
-@test "no runs and the pushed branch is outside push.branches: clears the marker silently" {
-  jq -nc --arg cwd "$BATS_TEST_TMPDIR" '{cwd:$cwd,sha:"abc1234def",branches:["feature"],blocks:0,pushedAt:0}' > "$MARKER"
-  mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"
-  printf 'on:\n  push:\n    branches: [main]\n' > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"
-  fake_gh '[]'
-  run "$HOOK" <<< "$(input)"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-  [ ! -e "$MARKER" ]
-}
-
-@test "no runs and the pushed branch is in push.branches: still reports CI did not run" {
-  jq -nc --arg cwd "$BATS_TEST_TMPDIR" '{cwd:$cwd,sha:"abc1234def",branches:["main"],blocks:0,pushedAt:0}' > "$MARKER"
-  mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"
-  printf 'on:\n  push:\n    branches: [main]\n' > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"
-  fake_gh '[]'
-  run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'GitHub created no Actions run'* ]]
-}
-
-paths_marker() { jq -nc --arg cwd "$BATS_TEST_TMPDIR" --argjson files "$1" '{cwd:$cwd,sha:"abc1234def",branches:["main"],files:$files,blocks:0,pushedAt:0}' > "$MARKER"; }
-paths_workflow() { mkdir -p "$BATS_TEST_TMPDIR/.github/workflows"; printf 'on:\n  push:\n    branches: [main]\n%s\n' "$1" > "$BATS_TEST_TMPDIR/.github/workflows/ci.yml"; }
-
-@test "no runs and every changed file is under push.paths-ignore: clears the marker silently" {
-  paths_marker '["docs/a.md","docs/projects/b.md"]'
-  paths_workflow "    paths-ignore: ['docs/**']"
-  fake_gh '[]'
-  run "$HOOK" <<< "$(input)"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-  [ ! -e "$MARKER" ]
-}
-
-@test "no runs and a changed file outside push.paths-ignore: still reports CI did not run" {
-  paths_marker '["docs/a.md","lib/x.ts"]'
-  paths_workflow "    paths-ignore: ['docs/**']"
-  fake_gh '[]'
-  run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'GitHub created no Actions run'* ]]
-}
-
-@test "no runs and no changed file under push.paths (list form): clears the marker silently" {
-  paths_marker '["README.md"]'
-  paths_workflow "    paths:
-      - 'src/**'"
-  fake_gh '[]'
-  run "$HOOK" <<< "$(input)"
-  [ -z "$output" ]
-  [ ! -e "$MARKER" ]
-}
-
-@test "no runs, push.paths-ignore and no changed files recorded: still reports CI did not run" {
-  paths_marker '[]'
-  paths_workflow "    paths-ignore: ['docs/**']"
-  fake_gh '[]'
-  run "$HOOK" <<< "$(input)"
-  [[ "$output" == *'GitHub created no Actions run'* ]]
+  [ "$(jq -r .sha "$MARKER")" = newer ]
 }

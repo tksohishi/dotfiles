@@ -826,6 +826,12 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/ci-gate-record.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/ci-gate.sh",
+            "asyncRewake": true,
+            "timeout": 1800
           }
         ]
       },
@@ -904,11 +910,6 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/skill-in-prompt.sh",
             "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/ci-gate.sh",
-            "timeout": 15
           }
         ]
       },
@@ -970,15 +971,6 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/idle-teammates.sh",
             "timeout": 5
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/ci-gate.sh",
-            "timeout": 150
           }
         ]
       },

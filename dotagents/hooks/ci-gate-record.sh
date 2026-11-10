@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# PostToolUse (Bash) hook: after a `git push`, record the pushed SHA for this
-# session so ci-gate.sh (Stop hook) can refuse to end the turn until every
-# GitHub Actions run for that commit is green. Deterministic replacement for
-# "remember to watch CI" reminders, which failed Aug 24 2026 (a chained watch
-# command masked a red run and the turn ended reporting green).
+# PostToolUse (Bash) hook: after a `git push` that some workflow runs for,
+# record the pushed SHA for this session, which ci-gate.sh (asyncRewake) waits
+# on in the background, and tell the agent not to call CI green meanwhile.
 set -eu
 input=$(cat)
 cmd=$(echo "$input" | jq -r '.tool_input.command // ""')
@@ -16,7 +14,6 @@ cwd=$(echo "$input" | jq -r '.cwd // ""')
 # never fires for a branch); pull_request counts only when the branch has an
 # open PR. push.paths / paths-ignore are matched against CI_GATE_FILES (the
 # push's changed files, one per line); with none known, every path counts.
-# Same functions in ci-gate.sh and ci-gate-record.sh; keep them in sync.
 paths_hit() {
   local f kind pat neg inc
   grep -qE '^[px] ' <<< "$1" || return 0
@@ -105,5 +102,6 @@ fi
 tracking=$(git -C "$cwd" branch -r --contains "$sha" 2>/dev/null | grep -v -- '->' | sed -E 's#^[[:space:]]*##' | head -1)
 CI_GATE_FILES=$(git -C "$cwd" diff --name-only "$tracking@{1}" "$sha" 2>/dev/null || true)
 workflow_targets "$cwd" $branches || exit 0
-jq -nc --arg cwd "$cwd" --arg sha "$sha" --arg branches "$branches" --arg files "$CI_GATE_FILES" --argjson at "$(date +%s)" \
-  '{cwd:$cwd, sha:$sha, branches:($branches | split("\n")), files:($files | split("\n") | map(select(. != ""))), blocks:0, pushedAt:$at}' > "$dir/$sid.json"
+jq -nc --arg cwd "$cwd" --arg sha "$sha" --argjson at "$(date +%s)" '{cwd:$cwd, sha:$sha, pushedAt:$at}' > "$dir/$sid.json"
+jq -n --arg c "CI gate: watching Actions runs for ${sha:0:7} in the background. Do not call CI green; a red or unverified result will wake you. Do not poll for it." \
+  '{hookSpecificOutput:{hookEventName:"PostToolUse", additionalContext:$c}}'
