@@ -354,6 +354,17 @@ if [ -f "$codex_rules_src" ]; then
     fi
 fi
 
+# ── Google Japanese Input (copy, not symlink) ─────────────────
+# The IME rewrites config1.db on save, which would replace a symlink.
+gime_dir="$HOME/Library/Application Support/Google/JapaneseInput"
+if [ ! -f "$gime_dir/config1.db" ]; then
+    mkdir -p "$gime_dir"
+    cp "$DOTFILES_DIR/googleime/config1.db" "$gime_dir/config1.db"
+    echo "Copied googleime/config1.db -> $gime_dir/config1.db"
+else
+    echo "Skipped googleime/config1.db (already exists)"
+fi
+
 # ── Agent skills (skills.sh) ──────────────────────────────────
 # Source of truth: dotagents/skills.txt
 # One entry per line. Format:
