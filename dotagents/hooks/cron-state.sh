@@ -3,10 +3,14 @@
 # statusline.sh can show the next fire; the statusline JSON has no such field.
 # File per job: "<first fire> <recurring> <created> <offset> <minutes...>".
 # humanSchedule can be prose ("Every 30 minutes"), so parse tool_input.cron.
+# Keyed by the Claude process, not session_id: /clear issues a new session_id
+# but session-only crons live as long as the process. The start time guards
+# against PID reuse.
 input=$(cat)
-session=$(jq -r '.session_id // empty' <<< "$input")
-[ -n "$session" ] || exit 0
-dir="$HOME/.claude/state/crons/$session"
+[ -n "${CLAUDE_PID:-}" ] || exit 0
+started=$(ps -o lstart= -p "$CLAUDE_PID" | tr -cd '[:alnum:]')
+[ -n "$started" ] || exit 0
+dir="$HOME/.claude/state/crons/$CLAUDE_PID-$started"
 
 if [ "$(jq -r '.tool_name' <<< "$input")" = "CronDelete" ]; then
   id=$(jq -r '.tool_input.id // empty' <<< "$input")

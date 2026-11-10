@@ -164,7 +164,12 @@ cron_part=""
 cron_next=""
 cron_rep=""
 cron_jobs=0
-for f in "$HOME/.claude/state/crons/$(echo "$input" | jq -r '.session_id // empty')"/*; do
+cron_key=""
+if [ -n "${CLAUDE_PID:-}" ]; then
+  started=$(ps -o lstart= -p "$CLAUDE_PID" 2>/dev/null | tr -cd '[:alnum:]' || true)
+  [ -n "$started" ] && cron_key="$CLAUDE_PID-$started"
+fi
+for f in ${cron_key:+"$HOME/.claude/state/crons/$cron_key"/*}; do
   [ -f "$f" ] || continue
   read -r fire recurring created offset minutes < "$f"
   next=""

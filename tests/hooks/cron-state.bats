@@ -4,7 +4,8 @@ HOOK="$BATS_TEST_DIRNAME/../../dotagents/hooks/cron-state.sh"
 
 setup() {
   export HOME="$BATS_TEST_TMPDIR"
-  DIR="$HOME/.claude/state/crons/s1"
+  export CLAUDE_PID=$$
+  DIR="$HOME/.claude/state/crons/$$-$(ps -o lstart= -p $$ | tr -cd '[:alnum:]')"
 }
 
 create() {
@@ -54,7 +55,15 @@ fields() { cut -d' ' -f"$1" "$DIR/j1"; }
   [ ! -f "$DIR/j1" ]
 }
 
-@test "no session id writes nothing" {
+@test "a new session_id after /clear keeps the same directory" {
+  create "13,43 * * * *" "" 1792545499302
+  run "$HOOK" <<< '{"session_id":"s2","tool_name":"CronDelete","tool_input":{"id":"j1"}}'
+  [ "$status" -eq 0 ]
+  [ ! -f "$DIR/j1" ]
+}
+
+@test "no CLAUDE_PID writes nothing" {
+  unset CLAUDE_PID
   run "$HOOK" <<< '{"tool_name":"CronCreate","tool_input":{"cron":"* * * * *"},"tool_response":{"id":"j1","nextFireAt":1}}'
   [ "$status" -eq 0 ]
   [ ! -d "$HOME/.claude/state/crons" ]
