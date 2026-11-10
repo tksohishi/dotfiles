@@ -881,7 +881,8 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bash \"$HOME/.claude/statusline.sh\""
+    "command": "bash \"$HOME/.claude/statusline.sh\"",
+    "refreshInterval": 30
   },
   "enabledPlugins": {},
   "outputStyle": "Concise",

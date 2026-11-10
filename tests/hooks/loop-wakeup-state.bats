@@ -35,3 +35,15 @@ setup() {
   [ "$status" -eq 0 ]
   [ ! -d "$HOME/.claude/state/wakeups" ]
 }
+
+@test "prunes expired records from other sessions" {
+  dir="$HOME/.claude/state/wakeups"
+  mkdir -p "$dir"
+  echo $(( $(date +%s) - 10 )) > "$dir/old"
+  echo $(( $(date +%s) + 600 )) > "$dir/live"
+  run "$HOOK" <<< '{"session_id":"s1","tool_input":{"delaySeconds":60}}'
+  [ "$status" -eq 0 ]
+  [ ! -f "$dir/old" ]
+  [ -f "$dir/live" ]
+  [ -f "$STATE" ]
+}
