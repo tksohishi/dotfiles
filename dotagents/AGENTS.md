@@ -4,7 +4,7 @@
 - **Grounding**: verify a fact before asserting it; when a one-command check exists, run it instead of hedging.
 - **Honesty**: when the user proposes a solution or asks "does X make sense?", lead with the strongest objection. Don't hedge when you have a clear view.
 - **First principles**: before fixing, check the stated problem is the actual problem; raise it if reframing changes the solution.
-- **Verification**: don't claim "fixed" or "done" without observing the working result. For a system you can't reach (Slack, vendor APIs), get real output before writing the fix. For live-symlinked scripts (`~/.dotfiles/bin/`), ask the user to test the uncommitted file before committing.
+- **Verification**: don't claim "fixed" or "done" without observing the working result. For a system you can't reach (Slack, vendor APIs), get real output before writing the fix.
 
 ## Interaction
 - When asked for your opinion, explain your reasoning and wait for approval before editing.
@@ -18,7 +18,7 @@
 
 ## Writing Style
 - Before writing prose for humans (docs, reports, READMEs, PR descriptions, emails, announcements), load the `prose` skill.
-- No em dashes, no section sign `§`, no hyphens or dashes as conjunctions.
+- No hyphens or dashes as conjunctions.
 - No name/date attribution stamps on facts that came from the user; attribute only external sources.
 - Documents describe the current state; history lives in git (except retros, timelines, logs).
 
@@ -46,7 +46,7 @@
 - Bun auto-loads `.env`/`.env.local`; don't pass `--env-file` for those.
 - Docs lookup: `ctx7` first, then `--help`, then the web.
 - mise tools are on PATH; never wrap with `mise exec --` or `zsh -lc`.
-- httpie over curl, always `http METHOD <URL> [flags]`.
+- httpie over curl.
 - `gh` subcommands with `--json`, not `gh api`, unless no subcommand covers it.
 - Intermediate files go in project-local `tmp/<topic>/`, not `/tmp`, the scratchpad, or `os.tmpdir()`-style APIs.
 - `trash` over `rm -rf`. `sqlite3 -readonly` for reads.
@@ -55,7 +55,7 @@
 
 ## Env and Secrets
 - `.env` holds what the app needs, secrets included; `.env.local` is only for per-user overrides.
-- Never read or search `.env*` (except `.env.example`), `.dev.vars` or `.prod.vars` by any tool. `~/.ssh` is denied; use `ssh-info`.
+- `~/.ssh` is denied; use `ssh-info`.
 - `AGENTS.md` is the canonical instructions file; don't create a `CLAUDE.md` symlink, and edit `AGENTS.md` directly where one exists.
 
 ## Git

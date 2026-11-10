@@ -32,6 +32,7 @@ Most files are self-explanatory. These have *why* worth knowing:
 
 ## When Editing
 
+- Scripts in `bin/` are live through symlinks: edit, ask the user to test the uncommitted file, and commit only after they confirm.
 - Most files under `~/.claude/` and `~/.codex/` symlink into this repo, and Edit/Write refuse to write through symlinks: edit the source here (e.g. `dotagents/AGENTS.md`, `dotclaude/settings.json`).
 - `model` and `effortLevel` in `dotclaude/settings.json` are self-modification: never add or change them without explicit direction. Omitted `model` means the session default (`"default"` errors); valid `effortLevel` values are `low`/`medium`/`high`/`xhigh`.
 - In `dotagents/AGENTS.md` (and any AGENTS.md), state rules as they stand now: no version history or "since X changed" clauses; history is derivable from git.
