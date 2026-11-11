@@ -723,6 +723,16 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/md-size.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "ScheduleWakeup",
         "hooks": [
           {
