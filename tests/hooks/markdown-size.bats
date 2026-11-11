@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-HOOK="$BATS_TEST_DIRNAME/../../dotagents/hooks/md-size.sh"
+HOOK="$BATS_TEST_DIRNAME/../../dotagents/hooks/markdown-size.sh"
 
 setup() {
   REPO="$BATS_TEST_TMPDIR/repo"

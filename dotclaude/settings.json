@@ -727,7 +727,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/md-size.sh",
+            "command": "$HOME/.claude/hooks/markdown-size.sh",
             "timeout": 5
           }
         ]
