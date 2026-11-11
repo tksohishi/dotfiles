@@ -15,6 +15,10 @@
           },
           {
             "type": "command",
+            "command": "$HOME/.codex/hooks/grep-repo-wide.sh"
+          },
+          {
+            "type": "command",
             "command": "$HOME/.codex/hooks/gog-mutations.sh"
           },
           {

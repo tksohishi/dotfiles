@@ -629,6 +629,11 @@
           },
           {
             "type": "command",
+            "command": "$HOME/.claude/hooks/grep-repo-wide.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "$HOME/.claude/hooks/git-remote-ssh.sh",
             "timeout": 5
           },
