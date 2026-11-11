@@ -1,7 +1,6 @@
 ---
 name: examine-video
 description: Examine a video file (screen recording, demo, capture) by splitting it into frames and visually reviewing them against the user's question. Use whenever asked to check, review, verify, or describe the contents of a video file.
-model: opus
 ---
 # Examine a video
 
@@ -27,7 +26,7 @@ ffmpeg -v error -ss <start> -to <end> -i <video> -vf 'fps=1,scale=1280:-1' tmp/f
 
 ## 2. Examine thoroughly
 
-- Delegate the bulk read to one subagent: give it the full ordered frame list (f001…fNNN, then last.png), the user's actual question, and ask for a frame-by-frame one-line map plus answers. Frames must be read in order — endpoint frames are where recordings start early or run long.
+- Delegate the bulk read to one subagent with `model: "sonnet"`: give it the full ordered frame list (f001…fNNN, then last.png), the user's actual question, and ask for a frame-by-frame one-line map plus answers. Frames must be read in order — endpoint frames are where recordings start early or run long.
 - Subagent visual claims are leads, not facts. Before reporting any decisive or alarming finding to the user (personal data on screen, an error state, a missing step), read that specific frame in the main context with your own eyes. If the harness discourages main-context image reads, use whatever exception path it documents for decisive verification.
 - If two reads of the same frame disagree, trust neither; re-extract and look again.
 

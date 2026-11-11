@@ -32,7 +32,7 @@ After printing the report, write the exact same markdown to `.cache/update-apps/
 
 Run every update operation inside a subagent so the verbose command output stays out of the main context. The main session only reads/writes state, runs the `open_items` checks, picks the "new & noteworthy" entries, and assembles the report from the summaries the subagents return.
 
-Launch the five subagents below as unnamed one-shot Agent calls **in a single message** so they run concurrently — they touch disjoint tools. Subagents can't see this skill, so copy each block's instructions (including the rationale text) into its prompt verbatim, and tell each to return only a bounded summary: the lists the report needs plus any errors verbatim, never full command output.
+Launch the five subagents below as unnamed one-shot Agent calls with `model: "sonnet"` **in a single message** so they run concurrently. Every step is scripted, so Sonnet runs them and the main session keeps the judgment (picking what to report, the 🔴 items). They touch disjoint tools. Subagents can't see this skill, so copy each block's instructions (including the rationale text) into its prompt verbatim, and tell each to return only a bounded summary: the lists the report needs plus any errors verbatim, never full command output.
 
 ### Homebrew subagent
 

@@ -1,7 +1,7 @@
 ---
 name: perfcheck
 description: Run a quick macOS performance check (load, CPU, memory, thermal) and summarize anomalies. Use when the user asks to check machine performance, slowness, or load.
-model: opus
+model: sonnet
 context: fork
 ---
 

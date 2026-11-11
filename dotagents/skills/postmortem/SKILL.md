@@ -21,7 +21,7 @@ If the incident is still ongoing, mitigate first and write afterwards. Say so in
 The session that caused the incident is the worst narrator of it. Build the timeline from records:
 
 - This session's own incident: the transcript is in context, but quote commands, errors and outputs verbatim from it rather than paraphrasing.
-- An earlier session: delegate reading its JSONL under `~/.claude/projects/<dir>/` to a subagent, asking for a timestamped event list with verbatim commands and errors (under 400 words).
+- An earlier session: delegate reading its JSONL under `~/.claude/projects/<dir>/` to a subagent with `model: "sonnet"`, asking for a timestamped event list with verbatim commands and errors (under 400 words).
 - Logs, `git log`/`git reflog`, CI runs, command output, file timestamps. Re-run read-only checks to confirm the current state.
 - Convert every time to the user's local zone with `date`; never in your head.
 - Anything not confirmed from a record is labeled unverified with what would settle it.

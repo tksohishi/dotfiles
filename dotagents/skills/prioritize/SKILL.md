@@ -31,7 +31,7 @@ Never read a brief's body in the main session. The body is facts and measurement
 
 ## 3. Retrofit and recheck, delegated
 
-Hand the retrofit and recheck lists to subagents, about eight briefs each, all launched in one message. Each agent gets:
+Hand the retrofit and recheck lists to subagents with `model: "sonnet"`, about eight briefs each, all launched in one message. The spot-check and the second-model review below catch what they get wrong. Each agent gets:
 
 - the list of briefs and today's date;
 - read-only rules: `cat`, `sed`, `rg`, `fd`, `git log`, `git show`; no edits, no commits, no scripts that touch a network;
