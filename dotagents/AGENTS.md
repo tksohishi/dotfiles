@@ -47,6 +47,7 @@
 - Bun auto-loads `.env`/`.env.local`; don't pass `--env-file` for those.
 - Docs lookup: `ctx7` first, then `--help`, then the web.
 - mise tools are on PATH; never wrap with `mise exec --` or `zsh -lc`.
+- Bash starts in the session's working directory; never prefix a command with `cd` into it.
 - httpie over curl.
 - `gh` subcommands with `--json`, not `gh api`, unless no subcommand covers it.
 - Intermediate files go in project-local `tmp/<topic>/`, not `/tmp`, the scratchpad, or `os.tmpdir()`-style APIs.
