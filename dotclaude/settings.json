@@ -635,11 +635,6 @@
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/cd-noop.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "$HOME/.claude/hooks/git-remote-ssh.sh",
             "timeout": 5
           },

@@ -19,10 +19,6 @@
           },
           {
             "type": "command",
-            "command": "$HOME/.codex/hooks/cd-noop.sh"
-          },
-          {
-            "type": "command",
             "command": "$HOME/.codex/hooks/gog-mutations.sh"
           },
           {
