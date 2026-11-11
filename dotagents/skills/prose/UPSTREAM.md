@@ -3,7 +3,7 @@
 | Upstream | Distilled from | Version | Synced commit | Synced |
 |---|---|---|---|---|
 | [blader/humanizer](https://github.com/blader/humanizer) | `SKILL.md` | 4.0.0 | `b48c832f0f809c1b5658edbb838c2521b72f2413` | 2026-11-10 |
-| [nanaism/yomiyasu](https://github.com/nanaism/yomiyasu) | `skills/yomiyasu/SKILL.md`, `skills/yomiyasu/references/slop-catalog.md`, `skills/yomiyasu/references/gemini-syntax.md` | 2.5.0 | `8394e099486aaa2e28cf89992e46f5ebe5ed839d` | 2026-11-08 |
+| [nanaism/yomiyasu](https://github.com/nanaism/yomiyasu) | `skills/yomiyasu/SKILL.md`, `skills/yomiyasu/references/slop-catalog.md`, `skills/yomiyasu/references/gemini-syntax.md` | 3.0.1 | `2318a6d0820a58d3f8cfadc75af86978bb739185` | 2026-11-11 |
 
 ### humanizer license
 
