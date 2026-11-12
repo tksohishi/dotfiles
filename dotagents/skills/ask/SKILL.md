@@ -15,14 +15,18 @@ Claude Code only: Codex has no ListAgents or SendMessage, so there it says so an
 
 ## Compose the message
 
-The receiver was not in this conversation and reads the message as information from another session, not as the user's instruction. Write it so it stands alone:
+The receiver was not in this conversation and reads the message as information from another session, not as the user's instruction. A summary written by this session drops the nuance and the reasons behind the user's conclusions, and blends the user's intent with this session's interpretation. So the discussion travels verbatim, and the message only frames it.
 
-- First line: who is asking (this session's name or project) and that the user asked for it.
-- What is established, as pointers: file paths, doc sections, commit hashes, plan briefs and item slugs. Paths, never pasted content (`@` attachments do not travel).
-- The ask: what to consider or do, and where its result goes (a file, a plan item, a reply). Leave approvals to the user in that session; never ask it to do something the user has not approved there, and never route around a refusal this session got.
-- Whether to reply. A cloud session cannot reply; read its transcript instead.
+1. Export the discussion of this topic with speaker labels: `transcript-excerpt --turns <n> --out tmp/ask/<slug>.md`, where `<n>` counts back to the user prompt where this topic began (the whole session when it is all one topic). It keeps user prompts and Claude's replies and drops tool traffic.
+2. Write the message so it stands alone:
+   - First line: who is asking (this session's name or project) and that the user asked for it.
+   - The ask: what to consider or do, and where its result goes (a file, a plan item, a reply). Leave approvals to the user in that session; never ask it to do something the user has not approved there, and never route around a refusal this session got.
+   - The excerpt's absolute path, with a note that `User:` lines are the user's own words and `Claude:` lines are this session's take, which the receiver is free to disagree with.
+   - The user's load-bearing statements quoted exactly, never paraphrased. This session's own view, if worth sending, marked as this session's view.
+   - What else is established, as pointers: file paths, doc sections, commit hashes, backlog items. Paths, never pasted file content (`@` attachments do not travel).
+   - Whether to reply. A cloud session cannot reply or read local files; for it, paste the excerpt into the message instead of the path, and read its transcript for the answer.
 
-Match the language the user is working in. Keep it short; the paths carry the detail.
+Match the language the user is working in.
 
 When the user's request already says what to send, send it. When it leaves the content to you, compose it from the conversation and send without a confirmation round, unless the message would commit the user to something (a decision, an approval, an outside contact): then show the draft first.
 

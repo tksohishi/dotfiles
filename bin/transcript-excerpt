@@ -1,0 +1,108 @@
+#!/usr/bin/env bun
+// transcript-excerpt — print a Claude Code session's conversation as plain
+// text with speaker labels (User: / Claude:), so another agent can read the
+// user's own words instead of a summary rewritten by the sending model.
+// Keeps user prompts and Claude's visible replies; drops tool calls, tool
+// output, thinking, system reminders and slash-command noise. A compaction
+// summary is kept and labeled as such.
+//
+// Usage: transcript-excerpt [--transcript <path> | --session <id>] [--turns <n>] [--max-chars <n>] [--out <file>]
+//   default session: $CLAUDE_CODE_SESSION_ID
+//   --turns     keep only the last n user prompts and what followed them
+//   --max-chars drop the oldest turns until the text fits (default 60000)
+//   --out       write to a file (parent dirs created) and print its path
+
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
+
+const args = process.argv.slice(2);
+const opt = (name: string) => {
+  const i = args.indexOf(name);
+  return i >= 0 ? args[i + 1] : undefined;
+};
+
+function findTranscript(id: string): string | undefined {
+  const root = path.join(homedir(), ".claude", "projects");
+  for (const dir of readdirSync(root)) {
+    const p = path.join(root, dir, `${id}.jsonl`);
+    if (existsSync(p)) return p;
+  }
+}
+
+const sessionId = opt("--session") ?? process.env.CLAUDE_CODE_SESSION_ID;
+const file = opt("--transcript") ?? (sessionId ? findTranscript(sessionId) : undefined);
+if (!file || !existsSync(file)) {
+  console.error("transcript-excerpt: no transcript found (pass --transcript or --session)");
+  process.exit(1);
+}
+
+const NOISE = /^\s*<(command-name|command-message|command-args|local-command-stdout|local-command-stderr|local-command-caveat|system-reminder|task-notification)\b/;
+const REMINDER = /<system-reminder>[\s\S]*?<\/system-reminder>/g;
+
+function textOf(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  return content
+    .filter((b) => b?.type === "text" && typeof b.text === "string")
+    .map((b) => b.text)
+    .join("\n");
+}
+
+const clean = (s: string) => s.split(REMINDER).join("").trim();
+
+type Turn = { label: string; text: string; isPrompt: boolean };
+const turns: Turn[] = [];
+
+for (const line of readFileSync(file, "utf8").split("\n")) {
+  if (!line.trim()) continue;
+  let rec: any;
+  try {
+    rec = JSON.parse(line);
+  } catch {
+    continue;
+  }
+  if (rec.isSidechain) continue;
+  if (rec.type === "user") {
+    if (rec.isCompactSummary) {
+      const t = clean(textOf(rec.message?.content));
+      if (t) turns.push({ label: "Summary of earlier conversation (compacted)", text: t, isPrompt: true });
+      continue;
+    }
+    if (rec.isMeta) continue;
+    const t = clean(textOf(rec.message?.content));
+    if (!t || NOISE.test(t)) continue;
+    turns.push({ label: "User", text: t, isPrompt: true });
+  } else if (rec.type === "assistant") {
+    const t = clean(textOf(rec.message?.content));
+    if (!t) continue;
+    const last = turns.at(-1);
+    if (last?.label === "Claude") last.text += `\n\n${t}`;
+    else turns.push({ label: "Claude", text: t, isPrompt: false });
+  }
+}
+
+let start = 0;
+const n = Number(opt("--turns") ?? 0);
+if (n > 0) {
+  const prompts = turns.flatMap((t, i) => (t.isPrompt ? [i] : []));
+  start = prompts.length > n ? prompts[prompts.length - n] : 0;
+}
+let kept = turns.slice(start);
+
+const render = (ts: Turn[]) => ts.map((t) => `${t.label}:\n${t.text}`).join("\n\n---\n\n") + "\n";
+const max = Number(opt("--max-chars") ?? 60000);
+let out = render(kept);
+while (out.length > max && kept.length > 1) {
+  kept = kept.slice(1);
+  out = `[earlier turns omitted]\n\n${render(kept)}`;
+}
+
+const dest = opt("--out");
+if (dest) {
+  mkdirSync(path.dirname(dest), { recursive: true });
+  writeFileSync(dest, out);
+  console.log(path.resolve(dest));
+} else {
+  process.stdout.write(out);
+}
