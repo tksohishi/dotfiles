@@ -36,6 +36,8 @@ for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
 // a turn the user wrote in English is answered in English
 const asked = count(typed)
 if (!asked.ja && (typed.match(/[A-Za-z]{2,}/g) ?? []).length >= 3) process.exit(0)
+// so is a Japanese turn that asks for English outright
+if (/英語で|英語だけ|英語のみ|英語の?[1一]文|英文|英訳|英語に(して|訳)|in English|English only|into English/i.test(typed)) process.exit(0)
 
 if (!english(last)) process.exit(0)
 let streak = 1

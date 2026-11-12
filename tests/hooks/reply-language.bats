@@ -29,6 +29,15 @@ stop() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg m "$1" '{hook_event_na
   [ -z "$output" ]
 }
 
+@test "passes English when the Japanese prompt asks for English" {
+  user "空の色について一言。ただし返答は必ず英語の1文だけで書いて。"
+  stop "The sky is a clear and brilliant blue this afternoon."
+  [ -z "$output" ]
+  user "この文を英訳して: 今日は晴れ"
+  stop "It is sunny today, with clear skies all around the city."
+  [ -z "$output" ]
+}
+
 @test "does not count a blockquoted draft for an outside party" {
   user "返信の下書きを書いて"
   stop $'下書きです。\n\n> Thanks for the update, I will review the proposal and get back to you tomorrow.'
