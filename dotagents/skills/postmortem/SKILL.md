@@ -70,4 +70,4 @@ For medium or high severity, run `/arch-review` on the root cause and action ite
 
 ## After writing
 
-The document is a record, not a tracker: it is not reopened to tick items off. Reply with the clickable path (`[name](file:///abs/path)`), the one-line root cause and the action items, then ask which to implement now. Don't implement prevent or detect items before the user picks. Items implemented in this session get their commit hash in the table before the document is committed (per the project's commit rules). Work left for later goes to a `/tmp-plan` brief, which is where to-do work is tracked and then removed.
+The document is a record, not a tracker: it is not reopened to tick items off. Reply with the clickable path (`[name](file:///abs/path)`), the one-line root cause and the action items, then ask which to implement now. Don't implement prevent or detect items before the user picks. Items implemented in this session get their commit hash in the table before the document is committed (per the project's commit rules). Work left for later goes to the backlog as `/later` lines.
