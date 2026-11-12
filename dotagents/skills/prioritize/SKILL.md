@@ -1,21 +1,21 @@
 ---
 name: prioritize
-description: Rank a project's backlog (tmp/backlog/<scope>.md, the lines /later writes) against the project's goal and what has shipped since, propose P0/P1 changes, offer stale lines for deletion, and present one ranked list of what to decide or start next. Use when the user runs /prioritize [scope] [project], asks 次何やる / 優先順位をつけて / backlog を整理して, or asks which pending item to pick up.
+description: Rank a project's backlog (the items the `later` CLI keeps) against the project's goal and what has shipped since, propose P0/P1 changes, offer stale lines for deletion, and present one ranked list of what to decide or start next. Use when the user runs /prioritize [scope] [project], asks 次何やる / 優先順位をつけて / backlog を整理して, or asks which pending item to pick up.
 ---
 
 # prioritize
 
-Reads the backlog (format in the `later` skill) in one pass and ranks it. Nothing starts without the user: the output is a list and at most three session cards.
+Reads the backlog (the `later` skill and `later -h` describe it) in one pass and ranks it. Every read and change goes through the `later` CLI. Nothing starts without the user: the output is a list and at most three session cards.
 
 ## Where it runs
 
 - Project: the current project root (`git rev-parse --show-toplevel`, else cwd), or a path or bare name under `~/work/<name>` given as an argument. If it does not resolve, ask.
-- Scope: an argument naming a file in `tmp/backlog/` ranks that file alone; without one, all files are ranked together. No backlog: say so and stop.
+- Scope: an argument naming a scope (`later scopes`) ranks that scope alone; without one, all scopes are ranked together. `later ls` prints `(none)`: say the backlog is empty and stop.
 
 ## 1. Read
 
 - The project's goal, from the overview or goal section of `AGENTS.md` or `CLAUDE.md`, and what the user said this session. Rank against that. No goal statement: say so and rank on risk and cost alone.
-- The backlog files in scope.
+- The open items: `later ls [scope] --json`.
 - Per line, one shipped check: `git log --oneline --since=<its date> -i --grep=<topic words>` and, where the slug names a path, `git log` on it. A commit that plainly does the line's work makes it a deletion candidate, with the hash as evidence.
 - A `when:` trigger that names a date or a count the session can check: whether it has fired.
 
@@ -59,4 +59,4 @@ Then offer the top line of up to three scopes as session cards (`start_session`,
 
 ## 4. Apply
 
-On the user's answers: delete approved lines, change approved tags, move misfiled lines, and drop `when:` from lines whose trigger fired. Edit tool, one line per edit, keeping each file in tag order.
+On the user's answers, through the CLI: `later done` for lines a commit covers (`--note` with the hash), `later drop` for approved stale or duplicate lines, `later tag` for approved tag changes, `later edit <slug> --when ""` for lines whose trigger fired, and for a misfiled line `later add` under the right scope followed by `later drop` of the old one. Report each change the CLI printed.

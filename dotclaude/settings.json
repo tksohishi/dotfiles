@@ -486,6 +486,7 @@
       "WebSearch"
     ],
     "deny": [
+      "Bash(sqlite3*backlog.db*)",
       "Bash(agent-browser *--all*)",
       "Bash(codex exec *--dangerously-bypass*)",
       "Bash(codex exec *danger-full-access*)",

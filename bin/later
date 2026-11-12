@@ -1,0 +1,269 @@
+#!/usr/bin/env bun
+// later — the project backlog of ideas and deferred work, for agents.
+// Stored in <repo>/tmp/backlog.db (SQLite); only this CLI writes it. Scopes come
+// from the "Scopes:" line of the project's AGENTS.md (none: the single scope main).
+
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
+import { parseArgs } from "node:util";
+
+const USAGE = `usage:
+  later add <scope>/<topic> --what <text> --why <text> [--when <trigger>] [--see <path>] [--tag P0|P1] [--date YYYY-MM-DD]
+  later ls [scope] [--tag P0|P1|none] [--waiting | --ready] [--closed] [--json]
+  later edit <slug> [--what <text>] [--why <text>] [--when <trigger>|""] [--see <path>|""]
+  later tag <slug> P0|P1|none
+  later done <slug> [--note <text>]
+  later drop <slug> [--note <text>]
+  later undo <slug>
+  later scopes`;
+
+const LIMITS = { what: 160, why: 120, when: 80, note: 160 } as const;
+
+function fail(msg: string): never {
+  console.error(`later: ${msg}`);
+  process.exit(1);
+}
+
+function root(): string {
+  try {
+    return execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  } catch {
+    return process.cwd();
+  }
+}
+
+function scopes(dir: string): string[] {
+  const file = join(dir, "AGENTS.md");
+  if (!existsSync(file)) return ["main"];
+  const line = readFileSync(file, "utf8").match(/^Scopes:\s*(.+)$/m)?.[1];
+  if (!line) return ["main"];
+  return line
+    .replace(/\([^)]*\)/g, "")
+    .split(/[,.]/)
+    .map((s) => s.trim().split(/\s+/)[0])
+    .filter((s): s is string => Boolean(s));
+}
+
+function width(s: string): number {
+  let w = 0;
+  for (const ch of s) w += /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦]/u.test(ch) ? 2 : 1;
+  return w;
+}
+
+function checkText(field: keyof typeof LIMITS, value: string | undefined, required: boolean): void {
+  if (value === undefined || value === "") {
+    if (required) fail(`--${field} is required`);
+    return;
+  }
+  if (/\n/.test(value)) fail(`--${field} must be one line`);
+  const w = width(value);
+  if (w > LIMITS[field]) fail(`--${field} is ${w} columns wide (max ${LIMITS[field]}, CJK counts 2); keep detail in --see`);
+}
+
+function parseSlug(slug: string | undefined, allowed: string[]): [string, string] {
+  if (!slug) fail("missing <scope>/<topic>");
+  const m = slug.match(/^([a-z0-9-]+)\/([a-z0-9]+(?:-[a-z0-9]+){0,3})$/);
+  if (!m) fail(`bad slug "${slug}": <scope>/<topic>, topic 1 to 4 kebab-case words`);
+  const [, scope, topic] = m as unknown as [string, string, string];
+  if (!allowed.includes(scope)) fail(`scope "${scope}" is not in the project's Scopes (${allowed.join(", ")})`);
+  return [scope, topic];
+}
+
+function open(dir: string): DatabaseSync {
+  mkdirSync(join(dir, "tmp"), { recursive: true });
+  const db = new DatabaseSync(join(dir, "tmp", "backlog.db"));
+  db.exec(`
+    PRAGMA busy_timeout = 5000;
+    PRAGMA journal_mode = WAL;
+    CREATE TABLE IF NOT EXISTS items (
+      id INTEGER PRIMARY KEY,
+      scope TEXT NOT NULL,
+      topic TEXT NOT NULL,
+      what TEXT NOT NULL,
+      why TEXT NOT NULL,
+      wait TEXT,
+      see TEXT,
+      tag TEXT CHECK (tag IN ('P0', 'P1')),
+      created TEXT NOT NULL,
+      closed TEXT,
+      outcome TEXT CHECK (outcome IN ('done', 'dropped')),
+      note TEXT
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS open_slug ON items (scope, topic) WHERE closed IS NULL;
+  `);
+  return db;
+}
+
+type Item = {
+  id: number;
+  scope: string;
+  topic: string;
+  what: string;
+  why: string;
+  wait: string | null;
+  see: string | null;
+  tag: string | null;
+  created: string;
+  closed: string | null;
+  outcome: string | null;
+  note: string | null;
+};
+
+function today(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+function render(i: Item): string {
+  const parts = [`${i.tag ? `${i.tag} ` : ""}${i.created.slice(5)} ${i.scope}/${i.topic}: ${i.what}`, `why: ${i.why}`];
+  if (i.wait) parts.push(`when: ${i.wait}`);
+  if (i.see) parts.push(`see: ${i.see}`);
+  if (i.closed) parts.push(`${i.outcome} ${i.closed.slice(5)}${i.note ? `: ${i.note}` : ""}`);
+  return parts.join(" | ");
+}
+
+function openItem(db: DatabaseSync, scope: string, topic: string): Item {
+  const row = db.prepare("SELECT * FROM items WHERE scope = ? AND topic = ? AND closed IS NULL").get(scope, topic) as Item | undefined;
+  if (!row) fail(`no open item ${scope}/${topic}`);
+  return row;
+}
+
+function checkSee(dir: string, see: string | undefined): void {
+  if (see && !existsSync(join(dir, see))) fail(`--see ${see} does not exist under ${dir}`);
+}
+
+function checkTag(tag: string | undefined): string | null {
+  if (tag === undefined || tag === "none") return null;
+  if (tag !== "P0" && tag !== "P1") fail(`tag must be P0, P1 or none`);
+  return tag;
+}
+
+const { values: opts, positionals } = parseArgs({
+  allowPositionals: true,
+  options: {
+    what: { type: "string" },
+    why: { type: "string" },
+    when: { type: "string" },
+    see: { type: "string" },
+    tag: { type: "string" },
+    note: { type: "string" },
+    date: { type: "string" },
+    waiting: { type: "boolean" },
+    ready: { type: "boolean" },
+    closed: { type: "boolean" },
+    json: { type: "boolean" },
+    help: { type: "boolean", short: "h" },
+  },
+});
+
+const [cmd, arg1, arg2] = positionals;
+if (!cmd || opts.help) {
+  console.log(USAGE);
+  process.exit(cmd || opts.help ? 0 : 1);
+}
+
+const dir = root();
+const allowed = scopes(dir);
+
+if (cmd === "scopes") {
+  console.log(allowed.join("\n"));
+  process.exit(0);
+}
+
+const db = open(dir);
+
+switch (cmd) {
+  case "add": {
+    const [scope, topic] = parseSlug(arg1, allowed);
+    checkText("what", opts.what, true);
+    checkText("why", opts.why, true);
+    checkText("when", opts.when, false);
+    checkSee(dir, opts.see);
+    const tag = checkTag(opts.tag);
+    if (opts.date !== undefined && (!/^\d{4}-\d{2}-\d{2}$/.test(opts.date) || opts.date > today())) {
+      fail("--date must be YYYY-MM-DD, not in the future");
+    }
+    if (db.prepare("SELECT 1 FROM items WHERE scope = ? AND topic = ? AND closed IS NULL").get(scope, topic)) {
+      fail(`${scope}/${topic} is already open; use later edit, or pick another topic`);
+    }
+    db.prepare("INSERT INTO items (scope, topic, what, why, wait, see, tag, created) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(
+      scope, topic, opts.what!, opts.why!, opts.when || null, opts.see || null, tag, opts.date ?? today(),
+    );
+    console.log(`added ${render(openItem(db, scope, topic))}`);
+    break;
+  }
+  case "ls": {
+    if (arg1 && !allowed.includes(arg1)) fail(`scope "${arg1}" is not in the project's Scopes (${allowed.join(", ")})`);
+    const where = [opts.closed ? "closed IS NOT NULL" : "closed IS NULL"];
+    const params: string[] = [];
+    if (arg1) { where.push("scope = ?"); params.push(arg1); }
+    if (opts.tag !== undefined) {
+      const t = checkTag(opts.tag);
+      if (t) { where.push("tag = ?"); params.push(t); } else where.push("tag IS NULL");
+    }
+    if (opts.waiting) where.push("wait IS NOT NULL");
+    if (opts.ready) where.push("wait IS NULL");
+    const rows = db
+      .prepare(`SELECT * FROM items WHERE ${where.join(" AND ")} ORDER BY scope, COALESCE(tag, 'P9'), created, id`)
+      .all(...params) as Item[];
+    if (opts.json) console.log(JSON.stringify(rows));
+    else if (rows.length === 0) console.log("(none)");
+    else for (const r of rows) console.log(render(r));
+    break;
+  }
+  case "edit": {
+    const [scope, topic] = parseSlug(arg1, allowed);
+    const item = openItem(db, scope, topic);
+    if (opts.what !== undefined) checkText("what", opts.what, true);
+    if (opts.why !== undefined) checkText("why", opts.why, true);
+    if (opts.when) checkText("when", opts.when, false);
+    if (opts.see) checkSee(dir, opts.see);
+    if ([opts.what, opts.why, opts.when, opts.see].every((v) => v === undefined)) fail("nothing to edit");
+    db.prepare("UPDATE items SET what = ?, why = ?, wait = ?, see = ? WHERE id = ?").run(
+      opts.what ?? item.what,
+      opts.why ?? item.why,
+      opts.when === undefined ? item.wait : opts.when || null,
+      opts.see === undefined ? item.see : opts.see || null,
+      item.id,
+    );
+    console.log(`edited ${render(openItem(db, scope, topic))}`);
+    break;
+  }
+  case "tag": {
+    const [scope, topic] = parseSlug(arg1, allowed);
+    const item = openItem(db, scope, topic);
+    if (arg2 === undefined) fail("missing tag: P0, P1 or none");
+    const tag = checkTag(arg2);
+    db.prepare("UPDATE items SET tag = ? WHERE id = ?").run(tag, item.id);
+    console.log(`tagged ${scope}/${topic}: ${item.tag ?? "none"} -> ${tag ?? "none"}`);
+    break;
+  }
+  case "done":
+  case "drop": {
+    const [scope, topic] = parseSlug(arg1, allowed);
+    const item = openItem(db, scope, topic);
+    checkText("note", opts.note, false);
+    const outcome = cmd === "done" ? "done" : "dropped";
+    db.prepare("UPDATE items SET closed = ?, outcome = ?, note = ? WHERE id = ?").run(today(), outcome, opts.note || null, item.id);
+    console.log(`${outcome} ${scope}/${topic} (later undo ${scope}/${topic} reopens it)`);
+    break;
+  }
+  case "undo": {
+    const [scope, topic] = parseSlug(arg1, allowed);
+    if (db.prepare("SELECT 1 FROM items WHERE scope = ? AND topic = ? AND closed IS NULL").get(scope, topic)) {
+      fail(`${scope}/${topic} is already open`);
+    }
+    const last = db
+      .prepare("SELECT * FROM items WHERE scope = ? AND topic = ? AND closed IS NOT NULL ORDER BY closed DESC, id DESC LIMIT 1")
+      .get(scope, topic) as Item | undefined;
+    if (!last) fail(`no closed item ${scope}/${topic}`);
+    db.prepare("UPDATE items SET closed = NULL, outcome = NULL, note = NULL WHERE id = ?").run(last.id);
+    console.log(`reopened ${render(openItem(db, scope, topic))}`);
+    break;
+  }
+  default:
+    fail(`unknown command "${cmd}"\n${USAGE}`);
+}
