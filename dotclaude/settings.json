@@ -598,6 +598,16 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "Agent|SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/agent-followup-context.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "WebFetch",
         "hooks": [
           {

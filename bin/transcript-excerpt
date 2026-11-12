@@ -6,8 +6,9 @@
 // output, thinking, system reminders and slash-command noise. A compaction
 // summary is kept and labeled as such.
 //
-// Usage: transcript-excerpt [--transcript <path> | --session <id>] [--turns <n>] [--max-chars <n>] [--out <file>]
+// Usage: transcript-excerpt [--transcript <path> | --session <id>] [--after-line <n>] [--turns <n>] [--max-chars <n>] [--out <file>]
 //   default session: $CLAUDE_CODE_SESSION_ID
+//   --after-line skip the first n lines of the transcript file (what was already sent)
 //   --turns     keep only the last n user prompts and what followed them
 //   --max-chars drop the oldest turns until the text fits (default 60000)
 //   --out       write to a file (parent dirs created) and print its path
@@ -54,7 +55,7 @@ const clean = (s: string) => s.split(REMINDER).join("").trim();
 type Turn = { label: string; text: string; isPrompt: boolean };
 const turns: Turn[] = [];
 
-for (const line of readFileSync(file, "utf8").split("\n")) {
+for (const line of readFileSync(file, "utf8").split("\n").slice(Number(opt("--after-line") ?? 0))) {
   if (!line.trim()) continue;
   let rec: any;
   try {

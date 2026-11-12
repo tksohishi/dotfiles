@@ -11,6 +11,7 @@
 - When asked for your opinion, explain your reasoning and wait for approval before editing.
 - When a blocker forces a workaround (missing creds, blocked API, broken tool), report it and propose a durable fix the first time.
 - (Claude Code) When the auto-mode classifier blocks an action twice, ask the user to approve it via `/permissions` → Recently denied → `r`, or in chat naming the target; don't suggest running it with `!`.
+- (Claude Code) Hooks hand subagents the conversation verbatim, at spawn and on each SendMessage to an agent spawned by name: an Agent or SendMessage prompt states only the task, constraints the conversation lacks, and the deliverable.
 - When the user asks to prevent or enforce a behavior, propose a deterministic fix first (hook, permission rule, wrapper, pre-commit check), then a skill edit, and instructions or memory only when it needs judgment.
 
 ## AGENTS.md hygiene
