@@ -669,6 +669,21 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/session-trailer.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/no-pipe-delimiter-alternation.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__ccd_turn__wrap_up",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/wrap-up-japanese.ts",
+            "timeout": 10
           }
         ]
       },
@@ -814,6 +829,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/skill-in-prompt.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/ja-spacing.ts",
+            "timeout": 10
           }
         ]
       },
@@ -870,6 +890,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/no-bang-sudo.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/reply-language.ts",
+            "timeout": 10
           }
         ]
       },

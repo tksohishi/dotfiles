@@ -28,6 +28,8 @@
 - 人称は一人称「私」、二人称「あなた」で統一
 - 丸囲み数字（①②③）などの特殊文字は避け、通常の数字や箇条書きを使う
 - 強調の閉じ `**` の直前に約物（。、（）「」：等）を置かない。`**重要**。` ✅ ／ `**重要。**` ❌（CommonMark の right-flanking 規則で太字にならない）
+- 数字・金額・記号と日本語のあいだに空白を入れない。`3件` `約1.5 ETH` ✅ ／ `3 件` ❌。英単語の前後とバッククォートの両側は空白を入れてよい
+- 同じ行で 。 の後に文が続くときは 。 の直後に半角空白を1つ入れる（ターミナルの折り返し位置になる）。行末の 。 には付けない
 
 ## Response Style
 - Times in the user's local zone (America/New_York unless the project says otherwise), e.g. "9/2 08:07 EDT", never UTC. Convert source UTC with `date`, never in your head.
