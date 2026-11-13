@@ -1,6 +1,6 @@
 ---
 name: prose
-description: Rules for writing and editing prose meant for human readers, in English or Japanese, so it reads as plain human writing without AI tells and without changing what it says. Use before drafting or revising any docs, reports, README sections, PR descriptions, emails, Slack posts, announcements or Google Docs, and when asked to review text for AI tells, humanize it, 推敲して, AIっぽさを消して or 自然な日本語に直して. Not for code, code comments, commit messages, or conversational chat replies.
+description: Rules for writing and editing text the user sends to other people, in English or Japanese, so it reads as plain human writing without AI tells and without changing what it says. Use before drafting or revising emails, Slack posts, social posts, PR descriptions or announcements, and when asked to review text for AI tells, humanize it, 推敲して, AIっぽさを消して or 自然な日本語に直して. Not for docs, reports, READMEs, Google Docs, code, code comments, commit messages, or chat replies.
 ---
 
 # prose
@@ -15,7 +15,7 @@ Two jobs share one set of rules: drafting new text, and editing text someone els
 
 Read only what applies. The patterns are signs to check, not a ban list: a pattern only justifies an edit when it actually hurts the sentence in front of you.
 
-The Writing Style and 日本語の注意点 sections of the global AGENTS.md also apply, and win on conflict. The patterns target the user's own writing (docs, reports, PRs, emails, Slack); there are no rules for fiction or promotional copy.
+The Writing Style and 日本語の注意点 sections of the global AGENTS.md also apply, and win on conflict. The patterns target what the user sends (emails, Slack, posts, PRs); there are no rules for fiction or promotional copy.
 
 ### Preserve meaning on four axes
 

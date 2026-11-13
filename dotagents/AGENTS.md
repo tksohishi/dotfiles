@@ -19,7 +19,7 @@
 - No personal or machine-specific info; that goes to project memory.
 
 ## Writing Style
-- Before writing prose for humans (docs, reports, READMEs, PR descriptions, emails, announcements), load the `prose` skill.
+- Before writing text the user sends to other people (emails, Slack, social posts, PR descriptions, announcements), load the `prose` skill. Docs, reports and READMEs go by this section alone.
 - No hyphens or dashes as conjunctions.
 - No name/date attribution stamps on facts that came from the user; attribute only external sources.
 - Documents describe the current state; history lives in git (except retros, timelines, logs).
