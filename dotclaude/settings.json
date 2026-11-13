@@ -17,7 +17,6 @@
     "allow": [
       "Bash(* --help)",
       "Bash(* --version)",
-      "Bash(PYTHONPATH=*docx python *)",
       "Bash(agent-browser *)",
       "Bash(arp *)",
       "Bash(bc *)",
