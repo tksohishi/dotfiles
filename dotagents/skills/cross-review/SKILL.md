@@ -12,7 +12,7 @@ An independent model audits a piece of writing or analysis the session produced.
 The reviewer never sees this conversation; everything it needs comes from the prompt and the files it names.
 
 1. **Context.** List the paths it must read first: the project's `AGENTS.md`, the files a project skill names as context (user profile, org notes), the draft itself, and the primary sources the draft relies on (thread files, data, images, linked docs). Give absolute paths under `<root>`, never relative ones, so the reviewers read the same files whatever directory they start in; don't paste content.
-2. **Goal.** Quote the user's request verbatim, then state who reads the result and what decision it feeds (a vote, a reply, a purchase).
+2. **Goal.** Quote the user's request verbatim, then state who reads the result and what decision it feeds (a vote, a reply, a purchase). Export the user's words on this topic with `transcript-excerpt --user-only --turns <n> --out <root>/tmp/cross-review/<stamp>-user.md` (`<n>` reaches back to where the topic began) and list it under Context. Leave out the session's replies: they argue for the draft under review.
 3. **Already verified.** List what this session already checked against sources, so the reviewer spends its effort elsewhere.
 4. **Lenses.** Always include these three:
    - **Claims vs primary sources.** For each number, date, amount, quote, attribution and rule: find it in the primary source, not in someone's restatement of it. Mark each as VERIFIED (with the file path or URL and the exact location), CONTRADICTED (with what the source says) or UNVERIFIABLE.
