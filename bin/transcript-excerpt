@@ -6,10 +6,11 @@
 // output, thinking, system reminders and slash-command noise. A compaction
 // summary is kept and labeled as such.
 //
-// Usage: transcript-excerpt [--transcript <path> | --session <id>] [--after-line <n>] [--turns <n>] [--max-chars <n>] [--out <file>]
+// Usage: transcript-excerpt [--transcript <path> | --session <id>] [--after-line <n>] [--turns <n>] [--user-only] [--max-chars <n>] [--out <file>]
 //   default session: $CLAUDE_CODE_SESSION_ID
 //   --after-line skip the first n lines of the transcript file (what was already sent)
 //   --turns     keep only the last n user prompts and what followed them
+//   --user-only keep only the user's prompts (a compaction summary is Claude's and is dropped too)
 //   --max-chars drop the oldest turns until the text fits (default 60000)
 //   --out       write to a file (parent dirs created) and print its path
 
@@ -90,6 +91,7 @@ if (n > 0) {
   start = prompts.length > n ? prompts[prompts.length - n] : 0;
 }
 let kept = turns.slice(start);
+if (args.includes("--user-only")) kept = kept.filter((t) => t.label === "User");
 
 const render = (ts: Turn[]) => ts.map((t) => `${t.label}:\n${t.text}`).join("\n\n---\n\n") + "\n";
 const max = Number(opt("--max-chars") ?? 60000);

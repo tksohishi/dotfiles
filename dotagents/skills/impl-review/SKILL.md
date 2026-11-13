@@ -36,7 +36,7 @@ Read whichever of these exist at the project root, in order, before drafting the
 
 The reviewer will not see this conversation. It must rediscover the project from files. List the **exact paths** the reviewer should read in the prompt (Step 4) so it does not have to guess.
 
-If the project is brand new or has no AGENTS.md, the user's intent has to come from this conversation — quote it verbatim in Step 4.
+The discussion that led to the work does travel, verbatim with speaker labels: export it with `transcript-excerpt --turns <n> --out <root>/tmp/impl-review/<stamp>-conversation.md`, where `<n>` counts back to the prompt where the task began (the whole session when it is all one task), and give the path in Step 4. A one-paragraph goal loses the user's reasons and the decisions taken along the way.
 
 ### Step 2 — Capture what's under review
 
@@ -98,6 +98,9 @@ files under review, etc.}
 {One paragraph. Quote the user's exact request verbatim, then state the
 inferred underlying intent. The reviewer needs both — what they literally
 asked AND what success looks like.}
+The discussion behind this work, verbatim: {<stamp>-conversation.md path}.
+"User:" lines are the user's own words; "Claude:" lines are the session
+under review, so where they differ, the user's words define the goal.
 
 ## What Claude produced
 {One paragraph. List the files / commits / artifacts under review. For drafts,

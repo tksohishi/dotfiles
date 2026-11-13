@@ -17,7 +17,7 @@ Invoke when the user asks, in plan mode before presenting a plan, or proactively
 
 1. **Context paths.** List the files the reviewer should read: `AGENTS.md` / `CLAUDE.md`, `README.md`, `DESIGN.md` / `ARCHITECTURE.md` if present, and the 2-5 existing files the plan touches or competes with. The reviewer will not see this conversation.
 2. **The artifact.** A draft plan that only exists in the conversation goes to `<root>/tmp/arch-review/<stamp>-plan.md` first; a change under review is a commit range or `git diff`. Point to it; don't paste long content.
-3. **The user's goal.** Quote the user's request verbatim, plus any constraints they stated. Add the inferred intent in one sentence, labeled as inferred. Leave out the session's reasoning for the chosen design; the reviewer has to reach its own view from the artifact.
+3. **The user's goal.** Quote the user's request verbatim, plus any constraints they stated. Add the inferred intent in one sentence, labeled as inferred. Also export everything the user said on this topic, in order: `transcript-excerpt --user-only --turns <n> --out <root>/tmp/arch-review/<stamp>-user.md`, where `<n>` counts back to the prompt where the topic began (the whole session when it is all one topic), and point to it. A one-line quote loses the reasons and the turns the user's thinking took; the full run of their words keeps them. Leave out the session's own replies and its reasoning for the chosen design; the reviewer has to reach its own view from the artifact.
 4. **Already decided.** List decisions the user made explicitly, so the reviewer doesn't relitigate them. A reviewer who thinks one of them is wrong may say so once, as a CONCERN.
 5. **The user's note.** When the user adds one (`/arch-review` followed by text), pass it verbatim under its own heading, labeled as the user's.
 
@@ -33,6 +33,7 @@ Under review: {plan path or commit range}
 
 ## The user's request
 {verbatim quote; constraints; one inferred-intent sentence labeled as inferred}
+Everything the user said on this, in order (their words only): {<stamp>-user.md path}
 
 ## Decided by the user
 {explicit decisions, or "none"}
