@@ -87,6 +87,7 @@ cask "nordvpn" # Password prompt: pkg installer
 cask "notion-cli"
 cask "openusage"
 cask "qlmarkdown"
+cask "session-manager-plugin" # Password prompt: pkg installer
 cask "simple-comic"
 cask "slack"
 cask "spotify"
