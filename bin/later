@@ -10,10 +10,10 @@ import { DatabaseSync } from "node:sqlite";
 import { parseArgs } from "node:util";
 
 const USAGE = `usage:
-  later add <scope>/<topic> --what <text> --why <text> [--when <trigger>] [--see <path>] [--tag P0|P1] [--date YYYY-MM-DD]
-  later ls [scope] [--tag P0|P1|none] [--waiting | --ready] [--closed] [--json]
+  later add <scope>/<topic> --what <text> --why <text> [--when <trigger>] [--see <path>] [--tag P0|P1|P2] [--date YYYY-MM-DD]
+  later ls [scope] [--tag P0|P1|P2] [--waiting | --ready] [--closed] [--json]
   later edit <slug> [--what <text>] [--why <text>] [--when <trigger>|""] [--see <path>|""]
-  later tag <slug> P0|P1|none
+  later tag <slug> P0|P1|P2
   later done <slug> [--note <text>]
   later drop <slug> [--note <text>]
   later undo <slug>
@@ -136,8 +136,8 @@ function checkSee(dir: string, see: string | undefined): void {
 }
 
 function checkTag(tag: string | undefined): string | null {
-  if (tag === undefined || tag === "none") return null;
-  if (tag !== "P0" && tag !== "P1") fail(`tag must be P0, P1 or none`);
+  if (tag === undefined || tag === "P2" || tag === "none") return null;
+  if (tag !== "P0" && tag !== "P1") fail(`tag must be P0, P1 or P2`);
   return tag;
 }
 
@@ -235,10 +235,10 @@ switch (cmd) {
   case "tag": {
     const [scope, topic] = parseSlug(arg1, allowed);
     const item = openItem(db, scope, topic);
-    if (arg2 === undefined) fail("missing tag: P0, P1 or none");
+    if (arg2 === undefined) fail("missing tag: P0, P1 or P2");
     const tag = checkTag(arg2);
     db.prepare("UPDATE items SET tag = ? WHERE id = ?").run(tag, item.id);
-    console.log(`tagged ${scope}/${topic}: ${item.tag ?? "none"} -> ${tag ?? "none"}`);
+    console.log(`tagged ${scope}/${topic}: ${item.tag ?? "P2"} -> ${tag ?? "P2"}`);
     break;
   }
   case "done":

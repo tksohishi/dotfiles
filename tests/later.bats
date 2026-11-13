@@ -73,8 +73,10 @@ setup() {
   run "$LATER" edit heron/a --what new --when ""
   [[ "$output" == *"heron/a: new | why: b" ]]
   run "$LATER" tag heron/a P0
-  [[ "$output" == *"none -> P0"* ]]
+  [[ "$output" == *"P2 -> P0"* ]]
   run "$LATER" tag heron/a P2
+  [[ "$output" == *"P0 -> P2"* ]]
+  run "$LATER" tag heron/a P3
   [ "$status" -eq 1 ]
 }
 

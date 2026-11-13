@@ -28,10 +28,10 @@ later add heron/refund-hint --what "<what to do or try>" --why "<what it moves>"
 - Check first with `later ls <scope>` for an item with the same intent; change that one with `later edit` instead of adding another.
 - `--when` only when the item cannot start until something happens (a measurement accrues, an event, a user decision). A target date or "ship with X" is not a trigger: work that can start now has no `--when`.
 - `--date YYYY-MM-DD` only when moving an item recorded earlier elsewhere, with the date it was first written down.
-- `--tag P0` (important and urgent) or `--tag P1` (important, not urgent) only when the user said so. Untagged means P2. Never set or change a tag on your own judgment; `later tag` is for the user's word.
+- Priority: P0 is important and urgent, P1 important and not urgent, P2 (the default, no tag) the rest. Add at the tag the user named, else P2. When the conversation shows the item is more than P2 (a deadline, money or users at stake, something blocked on it), suggest P0 or P1 in the reply with the one reason, and apply it with `later tag` only on the user's yes. Never set a tag on your own judgment.
 - Write in the user's language. The CLI rejects text past its width limits; put detail in `--see` rather than squeezing it in.
 
-Reply with the line the CLI printed.
+Reply with the line the CLI printed, and the tag suggestion if any.
 
 ## Closing
 
