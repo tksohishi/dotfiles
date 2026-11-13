@@ -19,6 +19,7 @@ for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
 if (promptsSince > 1 || !replies.length) process.exit(0)
 
 const text = replies.at(-1)!.join('\n\n').replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]*`/g, '``').replace(/https?:\/\/[^\s)]+/g, 'URL')
+  .replace(/「[^「」\n]*」/g, '「」') // a quoted slip is a literal, not the reply's own clock
 const hits = [...text.matchAll(/\d{1,2}:\d{2}(?::\d{2}(?:\.\d+)?)?\s*(?:UTC|GMT|Z\b)/g)].map((m) => text.slice(Math.max(0, m.index! - 10), m.index! + m[0].length + 6).replace(/\n/g, ' '))
 if (hits.length) {
   const note = `utc-time: 前回の返答に UTC の時刻が${hits.length}件（${hits.slice(0, 3).map((h) => `「${h}」`).join(' ')}）。 時刻はユーザーのローカル時間（ET）だけで書き、UTC は併記しない。 ユーザーが UTC を指定したときだけ UTC で書く。 変換は date で行う。 前回の返答は直さない。`
