@@ -843,6 +843,11 @@
             "type": "command",
             "command": "bun $HOME/.claude/hooks/ja-spacing.ts",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/utc-time.ts",
+            "timeout": 10
           }
         ]
       },
