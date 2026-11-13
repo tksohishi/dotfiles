@@ -608,6 +608,16 @@
         ]
       },
       {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/agents-md-no-incidents.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "WebFetch",
         "hooks": [
           {

@@ -38,6 +38,16 @@
             "command": "$HOME/.codex/hooks/no-pipe-delimiter-alternation.sh"
           }
         ]
+      },
+      {
+        "_dotfiles": true,
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.codex/hooks/agents-md-no-incidents.sh"
+          }
+        ]
       }
     ]
   }
