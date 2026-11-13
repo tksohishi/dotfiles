@@ -4,6 +4,10 @@ description: Update all Homebrew packages and casks, and check for Mac App Store
 model: opus
 ---
 
+## First: pull the repository
+
+Before anything else, run `git pull --ff-only` in the repository root. The Brewfile, this skill and `prose/UPSTREAM.md` may have changed on another machine, and a stale Brewfile makes step 2 install from an old list. If the pull fails (diverged history, conflicting local changes), report the error and stop. If it changed this file, read it again and follow the new version.
+
 ## Run state
 
 State lives at `.cache/update-apps/state.json` under the repository root. The `.cache/` directory is gitignored because this is persistent, machine-specific state, not repository content. Read it before launching the subagents; create the parent directory when needed, then write the state back after the report. Missing or unparseable file means first run — treat both fields as empty, don't error.
