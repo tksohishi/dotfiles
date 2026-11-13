@@ -7,7 +7,7 @@ description: Shell out to OpenAI Codex (GPT-6-Astra at xhigh, via `codex exec`) 
 
 Shell out to **OpenAI Codex** so an independent model from another vendor audits the details of the current session's recent work. The reviewer reads the repo fresh — no memory of what the current session verified, no anchoring on its framing. That is the point: adversarial second-pair-of-eyes, not a peer reviewer who already trusts the author.
 
-This review takes the design as settled. Whether the work solves the right problem, the architecture, and the alternatives are `/arch-review`'s job; run that first, on the plan, when the direction is still open.
+This review takes the design as settled. Whether the work solves the right problem, the architecture, and the alternatives are `/arch-review`'s job, which the user runs on the plan while the direction is still open.
 
 ## When to use
 

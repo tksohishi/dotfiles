@@ -1,6 +1,6 @@
 ---
 name: arch-review
-description: Shell out to Claude Fable at xhigh effort (headless `claude -p`, read-only) for an adversarial review of the purpose, design and architecture of a plan or change: is it the right problem, does it serve the user's actual goal, what simpler or more conventional design would work, what it locks in, and what to cut. Implementation details (bugs, edge cases, tests, API usage) belong to /impl-review, not here. Use when the user says "/arch-review", "design review", "arch review", "Fable でレビュー", "設計をレビュー", before presenting a plan in plan mode, or before building anything whose direction would be costly to reverse (new architecture, data model, public interface, a new tool or service).
+description: Shell out to Claude Fable at xhigh effort (headless `claude -p`, read-only) for an adversarial review of the purpose, design and architecture of a plan or change: is it the right problem, does it serve the user's actual goal, what simpler or more conventional design would work, what it locks in, and what to cut. Implementation details (bugs, edge cases, tests, API usage) belong to /impl-review, not here. Use when the user says "/arch-review", "design review", "arch review", "Fable でレビュー", "設計をレビュー". Runs only on the user's request.
 ---
 
 # Design Review
@@ -11,7 +11,7 @@ Run it on the plan, before code exists, when the direction is still cheap to cha
 
 ## When to use
 
-Invoke when the user asks, in plan mode before presenting a plan, or proactively before building a new architecture, data model, public interface, or tool. Skip for changes whose design is dictated by the request (a bug fix, a rename, a config tweak). Each review takes several minutes and draws on the Fable quota.
+Invoke only when the user asks; never on your own initiative, since each review takes several minutes and draws on the Fable quota. Before building something whose direction would be costly to reverse, you may suggest it in one line.
 
 ## Prompt construction (do this every run)
 
