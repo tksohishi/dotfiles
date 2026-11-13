@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
 # Scan background work left by agent sessions (see the bg-check skill). Read-only.
 #
-# Usage: bg-scan [--repo <path>]
+# Usage: bg-scan [--repo <path> | --session [<claude-pid>]]
 #
 # With no argument: every session on the machine, plus the claude daemon and
 # long-running agent processes. With --repo: only sessions started in that repo
-# or its Claude worktrees, and that repo's leftover worktrees.
+# or its Claude worktrees, and that repo's leftover worktrees. With --session:
+# every live shell task and Monitor of one Claude process (default $CLAUDE_PID).
+# It goes by process ancestry, not by folder: after /clear the session id
+# changes but task output stays under the first id's folder, and a task stuck
+# without printing keeps an old mtime, so neither the folder nor a newest-first
+# listing finds it reliably.
 set -uo pipefail
 
 repo=""
-if [ "${1:-}" = "--repo" ]; then
-  repo=$(cd "${2:-.}" && git rev-parse --show-toplevel 2>/dev/null || pwd)
-fi
+owner=""
+case "${1:-}" in
+  --repo) repo=$(cd "${2:-.}" && git rev-parse --show-toplevel 2>/dev/null || pwd) ;;
+  --session) owner="${2:-${CLAUDE_PID:-}}"
+    [ -n "$owner" ] || { echo "bg-scan: no Claude pid (pass one or run inside Claude Code)" >&2; exit 1; } ;;
+esac
 # Claude Code names a project folder after its path with "/" and "." as "-";
 # worktree sessions get the repo's name plus a suffix, so a prefix match covers them.
 slug=$(printf '%s' "$repo" | tr '/.' '--')
@@ -29,6 +37,23 @@ local_time() {
 self_tree=" $$ "
 p=$$
 while [ "${p:-1}" -gt 1 ]; do p=$(ps -o ppid= -p "$p" | tr -d ' '); self_tree+="$p "; done
+mtime() { TZ=America/New_York date -r "$(stat -f %m "$1")" '+%-m/%-d %H:%M'; }
+# A task's shell wraps the command in a snapshot preamble; show only the command it evals.
+task_cmd() { ps -o command= -p "$1" 2>/dev/null | sed -E "s/.* eval '(.*)' < \/dev\/null.*/\1/" | cut -c1-110; }
+
+if [ -n "$owner" ]; then
+  echo "## shell tasks and Monitors of Claude pid $owner, still running"
+  under_owner() { local q=$1; while [ "${q:-1}" -gt 1 ]; do [ "$q" = "$owner" ] && return 0; q=$(ps -o ppid= -p "$q" 2>/dev/null | tr -d ' '); done; return 1; }
+  found=0
+  while read -r pid file; do
+    [[ "$self_tree" == *" $pid "* ]] && continue
+    under_owner "$pid" || continue
+    found=1
+    echo "task=$(basename "$file" .output)  pid=$pid  running $(age "$pid")  last output $(mtime "$file")  $(task_cmd "$pid")"
+  done < <(find "$tasks_root" -path '*/tasks/*.output' 2>/dev/null | xargs lsof -Fpn 2>/dev/null | awk '/^p/{p=substr($0,2)} /^n/{f=substr($0,2); if (f ~ /\/tasks\/[^\/]+\.output$/) print p, f}' | sort -u -k2,2)
+  [ "$found" = 0 ] && echo "none"
+  exit 0
+fi
 
 if [ -z "$repo" ]; then
   echo "## claude daemon"
@@ -42,12 +67,12 @@ fi
 
 echo "## background shells (Bash run_in_background / Monitor) still running"
 found=0
-recent=$(find "$tasks_root"/"$slug"* -path '*/tasks/*.output' -mtime -3 2>/dev/null)
+recent=$(find "$tasks_root"/"$slug"* -path '*/tasks/*.output' 2>/dev/null)
 while read -r pid file; do
   [[ "$self_tree" == *" $pid "* ]] && continue
   found=1
   rel=${file#"$tasks_root"/}
-  echo "$(age "$pid")  pid=$pid  ${rel%%/*}  session=$(echo "$rel" | cut -d/ -f2 | cut -c1-8)  task=$(basename "$file" .output)  $(cmd "$pid")"
+  echo "$(age "$pid")  pid=$pid  ${rel%%/*}  session=$(echo "$rel" | cut -d/ -f2 | cut -c1-8)  task=$(basename "$file" .output)  $(task_cmd "$pid")"
 done < <([ -n "$recent" ] && echo "$recent" | xargs lsof -Fpn 2>/dev/null | awk -v root="$tasks_root/" '/^p/{p=substr($0,2)} /^n/{f=substr($0,2); if (index(f, root)==1 && f ~ /\/tasks\/[^\/]+\.output$/) print p, f}' | sort -u -k2,2)
 [ "$found" = 0 ] && echo "none"
 

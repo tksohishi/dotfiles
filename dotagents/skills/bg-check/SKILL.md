@@ -17,7 +17,7 @@ Run one `ToolSearch` with `select:CronList,CronDelete,TaskStop,ListAgents,Remote
 
 | Source | How to read it | Stop with |
 |---|---|---|
-| Shell tasks (`run_in_background`) and Monitors | `ls -lt` the `tasks/` folder next to this session's scratchpad (`/private/tmp/claude-<uid>/<project>/<session-id>/tasks/`); for each `.output`, its last write time, and `lsof <file>` to see whether a process still holds it (then `ps -o etime= -p <pid>` for its age) | `TaskStop` with the task ID (the file name) |
+| Shell tasks (`run_in_background`) and Monitors | `bg-scan --session` (dotfiles bin): every live task of this Claude process, with its age, last output and command. Never list the `tasks/` folder by hand: after /clear it sits under the earlier session id, and a task stuck without printing has an old mtime | `TaskStop` with the task ID |
 | Subagents and named teammates | `ListAgents`; this session's own agents and teammates, busy or idle | `TaskStop` with the name or agent ID |
 | CronCreate jobs | `CronList` | `CronDelete` with the job ID |
 | `/loop` wakeups | No list tool: read this session's transcript (`~/.claude/projects/<project>/<session-id>.jsonl`) for the last `ScheduleWakeup` call; pending unless its input has `stop: true` | `ScheduleWakeup` with `stop: true` |
@@ -36,7 +36,7 @@ Run `bg-scan --repo <repo root>` for `repo`, `bg-scan` for `all` (dotfiles bin).
 - leftover Claude worktrees, with uncommitted and unpushed counts
 - `all` only: the `claude` daemon and its background sessions, and long-running `patchright-fetch` windows, `codex exec` reviews, headless `claude -p` runs and Chrome for Testing
 
-Skip rows that belong to this session; step 2 already has them. Another session's shell task or cron job can only be stopped from that session: offer to ask it with `/ask` (SendMessage), or `kill <pid>` for a bare process.
+Skip rows whose pid step 2 already listed. Another session's shell task or cron job can only be stopped from that session: offer to ask it with `/ask` (SendMessage), or `kill <pid>` for a bare process.
 
 ## 4. Report
 

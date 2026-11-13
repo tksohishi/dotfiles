@@ -47,6 +47,14 @@ for m in $changed_mods; do
     fi
 done
 
+# ── 1b2. bin/: a newly added script is linked into ~/.local/bin as install.sh would,
+# so it is on PATH without a rerun of install.sh ─
+for b in $(git diff --cached --name-only --diff-filter=A -- bin/ || true); do
+    target="$HOME/.local/bin/$(basename "$b")"
+    [ -e "$target" ] || [ -L "$target" ] && continue
+    mkdir -p "$HOME/.local/bin" && ln -s "$PWD/$b" "$target" && echo "pre-commit: linked $b -> $target" >&2
+done
+
 # ── 1c. install.sh: changes to it, its helper scripts, or its test run tests/install.bats ─
 install_inputs=(install.sh scripts/ tests/install.bats dotcodex/ editors/)
 if git diff --cached --name-only -- "${install_inputs[@]}" | grep -q .; then
