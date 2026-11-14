@@ -3,7 +3,13 @@
   "skillOverrides": {
     "anthropic-skills:docx": "off",
     "anthropic-skills:xlsx": "off",
-    "anthropic-skills:pptx": "off"
+    "anthropic-skills:pptx": "off",
+    "anthropic-skills:chrome-browser": "off",
+    "anthropic-skills:google-workspace": "off",
+    "anthropic-skills:import-memory": "off",
+    "anthropic-skills:morning": "off",
+    "init": "off",
+    "fewer-permission-prompts": "off"
   },
   "env": {
     "GOG_JSON": "1",
