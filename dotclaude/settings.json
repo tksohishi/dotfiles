@@ -720,6 +720,16 @@
         ]
       },
       {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/reply-language.ts",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "hooks": [
           {
             "async": true,
