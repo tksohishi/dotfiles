@@ -16,7 +16,7 @@ An item holds what to do later and why, nothing else: no progress, no figures, n
 
 Every item, data directory and memory about one thing shares a slug `<scope>/<topic>`.
 
-- `scope`: a name from the project's "Scopes:" line in AGENTS.md (`later scopes` lists them; without the line the only scope is `main`). An item goes in the scope where its change lands; one that spans apps goes where the shared change is made. One that changes no code goes where its answer will be used. When no scope fits, ask the user whether to add one; never stretch an unrelated one.
+- `scope`: a name in `.agents/later/scopes` (`later scopes` lists them with what each covers; without the file the only scope is `main`). An item goes in the scope where its change lands; one that spans apps goes where the shared change is made. One that changes no code goes where its answer will be used. When no scope fits, ask the user whether to add one (`later scope add <name> --what <text>`, then commit the file); never stretch an unrelated one.
 - `topic`: 1 to 4 English words, kebab-case, naming the problem, not the fix (`refund-hint`, not `add-refund-parser`).
 
 ## Adding

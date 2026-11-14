@@ -6,7 +6,7 @@ setup() {
   P="$BATS_TEST_TMPDIR/proj"
   mkdir -p "$P/tmp/heron/refund-hint"
   git -C "$P" init -q
-  printf '# Proj\n\nScopes: heron (the trading app), lib (shared code), ops (hosts and costs).\n' > "$P/AGENTS.md"
+  mkdir -p "$P/.agents/later" && printf 'heron the trading app\nlib shared code\nops hosts and costs\n' > "$P/.agents/later/scopes"
   cd "$P"
 }
 
@@ -27,13 +27,13 @@ setup() {
 @test "rejects a scope outside the list and a bad topic" {
   run "$LATER" add misc/x --what a --why b
   [ "$status" -eq 1 ]
-  [[ "$output" == *"not in the project's Scopes"* ]]
+  [[ "$output" == *"not in .agents/later/scopes"* ]]
   run "$LATER" add heron/Bad_Topic --what a --why b
   [[ "$output" == *"bad slug"* ]]
 }
 
 @test "uses main without a scope list" {
-  printf '# Proj\n' > AGENTS.md
+  trash .agents/later/scopes
   run "$LATER" add main/thing --what a --why b
   [ "$status" -eq 0 ]
 }
@@ -111,4 +111,21 @@ setup() {
   run "$LATER" add lib/feed-retry --what a --why b
   [ "$status" -eq 0 ]
   [ -f "$P/tmp/backlog.db" ]
+}
+
+@test "adds and removes a scope, and refuses to remove one with open items" {
+  run "$LATER" scope add stargazer --what "the Stargazer app"
+  [ "$status" -eq 0 ]
+  run "$LATER" scopes
+  [[ "$output" == *$'stargazer\tthe Stargazer app'* && "$output" == *$'heron\tthe trading app'* ]]
+  run "$LATER" add stargazer/first --what a --why b
+  [ "$status" -eq 0 ]
+  run "$LATER" scope rm stargazer
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"1 open item"* ]]
+  run "$LATER" done stargazer/first
+  run "$LATER" scope rm stargazer
+  [ "$status" -eq 0 ]
+  run "$LATER" scope add heron --what dup
+  [[ "$output" == *"already exists"* ]]
 }

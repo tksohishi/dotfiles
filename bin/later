@@ -1,10 +1,11 @@
 #!/usr/bin/env bun
 // later — the project backlog of ideas and deferred work, for agents.
-// Stored in <repo>/tmp/backlog.db (SQLite); only this CLI writes it. Scopes come
-// from the "Scopes:" line of the project's AGENTS.md (none: the single scope main).
+// Stored in <repo>/tmp/backlog.db (SQLite); only this CLI writes it. Scopes live in
+// <repo>/.agents/later/scopes, a tracked file of "name description" lines that this CLI
+// also owns (none: the single scope main).
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { parseArgs } from "node:util";
@@ -17,7 +18,9 @@ const USAGE = `usage:
   later done <slug> [--note <text>]
   later drop <slug> [--note <text>]
   later undo <slug>
-  later scopes`;
+  later scopes
+  later scope add <name> --what <text>
+  later scope rm <name>`;
 
 const LIMITS = { what: 160, why: 120, when: 80, note: 160 } as const;
 
@@ -34,16 +37,25 @@ function root(): string {
   }
 }
 
-function scopes(dir: string): string[] {
-  const file = join(dir, "AGENTS.md");
-  if (!existsSync(file)) return ["main"];
-  const line = readFileSync(file, "utf8").match(/^Scopes:\s*(.+)$/m)?.[1];
-  if (!line) return ["main"];
-  return line
-    .replace(/\([^)]*\)/g, "")
-    .split(/[,.]/)
-    .map((s) => s.trim().split(/\s+/)[0])
-    .filter((s): s is string => Boolean(s));
+type Scope = { name: string; what: string };
+
+const scopesFile = (dir: string) => join(dir, ".agents", "later", "scopes");
+
+function readScopes(dir: string): Scope[] {
+  const file = scopesFile(dir);
+  if (!existsSync(file)) return [];
+  return readFileSync(file, "utf8")
+    .split("\n")
+    .filter((l) => l.trim() && !l.startsWith("#"))
+    .map((l) => {
+      const [name, ...what] = l.trim().split(/\s+/);
+      return { name: name!, what: what.join(" ") };
+    });
+}
+
+function writeScopes(dir: string, list: Scope[]): void {
+  mkdirSync(join(dir, ".agents", "later"), { recursive: true });
+  writeFileSync(scopesFile(dir), list.map((s) => (s.what ? `${s.name} ${s.what}` : s.name)).join("\n") + "\n");
 }
 
 function width(s: string): number {
@@ -67,7 +79,7 @@ function parseSlug(slug: string | undefined, allowed: string[]): [string, string
   const m = slug.match(/^([a-z0-9-]+)\/([a-z0-9]+(?:-[a-z0-9]+){0,3})$/);
   if (!m) fail(`bad slug "${slug}": <scope>/<topic>, topic 1 to 4 kebab-case words`);
   const [, scope, topic] = m as unknown as [string, string, string];
-  if (!allowed.includes(scope)) fail(`scope "${scope}" is not in the project's Scopes (${allowed.join(", ")})`);
+  if (!allowed.includes(scope)) fail(`scope "${scope}" is not in .agents/later/scopes (${allowed.join(", ")}); add it with later scope add`);
   return [scope, topic];
 }
 
@@ -166,14 +178,33 @@ if (!cmd || opts.help) {
 }
 
 const dir = root();
-const allowed = scopes(dir);
+const scopeList = readScopes(dir);
+const allowed = scopeList.length ? scopeList.map((s) => s.name) : ["main"];
 
 if (cmd === "scopes") {
-  console.log(allowed.join("\n"));
+  for (const s of scopeList.length ? scopeList : [{ name: "main", what: "" }]) console.log(s.what ? `${s.name}\t${s.what}` : s.name);
   process.exit(0);
 }
 
 const db = open(dir);
+
+if (cmd === "scope") {
+  const name = arg2;
+  if (!name || !/^[a-z0-9-]+$/.test(name)) fail("scope name: lowercase letters, digits and hyphens");
+  if (arg1 === "add") {
+    if (scopeList.some((s) => s.name === name)) fail(`scope "${name}" already exists`);
+    checkText("what", opts.what, true);
+    writeScopes(dir, [...scopeList, { name, what: opts.what! }]);
+    console.log(`added scope ${name}; commit .agents/later/scopes`);
+  } else if (arg1 === "rm") {
+    if (!scopeList.some((s) => s.name === name)) fail(`no scope "${name}"`);
+    const { n } = db.prepare("SELECT COUNT(*) AS n FROM items WHERE scope = ? AND closed IS NULL").get(name) as { n: number };
+    if (n) fail(`scope "${name}" has ${n} open item(s); close them first`);
+    writeScopes(dir, scopeList.filter((s) => s.name !== name));
+    console.log(`removed scope ${name}; commit .agents/later/scopes`);
+  } else fail(`unknown scope command "${arg1 ?? ""}": add or rm`);
+  process.exit(0);
+}
 
 switch (cmd) {
   case "add": {
@@ -196,7 +227,7 @@ switch (cmd) {
     break;
   }
   case "ls": {
-    if (arg1 && !allowed.includes(arg1)) fail(`scope "${arg1}" is not in the project's Scopes (${allowed.join(", ")})`);
+    if (arg1 && !allowed.includes(arg1)) fail(`scope "${arg1}" is not in .agents/later/scopes (${allowed.join(", ")})`);
     const where = [opts.closed ? "closed IS NOT NULL" : "closed IS NULL"];
     const params: string[] = [];
     if (arg1) { where.push("scope = ?"); params.push(arg1); }
