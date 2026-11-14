@@ -17,6 +17,7 @@
 ## AGENTS.md hygiene
 - A constraint system, not documentation: keep domain knowledge, silent-bug gotchas and "never do" boundaries; cut anything derivable from code or `--help`.
 - No personal or machine-specific info; that goes to project memory.
+- A rule that a hook, permission rule or pre-commit check blocks before it is broken does not also live here: the deny message carries the rule. When such a check lands, delete the line it replaces, here and in project AGENTS.md files. Keep a line the check only reports after the fact, or one that overrides a harness instruction.
 
 ## Writing Style
 - Before writing text the user sends to other people (emails, Slack, social posts, PR descriptions, announcements), load the `prose` skill. Docs, reports and READMEs go by this section alone.
