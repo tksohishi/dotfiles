@@ -6,7 +6,7 @@
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { parseArgs } from "node:util";
 
@@ -29,9 +29,12 @@ function fail(msg: string): never {
   process.exit(1);
 }
 
+// the main checkout, also from inside a worktree: one backlog and one scope list per repo, so an item added in a
+// worktree is not left in a tmp/ that dies with it
 function root(): string {
   try {
-    return execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    const common = execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    return dirname(common);
   } catch {
     return process.cwd();
   }

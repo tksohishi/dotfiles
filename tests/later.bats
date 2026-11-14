@@ -129,3 +129,15 @@ setup() {
   run "$LATER" scope add heron --what dup
   [[ "$output" == *"already exists"* ]]
 }
+
+@test "uses the main checkout's backlog and scopes from a worktree" {
+  git -C "$P" add .agents/later/scopes
+  git -C "$P" -c user.name=t -c user.email=t@example.com commit -qm init -- .agents/later/scopes
+  git -C "$P" worktree add -q "$BATS_TEST_TMPDIR/wt"
+  printf 'heron the trading app\nonly-in-main x\n' > "$P/.agents/later/scopes"
+  cd "$BATS_TEST_TMPDIR/wt"
+  run "$LATER" add only-in-main/thing --what a --why b
+  [ "$status" -eq 0 ]
+  [ -f "$P/tmp/backlog.db" ]
+  [ ! -e "$BATS_TEST_TMPDIR/wt/tmp/backlog.db" ]
+}
