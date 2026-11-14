@@ -6,4 +6,5 @@
 node = { version = "lts", postinstall = "npm install -g corepack && corepack enable pnpm" }
 bun = "latest"
 "npm:@ticktick/ticktick-cli" = "latest"
+"pipx:markitdown" = { version = "latest", extras = "all", uvx_args = "--python 3.13" }
 "github:moznion/cccc" = "latest"

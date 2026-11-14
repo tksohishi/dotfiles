@@ -52,6 +52,7 @@
 - JS/TS: `bun` (stay on pnpm where `pnpm-lock.yaml` exists). Python: `uv`. Global CLIs: `brew`. Agent skills: `bunx skills add -g` (`/install-skill` in dotfiles), not plugins.
 - Bun auto-loads `.env`/`.env.local`; don't pass `--env-file` for those.
 - Docs lookup: `ctx7` first, then `--help`, then the web.
+- Office files (docx, xlsx, pptx): never create or edit them. Read one with `markitdown <file>`; when someone needs a docx or PDF, write Markdown and export it (`pandoc` for docx, `typst` for PDF).
 - mise tools are on PATH; never wrap with `mise exec --` or `zsh -lc`.- httpie over curl.
 - `gh` subcommands with `--json`, not `gh api`, unless no subcommand covers it.
 - Intermediate files go in project-local `tmp/<topic>/`, not `/tmp`, the scratchpad, or `os.tmpdir()`-style APIs.
