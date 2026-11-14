@@ -42,7 +42,9 @@ for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
   try { e = JSON.parse(line) } catch { continue }
   const content = e.message?.content
   if (e.type === 'user' && (typeof content === 'string' || (Array.isArray(content) && !content.some((c: any) => c.type === 'tool_result')))) {
-    typed = typeof content === 'string' ? content : content.map((c: any) => c.text ?? '').join(' ')
+    const text = typeof content === 'string' ? content : content.map((c: any) => c.text ?? '').join(' ')
+    // a peer session's message or a background task notice starts a turn too, but its language is not the user's
+    if (!e.isMeta && !/^\s*(<task-notification>|<cross-session-message|Another Claude session sent a message)/.test(text)) typed = text
     if (turnLast) finals.push(turnLast)
     turnLast = ''
   }

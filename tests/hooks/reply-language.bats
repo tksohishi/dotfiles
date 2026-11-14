@@ -58,3 +58,11 @@ ask() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg q "$1" '{hook_event_nam
   ask "質問の前にも言語判定を走らせる?"
   [ -z "$output" ]
 }
+
+@test "a peer session's English message or a task notice does not make the turn English" {
+  user "これ直して"
+  jq -nc '{type:"user",isMeta:true,message:{role:"user",content:"Another Claude session sent a message:\n<cross-session-message from=\"x\">Please fix the gateway and report back.</cross-session-message>"}}' >> "$T"
+  jq -nc '{type:"user",message:{role:"user",content:"<task-notification>\n<task-id>b1</task-id>\n<status>completed</status>\n</task-notification>"}}' >> "$T"
+  stop "The HyperSync gateway is built, committed, and pushed. Should I wire it into the runner next?"
+  jq -e '.decision == "block"' <<< "$output"
+}
