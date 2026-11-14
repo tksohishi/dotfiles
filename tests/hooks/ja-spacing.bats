@@ -51,3 +51,17 @@ run_hook() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" '{hook_event_name:"UserP
   run_hook
   jq -e '.hookSpecificOutput.additionalContext | test("2返答連続")' <<< "$output"
 }
+
+@test "a number inside a Latin word or name keeps its space" {
+  user "どう？"
+  claude "e530eb9 でコミットしました。 Apache 2.0 で公開されています。 中身は 1Password にあります。"
+  run_hook
+  [ -z "$output" ]
+}
+
+@test "still notes a bare number beside Japanese next to a Latin word" {
+  user "どう？"
+  claude "残りは 3 ETH です。"
+  run_hook
+  jq -e '.hookSpecificOutput.additionalContext | test("3 ETH")' <<< "$output"
+}

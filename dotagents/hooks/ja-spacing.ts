@@ -36,6 +36,13 @@ function check(reply: string[]): { bad: string[]; noSpace: string[] } {
       const i = m.index!
       const before = line.slice(0, i)
       if (/``\s*$/.test(before) || /^\s*``/.test(line.slice(i + m[0].length - 1))) continue // the space beside a code span
+      // a number that is part of a Latin word or name keeps its space: e530eb9 で, Apache 2.0 で, は 1Password
+      if (new RegExp(`^[${ja}]`, 'u').test(m[0])) {
+        if (/[A-Za-z]/.test(line.slice(i + m[0].length - 1).match(/^\S+/)![0])) continue
+      } else {
+        const head = line.slice(0, i + 1), token = head.match(/\S+$/)![0]
+        if (/[A-Za-z]/.test(token) || /[A-Za-z]\s+$/.test(head.slice(0, -token.length))) continue
+      }
       bad.push(line.slice(Math.max(0, i - 12), i + m[0].length + 12))
     }
     // a half-width space after 。 (a break opportunity for the terminal's word wrap); a closing bracket or quote may follow first.
