@@ -56,11 +56,19 @@ denied() {
   [ -z "$output" ]
 }
 
-@test "fails closed on network calls when the list is missing" {
+@test "without the list, checks git emails and private-strings emails and phones, and warns once" {
   rm "$HOME/.claude/outbound-private.txt"
-  run "$HOOK" <<< "$(call WebFetch '{"url":"https://example.org","prompt":"x"}')"
+  export TMPDIR="$BATS_TEST_TMPDIR"
+  printf '[user]\n\temail = jane.doe@example.com\n' > "$HOME/.gitconfig"
+  printf 'Jane Doe\n(212) 555-0142\n' > "$HOME/.claude/private-strings.txt"
+  run "$HOOK" <<< "$(jq -nc '{session_id:"s1",tool_name:"WebFetch",tool_input:{url:"https://example.org/?u=jane.doe@example.com",prompt:"x"}}')"
   denied
-  [[ "$output" == *"is missing"* ]]
+  run "$HOOK" <<< "$(jq -nc '{session_id:"s1",tool_name:"WebSearch",tool_input:{query:"who is 212-555-0142"}}')"
+  denied
+  run "$HOOK" <<< "$(jq -nc '{session_id:"s1",tool_name:"WebSearch",tool_input:{query:"Jane Doe"}}')"
+  jq -e '.systemMessage | test("missing")' <<< "$output"
+  run "$HOOK" <<< "$(jq -nc '{session_id:"s1",tool_name:"WebSearch",tool_input:{query:"weather"}}')"
+  [ -z "$output" ]
 }
 
 @test "ignores other tools" {

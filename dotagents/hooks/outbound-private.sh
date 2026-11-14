@@ -11,8 +11,11 @@
 #   - Write / Edit / NotebookEdit: content written to a source file, where a
 #     string would go out when the code runs (e.g. a User-Agent header).
 #
-# Fail closed: when the list is missing, network calls are denied until it
-# exists.
+# When the list is missing (a machine set up without it), the check runs on
+# what can be found on the machine: the emails in ~/.gitconfig and
+# ~/.gitconfig.local, and the email and phone lines of the pre-commit list
+# ~/.claude/private-strings.txt. A home address is not covered then, so the
+# user is warned once per session.
 
 TOOL_INPUT=$(cat)
 TOOL=$(printf '%s' "$TOOL_INPUT" | jq -r '.tool_name // empty')
@@ -50,7 +53,17 @@ case "$TOOL" in
     ;;
 esac
 
-[ -f "$LIST" ] || deny "Personal-string list $LIST is missing, so outbound calls cannot be checked. Ask the user to create it."
+if [ -f "$LIST" ]; then
+  ENTRIES=$(cat "$LIST")
+else
+  ENTRIES=$({ cat "$HOME/.gitconfig" "$HOME/.gitconfig.local" 2>/dev/null | grep -oE '[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]+'
+    grep -E '@|^[0-9 ()+.-]{7,}$' "$HOME/.claude/private-strings.txt" 2>/dev/null; } | sort -u)
+  SESSION=$(printf '%s' "$TOOL_INPUT" | jq -r '.session_id // "none"')
+  MARK="${TMPDIR:-/tmp}/outbound-private-warned-$SESSION"
+  if [ ! -e "$MARK" ]; then
+    WARN="outbound-private: $LIST is missing; checking only the git emails and the email and phone lines of private-strings.txt. Create the list to cover the home address."
+  fi
+fi
 
 # Compare on letters and digits only, so URL encoding (123+Main),
 # slugs and phone separators can't slip a string past.
@@ -61,8 +74,9 @@ while IFS= read -r entry; do
   [[ -z "$entry" || "$entry" == \#* ]] && continue
   needle=$(squash "$entry")
   if [[ -n "$needle" && "$HAYSTACK" == *"$needle"* ]]; then
-    deny "This call would send a personal string from $LIST (\"${entry:0:4}…\") to an outside service. Remove it: no email in User-Agent or headers, for the home address use the public origin in ~/.claude/personal.md (Location). If the user explicitly wants it sent, ask them to do it themselves."
+    deny "This call would send a personal string (\"${entry:0:4}…\") to an outside service. Remove it: no email in User-Agent or headers, for the home address use the public origin in ~/.claude/personal.md (Location). If the user explicitly wants it sent, ask them to do it themselves."
   fi
-done < "$LIST"
+done <<< "$ENTRIES"
 
+[ -n "${WARN:-}" ] && touch "$MARK" && jq -nc --arg m "$WARN" '{systemMessage: $m}'
 exit 0
