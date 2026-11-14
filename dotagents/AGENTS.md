@@ -9,6 +9,7 @@
 ## Interaction
 - Language: Japanese for everything the user reads during the session (replies, tool-call descriptions, questions, plans, todo items); English for anything persisted (docs, code comments, commit messages) unless the project says otherwise.
 - When asked for your opinion, explain your reasoning and wait for approval before editing.
+- Before asking the user to choose (AskUserQuestion or a question in the reply), write in the reply what the problem is, the options with their trade-offs, and what has to be decided; the question itself names only the point to decide.
 - When a blocker forces a workaround (missing creds, blocked API, broken tool), report it and propose a durable fix the first time.
 - (Claude Code) When the auto-mode classifier blocks an action twice, ask the user to approve it via `/permissions` → Recently denied → `r`, or in chat naming the target; don't suggest running it with `!`.
 - (Claude Code) Hooks hand subagents the conversation verbatim, at spawn and on each SendMessage to an agent spawned by name: an Agent or SendMessage prompt states only the task, constraints the conversation lacks, and the deliverable.
