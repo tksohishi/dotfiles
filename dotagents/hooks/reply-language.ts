@@ -30,13 +30,10 @@ const english = (t: string) => { const { ja, latin } = count(t); return ja + lat
 let typed = '', turnLast = ''
 let step: string[] = []
 const finals: string[] = []
-// the transcript is written behind the stream: at PreToolUse the text before the call lands a few hundred ms later, so
-// wait until this call's own tool_use is in the file
-let transcript = await Bun.file(input.transcript_path).text()
-for (let i = 0; asking && input.tool_use_id && i < 30 && !transcript.includes(`"id":"${input.tool_use_id}"`); i++) {
-  await new Promise((r) => setTimeout(r, 100))
-  transcript = await Bun.file(input.transcript_path).text()
-}
+// an interactive session writes the transcript in batches, so at PreToolUse the text before the call is usually not
+// in the file yet. The checks on that text run only when this call's own tool_use is already there (headless runs)
+const transcript = await Bun.file(input.transcript_path).text()
+const textLanded = !!input.tool_use_id && transcript.includes(`"id":"${input.tool_use_id}"`)
 for (const line of transcript.split('\n')) {
   if (!line) continue
   let e: any
@@ -61,8 +58,8 @@ if (asking) {
   const problems: string[] = []
   const pre = step.join('\n\n')
   const { ja, latin } = count(pre)
-  if (ja + latin < PREAMBLE_MIN) problems.push('質問の前に説明がない。 何が問題になっていて、何を決めてもらう必要があるかを、質問の直前に本文で書く')
-  else if (!englishTurn && english(pre)) problems.push('質問の前の説明が英語。 日本語で書き直す')
+  if (textLanded && ja + latin < PREAMBLE_MIN) problems.push('質問の前に説明がない。 何が問題になっていて、何を決めてもらう必要があるかを、質問の直前に本文で書く')
+  else if (textLanded && !englishTurn && english(pre)) problems.push('質問の前の説明が英語。 日本語で書き直す')
   const long = (input.tool_input?.questions ?? []).map((q: any) => String(q.question ?? '')).filter((q: string) => q.length > QUESTION_MAX)
   if (long.length) problems.push(`質問文が長い（${long.map((q: string) => q.length).join('、')}字、上限${QUESTION_MAX}字）。 経緯や理由は質問の前の本文に移し、質問には決めることだけを書く`)
   if (!problems.length) process.exit(0)

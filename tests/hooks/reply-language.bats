@@ -52,12 +52,15 @@ stop() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg m "$1" '{hook_event_na
 
 claude() { jq -nc --arg s "$1" '{type:"assistant",message:{role:"assistant",content:[{type:"text",text:$s}]}}' >> "$T"; }
 result() { jq -nc '{type:"user",message:{role:"user",content:[{type:"tool_result",tool_use_id:"x",content:"ok"}]}}' >> "$T"; }
-ask() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg q "$1" '{hook_event_name:"PreToolUse",tool_name:"AskUserQuestion",transcript_path:$t,tool_input:{questions:[{question:$q}]}}')"; }
+# a headless run has written the call's own tool_use by PreToolUse; an interactive session has not (no `landed`)
+landed() { jq -nc '{type:"assistant",message:{role:"assistant",content:[{type:"tool_use",id:"toolu_q",name:"AskUserQuestion",input:{}}]}}' >> "$T"; }
+ask() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg q "$1" '{hook_event_name:"PreToolUse",tool_name:"AskUserQuestion",tool_use_id:"toolu_q",transcript_path:$t,tool_input:{questions:[{question:$q}]}}')"; }
 EXPLAIN="degen-para からの依頼です。 質問ダイアログの直前に英語の説明が出ることがありました。 今の hook は最後の返答しか見ていません。 決めてもらうのは、質問の前にも言語判定を走らせるかどうかです。"
 
 @test "passes a short question after a Japanese explanation" {
   user "どうする？"
   claude "$EXPLAIN"
+  landed
   ask "質問の前にも言語判定を走らせる?"
   [ -z "$output" ]
 }
@@ -66,6 +69,7 @@ EXPLAIN="degen-para からの依頼です。 質問ダイアログの直前に�
   user "どうする？"
   claude "$EXPLAIN"
   result
+  landed
   ask "質問の前にも言語判定を走らせる?"
   jq -e '.hookSpecificOutput.permissionDecision == "deny"' <<< "$output"
   jq -e '.hookSpecificOutput.permissionDecisionReason | test("説明がない")' <<< "$output"
@@ -74,6 +78,7 @@ EXPLAIN="degen-para からの依頼です。 質問ダイアログの直前に�
 @test "denies a question after an English explanation" {
   user "どうする？"
   claude "The reply-language hook only checks the final reply, so English text before a question dialog is never caught. Decide whether to add the check."
+  landed
   ask "質問の前にも言語判定を走らせる?"
   jq -e '.hookSpecificOutput.permissionDecisionReason | test("英語")' <<< "$output"
 }
@@ -88,6 +93,14 @@ EXPLAIN="degen-para からの依頼です。 質問ダイアログの直前に�
 @test "lets an English explanation through on an English turn" {
   user "what should we do about the hook?"
   claude "The reply-language hook only checks the final reply, so English text before a question dialog is never caught. Decide whether to add the check."
+  landed
   ask "Add the check?"
+  [ -z "$output" ]
+}
+
+@test "skips the text checks when the transcript has not caught up" {
+  user "どうする？"
+  result
+  ask "質問の前にも言語判定を走らせる?"
   [ -z "$output" ]
 }
