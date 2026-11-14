@@ -41,6 +41,10 @@ if [ "$SKIP_BREW" = false ]; then
         brew tap "$tap" && brew trust --tap "$tap"
     done
 
+    # A package dropped from the Brewfile stays installed and can clash with its replacement (agy vs antigravity-cli)
+    # Without --force, cleanup lists what it would remove and asks before removing anything
+    HOMEBREW_BUNDLE_FILE="$DOTFILES_DIR/Brewfile" brew bundle cleanup || true
+
     # Install all packages, apps, and App Store apps (no upgrades)
     echo "Installing packages from Brewfile..."
     HOMEBREW_BUNDLE_FILE="$DOTFILES_DIR/Brewfile" brew bundle --no-upgrade || echo "Some packages failed to install (see above). Continuing..."

@@ -43,6 +43,7 @@ Launch the five subagents below as unnamed one-shot Agent calls with `model: "so
 All brew operations stay in this ONE subagent, run sequentially — brew holds a global lock, so never split brew steps across parallel agents. Include the repository root path in its prompt (it needs the Brewfile). Steps, in order:
 
 1. `brew update` — refresh package index. Capture the `==> New Formulae` / `==> New Casks` names.
+1b. Trust every tap in the Brewfile: `for tap in $(sed -n 's/^tap "\([^"]*\)".*/\1/p' Brewfile); do brew tap "$tap" && brew trust --tap "$tap"; done`. Homebrew refuses formulae from an untrusted tap, so the first run after a tap is added to the Brewfile would fail step 2. A tap in the tracked Brewfile was trusted when it was added; `install.sh` runs the same loop.
 2. `HOMEBREW_BUNDLE_MAS_SKIP="$(rg -o 'id: [0-9]+' Brewfile | rg -o '[0-9]+' | tr '\n' ' ')" brew bundle install --no-upgrade` — install any missing Brewfile entries without upgrading already-present ones (upgrades are handled by steps 3-4 for formulae/casks, auto-update for GUI casks, and `mas upgrade` manually for App Store apps). The env var skips every `mas` entry: mas detects installed apps via Spotlight and sporadically misses some (2026-08-26: Day One, Amphetamine, CotEditor), which makes bundle run `mas install` on already-installed apps, and that path calls sudo and fails headlessly. App Store installs need a password anyway, so this step can never usefully install them; `install.sh` (interactive) still handles them on a fresh machine. `brew bundle` has no blanket mas-skip flag, hence the ID list.
 3. `brew upgrade --formula` — upgrade all formulae
 4. `brew upgrade --cask gcloud-cli $(brew info --json=v2 --installed | jq -r '.casks[] | select((.auto_updates | not) and (.version != "latest") and (any(.artifacts[]; type == "object" and has("uninstall")) | not)) | .token')` — upgrades only casks with no self-update mechanism (CLI casks like codex, 1password-cli, notion-cli; versioned fonts; libreoffice). Never add `--greedy` or run a bare `brew upgrade --cask`.
@@ -56,6 +57,7 @@ All brew operations stay in this ONE subagent, run sequentially — brew holds a
    - `~/.agent-browser/browsers/chrome-<semver>/` — keep highest semver
    - `~/Library/Caches/ms-playwright/` — if it exists at all, trash the whole directory and report which tool recreated it if you can tell. Playwright's bundled browsers lag Chrome's security fixes and run with the sandbox off by default, and nothing on this machine is meant to use them (`agent-browser` and `patchright-fetch` cover browser work).
 7. `brew cleanup` — remove old versions and free disk space
+8. `brew bundle cleanup </dev/null` — dry run only, never `--force`: lists formulae, casks and taps installed but no longer in the Brewfile. A dropped package left installed can clash with its replacement. Removing them is `install.sh`'s job, where the user answers its prompt.
 
 Also include this rule in its prompt: never strip `com.apple.quarantine` from bundled binaries.
 
@@ -72,6 +74,7 @@ Have it return:
 - For each Brewfile package with a major version bump: a summary of breaking changes, new features, and deprecations from its GitHub release notes (e.g. `https://github.com/<org>/<repo>/releases/tag/v<version>`)
 - The homepage URL from `brew info <name>` (the first URL line, above the `From:` Homebrew-formula line) for each upgraded Brewfile package
 - The new formulae/casks names from step 1
+- The packages and taps step 8 would uninstall (not its `Would remove:` cache and log lines)
 - Bytes reclaimed: cache prune per location, and the `brew cleanup` total
 - Any errors or warnings verbatim, EXCEPT these known-benign ones, which must be omitted entirely (not merely marked benign):
   - "Not upgrading <cask>, the latest version is already installed" lines from step 4
@@ -123,7 +126,7 @@ Structure the report as sections with the emojis below. Section headers are orga
 - `### 🤖 Claude Code` — include current version in the header, e.g. `### 🤖 Claude Code (2.1.148)`
 - `### 🍎 Mac App Store` — pending mas updates (informational; never persisted to `open_items`)
 - `### ✍️ prose upstream` — upstream changes to humanizer/yomiyasu not yet distilled into `prose`
-- `### 🧹 Cleanup` — cache pruning and `brew cleanup` results
+- `### 🧹 Cleanup` — cache pruning and `brew cleanup` results, plus each package step 8 found as a 🟡 item with `./install.sh --skip-macos` (or `brew uninstall <name>`) to remove it
 - `### ✨ New & noteworthy` — interesting new formulae/casks
 
 Omit empty sections (e.g. if nothing was upgraded in mise, drop the section).
