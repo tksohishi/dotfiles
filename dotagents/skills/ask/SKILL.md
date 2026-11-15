@@ -34,3 +34,7 @@ When the user's request already says what to send, send it. When it leaves the c
 ## After sending
 
 Tell the user the session it went to and one line on what was asked, nothing more: the delivery state (in the inbox, unread, the receiver busy) is not reported, and the send is not checked again with ListAgents. A delivery notice that the session held or refused the message is the exception and is reported. Never predict or invent the receiver's answer; a reply arrives as a message in this session when it comes.
+
+## Each piece of text is shown once
+
+The user reads every session, so text one session showed them is not shown again in another. When the answer comes back, name its sender in one line and write only what this session adds: agreement or objection with its grounds, what the answer leaves open, and the next step. A session answering a peer writes the answer once; the reply it ends the turn with after sending says only where the answer went. The `peer-echo` Stop hook enforces both.
