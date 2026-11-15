@@ -37,4 +37,4 @@ Tell the user the session it went to and one line on what was asked, nothing mor
 
 ## Each piece of text is shown once
 
-The user reads every session, so text one session showed them is not shown again in another. When the answer comes back, name its sender in one line and write only what this session adds: agreement or objection with its grounds, what the answer leaves open, and the next step. A session answering a peer writes the answer once; the reply it ends the turn with after sending says only where the answer went. The `peer-echo` Stop hook enforces both.
+The user reads every session, so a finding is shown once, in the reply of the session that made it. When a peer's message arrives, name its sender in one line and write only what this session adds: agreement or objection with its grounds, what the message leaves open, and the next step. The `peer-echo` Stop hook enforces it, a translated retelling included.

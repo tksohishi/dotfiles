@@ -24,11 +24,24 @@ stop() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg m "$1" '{hook_event_na
   [ -z "$output" ]
 }
 
-@test "blocks a reply that repeats what this turn sent" {
+@test "passes a sender showing what it sent" {
   user "heron に聞いて"
   send "$ANSWER"
   stop "degen-heron に送りました。 $ANSWER"
-  jq -e '.decision == "block" and (.reason | contains("送った本文"))' <<< "$output"
+  [ -z "$output" ]
+}
+
+@test "blocks a Japanese retelling of an English peer report" {
+  user "<cross-session-message from-name=\"degen-ops\">21:45 discover: maxJoin=5 working as designed. 5 seats joined, 0 dropped, offer index 50,960,472 bytes, commit 1a466bdf deployed at 22:34:21.</cross-session-message>"
+  stop "ops から、21:45の discover の報告が来ました。 maxJoin=5 で設計どおりです。 5席が入り、外れたのは0件、索引は50,960,472バイト、1a466bdf は22:34:21に入りました。"
+  jq -e '.decision == "block"' <<< "$output"
+}
+
+@test "passes a report of work the peer asked for" {
+  user "<cross-session-message from-name=\"degen-ops\">Please fix docs/hosts.md:29 and the disk alert rate in lib/alerts.ts, then push.</cross-session-message>"
+  jq -nc '{type:"user",message:{role:"user",content:[{type:"tool_result",content:"[main 1a466bdf] fix docs/hosts.md lib/alerts.ts\n84 pass 0 fail"}]}}' >> "$T"
+  stop "ops から頼まれた2件を直して push しました（1a466bdf）。 docs/hosts.md と lib/alerts.ts を直し、テストは84件すべて通りました。"
+  [ -z "$output" ]
 }
 
 @test "ignores a turn the user started" {
