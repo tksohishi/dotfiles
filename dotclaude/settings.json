@@ -935,11 +935,6 @@
             "type": "command",
             "command": "bun $HOME/.claude/hooks/reply-language.ts",
             "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "bun $HOME/.claude/hooks/peer-echo.ts",
-            "timeout": 10
           }
         ]
       },

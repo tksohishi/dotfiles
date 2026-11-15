@@ -37,4 +37,6 @@ Tell the user the session it went to and one line on what was asked, nothing mor
 
 ## Each piece of text is shown once
 
-The user reads every session, so a finding is shown once, in the reply of the session that made it. When a peer's message arrives, name its sender in one line and write only what this session adds: agreement or objection with its grounds, what the message leaves open, and the next step. The `peer-echo` Stop hook enforces it, a translated retelling included.
+The user reads every session, so a finding is shown once, in the reply of the session that made it. When a peer's answer or report arrives, the reply to the user never retells it, in summary or in translation: no restated conclusion, no copied figures, times, hashes or lists. Write one line naming the sender and the topic, then only what this session adds: agreement or objection with its grounds, what the message leaves open, and the next step. With nothing to add, the one line is the whole reply. A figure from the message appears only where this session's own point needs it, and this session's own checks (a command it ran, a file it read) are its own finding, not a retelling.
+
+Every message this skill sends carries the same rule for the receiver: the user reads its session too, so its reply to the user shows its finding, and what it sends back is that finding, not a second version.
