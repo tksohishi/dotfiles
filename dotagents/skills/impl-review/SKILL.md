@@ -125,6 +125,14 @@ missed, especially in the details.}
 concrete input/state, the resulting wrong behavior, and how often that input
 occurs in real use (common / plausible / rare).}
 
+## Against the real data
+{Where the code runs on a live system's state (a file, a table, a box's saved
+state), give the reviewer a copy or its path (never one holding secrets or
+personal data: the reviewer's model runs outside this machine) and ask it to
+walk the change over those real entries: what the change does to them, not only to the
+inputs the tests build. Also ask whether a new path into an existing list or
+decision applies every filter the old paths apply.}
+
 ## Test coverage
 {Which changed behaviors and edge cases have no test; which tests would pass
 if the code were wrong. Name the missing test cases.}
@@ -199,7 +207,7 @@ The model and effort are pinned here because `~/.codex/config.toml` sets a diffe
 
 ## Rebuttal rounds
 
-The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, or when the user asks you to put a point to the reviewer. Send only what is new since the last round, each part labeled with who said it: your rebuttal per disputed finding (quote its title; answer with evidence such as a test run, a file path or a doc link), the user's words verbatim when they weighed in, and paths to anything changed since. Ask the reviewer to answer each disputed finding with `HOLD` or `CONCEDE` and one line why.
+The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, when a BLOCKER's class fix needs checking (step 6 below; the reviewer answers `CLOSED` or `OPEN` with the path still open), or when the user asks you to put a point to the reviewer. Send only what is new since the last round, each part labeled with who said it: your rebuttal per disputed finding (quote its title; answer with evidence such as a test run, a file path or a doc link), the user's words verbatim when they weighed in, and paths to anything changed since. Ask the reviewer to answer each disputed finding with `HOLD` or `CONCEDE` and one line why.
 
 ```bash
 codex exec resume <thread_id> -m gpt-6-astra -c model_reasoning_effort=xhigh -c sandbox_mode='"read-only"' -o <root>/tmp/impl-review/<stamp>-r2.md - > /dev/null <<'PROMPT'
@@ -218,7 +226,7 @@ When the reviewer returns:
 3. Group findings: BLOCKERs first, then CONCERNs, then NITs.
 4. For each finding, state whether you agree.
 5. **Verify reviewer-cited URLs before accepting them.** The reviewer can hallucinate sources. If it says "the issuer page says X", fetch the page and confirm. If the URL 404s or doesn't say what was cited, treat that finding as uncertain.
-6. If BLOCKERs are valid, fix before reporting the work as done. Do not commit / publish until resolved. A BLOCKER whose fix would change the direction, design or scope goes to the user first, per step 8.
+6. If BLOCKERs are valid, fix before reporting the work as done. Do not commit / publish until resolved. A BLOCKER whose fix would change the direction, design or scope goes to the user first, per step 8. A finding names one path; fix its class: search the change for every other path with the same cause (another entry to the same list, another lookup of the same cache) and fix those too. The fixes then go back to the same reviewer as a rebuttal round asking whether the class is closed, before the commit.
 7. If you disagree with the reviewer, say why — don't auto-capitulate. The reviewer's verdict is not the last word; you remain responsible for the output.
 8. Settle each finding:
    - A detail you agree with (a missing test, a wrong number, an edge case users will hit): fix it without asking, one summary line each.
