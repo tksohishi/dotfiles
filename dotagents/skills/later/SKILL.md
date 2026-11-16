@@ -31,7 +31,7 @@ later add heron/refund-hint --what "<what to do or try>" --why "<what it moves>"
 - Priority: P0 is important and urgent, P1 important and not urgent, P2 (the default, no tag) the rest. Add at the tag the user named, else P2. When the conversation shows the item is more than P2 (a deadline, money or users at stake, something blocked on it), suggest P0 or P1 in the reply with the one reason, and apply it with `later tag` only on the user's yes. Never set a tag on your own judgment.
 - Write in the user's language. The CLI rejects text past its width limits; put detail in `--see` rather than squeezing it in.
 
-Reply with the line the CLI printed, and the tag suggestion if any.
+Reply with the items as a table, never the CLI's raw lines: columns slug, added (MM-DD), tag (P2 when none), what in one short summary, why. A `when` or a close goes in a last column only when an item has one. The tag suggestion, if any, follows the table. Items read with `later ls` are shown the same way.
 
 ## Closing
 
