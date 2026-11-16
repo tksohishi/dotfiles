@@ -66,3 +66,13 @@ ask() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg q "$1" '{hook_event_nam
   stop "The HyperSync gateway is built, committed, and pushed. Should I wire it into the runner next?"
   jq -e '.decision == "block"' <<< "$output"
 }
+
+@test "a compact's command echo, output and continuation summary do not make the turn English" {
+  user "これ直して"
+  user "<command-name>/compact</command-name>
+<command-message>compact</command-message>"
+  user "<local-command-stdout>Compacted (ctrl+o to see full summary)</local-command-stdout>"
+  user "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion."
+  stop "The HyperSync gateway is built, committed, and pushed. Should I wire it into the runner next?"
+  jq -e '.decision == "block"' <<< "$output"
+}

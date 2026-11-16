@@ -43,8 +43,9 @@ for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
   const content = e.message?.content
   if (e.type === 'user' && (typeof content === 'string' || (Array.isArray(content) && !content.some((c: any) => c.type === 'tool_result')))) {
     const text = typeof content === 'string' ? content : content.map((c: any) => c.text ?? '').join(' ')
-    // a peer session's message or a background task notice starts a turn too, but its language is not the user's
-    if (!e.isMeta && !/^\s*(<task-notification>|<cross-session-message|Another Claude session sent a message)/.test(text)) typed = text
+    // a peer session's message, a background task notice, a slash command's echo and output, and the summary that
+    // continues a compacted session all start a turn too, but their language is not the user's
+    if (!e.isMeta && !/^\s*(<task-notification>|<cross-session-message|Another Claude session sent a message|<local-command-|<command-name>|<command-message>|This session is being continued from a previous conversation)/.test(text)) typed = text
     if (turnLast) finals.push(turnLast)
     turnLast = ''
   }
