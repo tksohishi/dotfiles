@@ -9,7 +9,6 @@ approval_policy = "on-request"
 # auto mode classifier. Policy text lives in [auto_review] at the bottom.
 approvals_reviewer = "auto_review"
 
-model = "gpt-5.6-sol"
 model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "xhigh"
 personality = "pragmatic"

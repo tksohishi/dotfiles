@@ -1,6 +1,6 @@
 ---
 name: cross-review
-description: Shell out to OpenAI Codex (GPT-6-Astra at xhigh, via `codex exec`) for an adversarial second-opinion review of non-code work the current session produced - drafts, forum comments, rationales, analyses, reports, recommendations. It checks every load-bearing claim against its primary source, the reasoning against the evidence, and the draft against what the reader needs. Code changes belong to /impl-review, plans and architecture to /arch-review. Use when the user says "/cross-review", "/codex-review", "cross review", "別の LLM で review", "コーデックスでチェック" on a draft, "/cross-review fable" or "/cross-review argon" (Fable at xhigh or Gemini 4 Argon reviewing in parallel), "Fable でも", "Gemini でも", when a project skill calls for a cross-review gate, or before publishing anything a wrong fact or misread source would embarrass (public posts, votes, financial or governance claims, emails).
+description: Shell out to OpenAI Codex (the newest Astra model at xhigh, via `codex exec`) for an adversarial second-opinion review of non-code work the current session produced - drafts, forum comments, rationales, analyses, reports, recommendations. It checks every load-bearing claim against its primary source, the reasoning against the evidence, and the draft against what the reader needs. Code changes belong to /impl-review, plans and architecture to /arch-review. Use when the user says "/cross-review", "/codex-review", "cross review", "別の LLM で review", "コーデックスでチェック" on a draft, "/cross-review fable" or "/cross-review argon" (Fable at xhigh or Gemini 4 Argon reviewing in parallel), "Fable でも", "Gemini でも", when a project skill calls for a cross-review gate, or before publishing anything a wrong fact or misread source would embarrass (public posts, votes, financial or governance claims, emails).
 ---
 
 # Cross Review
@@ -38,10 +38,10 @@ End with one line: VERDICT: Ready | Fix first
 
 ## Run
 
-`<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S`; run both first and write them literally into every path below. Write the assembled prompt to `<root>/tmp/cross-review/<stamp>-prompt.md`, then:
+`<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S`; `<model>` is the newest Astra, Codex's most capable tier, from `jq -r '[.models[] | select(.slug | test("^gpt-[0-9.]+-astra$"))] | sort_by(.priority)[0].slug // empty' ~/.codex/models_cache.json` (empty output: stop and tell the user rather than guess a slug). Run all three first and write them literally below. Write the assembled prompt to `<root>/tmp/cross-review/<stamp>-prompt.md`, then:
 
 ```bash
-codex exec --json -C <root> -m gpt-6-astra -c model_reasoning_effort=xhigh -s read-only -o <root>/tmp/cross-review/<stamp>-codex.md - < <root>/tmp/cross-review/<stamp>-prompt.md > <root>/tmp/cross-review/<stamp>-codex.jsonl
+codex exec --json -C <root> -m <model> -c model_reasoning_effort=xhigh -s read-only -o <root>/tmp/cross-review/<stamp>-codex.md - < <root>/tmp/cross-review/<stamp>-prompt.md > <root>/tmp/cross-review/<stamp>-codex.jsonl
 ```
 
 `--json` writes the run's events to the `.jsonl` file; its first line, `thread.started`, carries the `thread_id` that rebuttal rounds resume.
@@ -81,7 +81,7 @@ jq -Rsc '{event:"user",message:{content:[{type:"text",text:.}]}}' <root>/tmp/cro
 The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, or when the user asks you to put a point to the reviewer. Send each reviewer only its own disputed findings and only what is new since the last round, each part labeled with who said it: your rebuttal (quote the finding's title; answer with the source location or URL that settles it), the user's words verbatim when they weighed in, and paths to the revised draft. Ask for `HOLD` or `CONCEDE` per disputed finding with one line why.
 
 ```bash
-codex exec resume <thread_id> -m gpt-6-astra -c model_reasoning_effort=xhigh -c sandbox_mode='"read-only"' -o <root>/tmp/cross-review/<stamp>-codex-r2.md - < <root>/tmp/cross-review/<stamp>-rebuttal-codex.md > /dev/null
+codex exec resume <thread_id> -m <model> -c model_reasoning_effort=xhigh -c sandbox_mode='"read-only"' -o <root>/tmp/cross-review/<stamp>-codex-r2.md - < <root>/tmp/cross-review/<stamp>-rebuttal-codex.md > /dev/null
 claude -p --resume <uuid> --add-dir <root> --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" < <root>/tmp/cross-review/<stamp>-rebuttal-fable.md > <root>/tmp/cross-review/<stamp>-fable-r2.md
 ```
 
@@ -93,8 +93,8 @@ claude -p --resume <uuid> --add-dir <root> --model fable --effort xhigh --permis
 2. Print each VERDICT line, then findings grouped BLOCKER, CONCERN, NIT, each with whether you agree. With several reviewers, merge duplicates and note which reviewers raised each finding; a point only one model raised still counts.
 3. Verify every source the reviewer cites before acting on it: open the file location or URL and confirm it says what the reviewer claims. A citation that doesn't hold up makes the finding uncertain, not accepted.
 4. Fix agreed BLOCKERs and CONCERNs in the draft before showing it. Where you disagree, say why; don't auto-capitulate. A finding that changes the draft's position or recommendation goes to the user with your view, since that is their call.
-5. Log one line per reviewer once findings are settled (`reviewer`/`model`: `codex`/`gpt-6-astra`, `claude`/`fable`, or `agy`/`gemini-4-argon-high`):
+5. Log one line per reviewer once findings are settled (`reviewer`/`model`: `codex`/`<model>`, `claude`/`fable`, or `agy`/`gemini-4-argon-high`):
 
 ```bash
-jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "cross-review", reviewer: "codex", model: "gpt-6-astra", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
+jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "cross-review", reviewer: "codex", model: "<model>", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
 ```

@@ -1,6 +1,6 @@
 ---
 name: impl-review
-description: Shell out to OpenAI Codex (GPT-6-Astra at xhigh, via `codex exec`) for an adversarial second-opinion review of the implementation details the current session produced. It hunts correctness bugs and edge cases, audits test coverage, and checks newly used APIs against official docs. Purpose, design and architecture belong to /arch-review, not here. Use when the user says "/impl-review", "impl review", "codex review", "Astra でチェック", "コーデックスでチェック", "別の LLM で review", or before committing code where errors are costly (security-sensitive code, API contracts, anything irreversible). Drafts, analyses and other non-code work belong to /cross-review.
+description: Shell out to OpenAI Codex (the newest Astra model at xhigh, via `codex exec`) for an adversarial second-opinion review of the implementation details the current session produced. It hunts correctness bugs and edge cases, audits test coverage, and checks newly used APIs against official docs. Purpose, design and architecture belong to /arch-review, not here. Use when the user says "/impl-review", "impl review", "codex review", "Astra でチェック", "コーデックスでチェック", "別の LLM で review", or before committing code where errors are costly (security-sensitive code, API contracts, anything irreversible). Drafts, analyses and other non-code work belong to /cross-review.
 ---
 
 # Impl Review
@@ -206,7 +206,7 @@ Be blunt. A false positive costs a minute; a false negative costs
 
 ```bash
 mkdir -p <root>/tmp/impl-review
-codex exec --json -C <root> -m gpt-6-astra -c model_reasoning_effort=xhigh -o <root>/tmp/impl-review/<stamp>.md - > <root>/tmp/impl-review/<stamp>.jsonl <<'PROMPT'
+codex exec --json -C <root> -m <model> -c model_reasoning_effort=xhigh -o <root>/tmp/impl-review/<stamp>.md - > <root>/tmp/impl-review/<stamp>.jsonl <<'PROMPT'
 {the assembled prompt from Step 4}
 PROMPT
 ```
@@ -215,7 +215,13 @@ PROMPT
 
 `<root>` is `git rev-parse --show-toplevel` (`pwd` outside a git repo) and `<stamp>` is `date +%Y%m%d-%H%M%S` followed by `-<topic>` (a 2-4 word kebab-case slug of the task, e.g. `20261106-104931-ci-gate-paths`), so parallel sessions never share a file; run both first and write them literally into the path. `-o` saves the reviewer's final message (the findings, without tool-call traces) to the project's `tmp/`, because the background task's output file sits in a per-session temp directory that does not survive. `-C <root>` makes the project the reviewer's working root wherever the session started; still give every path in the prompt as an absolute path under `<root>`.
 
-The model and effort are pinned here because `~/.codex/config.toml` sets a different daily model at medium effort. The `-` arg tells `codex exec` to read the prompt from stdin. The heredoc ends at the delimiter, so EOF arrives and the call doesn't hang.
+`~/.codex/config.toml` leaves the daily model to Codex's default at medium effort, so the review pins both. `<model>` is the newest Astra, Codex's most capable tier, read from Codex's model catalog (a lower `priority` is newer); resolve it first and write it literally, like `<stamp>`:
+
+```bash
+jq -r '[.models[] | select(.slug | test("^gpt-[0-9.]+-astra$"))] | sort_by(.priority)[0].slug // empty' ~/.codex/models_cache.json
+```
+
+Empty output means the catalog is missing (Codex has not run on this machine) or the tier was renamed: stop and tell the user rather than guess a slug. The `-` arg tells `codex exec` to read the prompt from stdin. The heredoc ends at the delimiter, so EOF arrives and the call doesn't hang.
 
 **Don't combine `codex exec review --uncommitted` with a custom prompt.** Those flags are mutually exclusive (`error: the argument '--uncommitted' cannot be used with '[PROMPT]'`). Use plain `codex exec` with a custom prompt — the project-specific adversarial framing is the value-add. The built-in `review` mode is fine for generic code review but skips everything Steps 1-3 composed.
 
@@ -228,7 +234,7 @@ The model and effort are pinned here because `~/.codex/config.toml` sets a diffe
 The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, when a BLOCKER's class fix needs checking (step 6 below; the reviewer answers `CLOSED` or `OPEN` with the path still open), or when the user asks you to put a point to the reviewer. Send only what is new since the last round, each part labeled with who said it: your rebuttal per disputed finding (quote its title; answer with evidence such as a test run, a file path or a doc link), the user's words verbatim when they weighed in, and paths to anything changed since. Ask the reviewer to answer each disputed finding with `HOLD` or `CONCEDE` and one line why.
 
 ```bash
-codex exec resume <thread_id> -m gpt-6-astra -c model_reasoning_effort=xhigh -c sandbox_mode='"read-only"' -o <root>/tmp/impl-review/<stamp>-r2.md - > /dev/null <<'PROMPT'
+codex exec resume <thread_id> -m <model> -c model_reasoning_effort=xhigh -c sandbox_mode='"read-only"' -o <root>/tmp/impl-review/<stamp>-r2.md - > /dev/null <<'PROMPT'
 {the rebuttal}
 PROMPT
 ```
@@ -253,7 +259,7 @@ When the reviewer returns:
 9. Log one line to `~/.local/state/review/log.jsonl` (create the directory if missing) once findings are settled, after the user's answers to any step 8 questions, so reviewers can be compared across projects later. Counts come from your step 4 judgments (a "noted, not fixed" finding is accepted); `user_overrode` is step 8 answers where the user sided against your position.
 
 ```bash
-jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "impl-review", reviewer: "codex", model: "gpt-6-astra", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
+jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "impl-review", reviewer: "codex", model: "<model>", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
 ```
 
 ## Notes
