@@ -125,6 +125,24 @@ missed, especially in the details.}
 concrete input/state, the resulting wrong behavior, and how often that input
 occurs in real use (common / plausible / rare).}
 
+## Before calling anything correct
+Most missed defects sit in code that was read and judged fine. Before you
+judge a changed point correct, build the smallest execution (input, order,
+history) under which it would be wrong, and name the code that rules it out;
+a caveat ("non-atomic, but...") is not a ruling. Apply this to every changed
+point, and always to these:
+- A side effect that fails partway: what state remains, and how does the
+  caller, the next run or a restart read it?
+- Saved data: does the new reader accept everything the current and older
+  writers produce, with the same meaning?
+- Retry, recovery or deferred work: build one concrete sequence from the
+  failed state back to the intended processing, with normal updates in
+  between. "The retry state is saved" is not "the retry runs".
+- A set kept for dedupe, history or caching: where entries are added, where
+  they are removed, and what bounds its size.
+When you find a defect, put the question that found it to every other place
+with the same shape.
+
 ## Against the real data
 {Where the code runs on a live system's state (a file, a table, a box's saved
 state), give the reviewer a copy or its path (never one holding secrets or
