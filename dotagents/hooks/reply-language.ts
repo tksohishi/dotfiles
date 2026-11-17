@@ -2,7 +2,8 @@
 // (AGENTS.md Interaction, Language).
 // Stop: block a final reply written in English; the turn goes on until its last reply is in Japanese. Only the turn's
 // last message is judged; the updates before it may be English. A draft for an outside party (a Telegram, Discord or
-// mail reply) is written in a blockquote and is not counted, so a reply that is only the draft may be English.
+// mail reply) is written in a blockquote and is not counted, so a reply that is only the draft may be English; so is
+// the same draft repeated without its quote marks in the next turn, for a user who asked for it ready to paste.
 // AskUserQuestion: the question carries only the point to decide; the problem and the choice go in the reply before
 // it. PreToolUse denies a question whose own text is too long. The text before the dialog is not checked: the
 // transcript does not reliably hold it (at PreToolUse an interactive session has not written it yet, and some text
@@ -52,8 +53,11 @@ for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
   if (e.type === 'assistant' && Array.isArray(content)) for (const c of content) if (c.type === 'text' && c.text) turnLast = c.text
 }
 
-const last = input.last_assistant_message
-if (typeof last !== 'string' || !last || englishAsk(typed) || !english(last)) process.exit(0)
+// the previous turn's blockquoted draft, handed back without its quote marks on the user's ask, is still the draft
+const drafts = new Set((finals.at(-1) ?? '').split('\n').filter((l) => l.startsWith('>')).map((l) => l.replace(/^>\s?/, '').trim()).filter(Boolean))
+const reply = typeof input.last_assistant_message === 'string' ? input.last_assistant_message : ''
+const last = reply.split('\n').filter((l) => !drafts.has(l.trim())).join('\n')
+if (!last || englishAsk(typed) || !english(last)) process.exit(0)
 let streak = 1
 for (let i = finals.length - 1; i >= 0 && english(finals[i]!); i--) streak++
 const reason = `reply-language: この返答は英語${streak > 1 ? `（${streak}返答連続）` : ''}。 ターンを終える前に、同じ内容を日本語で書き直す（結果、確かめていないこと、聞くこと）。 英語のままでよいのはコード、識別子、ログの引用だけ。`

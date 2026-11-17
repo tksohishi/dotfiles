@@ -44,6 +44,18 @@ stop() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg m "$1" '{hook_event_na
   [ -z "$output" ]
 }
 
+said() { jq -nc --arg s "$1" '{type:"assistant",message:{role:"assistant",content:[{type:"text",text:$s}]}}' >> "$T"; }
+
+@test "does not count the previous draft handed back without its quote marks" {
+  user "返信の下書きを書いて"
+  said $'下書きです。\n\n> Thanks for the update, I will review the proposal and get back to you tomorrow.'
+  user "クオートなし"
+  stop "Thanks for the update, I will review the proposal and get back to you tomorrow."
+  [ -z "$output" ]
+  stop $'Thanks for the update, I will review the proposal and get back to you tomorrow.\n\nI also changed the parser and pushed the fix to main today.'
+  jq -e '.decision == "block"' <<< "$output"
+}
+
 @test "does not block twice in a row" {
   user "これ直して"
   run bun "$HOOK" <<< "$(jq -nc --arg t "$T" '{hook_event_name:"Stop",transcript_path:$t,last_assistant_message:"I fixed the bug in the parser and pushed it.",stop_hook_active:true}')"
