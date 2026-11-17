@@ -74,3 +74,7 @@ command -v mise >/dev/null && eval "$(mise activate zsh)"
 [ -d $HOME/.local/bin ] && export PATH=$HOME/.local/bin:$PATH
 command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
 command -v starship >/dev/null && eval "$(starship init zsh)"
+
+# Agents write bash-style `for x in $VAR` / `set -- $VAR`; Claude Code's Bash tool
+# captures shell options from this file, so split words there as bash does.
+[[ -n $CLAUDECODE ]] && setopt sh_word_split
