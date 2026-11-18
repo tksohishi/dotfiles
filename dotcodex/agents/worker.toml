@@ -1,6 +1,6 @@
 name = "worker"
 description = "Implementation agent for delegated coding tasks."
-model = "gpt-6.1-terra"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
 Complete the delegated task exactly as scoped. Follow the project's AGENTS.md
