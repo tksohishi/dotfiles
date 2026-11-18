@@ -1,6 +1,6 @@
 ---
 name: impl-review
-description: Shell out to OpenAI Codex (the newest Astra model at xhigh, via `codex exec`) for an adversarial second-opinion review of the implementation details the current session produced. It hunts correctness bugs and edge cases, audits test coverage, and checks newly used APIs against official docs. Purpose, design and architecture belong to /arch-review, not here. Use when the user says "/impl-review", "impl review", "codex review", "Astra でチェック", "コーデックスでチェック", "別の LLM で review", or before committing code where errors are costly (security-sensitive code, API contracts, anything irreversible). Drafts, analyses and other non-code work belong to /cross-review.
+description: Shell out to OpenAI Codex (the newest Astra model at xhigh, via `codex exec`) for an adversarial second-opinion review of the implementation details the current session produced. It hunts correctness bugs and edge cases, audits test coverage, and checks newly used APIs against official docs. Purpose, design and architecture belong to /arch-review, not here. Use when the user says "/impl-review", "impl review", "codex review", "Astra でチェック", "コーデックスでチェック", "別の LLM で review", or before committing code where errors are costly (security-sensitive code, API contracts, anything irreversible). Solidity changes, or a contract named for review before deploy ("/solidity-review", "コントラクトをレビュー", "Solidity の監査"), also get a pashov-style attacker pass. Drafts, analyses and other non-code work belong to /cross-review.
 ---
 
 # Impl Review
@@ -52,6 +52,8 @@ For UI / visual / generated-image work, **point to the rendered artifact** (PNG,
 For long outputs (drafts, specs, posts), do not paste the whole content into the prompt — tell the reviewer the path and have it `Read` the file itself. Pasting bloats the prompt and the reviewer's read of the live file is more authoritative anyway.
 
 Also list what has already been reviewed or verified this session (subagent reviews, `/arch-review`, `/code-review`, tests run, sources fetched). The reviewer skips that ground and digs for what those passes missed.
+
+**Solidity.** When the surface includes `.sol` files, or the user names a contract to review before deploy, read `references/solidity.md` and run its security pass beside this one (deploy mode runs it alone). It has its own prompt; don't fold its lenses into this one.
 
 ### Step 3 — Pick risk categories
 

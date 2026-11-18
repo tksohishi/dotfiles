@@ -1,18 +1,20 @@
----
-name: solidity-review
-description: Shell out to OpenAI Codex (the newest Astra model at xhigh, via `codex exec`) for a one-pass adversarial security review of Solidity source before it is deployed, on a slimmed version of pashov's solidity-auditor lenses (access control, boundaries, execution trace, flow gaps, invariants, asymmetry, math, trust), with its four judging gates. Use when the user says "/solidity-review", "/smart-contract-review", "コントラクトをレビュー", "Solidity の監査", or when a project rule asks for a security review of a contract's exact source before its deploy. General code goes to /impl-review; a full multi-agent audit is pashov's solidity-auditor itself.
----
+# Solidity security pass
 
-# Solidity Review
+A second codex run beside the main review, auditing a contract the way pashov's solidity-auditor (github.com/pashov/skills, `solidity-auditor/references/`) does with twelve agents: the same lenses, cut to the checks that find bugs in a small executor or vault, and the same judging gates, so a finding comes with a proof or is a lead. It costs one review's minutes instead of the auditor's 15 to 45. A full multi-agent audit is pashov's solidity-auditor itself.
 
-One codex run audits a contract the way pashov's solidity-auditor (github.com/pashov/skills, `solidity-auditor/references/`) does with twelve agents: the same lenses, cut to the checks that find bugs in a small executor or vault, and the same judging gates, so a finding comes with a proof or is a lead. It costs one review's minutes instead of the auditor's 15 to 45, and gives an independent model's read where /impl-review gives a general one. It does not replace /impl-review or /code-review where a project asks for those; it is the security pass beside them.
+Its prompt is its own, never merged into the main review's: the main review hunts correctness broadly, this one is an attacker after funds, and sharing one word budget blurs both.
 
-## Prompt construction (every run)
+## Scope
 
-1. **Scope.** The exact `.sol` files the deploy sends (named by path, never a glob), and the deployed predecessor when there is one: a diff against it goes to `<root>/tmp/solidity-review/<stamp>-diff.diff` and the reviewer gets both, the whole new source and the diff, so it reviews the contract and knows what moved.
+- **Change mode** (the session changed `.sol` files): the changed contracts in full plus the session's diff.
+- **Deploy mode** (the user names a contract to review before deploy, or a project rule asks for a security review of a contract's exact source before its deploy): the exact `.sol` files the deploy sends, named by path, never a glob, and the deployed predecessor when there is one. A diff against it goes to `<root>/tmp/impl-review/<stamp>-sol.diff`; the reviewer gets both the whole new source and the diff. Deploy mode runs this pass alone, without the main review.
+
+## Prompt construction
+
+1. **Scope** as above.
 2. **Context files.** `AGENTS.md`, the contract's design doc, its tests, and the off-chain code that builds its calldata or calls it (an encoder, a deploy script, an admin script): a contract's bugs often sit between its packed layout and the code that packs it.
 3. **The user's goal and the design decisions.** Quote the user's words on what the contract must do and what they chose (a float held, a role split, an approval kept). A decision is out of scope as a finding unless it causes a concrete loss; the reviewer may name it once as a CONCERN.
-4. **Already reviewed.** Earlier passes (/impl-review, /code-review, an auditor run) and what they closed, so the reviewer spends its effort on new ground.
+4. **Already reviewed.** Earlier passes and what they closed, so the reviewer spends its effort on new ground.
 5. **Live facts the code cannot show.** Which external contracts it trusts (routers, pools, hooks) and whether their source is verified; what an approval or a callback exposes. A reviewer cannot read an unverified venue; say so.
 
 Keep the prompt under about 4KB; long material goes in files the reviewer reads.
@@ -23,7 +25,7 @@ Keep the prompt under about 4KB; long material goes in files the reviewer reads.
 You are auditing Solidity for the {PROJECT} project, written by another AI assistant (Claude), before it is deployed. You
 are an attacker: find what loses funds, lets a third party move them, or lets a losing or forged action pass.
 
-Read first: {paths}. In scope: {exact .sol paths}. Changed from the deployed {predecessor}: {diff path}.
+Read first: {paths}. In scope: {exact .sol paths}. Changed from {the session's base | the deployed predecessor}: {diff path}.
 
 ## What it must do (the user's words) and what is decided
 {quotes; decisions; trusted external contracts and their verification status}
@@ -60,7 +62,7 @@ events, centralization without a mechanism, or admin doing admin things.
 
 ## Constraints
 At most 700 words. Read narrowly (rg -n, sed ranges). Do not edit any file in the repo; write a proof of concept under
-{root}/tmp/solidity-review/poc/ and quote it.
+{root}/tmp/impl-review/poc/ and quote it.
 
 ## Output
 For each item:
@@ -75,23 +77,16 @@ End with: VERDICT: Deploy | VERDICT: Do not deploy until FINDINGs are fixed
 
 ## Run
 
-Same as /impl-review: `<root>` from `git rev-parse --show-toplevel`, `<stamp>` from `date +%Y%m%d-%H%M%S` plus `-<topic>`, prompt over stdin with a quoted heredoc, background, output kept in the project's tmp.
+Same command as the main review, same `<model>` and effort, with `-sol` appended to the stamp, started in the background in the same message as the main run:
 
 ```bash
-mkdir -p <root>/tmp/solidity-review
-codex exec --json -C <root> -m <model> -c model_reasoning_effort=xhigh -o <root>/tmp/solidity-review/<stamp>.md - > <root>/tmp/solidity-review/<stamp>.jsonl <<'PROMPT'
+codex exec --json -C <root> -m <model> -c model_reasoning_effort=xhigh -o <root>/tmp/impl-review/<stamp>-sol.md - > <root>/tmp/impl-review/<stamp>-sol.jsonl <<'PROMPT'
 {the prompt}
 PROMPT
 ```
 
-`<model>` is the newest Astra, resolved the way /impl-review does it (`~/.codex/models_cache.json`, lowest `priority`) and written literally; empty output means stop and tell the user rather than guess a slug.
-
-Rebuttal rounds as /impl-review describes (`codex exec resume <thread_id>`, read-only sandbox, at most two, `HOLD` or `CONCEDE` per disputed item; after a fix, `CLOSED` or `OPEN` per finding).
+Rebuttal rounds resume this run's own thread, as the main review's do; after a fix, ask for `CLOSED` or `OPEN` per finding.
 
 ## Reporting
 
-Read the `-o` file. Print the VERDICT, then FINDINGs by severity, then LEADs. Judge each one yourself before any change: how the input occurs live, what it costs when it does, and the code its fix adds (a project's own rule on judging findings applies). A FINDING you agree with is fixed and its class searched for in the rest of the contract, then sent back for `CLOSED`; a LEAD is recorded or chased by its cost. A finding that changes the design goes to the user with both positions. Log one line when settled:
-
-```bash
-jq -nc '{date: (now | todate), project: "<repo>", skill: "solidity-review", reviewer: "codex", model: "<model>", findings: {finding: 0, lead: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
-```
+Report this pass in its own block after the main review's: the VERDICT, then FINDINGs by severity, then LEADs. Judge each one yourself before any change: how the input occurs live, what it costs when it does, and the code its fix adds (a project's own rule on judging findings applies). A FINDING you agree with is fixed and its class searched for in the rest of the contract, then sent back for `CLOSED`; a LEAD is recorded or chased by its cost. A finding that changes the design goes to the user with both positions. Its log line uses `skill: "impl-review-sol"` and `findings: {finding: 0, lead: 0}`.
