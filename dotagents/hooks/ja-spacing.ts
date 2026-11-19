@@ -4,6 +4,7 @@
 // A backticked span keeps a space on each side, so code spans are blanked to `` before the scan; fenced code, URLs and
 // table rows are skipped. It reads the transcript at prompt time rather than handing a note over from a Stop hook,
 // which lost notes when the Stop did not run. The note goes to the agent only.
+import { transcriptTail } from './lib/transcript-tail.ts'
 const input = await new Response(Bun.stdin.stream()).json().catch(() => ({}))
 if (!input.transcript_path) process.exit(0)
 
@@ -12,7 +13,7 @@ if (!input.transcript_path) process.exit(0)
 // two typed messages already follow was noted at the previous prompt
 const replies: string[][] = []
 let promptsSince = 1
-for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
+for (const line of (await transcriptTail(input.transcript_path)).split('\n')) {
   if (!line) continue
   let e: any
   try { e = JSON.parse(line) } catch { continue }

@@ -2,13 +2,14 @@
 // `17:20:59Z`), which the global AGENTS.md rules out: times are in the user's local zone, with no UTC beside them unless
 // the user asked for UTC. Code spans, fenced code and URLs are skipped, since a quoted log line keeps its own clock.
 // Read from the transcript at prompt time, as ja-spacing.ts does. The note goes to the agent only.
+import { transcriptTail } from './lib/transcript-tail.ts'
 const input = await new Response(Bun.stdin.stream()).json().catch(() => ({}))
 if (!input.transcript_path) process.exit(0)
 
 // the assistant text after the last message the user typed before this prompt (tool results also arrive as "user")
 const replies: string[][] = []
 let promptsSince = 1
-for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
+for (const line of (await transcriptTail(input.transcript_path)).split('\n')) {
   if (!line) continue
   let e: any
   try { e = JSON.parse(line) } catch { continue }

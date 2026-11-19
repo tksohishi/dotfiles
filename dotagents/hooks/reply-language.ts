@@ -9,6 +9,7 @@
 // it. PreToolUse denies a question whose own text is too long. The text before the dialog is not checked: the
 // transcript does not reliably hold it (at PreToolUse an interactive session has not written it yet, and some text
 // before an answered question was never written at all).
+import { transcriptTail } from './lib/transcript-tail.ts'
 const input = await new Response(Bun.stdin.stream()).json().catch(() => ({}))
 const event = input.hook_event_name
 const asking = event === 'PreToolUse' && input.tool_name === 'AskUserQuestion'
@@ -38,7 +39,7 @@ const englishAsk = (typed: string) => (!count(typed).ja && (typed.match(/[A-Za-z
 // each earlier turn's final reply, for the streak: the last assistant text before the next typed message
 let typed = '', turnLast = ''
 const finals: string[] = []
-for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
+for (const line of (await transcriptTail(input.transcript_path)).split('\n')) {
   if (!line) continue
   let e: any
   try { e = JSON.parse(line) } catch { continue }
