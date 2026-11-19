@@ -84,7 +84,7 @@ Have it return:
 
 Run `mise upgrade`, then `mise prune -y` (removes installed versions no tracked config or stub still references; versions pinned by another project's `mise.toml` are kept, which is correct). Return each upgraded tool with old → new version (or "nothing upgraded"), each pruned tool@version (or "nothing pruned"), plus any errors verbatim. The main session reports pruned versions in `### 🧹 Cleanup`.
 
-bun is the exception to "patch and minor are routine": a production VM runs it, so its version is a deploy decision. Whenever bun moved, or a newer bun was held back by `minimum_release_age`, the subagent reads that release's notes (`https://bun.com/blog/bun-v<version>`, else the GitHub release) and returns breaking changes, behaviour changes in the runtime, `Bun.serve`, `fetch`, SQLite or the bundler, and notable fixes, in under 150 words. The main session reports it as a 🟡 item, whatever the bump size.
+bun is the exception to "patch and minor are routine": a production VM runs it, so its version is a deploy decision. Whenever bun moved, or a newer bun was held back by `minimum_release_age`, the subagent reads that release's notes (`https://bun.com/blog/bun-v<version>`, else the GitHub release) and returns breaking changes, behaviour changes in the runtime, `Bun.serve`, `fetch`, SQLite or the bundler, and notable fixes, in under 150 words. The main session reports it as a 🟡 item, whatever the bump size. When the notes call a held-back release a security release, the subagent installs it now with `mise upgrade bun --minimum-release-age 0`: the age gate guards against a hijacked release, and bun's own blog naming the fix outweighs that risk.
 
 ### Claude Code subagent
 
