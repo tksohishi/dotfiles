@@ -13,7 +13,7 @@ The reviewer never sees this conversation; everything it needs comes from the pr
 
 1. **Context.** List the paths it must read first: the project's `AGENTS.md`, the files a project skill names as context (user profile, org notes), the draft itself, and the primary sources the draft relies on (thread files, data, images, linked docs). Give absolute paths under `<root>`, never relative ones, so the reviewers read the same files whatever directory they start in; don't paste content.
 2. **Goal.** Quote the user's request verbatim, then state who reads the result and what decision it feeds (a vote, a reply, a purchase). Export the user's words on this topic with `transcript-excerpt --user-only --turns <n> --out <root>/tmp/cross-review/<stamp>-user.md` (`<n>` reaches back to where the topic began) and list it under Context. Leave out the session's replies: they argue for the draft under review.
-3. **Already verified.** List what this session already checked against sources, so the reviewer spends its effort elsewhere.
+3. **No reading of the author's.** The prompt names no claim as already checked and summarizes no evidence or inference of the session's: a check stated in the prompt is one the reviewer skips, and it is the claim under review.
 4. **Lenses.** Always include these three:
    - **Claims vs primary sources.** For each number, date, amount, quote, attribution and rule: find it in the primary source, not in someone's restatement of it. Mark each as VERIFIED (with the file path or URL and the exact location), CONTRADICTED (with what the source says) or UNVERIFIABLE.
    - **Reasoning.** Conclusions the evidence doesn't support, overclaiming, a counterargument the reader will raise that the draft ignores, a stale premise (a later post or version superseding the one cited).
@@ -78,7 +78,7 @@ jq -Rsc '{event:"user",message:{content:[{type:"text",text:.}]}}' <root>/tmp/cro
 
 ## Rebuttal rounds
 
-The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, or when the user asks you to put a point to the reviewer. Send each reviewer only its own disputed findings and only what is new since the last round, each part labeled with who said it: your rebuttal (quote the finding's title; answer with the source location or URL that settles it), the user's words verbatim when they weighed in, and paths to the revised draft. Ask for `HOLD` or `CONCEDE` per disputed finding with one line why.
+The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, or when the user asks you to put a point to the reviewer. Send each reviewer only its own disputed findings and only what is new since the last round, each part labeled with who said it: per disputed finding, its title and the source location or URL that bears on it, for the reviewer to read itself (never your argument or conclusion); the user's words verbatim when they weighed in, and paths to the revised draft. Ask for `HOLD` or `CONCEDE` per disputed finding with one line why.
 
 ```bash
 codex exec resume <thread_id> -m <model> -c model_reasoning_effort=xhigh -c sandbox_mode='"read-only"' -o <root>/tmp/cross-review/<stamp>-codex-r2.md - < <root>/tmp/cross-review/<stamp>-rebuttal-codex.md > /dev/null

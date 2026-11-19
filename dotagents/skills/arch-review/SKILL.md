@@ -17,7 +17,7 @@ Invoke only when the user asks; never on your own initiative, since each review 
 
 1. **Context paths.** List the files the reviewer should read: `AGENTS.md` / `CLAUDE.md`, `README.md`, `DESIGN.md` / `ARCHITECTURE.md` if present, and the 2-5 existing files the plan touches or competes with. The reviewer will not see this conversation.
 2. **The artifact.** A draft plan that only exists in the conversation goes to `<root>/tmp/arch-review/<stamp>-plan.md` first; a change under review is a commit range or `git diff`. Point to it; don't paste long content.
-3. **The user's goal.** Quote the user's request verbatim, plus any constraints they stated. Add the inferred intent in one sentence, labeled as inferred. Export the user's words on this topic with `transcript-excerpt --user-only --turns <n> --out <root>/tmp/arch-review/<stamp>-user.md` (`<n>` reaches back to where the topic began) and point to it. Leave out the session's replies and its case for the design; the reviewer reaches its own view from the artifact.
+3. **The user's goal.** Quote the user's request verbatim, plus any constraints they stated. Export the user's words on this topic with `transcript-excerpt --user-only --turns <n> --out <root>/tmp/arch-review/<stamp>-user.md` (`<n>` reaches back to where the topic began) and point to it. Leave out the session's replies and its case for the design; the reviewer reaches its own view from the artifact. The prompt carries no reading of the author's: no inferred intent, no claim about what the code or a system does, no summary of earlier passes.
 4. **Already decided.** List decisions the user made explicitly, so the reviewer doesn't relitigate them. A reviewer who thinks one of them is wrong may say so once, as a CONCERN.
 5. **The user's note.** When the user adds one (`/arch-review` followed by text), pass it verbatim under its own heading, labeled as the user's.
 
@@ -32,7 +32,7 @@ Read first: {paths}
 Under review: {plan path or commit range}
 
 ## The user's request
-{verbatim quote; constraints; one inferred-intent sentence labeled as inferred}
+{verbatim quote; constraints}
 Everything the user said on this, in order (their words only): {<stamp>-user.md path}
 
 ## Decided by the user
@@ -98,7 +98,7 @@ The first round stays a cold read; the follow-up is a conversation with the same
 
 Start one when you disagree with any BLOCKER or CONCERN, or when the user asks you to put a point to the reviewer. Send only what is new since the last round, each part labeled with who said it:
 
-- your rebuttal per disputed finding, quoting its title, answering the point with evidence (a file path, a measurement, a constraint the reviewer missed), not with the design reasoning withheld from round one
+- per disputed finding, its title and the paths, commands or quoted constraints (the user's, or the project's `AGENTS.md`) that bear on it, for the reviewer to read itself; never your argument, a result summary or the design reasoning withheld from round one
 - the user's words, verbatim, when they weighed in
 - paths to anything changed or newly relevant, never pasted content
 

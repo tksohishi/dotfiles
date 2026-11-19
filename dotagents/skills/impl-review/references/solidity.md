@@ -14,8 +14,9 @@ Its prompt is its own, never merged into the main review's: the main review hunt
 1. **Scope** as above.
 2. **Context files.** `AGENTS.md`, the contract's design doc, its tests, and the off-chain code that builds its calldata or calls it (an encoder, a deploy script, an admin script): a contract's bugs often sit between its packed layout and the code that packs it.
 3. **The user's goal and the design decisions.** Quote the user's words on what the contract must do and what they chose (a float held, a role split, an approval kept). A decision is out of scope as a finding unless it causes a concrete loss; the reviewer may name it once as a CONCERN.
-4. **Already reviewed.** Earlier passes and what they closed, so the reviewer spends its effort on new ground.
-5. **Live facts the code cannot show.** Which external contracts it trusts (routers, pools, hooks) and whether their source is verified; what an approval or a callback exposes. A reviewer cannot read an unverified venue; say so.
+4. **External contracts by address.** The routers, pools and hooks it calls, each with its address and where its source can be read (an explorer URL, a local copy), or that none is published. Name them only; what they do is the reviewer's to read.
+
+As in the main review, the prompt carries no reading of the author's: no claim that a layout, an encoding or a venue was checked, and no list of what earlier passes closed. A claim like that is the thing under review.
 
 Keep the prompt under about 4KB; long material goes in files the reviewer reads.
 
@@ -28,10 +29,7 @@ are an attacker: find what loses funds, lets a third party move them, or lets a 
 Read first: {paths}. In scope: {exact .sol paths}. Changed from {the session's base | the deployed predecessor}: {diff path}.
 
 ## What it must do (the user's words) and what is decided
-{quotes; decisions; trusted external contracts and their verification status}
-
-## Already reviewed
-{passes and what they closed}
+{quotes; decisions; external contracts by address and where their source is}
 
 ## Lenses (pashov solidity-auditor, slimmed). Walk every in-scope function through each.
 1. Access: every external function's caller check; every callback accepted only from the venue the contract is calling

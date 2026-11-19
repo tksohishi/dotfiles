@@ -36,7 +36,9 @@ Read whichever of these exist at the project root, in order, before drafting the
 
 The reviewer will not see this conversation. It must rediscover the project from files. List the **exact paths** the reviewer should read in the prompt (Step 4) so it does not have to guess.
 
-The discussion itself travels as a file: `transcript-excerpt --turns <n> --out <root>/tmp/impl-review/<stamp>-conversation.md` (`<n>` reaches back to where the task began), given in Step 4.
+The user's side of the discussion travels as a file: `transcript-excerpt --user-only --turns <n> --out <root>/tmp/impl-review/<stamp>-user.md` (`<n>` reaches back to where the task began), given in Step 4. The session's replies stay out: they are the author's reading of the work.
+
+**The prompt carries no reading of the author's.** The point is a review of the code, not of the author's account of it. A sentence such as "the storage layout is unchanged, verified" is a claim under review; written into the prompt, the reviewer takes it as ground already covered and skips it (a contract shipped with a changed layout this way, and a live bot priced everything at 0 for hours). So the prompt holds the user's words and decisions, what is under review (commits, files), the paths to read, and areas to probe phrased as questions. It holds no conclusion, verification claim, evidence summary or inference of the author's about the code or outside state, and no list of what earlier passes or tests found. A test may be named as a command the reviewer can run, never as a result.
 
 ### Step 2 — Capture what's under review
 
@@ -50,8 +52,6 @@ List the specific surface to audit:
 For UI / visual / generated-image work, **point to the rendered artifact** (PNG, PDF, deployed URL), not just the source. Source alone misses layout / wrap / density issues.
 
 For long outputs (drafts, specs, posts), do not paste the whole content into the prompt — tell the reviewer the path and have it `Read` the file itself. Pasting bloats the prompt and the reviewer's read of the live file is more authoritative anyway.
-
-Also list what has already been reviewed or verified this session (subagent reviews, `/arch-review`, `/code-review`, tests run, sources fetched). The reviewer skips that ground and digs for what those passes missed.
 
 **Solidity.** When the surface includes `.sol` files, or the user names a contract to review before deploy, read `references/solidity.md` and run its security pass beside this one (deploy mode runs it alone). It has its own prompt; don't fold its lenses into this one.
 
@@ -97,17 +97,13 @@ Before reviewing, READ the following for context:
 files under review, etc.}
 
 ## The user's actual goal
-{One paragraph. Quote the user's exact request verbatim, then state the
-inferred underlying intent. The reviewer needs both — what they literally
-asked AND what success looks like.}
-The discussion behind this work, verbatim: {<stamp>-conversation.md path}.
-"User:" lines are the user's own words; "Claude:" lines are the session
-under review, so where they differ, the user's words define the goal.
+{The user's exact request, verbatim, and the decisions they made.}
+Everything the user said on this, in order (their words only): {<stamp>-user.md path}
 
-## What Claude produced
-{One paragraph. List the files / commits / artifacts under review. For drafts,
-give the path and tell the reviewer to Read it. For diffs, mention the
-range (`HEAD~3..HEAD` or `git diff main`).}
+## Under review
+{Commits, the diff range (`HEAD~3..HEAD`, `git diff main`) and files only; for
+drafts, the path to Read. Tests as commands the reviewer may run. Nothing on
+what the change does or why it is correct.}
 
 ## Review from first principles
 
@@ -116,11 +112,6 @@ would {COST WHAT — readers' money, security incident, broken API consumers,
 regulatory fine, etc.}. Be adversarial. If a claim cannot be verified from
 the cited source, flag it. The design direction is settled; raise a design
 problem only when it causes a concrete bug.
-
-## Already reviewed
-{What earlier passes covered (design review, subagent reviews, /code-review,
-tests run, verified sources). Do not repeat their findings; look for what they
-missed, especially in the details.}
 
 ## Edge cases
 {3-6 project-specific edge cases to probe. For each issue found, give the
@@ -177,7 +168,6 @@ Skip if nothing specific.}
 - Output ≤ 600 words total. Brevity over completeness.
 - Do not retry the same URL more than 2 times. If a source 403s twice, note
   the failure and move on.
-- Do not re-verify facts already labeled VERIFIED in this prompt.
 - Read narrowly; every byte of command output fills your context. Start
   diffs with `git diff --stat`, then `git diff -- <path>` per file. Read
   files in ranges (`sed -n 'A,Bp'`, ~80 lines at a time) found via
@@ -233,7 +223,7 @@ Empty output means the catalog is missing (Codex has not run on this machine) or
 
 ## Rebuttal rounds
 
-The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, when a BLOCKER's class fix needs checking (step 6 below; the reviewer answers `CLOSED` or `OPEN` with the path still open), or when the user asks you to put a point to the reviewer. Send only what is new since the last round, each part labeled with who said it: your rebuttal per disputed finding (quote its title; answer with evidence such as a test run, a file path or a doc link), the user's words verbatim when they weighed in, and paths to anything changed since. Ask the reviewer to answer each disputed finding with `HOLD` or `CONCEDE` and one line why.
+The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, when a BLOCKER's class fix needs checking (step 6 below; the reviewer answers `CLOSED` or `OPEN` with the path still open), or when the user asks you to put a point to the reviewer. Send only what is new since the last round, each part labeled with who said it: per disputed finding, its title and the paths, commands or doc links that bear on it, for the reviewer to read and run itself (never your argument, evidence summary or conclusion on why it is closed); the user's words verbatim when they weighed in; and paths to anything changed since. Ask the reviewer to answer each disputed finding with `HOLD` or `CONCEDE` and one line why.
 
 ```bash
 codex exec resume <thread_id> -m <model> -c model_reasoning_effort=xhigh -c sandbox_mode='"read-only"' -o <root>/tmp/impl-review/<stamp>-r2.md - > /dev/null <<'PROMPT'
