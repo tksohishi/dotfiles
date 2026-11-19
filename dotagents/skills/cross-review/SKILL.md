@@ -1,6 +1,6 @@
 ---
 name: cross-review
-description: Shell out to OpenAI Codex (the newest Astra model at xhigh, via `codex exec`) for an adversarial second-opinion review of non-code work the current session produced - drafts, forum comments, rationales, analyses, reports, recommendations. It checks every load-bearing claim against its primary source, the reasoning against the evidence, and the draft against what the reader needs. Code changes belong to /impl-review, plans and architecture to /arch-review. Use when the user says "/cross-review", "/codex-review", "cross review", "別の LLM で review", "コーデックスでチェック" on a draft, "/cross-review fable" or "/cross-review argon" (Fable at xhigh or Gemini 4 Argon reviewing in parallel), "Fable でも", "Gemini でも", when a project skill calls for a cross-review gate, or before publishing anything a wrong fact or misread source would embarrass (public posts, votes, financial or governance claims, emails).
+description: Shell out to OpenAI Codex (the newest Astra model at xhigh, via `codex exec`) for an adversarial second-opinion review of non-code work the current session produced - drafts, forum comments, rationales, analyses, reports, recommendations. It checks every load-bearing claim against its primary source, the reasoning against the evidence, and the draft against what the reader needs. Code changes belong to /impl-review, plans and architecture to /arch-review. Use when the user says "/cross-review", "/codex-review", "cross review", "別の LLM で review", "コーデックスでチェック" on a draft, "/cross-review fable" (Fable at xhigh reviewing in parallel), "Fable でも", when a project skill calls for a cross-review gate, or before publishing anything a wrong fact or misread source would embarrass (public posts, votes, financial or governance claims, emails).
 ---
 
 # Cross Review
@@ -50,7 +50,7 @@ codex exec --json -C <root> -m <model> -c model_reasoning_effort=xhigh -s read-o
 
 ### Extra reviewers, only when asked
 
-Add a reviewer only when the user names it (`/cross-review fable`, `/cross-review argon`, "Fable でも", "Gemini でも") or a project skill's gate names it. Each extra model catches different misses, at the cost of its own quota. Run every named reviewer in the background at the same time as Codex, all on the same prompt file.
+Add a reviewer only when the user names it (`/cross-review fable`, "Fable でも") or a project skill's gate names it. Gemini through `agy` is not one: Antigravity's terms bar driving `agy -p` from another vendor's agent on a consumer plan, at the risk of the account. Each extra model catches different misses, at the cost of its own quota. Run every named reviewer in the background at the same time as Codex, all on the same prompt file.
 
 **Fable at xhigh.** Worth it on high-stakes analysis; from a Claude session it is a deeper reading by the same model family, not a different lineage.
 
@@ -62,20 +62,6 @@ claude -p --session-id <uuid> --add-dir <root> --model fable --effort xhigh --pe
 
 The prompt must come over stdin: `--disallowedTools` takes a variadic list and swallows a positional prompt as tool names. `dontAsk` denies any tool not already allowed by settings; `WebSearch` and `WebFetch` are on the allow list, so Fable checks web sources itself.
 
-**Gemini 4 Argon.** The Google AI Pro allowance is small (a full review uses several percent of the weekly bucket).
-
-1. Check quota (free): `agy -p /usage --output-format json | jq '.command.data.groups[] | select(.name=="Gemini 4 Argon") | .buckets[0].remaining_fraction'`. Below `0.25`, skip Argon and tell the user.
-2. Argon reads files but cannot run shell commands (headless `--mode plan` refuses all of them), so the prompt must name file paths rather than commands to run.
-3. `-p` ignores stdin, so pipe the prompt in as stream-json:
-
-```bash
-jq -Rsc '{event:"user",message:{content:[{type:"text",text:.}]}}' <root>/tmp/cross-review/<stamp>-prompt.md |
-  agy --add-dir <root> --model gemini-4-argon-high --mode plan --input-format stream-json --output-format stream-json -p "" \
-  > <root>/tmp/cross-review/<stamp>-argon.ndjson
-```
-
-4. Read it with `jq -r 'select(.event=="result") | .result | .status, .response' <root>/tmp/cross-review/<stamp>-argon.ndjson`. An empty `response` is a failed run even when `status` is `SUCCESS`; check `select(.event=="step_update") | .step_update | select(.state=="ERROR")` for the cause and report it rather than retrying blindly.
-
 ## Rebuttal rounds
 
 The first round stays a cold read; the follow-up is a conversation with the same reviewer in its own thread. Start one when you disagree with any BLOCKER or CONCERN, or when the user asks you to put a point to the reviewer. Send each reviewer only its own disputed findings and only what is new since the last round, each part labeled with who said it: per disputed finding, its title and the source location or URL that bears on it, for the reviewer to read itself (never your argument or conclusion); the user's words verbatim when they weighed in, and paths to the revised draft. Ask for `HOLD` or `CONCEDE` per disputed finding with one line why.
@@ -85,7 +71,7 @@ codex exec resume <thread_id> -m <model> -c model_reasoning_effort=xhigh -c sand
 claude -p --resume <uuid> --add-dir <root> --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" < <root>/tmp/cross-review/<stamp>-rebuttal-fable.md > <root>/tmp/cross-review/<stamp>-fable-r2.md
 ```
 
-`<thread_id>` comes from `jq -r 'select(.type=="thread.started") | .thread_id' <root>/tmp/cross-review/<stamp>-codex.jsonl`. `codex exec resume` takes no `-C` or `-s`, so the sandbox goes through `-c` and every path stays absolute. Argon has no resumable thread here; a disputed Argon finding goes straight to the user. At most two rebuttal rounds (`-r2`, `-r3`); after that, the remaining disagreement goes to the user. Conceded findings are listed as resolved, one line each.
+`<thread_id>` comes from `jq -r 'select(.type=="thread.started") | .thread_id' <root>/tmp/cross-review/<stamp>-codex.jsonl`. `codex exec resume` takes no `-C` or `-s`, so the sandbox goes through `-c` and every path stays absolute. At most two rebuttal rounds (`-r2`, `-r3`); after that, the remaining disagreement goes to the user. Conceded findings are listed as resolved, one line each.
 
 ## Report back
 
@@ -93,7 +79,7 @@ claude -p --resume <uuid> --add-dir <root> --model fable --effort xhigh --permis
 2. Print each VERDICT line, then findings grouped BLOCKER, CONCERN, NIT, each with whether you agree. With several reviewers, merge duplicates and note which reviewers raised each finding; a point only one model raised still counts.
 3. Verify every source the reviewer cites before acting on it: open the file location or URL and confirm it says what the reviewer claims. A citation that doesn't hold up makes the finding uncertain, not accepted.
 4. Fix agreed BLOCKERs and CONCERNs in the draft before showing it. Where you disagree, say why; don't auto-capitulate. A finding that changes the draft's position or recommendation goes to the user with your view, since that is their call.
-5. Log one line per reviewer once findings are settled (`reviewer`/`model`: `codex`/`<model>`, `claude`/`fable`, or `agy`/`gemini-4-argon-high`):
+5. Log one line per reviewer once findings are settled (`reviewer`/`model`: `codex`/`<model>`, or `claude`/`fable`):
 
 ```bash
 jq -nc '{date: (now | todate), project: "<repo dir name>", skill: "cross-review", reviewer: "codex", model: "<model>", findings: {blocker: 0, concern: 0, nit: 0}, accepted: 0, rejected: 0, user_overrode: 0, rounds: 1, conceded: 0, seconds: 0}' >> ~/.local/state/review/log.jsonl
