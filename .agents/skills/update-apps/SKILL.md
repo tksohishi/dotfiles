@@ -84,6 +84,8 @@ Have it return:
 
 Run `mise upgrade`, then `mise prune -y` (removes installed versions no tracked config or stub still references; versions pinned by another project's `mise.toml` are kept, which is correct). Return each upgraded tool with old → new version (or "nothing upgraded"), each pruned tool@version (or "nothing pruned"), plus any errors verbatim. The main session reports pruned versions in `### 🧹 Cleanup`.
 
+bun is the exception to "patch and minor are routine": a production VM runs it, so its version is a deploy decision. Whenever bun moved, or a newer bun was held back by `minimum_release_age`, the subagent reads that release's notes (`https://bun.com/blog/bun-v<version>`, else the GitHub release) and returns breaking changes, behaviour changes in the runtime, `Bun.serve`, `fetch`, SQLite or the bundler, and notable fixes, in under 150 words. The main session reports it as a 🟡 item, whatever the bump size.
+
 ### Claude Code subagent
 
 Pass the stored `claude_version` from the run state into its prompt. It runs `claude update`, determines the installed version, then always fetches the changelog from `https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md` — Claude Code auto-updates between sessions, so checking only when `claude update` upgrades misses the case where the version moved silently.
