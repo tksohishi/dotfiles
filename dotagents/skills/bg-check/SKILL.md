@@ -22,7 +22,7 @@ Run one `ToolSearch` with `select:CronList,CronDelete,TaskStop,ListAgents,Remote
 | CronCreate jobs | `CronList` | `CronDelete` with the job ID |
 | `/loop` wakeups | No list tool: read this session's transcript (`~/.claude/projects/<project>/<session-id>.jsonl`) for the last `ScheduleWakeup` call; pending unless its input has `stop: true` | `ScheduleWakeup` with `stop: true` |
 | Scheduled tasks (desktop) | `list_scheduled_tasks` | that MCP's own delete or disable |
-| Routines | `RemoteTrigger` `list`, then `get` for `enabled` and `next_run_at` | `RemoteTrigger` `update` with the user's change |
+| Routines | `RemoteTrigger` `list`, then `get` for `enabled` and `next_run_at`. A routine belongs to the account, not the session: with no argument or `repo`, list only those whose sources include the current repo and count the rest in one line ("N more, other repos"); `all` lists every one | `RemoteTrigger` `update` with the user's change |
 | Sessions this session started (desktop) | `list_sessions`, the rows linked to this session | the session's own close |
 
 For each item, the purpose comes from the call that created it: the task description, the cron prompt, the agent's task, the routine's prompt. Read it from the transcript when the listing doesn't say. Convert every time to the user's local time with `date`.
