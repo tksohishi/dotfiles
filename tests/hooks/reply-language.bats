@@ -88,3 +88,17 @@ ask() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg q "$1" '{hook_event_nam
   stop "The HyperSync gateway is built, committed, and pushed. Should I wire it into the runner next?"
   jq -e '.decision == "block"' <<< "$output"
 }
+
+@test "does not count a plain-text draft led by a Japanese line naming where it goes" {
+  user "Stef に返信して"
+  stop $'Telegram の Stef との DM に送る文面です。\n\nThanks! I\'m still working on the new placement. Also, is there a way to send a few txs to Submit at the same moment on our key?'
+  [ -z "$output" ]
+}
+
+@test "blocks the same draft with no Japanese lead, and a plain English reply" {
+  user "Stef に返信して"
+  stop $'Thanks! I\'m still working on the new placement. Also, is there a way to send a few txs to Submit at the same moment on our key?'
+  jq -e '.decision == "block"' <<< "$output"
+  stop $'結果です。\n\nI fixed the bug in the parser and pushed the commit to main, and the tests pass now.'
+  jq -e '.decision == "block"' <<< "$output"
+}

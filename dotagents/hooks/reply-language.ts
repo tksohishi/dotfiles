@@ -3,7 +3,8 @@
 // Stop: block a final reply written in English; the turn goes on until its last reply is in Japanese. Only the turn's
 // last message is judged; the updates before it may be English. A draft for an outside party (a Telegram, Discord or
 // mail reply) is written in a blockquote and is not counted, so a reply that is only the draft may be English; so is
-// the same draft repeated without its quote marks in the next turn, for a user who asked for it ready to paste.
+// the same draft repeated without its quote marks in the next turn, for a user who asked for it ready to paste, and a
+// plain-text draft led by a Japanese line naming where it goes.
 // AskUserQuestion: the question carries only the point to decide; the problem and the choice go in the reply before
 // it. PreToolUse denies a question whose own text is too long. The text before the dialog is not checked: the
 // transcript does not reliably hold it (at PreToolUse an interactive session has not written it yet, and some text
@@ -56,7 +57,16 @@ for (const line of (await Bun.file(input.transcript_path).text()).split('\n')) {
 // the previous turn's blockquoted draft, handed back without its quote marks on the user's ask, is still the draft
 const drafts = new Set((finals.at(-1) ?? '').split('\n').filter((l) => l.startsWith('>')).map((l) => l.replace(/^>\s?/, '').trim()).filter(Boolean))
 const reply = typeof input.last_assistant_message === 'string' ? input.last_assistant_message : ''
-const last = reply.split('\n').filter((l) => !drafts.has(l.trim())).join('\n')
+// a plain-text draft (Telegram mangles a pasted quote) follows a Japanese line naming where it goes; the lines with no
+// Japanese after that line are the draft
+const lead = /(Telegram|Discord|Slack|メール|mail|DM|ツイート|返信)[\s\S]*(送る|貼る|貼り付け|文面|下書き|ドラフト|返信文)/i
+const hasJa = (l: string) => count(l).ja > 0
+let inDraft = false
+const last = reply.split('\n').filter((l) => {
+  if (drafts.has(l.trim())) return false
+  if (hasJa(l)) { inDraft = lead.test(l); return true }
+  return !inDraft
+}).join('\n')
 if (!last || englishAsk(typed) || !english(last)) process.exit(0)
 let streak = 1
 for (let i = finals.length - 1; i >= 0 && english(finals[i]!); i--) streak++
