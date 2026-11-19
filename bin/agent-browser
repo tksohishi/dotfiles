@@ -149,7 +149,11 @@ fi
 # OmniboxEverywhere is a server-enabled field trial that adds a "Search from
 # anywhere" icon to the Mac menu bar. Chrome keeps only the last
 # --disable-features, so this repeats agent-browser's own Translate entry.
-export AGENT_BROWSER_ARGS="--disable-features=Translate,OmniboxEverywhere${AGENT_BROWSER_ARGS:+,$AGENT_BROWSER_ARGS}"
+# KeychainKeyProviderUserDataDirProtection (Chrome 158) treats a non-default
+# user-data-dir as cookie theft, stops using the v10 key and re-encrypts as
+# v11, dropping every cookie it cannot read; a project profile lost its logins
+# that way on the 158 update.
+export AGENT_BROWSER_ARGS="--disable-features=Translate,OmniboxEverywhere,KeychainKeyProviderUserDataDirProtection${AGENT_BROWSER_ARGS:+,$AGENT_BROWSER_ARGS}"
 
 LOCK="${TMPDIR:-/tmp}/agent-browser-$(lock_key).lock"
 
