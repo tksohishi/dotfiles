@@ -102,3 +102,19 @@ ask() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg q "$1" '{hook_event_nam
   stop $'結果です。\n\nI fixed the bug in the parser and pushed the commit to main, and the tests pass now.'
   jq -e '.decision == "block"' <<< "$output"
 }
+
+@test "does not count a revised draft after a Japanese line in the turn after a draft" {
+  user "Stef に返信して"
+  said $'Telegram の Stef との DM に送る文面です。\n\nThanks! I\'m still working on the new placement. Also, is there a way to send a few txs to Submit at the same moment on our key?'
+  user "One more thing は変"
+  stop $'確かに3つ聞いているので合いませんでした。直します:\n\nThanks! I\'m still working on the new placement. Also, could we send a few txs to Submit at the same moment on our key?'
+  [ -z "$output" ]
+}
+
+@test "blocks English after a Japanese line when the previous turn held no draft" {
+  user "これ直して"
+  said "パーサーを直しました。"
+  user "テストは?"
+  stop $'結果です。\n\nI fixed the bug in the parser and pushed the commit to main, and the tests pass now.'
+  jq -e '.decision == "block"' <<< "$output"
+}
