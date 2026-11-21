@@ -84,7 +84,7 @@ codex exec --json -C <root> -m <model> -c model_reasoning_effort=xhigh -o <root>
 PROMPT
 ```
 
-OpenAI's cyber filter can end the run with `turn.failed` and "flagged for possible cybersecurity risk", at the start or midway after the reviewer reads contract code. Rewording does not reliably clear it, since the code it reads can trip it too, and the access it points to (Daybreak, Trusted Access for Cyber) is for verified security organizations. On that error, run the same prompt once on Fable at xhigh instead, and say in the report that this pass came from Fable, a reviewer of the author's own model family:
+OpenAI's cyber filter can end the run with `turn.failed` and "flagged for possible cybersecurity risk", at the start or midway after the reviewer reads contract code. Rewording does not reliably clear it, since the code it reads can trip it too. On that error, run the same prompt once on Fable at xhigh instead, and say in the report that this pass came from Fable, a reviewer of the author's own model family:
 
 ```bash
 claude -p --session-id <uuid> --add-dir <root> --model fable --effort xhigh --permission-mode dontAsk --disallowedTools "Edit Write NotebookEdit" < <root>/tmp/impl-review/<stamp>-sol-prompt.md > <root>/tmp/impl-review/<stamp>-sol-fable.md
