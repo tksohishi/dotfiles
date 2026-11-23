@@ -33,7 +33,7 @@ Look for clusters, not single hits. One "however" or one short punchy sentence i
 
 ### Communication
 
-20. Chatbot artifacts. "I hope this helps", "Certainly!", "Let me know if you'd like ...", "Here is an overview of ...". Delete; start with the content.
+20. Chatbot artifacts. "I hope this helps", "Certainly!", "Let me know if you'd like ...", "Here is an overview of ...". Delete; start with the content. A plain "let me know" in a message predates chatbots; keep it.
 21. Cutoff disclaimers and gap-filling. "While details are limited ...", "maintains a low profile", "likely grew up ...". Say what isn't known or cut it. Never dress a guess up as fact.
 22. Sycophancy. "Great question!", "You're absolutely right". Delete.
 
@@ -41,14 +41,16 @@ Look for clusters, not single hits. One "however" or one short punchy sentence i
 
 23. Filler phrases. "in order to" → "to"; "due to the fact that" → "because"; "at this point in time" → "now"; "has the ability to" → "can"; "it is important to note that" → cut.
 24. Stacked hedges. "could potentially possibly be argued that ... might" → one hedge at the original strength ("may"). Don't remove the hedge.
-25. Generic upbeat endings. "The future looks bright", "exciting times lie ahead". Cut, or end on the last concrete fact the text already has.
+25. Generic upbeat endings. "The future looks bright", "exciting times lie ahead", or a closing "Overall" / "Ultimately" sentence that restates a verdict the paragraph already gave. Cut, or end on the last concrete fact the text already has.
 26. Hyphen pairs in predicate position. "the report is high-quality" → "the report is high quality". Keep the hyphen before a noun ("a high-quality report").
 27. Authority tropes. "The real question is", "at its core", "what really matters", "fundamentally". Cut the ceremony and state the point.
 28. Signposting. "Let's dive in", "here's what you need to know", "now let's look at". Delete; do the thing.
+   "The part" standing in for a named thing does the same: "the hard part is X" → state X; "the part worth sharing" → name it. Leave a literal part (one part of a multipart upload).
 29. Fragmented headers. A heading followed by a one-line restatement ("## Performance / Speed matters."). Delete the restatement.
 30. Diff-anchored writing. "This function was added to replace the previous approach ...". Describe the current state, except in changelogs, release notes and migration guides.
 31. Manufactured punchlines and staccato. "No aesthetic prior. No nostalgia. The old rules were gone." Join a run of fragments into ordinary sentences. One short sentence for emphasis is fine.
 32. Aphorism formulas. "X is the language of Y", "X becomes a trap", "not a tool but a mirror". Replace with the concrete claim it gestures at; if the text never states one, keep it and ask.
+   Also spatial idioms for an abstract choice: "a question about where the product sits" → "a question about which platform it runs on". Name the concrete thing.
 33. Fake-candid openers. "Honestly?", "Look,", "Here's the thing", "Real talk" as standalone hooks. Just say the thing. "honestly" mid-sentence is fine.
 
 ### What not to flag
@@ -59,6 +61,7 @@ None of these is a reliable sign on its own:
 - Mixed casual and formal registers, or dry, bland prose without the specific tells above.
 - Formal or academic vocabulary outside the list in 7 ("ostensibly", "constituent").
 - Letter-style greetings and sign-offs.
+- Informal text (chat, comments, rants, angry reviews): lowercase, "lmk", fragments and "Worst. Service. Ever." are its register. Act only on two unrelated tells or on chatbot artifacts (20); keep the anger at full strength, and return it unchanged when nothing applies.
 - A single transition word ("however", "moreover"), a single em dash in someone else's text, curly quotes alone.
 - One short emphatic sentence; "honestly" or "look" mid-sentence.
 - Unsourced claims. Most writing is unsourced.
