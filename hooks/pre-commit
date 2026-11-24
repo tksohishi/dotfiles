@@ -7,6 +7,7 @@
 #       `bats tests/install.bats`.
 #   2. Privacy — warn if staged public agent-config changes look like they
 #      contain personal/private info.
+#   3. Private project names — block added lines naming a ~/Work project.
 # Escape hatch for either: git commit --no-verify.
 
 fail=0
@@ -137,6 +138,30 @@ if [ -n "$staged_files" ]; then
         echo "Review the diff carefully. Use .local/.override files for private settings."
         echo "To proceed anyway: git commit --no-verify"
         fail=1
+    fi
+fi
+
+# ── 3. Private project names: this repo is public ─────────────────────────
+# Names come from ~/Work/* at commit time, so the list never goes stale.
+# Dictionary words are dropped because they would match ordinary prose, and
+# names HEAD already contains are public tools cloned there (agent-browser).
+if [ -d "$HOME/Work" ] && [ -r /usr/share/dict/words ]; then
+    added=$(git diff --cached -U0 --diff-filter=ACM | grep '^+' | grep -v '^+++' || true)
+    if [ -n "$added" ]; then
+        hits=""
+        for d in "$HOME"/Work/*/; do
+            name=$(basename "$d")
+            [ ${#name} -ge 3 ] || continue
+            echo "$added" | grep -qiwF "$name" || continue
+            grep -qixF "$name" /usr/share/dict/words && continue
+            git grep -qiwF "$name" HEAD -- . && continue
+            hits="$hits $name"
+        done
+        if [ -n "$hits" ]; then
+            echo "pre-commit: staged changes name private projects from ~/Work:$hits" >&2
+            echo "  This repo is public. Use a placeholder such as acme or api." >&2
+            fail=1
+        fi
     fi
 fi
 
