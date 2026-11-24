@@ -1,6 +1,6 @@
 ---
 name: ask
-description: Send a request to another running Claude Code session on this machine (ListAgents to find it, SendMessage to deliver it). Use when the user runs /ask <session> [what], or says to tell, ask or pass something to another session ("lynx セッションで検討して", "degen-app に伝えて", "tell the dotfiles session"). The session name is matched loosely; the request text is composed from the conversation.
+description: Send a request to another running Claude Code session on this machine (ListAgents to find it, SendMessage to deliver it). Use when the user runs /ask <session> [what], or says to tell, ask or pass something to another session ("api セッションで検討して", "web-app に伝えて", "tell the dotfiles session"). The session name is matched loosely; the request text is composed from the conversation.
 ---
 
 # ask
@@ -10,7 +10,7 @@ Claude Code only: Codex has no ListAgents or SendMessage, so there it says so an
 ## Find the session
 
 1. Run ListAgents. Load SendMessage with ToolSearch (`select:SendMessage`) if its schema is not loaded.
-2. Match the user's word against the rows, loosely: exact name, then a name containing the word (`lynx` → `degen-lynx`), then the word plus this project's name. When more than one row matches, prefer the one in the current project's name family; still tied, ask with AskUserQuestion listing the candidates and each one's state.
+2. Match the user's word against the rows, loosely: exact name, then a name containing the word (`api` → `acme-api`), then the word plus this project's name. When more than one row matches, prefer the one in the current project's name family; still tied, ask with AskUserQuestion listing the candidates and each one's state.
 3. Never send to this session itself. No match: say which sessions are running and stop; never start a new one.
 
 ## Compose the message

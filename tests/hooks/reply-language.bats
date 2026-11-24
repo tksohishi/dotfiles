@@ -65,7 +65,7 @@ said() { jq -nc --arg s "$1" '{type:"assistant",message:{role:"assistant",conten
 ask() { run bun "$HOOK" <<< "$(jq -nc --arg t "$T" --arg q "$1" '{hook_event_name:"PreToolUse",tool_name:"AskUserQuestion",tool_use_id:"toolu_q",transcript_path:$t,tool_input:{questions:[{question:$q}]}}')"; }
 
 @test "denies a question whose text is too long, and passes a short one" {
-  ask "degen-para から依頼です。 AskUserQuestion の直前に書かれた英語の文章が、チェックされずにあなたに見えてしまうとのことです。 進めますか?"
+  ask "acme-api から依頼です。 AskUserQuestion の直前に書かれた英語の文章が、チェックされずにあなたに見えてしまうとのことです。 進めますか?"
   jq -e '.hookSpecificOutput.permissionDecisionReason | test("質問文が長い")' <<< "$output"
   ask "質問の前にも言語判定を走らせる?"
   [ -z "$output" ]

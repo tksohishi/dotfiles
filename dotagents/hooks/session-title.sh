@@ -1,6 +1,6 @@
 #!/bin/bash
 # SessionStart: name the session after the launch directory (like /rename),
-# so /resume and the tab show "life", "dotfiles", "degen" instead of a
+# so /resume and the tab show "notes", "dotfiles", "acme" instead of a
 # generated title. Skips when the user already named the session (--name,
 # /rename) and on clear/compact, where Claude Code ignores sessionTitle anyway.
 input=$(cat)
