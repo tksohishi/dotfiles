@@ -56,6 +56,7 @@ files=(
     .vimrc
     .gitconfig
     .zshrc
+    .zshenv
     .gitignore_global
     .tmux.conf
     .config/starship.toml
