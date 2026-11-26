@@ -201,6 +201,11 @@
           },
           {
             "type": "command",
+            "command": "$HOME/.claude/hooks/ls-long.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "$HOME/.claude/hooks/git-remote-ssh.sh",
             "timeout": 5
           },
