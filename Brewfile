@@ -101,5 +101,6 @@ cask "chatgpt"
 # Manual install: Eika (self-built)
 # Manual install: Kanary (scripts/install-kanary.sh)
 # Manual install: Lifelane Beta (https://github.com/blossomlink/lifelane/releases)
+# Manual install: Rex Beta (https://superlogical.com, invite-only; download after Discord login)
 # Manual install: ScreenStory (https://github.com/blossomlink/screenstory-releases/releases)
 mas "Xcode", id: 497799835
