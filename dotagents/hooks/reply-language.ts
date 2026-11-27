@@ -7,21 +7,23 @@
 // plain-text draft led by a Japanese line naming where it goes, and, in the turn after a draft, a revision following
 // any Japanese line.
 // AskUserQuestion: the question carries only the point to decide; the problem and the choice go in the reply before
-// it. PreToolUse denies a question whose own text is too long. The text before the dialog is not checked: the
-// transcript does not reliably hold it (at PreToolUse an interactive session has not written it yet, and some text
-// before an answered question was never written at all).
+// it. PreToolUse denies a question whose own text is too long, and one whose lead-in (the assistant text written since
+// the last tool result or typed message) is in English on a Japanese turn. The lead-in is written to the transcript a
+// second or two before the tool call, but not always (some text before an answered question was never written): with
+// none found the question passes, so the check never denies on a missing read.
 import { transcriptTail } from './lib/transcript-tail.ts'
 const input = await new Response(Bun.stdin.stream()).json().catch(() => ({}))
 const event = input.hook_event_name
 const asking = event === 'PreToolUse' && input.tool_name === 'AskUserQuestion'
-if (asking) {
-  const long = (input.tool_input?.questions ?? []).map((q: any) => String(q.question ?? '')).filter((q: string) => q.length > 60)
-  if (!long.length) process.exit(0)
-  const reason = `reply-language: 質問文が長い（${long.map((q: string) => q.length).join('、')}字、上限60字）。 経緯や理由は質問の前の本文に移し、質問には決めることだけを書いて質問し直す。`
+const deny = (reason: string) => {
   console.log(JSON.stringify({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason } }))
   process.exit(0)
 }
-if (!input.transcript_path || event !== 'Stop' || input.stop_hook_active) process.exit(0)
+if (asking) {
+  const long = (input.tool_input?.questions ?? []).map((q: any) => String(q.question ?? '')).filter((q: string) => q.length > 60)
+  if (long.length) deny(`reply-language: 質問文が長い（${long.map((q: string) => q.length).join('、')}字、上限60字）。 経緯や理由は質問の前の本文に移し、質問には決めることだけを書いて質問し直す。`)
+}
+if (!input.transcript_path || (event !== 'Stop' && !asking) || input.stop_hook_active) process.exit(0)
 
 const strip = (t: string) => t.replace(/^>.*$/gm, '').replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]*`/g, '').replace(/https?:\S+|file:\S+/g, '').replace(/0x[0-9a-fA-F]+/g, '')
 const count = (t: string) => {
@@ -38,14 +40,15 @@ const englishAsk = (typed: string) => (!count(typed).ja && (typed.match(/[A-Za-z
   || /英語で|英語だけ|英語のみ|英語の?[1一]文|英文|英訳|英語に(して|訳)|in English|English only|into English/i.test(typed)
 
 // each earlier turn's final reply, for the streak: the last assistant text before the next typed message
-let typed = '', turnLast = ''
+let typed = '', turnLast = '', leadIn = ''
 const finals: string[] = []
 for (const line of (await transcriptTail(input.transcript_path)).split('\n')) {
   if (!line) continue
   let e: any
   try { e = JSON.parse(line) } catch { continue }
   const content = e.message?.content
-  if (e.type === 'user' && (typeof content === 'string' || (Array.isArray(content) && !content.some((c: any) => c.type === 'tool_result')))) {
+  if (e.type === 'user') leadIn = ''
+  if (e.type === 'user' &&(typeof content === 'string' || (Array.isArray(content) && !content.some((c: any) => c.type === 'tool_result')))) {
     const text = typeof content === 'string' ? content : content.map((c: any) => c.text ?? '').join(' ')
     // a peer session's message, a background task notice, a slash command's echo and output, and the summary that
     // continues a compacted session all start a turn too, but their language is not the user's
@@ -53,7 +56,11 @@ for (const line of (await transcriptTail(input.transcript_path)).split('\n')) {
     if (turnLast) finals.push(turnLast)
     turnLast = ''
   }
-  if (e.type === 'assistant' && Array.isArray(content)) for (const c of content) if (c.type === 'text' && c.text) turnLast = c.text
+  if (e.type === 'assistant' && Array.isArray(content)) for (const c of content) if (c.type === 'text' && c.text) { turnLast = c.text; leadIn += `${c.text}\n` }
+}
+if (asking) {
+  if (leadIn && !englishAsk(typed) && english(leadIn)) deny('reply-language: 質問の前の本文が英語。 問題、選択肢とその得失、決めることを日本語で書き直してから質問し直す。')
+  process.exit(0)
 }
 
 // the previous turn's blockquoted draft, handed back without its quote marks on the user's ask, is still the draft
